@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -8,9 +9,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/CESSProject/cess-oss/pkg/hashtree"
+	"github.com/CESSProject/sdk-go/core/chain"
 	"github.com/CESSProject/sdk-go/core/erasure"
 	"github.com/CESSProject/sdk-go/core/rule"
 	"github.com/CESSProject/sdk-go/core/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 type SegmentInfo struct {
@@ -18,29 +22,49 @@ type SegmentInfo struct {
 	FragmentHash []string
 }
 
-func (c *Cli) PutFile(owner []byte, path, filename, bucketname string) error {
+func (c *Cli) PutFile(owner []byte, path, filename, bucketname string) (string, error) {
 	var err error
 	var ok bool
-	// var roothash string
-	// var segment = make([]SegmentInfo, 0)
+	var roothash string
 
 	//
 	if ok = utils.CheckBucketName(bucketname); !ok {
-		return errors.New("Invalid bucketname")
+		return roothash, errors.New("Invalid bucketname")
 	}
 
 	//
 	ok, err = c.Chain.IsGrantor(owner)
 	if err != nil {
-		return err
+		return roothash, err
 	}
 	if !ok {
-		return errors.New("Unauthorized")
+		return roothash, errors.New("Unauthorized")
 	}
 
 	//
-	c.ProcessingData(path)
-	return err
+	segment, err := c.ProcessingData(path)
+	if err != nil {
+		return roothash, err
+	}
+
+	segmenthash := ExtractSegmenthash(segment)
+
+	// Calculate merkle hash tree
+	hTree, err := hashtree.NewHashTree(segmenthash)
+	if err != nil {
+		return roothash, err
+	}
+	// Merkel root hash
+	roothash = hex.EncodeToString(hTree.MerkleRoot())
+
+	err = c.GenerateStorageOrder(roothash, segment, owner, filename, bucketname)
+	if err != nil {
+		return roothash, err
+	}
+
+	// TODO: store fragment to storage
+
+	return "", err
 }
 
 func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
@@ -88,8 +112,10 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 			if i+1 != segmentCount {
 				return segment, fmt.Errorf("Error reading %s", path)
 			}
-			utils.CalcSHA256(buf)
+			remainbuf := make([]byte, rule.SegmentSize-num)
+			copy(buf[num:], remainbuf)
 		}
+
 		hash, err := utils.CalcSHA256(buf)
 		if err != nil {
 			return segment, err
@@ -123,4 +149,40 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 	}
 
 	return segment, err
+}
+
+func (c *Cli) GenerateStorageOrder(roothash string, segment []SegmentInfo, owner []byte, filename, buckname string) error {
+	var err error
+	var dealinfo = make([]chain.DealInfo, len(segment))
+	var user chain.UserBrief
+	for i := 0; i < len(segment); i++ {
+		hash := filepath.Base(segment[i].SegmentHash)
+		for k := 0; k < len(hash); k++ {
+			dealinfo[i].SegmentHash[k] = types.U8(hash[k])
+		}
+		dealinfo[i].FragmentHash = make([]chain.FileHash, len(segment[i].FragmentHash))
+		for j := 0; j < len(segment[i].FragmentHash); j++ {
+			hash := filepath.Base(segment[i].FragmentHash[j])
+			for k := 0; k < len(hash); k++ {
+				dealinfo[i].FragmentHash[j][k] = types.U8(hash[k])
+			}
+		}
+	}
+	acc, err := types.NewAccountID(owner)
+	if err != nil {
+		return err
+	}
+	user.User = *acc
+	user.Bucket_name = types.NewBytes([]byte(buckname))
+	user.File_name = types.NewBytes([]byte(filename))
+	_, err = c.Chain.UploadDeclaration(roothash, dealinfo, user)
+	return err
+}
+
+func ExtractSegmenthash(segment []SegmentInfo) []string {
+	var segmenthash = make([]string, len(segment))
+	for i := 0; i < len(segment); i++ {
+		segmenthash[i] = segment[i].SegmentHash
+	}
+	return segmenthash
 }

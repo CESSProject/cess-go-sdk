@@ -194,3 +194,8 @@ type UserBrief struct {
 	File_name   types.Bytes
 	Bucket_name types.Bytes
 }
+
+type DealInfo struct {
+	SegmentHash  FileHash
+	FragmentHash []FileHash
+}

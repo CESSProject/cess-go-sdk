@@ -540,7 +540,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	}
 }
 
-func (c *chainClient) DeclarationFile(filehash string, user UserBrief) (string, error) {
+func (c *chainClient) UploadDeclaration(filehash string, dealinfo []DealInfo, user UserBrief) (string, error) {
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
@@ -572,6 +572,7 @@ func (c *chainClient) DeclarationFile(filehash string, user UserBrief) (string, 
 		c.metadata,
 		TX_FILEBANK_UPLOADDEC,
 		hash,
+		dealinfo,
 		user,
 	)
 	if err != nil {
@@ -619,25 +620,6 @@ func (c *chainClient) DeclarationFile(filehash string, user UserBrief) (string, 
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if !strings.Contains(err.Error(), "Priority is too low") {
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-		}
-		var tryCount = 0
-		for tryCount < 20 {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + types.NewU32(1)))
-			// Sign the transaction
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err == nil {
-				break
-			}
-			tryCount++
-		}
-	}
 	if err != nil {
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}

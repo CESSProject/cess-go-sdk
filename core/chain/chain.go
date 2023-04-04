@@ -65,7 +65,7 @@ type Chain interface {
 	//
 	DeleteFile(owner_pkey []byte, filehash []string) (string, []FileHash, error)
 	//
-	DeclarationFile(filehash string, user UserBrief) (string, error)
+	UploadDeclaration(filehash string, dealinfo []DealInfo, user UserBrief) (string, error)
 }
 
 type chainClient struct {

@@ -15,7 +15,7 @@ import (
 )
 
 type Client interface {
-	PutFile(owner []byte, path, filename, bucketname string) error
+	PutFile(owner []byte, path, filename, bucketname string) (string, error)
 	DeleteFile(roothash string) error
 	DeleteBucket(bucketName string) error
 }
