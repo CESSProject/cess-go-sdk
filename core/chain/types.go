@@ -45,6 +45,7 @@ const (
 	FILE       = "File"
 	BUCKET     = "Bucket"
 	BUCKETLIST = "UserBucketList"
+	DEALMAP    = "DealMap"
 
 	// SYSTEM
 	ACCOUNT = "Account"
@@ -195,7 +196,33 @@ type UserBrief struct {
 	Bucket_name types.Bytes
 }
 
-type DealInfo struct {
+type SegmentList struct {
 	SegmentHash  FileHash
 	FragmentHash []FileHash
+}
+
+type MinerTaskList struct {
+	Account types.AccountID
+	Hash    []FileHash
+}
+
+type SegmentInfo struct {
+	Hash         FileHash
+	FragmentList FragmentList
+}
+
+type FragmentList struct {
+	Hash  FileHash
+	Avail types.Bool
+	Miner types.AccountID
+}
+
+type StorageOrder struct {
+	Stage         types.U8
+	SegmentList   SegmentList
+	NeededList    SegmentList
+	User          UserBrief
+	AssignedMiner []MinerTaskList
+	ShareInfo     SegmentInfo
+	CompleteList  []types.AccountID
 }

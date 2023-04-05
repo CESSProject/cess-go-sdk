@@ -29,7 +29,7 @@ type Chain interface {
 	// GetChainStatus returns chain status
 	GetChainStatus() bool
 	// Getstorageminerinfo is used to get the details of the miner
-	GetStorageMinerInfo(pkey []byte) (MinerInfo, error)
+	QueryStorageMinerInfo(pkey []byte) (MinerInfo, error)
 	// Getallstorageminer is used to obtain the AccountID of all miners
 	GetAllStorageMiner() ([]types.AccountID, error)
 	// GetFileMetaInfo is used to get the meta information of the file
@@ -65,7 +65,9 @@ type Chain interface {
 	//
 	DeleteFile(owner_pkey []byte, filehash []string) (string, []FileHash, error)
 	//
-	UploadDeclaration(filehash string, dealinfo []DealInfo, user UserBrief) (string, error)
+	UploadDeclaration(filehash string, dealinfo []SegmentList, user UserBrief) (string, error)
+	//
+	QueryStorageOrder(roothash string) (StorageOrder, error)
 }
 
 type chainClient struct {

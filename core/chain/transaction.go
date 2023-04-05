@@ -540,7 +540,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	}
 }
 
-func (c *chainClient) UploadDeclaration(filehash string, dealinfo []DealInfo, user UserBrief) (string, error) {
+func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList, user UserBrief) (string, error) {
 	var (
 		txhash      string
 		accountInfo types.AccountInfo

@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/CESSProject/cess-oss/pkg/hashtree"
 	"github.com/CESSProject/sdk-go/core/chain"
@@ -62,8 +63,13 @@ func (c *Cli) PutFile(owner []byte, path, filename, bucketname string) (string, 
 		return roothash, err
 	}
 
-	// TODO: store fragment to storage
+	time.Sleep(rule.BlockInterval)
 
+	// store fragment to storage
+	err = c.StorageData(roothash, segment)
+	if err != nil {
+		return roothash, err
+	}
 	return "", err
 }
 
@@ -153,18 +159,18 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 
 func (c *Cli) GenerateStorageOrder(roothash string, segment []SegmentInfo, owner []byte, filename, buckname string) error {
 	var err error
-	var dealinfo = make([]chain.DealInfo, len(segment))
+	var segmentList = make([]chain.SegmentList, len(segment))
 	var user chain.UserBrief
 	for i := 0; i < len(segment); i++ {
 		hash := filepath.Base(segment[i].SegmentHash)
 		for k := 0; k < len(hash); k++ {
-			dealinfo[i].SegmentHash[k] = types.U8(hash[k])
+			segmentList[i].SegmentHash[k] = types.U8(hash[k])
 		}
-		dealinfo[i].FragmentHash = make([]chain.FileHash, len(segment[i].FragmentHash))
+		segmentList[i].FragmentHash = make([]chain.FileHash, len(segment[i].FragmentHash))
 		for j := 0; j < len(segment[i].FragmentHash); j++ {
 			hash := filepath.Base(segment[i].FragmentHash[j])
 			for k := 0; k < len(hash); k++ {
-				dealinfo[i].FragmentHash[j][k] = types.U8(hash[k])
+				segmentList[i].FragmentHash[j][k] = types.U8(hash[k])
 			}
 		}
 	}
@@ -175,7 +181,7 @@ func (c *Cli) GenerateStorageOrder(roothash string, segment []SegmentInfo, owner
 	user.User = *acc
 	user.Bucket_name = types.NewBytes([]byte(buckname))
 	user.File_name = types.NewBytes([]byte(filename))
-	_, err = c.Chain.UploadDeclaration(roothash, dealinfo, user)
+	_, err = c.Chain.UploadDeclaration(roothash, segmentList, user)
 	return err
 }
 
@@ -185,4 +191,51 @@ func ExtractSegmenthash(segment []SegmentInfo) []string {
 		segmenthash[i] = segment[i].SegmentHash
 	}
 	return segmenthash
+}
+
+func (c *Cli) StorageData(roothash string, segment []SegmentInfo) error {
+	var err error
+	var storageOrder chain.StorageOrder
+	for i := 0; i < 3; i++ {
+		storageOrder, err = c.Chain.QueryStorageOrder(roothash)
+		if err != nil && err.Error() != chain.ERR_Empty {
+			return err
+		}
+	}
+	if err != nil {
+		return err
+	}
+
+	// query all assigned miner multiaddr
+	multiaddrs, err := c.QueryAssignedMiner(storageOrder.AssignedMiner)
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < len(segment); i++ {
+		for j := 0; j < len(segment[i].FragmentHash); j++ {
+			peerid, err := c.Protocol.AddMultiaddrToPearstore(multiaddrs[i], 0)
+			if err != nil {
+				return err
+			}
+			err = c.Protocol.WriteFileAction(peerid, roothash, segment[i].FragmentHash[j])
+			if err != nil {
+				return err
+			}
+		}
+
+	}
+	return nil
+}
+
+func (c *Cli) QueryAssignedMiner(minerTaskList []chain.MinerTaskList) ([]string, error) {
+	var multiaddrs = make([]string, len(minerTaskList))
+	for i := 0; i < len(minerTaskList); i++ {
+		minerInfo, err := c.Chain.QueryStorageMinerInfo(minerTaskList[i].Account[:])
+		if err != nil {
+			return multiaddrs, err
+		}
+		multiaddrs[i] = minerInfo.Ip
+	}
+	return multiaddrs, nil
 }
