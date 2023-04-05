@@ -11,6 +11,7 @@ import (
 	"log"
 
 	"github.com/CESSProject/sdk-go/core/utils"
+
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/centrifuge/go-substrate-rpc-client/xxhash"
@@ -42,7 +43,7 @@ func (c *chainClient) GetChainStatus() bool {
 }
 
 // Get miner information on the chain
-func (c *chainClient) GetStorageMinerInfo(pkey []byte) (MinerInfo, error) {
+func (c *chainClient) QueryStorageMinerInfo(pkey []byte) (MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println(utils.RecoverError(err))
@@ -418,6 +419,41 @@ func (c *chainClient) GetSchedulerList() ([]SchedulerInfo, error) {
 		c.metadata,
 		TEEWORKER,
 		SCHEDULERMAP,
+	)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
+func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			//fmt.Println(utils.RecoverError(err))
+		}
+	}()
+	var data StorageOrder
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return data, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		FILEBANK,
+		DEALMAP,
 	)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")

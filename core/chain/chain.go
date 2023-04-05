@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/CESSProject/sdk-go/core/utils"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -28,7 +29,7 @@ type Chain interface {
 	// GetChainStatus returns chain status
 	GetChainStatus() bool
 	// Getstorageminerinfo is used to get the details of the miner
-	GetStorageMinerInfo(pkey []byte) (MinerInfo, error)
+	QueryStorageMinerInfo(pkey []byte) (MinerInfo, error)
 	// Getallstorageminer is used to obtain the AccountID of all miners
 	GetAllStorageMiner() ([]types.AccountID, error)
 	// GetFileMetaInfo is used to get the meta information of the file
@@ -39,6 +40,9 @@ type Chain interface {
 	GetAccountInfo(pkey []byte) (types.AccountInfo, error)
 	//KeepConnect()
 	KeepConnect()
+
+	//
+	IsGrantor(pubkey []byte) (bool, error)
 
 	// GetSchedulerList is used to get information about all schedules
 	GetSchedulerList() ([]SchedulerInfo, error)
@@ -61,7 +65,9 @@ type Chain interface {
 	//
 	DeleteFile(owner_pkey []byte, filehash []string) (string, []FileHash, error)
 	//
-	DeclarationFile(filehash string, user UserBrief) (string, error)
+	UploadDeclaration(filehash string, dealinfo []SegmentList, user UserBrief) (string, error)
+	//
+	QueryStorageOrder(roothash string) (StorageOrder, error)
 }
 
 type chainClient struct {
@@ -184,4 +190,23 @@ func (c *chainClient) KeepConnect() {
 	case <-tick.C:
 		healthchek(c.api)
 	}
+}
+
+// VerifyGrantor is used to verify whether the right to use the space is authorized
+func (c *chainClient) IsGrantor(pubkey []byte) (bool, error) {
+	var (
+		err     error
+		grantor types.AccountID
+	)
+
+	grantor, err = c.GetGrantor(pubkey)
+	if err != nil {
+		if err.Error() == ERR_Empty {
+			return false, nil
+		}
+		return false, err
+	}
+	account_chain, _ := utils.EncodePublicKeyAsCessAccount(grantor[:])
+	account_local, _ := c.GetCessAccount()
+	return account_chain == account_local, nil
 }

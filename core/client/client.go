@@ -11,15 +11,11 @@ import (
 	"github.com/CESSProject/p2p-go/core"
 	"github.com/CESSProject/p2p-go/protocol"
 	"github.com/CESSProject/sdk-go/core/chain"
+	"github.com/CESSProject/sdk-go/core/rule"
 )
 
-type SegmentInfo struct {
-	SegmentHash  string
-	FragmentHash []string
-}
-
 type Client interface {
-	PutFile(path, owner, filename, bucketname string) error
+	PutFile(owner []byte, path, filename, bucketname string) (string, error)
 	DeleteFile(roothash string) error
 	DeleteBucket(bucketName string) error
 }
@@ -41,10 +37,11 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port, timeou
 	if err != nil {
 		return cli, err
 	}
+
 	workspaceActual := filepath.Join(workspace, account, name)
 	fstat, err := os.Stat(workspaceActual)
 	if err != nil {
-		err = os.MkdirAll(workspaceActual, 0755)
+		err = os.MkdirAll(workspaceActual, rule.DirMode)
 		if err != nil {
 			return cli, err
 		}
@@ -62,6 +59,7 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port, timeou
 		p2pgo.ListenAddrStrings(
 			fmt.Sprintf("/ip4/%s/tcp/%d", addr, port), // regular tcp connections
 		),
+		p2pgo.Workspace(workspaceActual),
 	)
 	if err != nil {
 		return cli, err
@@ -75,6 +73,11 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port, timeou
 	cli.Protocol = protocol.NewProtocol(p2pnode)
 	cli.Protocol.WriteFileProtocol = protocol.NewWriteFileProtocol(p2pnode)
 	cli.Protocol.ReadFileProtocol = protocol.NewReadFileProtocol(p2pnode)
+
+	//
+	os.MkdirAll(filepath.Join(workspaceActual, rule.FileDir), rule.DirMode)
+	os.MkdirAll(filepath.Join(workspaceActual, rule.TempDir), rule.DirMode)
+	os.MkdirAll(filepath.Join(workspaceActual, rule.DbDir), rule.DirMode)
 
 	return cli, nil
 }
