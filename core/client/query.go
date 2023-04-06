@@ -11,7 +11,9 @@ func (c *Cli) QueryDeoss(pubkey []byte) (string, error) {
 }
 
 func (c *Cli) QueryFile(roothash string) (chain.FileMetaInfo, error) {
-	var err error
-	var metadata chain.FileMetaInfo
-	return metadata, err
+	return c.Chain.GetFileMetaInfo(roothash)
+}
+
+func (c *Cli) QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, error) {
+	return c.Chain.GetBucketInfo(owner, bucketname)
 }

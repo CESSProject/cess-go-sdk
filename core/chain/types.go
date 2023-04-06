@@ -177,11 +177,8 @@ type SpacePackage struct {
 }
 
 type BucketInfo struct {
-	Total_capacity     types.U32
-	Available_capacity types.U32
-	Objects_num        types.U32
-	Objects_list       []FileHash
-	Authority          []types.AccountID
+	Objects_list []FileHash
+	Authority    []types.AccountID
 }
 
 type UserBrief struct {
