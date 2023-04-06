@@ -235,7 +235,7 @@ func (c *Cli) QueryAssignedMiner(minerTaskList []chain.MinerTaskList) ([]string,
 		if err != nil {
 			return multiaddrs, err
 		}
-		multiaddrs[i] = minerInfo.Ip
+		multiaddrs[i] = string(minerInfo.Ip)
 	}
 	return multiaddrs, nil
 }

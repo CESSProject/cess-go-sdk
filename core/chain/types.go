@@ -97,7 +97,7 @@ type FileBlockId [68]types.U8
 type MinerInfo struct {
 	PeerId      types.U64
 	IncomeAcc   types.AccountID
-	Ip          Ipv4Type
+	Ip          types.Bytes
 	Collaterals types.U128
 	State       types.Bytes
 	Power       types.U128

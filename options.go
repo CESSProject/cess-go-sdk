@@ -41,3 +41,11 @@ func Workspace(workspace string) Option {
 		return nil
 	}
 }
+
+// Workspace configures client to use the given workspace.
+func Mnemonic(mnemonic string) Option {
+	return func(cfg *Config) error {
+		cfg.Phase = mnemonic
+		return nil
+	}
+}

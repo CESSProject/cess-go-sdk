@@ -19,7 +19,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) Register(ip, port string) (string, error) {
+func (c *chainClient) Register(ip string, port int) (string, error) {
 	var (
 		txhash      string
 		ipType      IpAddress
@@ -47,8 +47,7 @@ func (c *chainClient) Register(ip, port string) (string, error) {
 			temp, _ := strconv.Atoi(ips[i])
 			ipType.IPv4.Value[i] = types.U8(temp)
 		}
-		temp, _ := strconv.Atoi(port)
-		ipType.IPv4.Port = types.U16(temp)
+		ipType.IPv4.Port = types.U16(port)
 	} else {
 		return txhash, ERR_RPC_IP_FORMAT
 	}
