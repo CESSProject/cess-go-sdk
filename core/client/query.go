@@ -17,3 +17,7 @@ func (c *Cli) QueryFile(roothash string) (chain.FileMetaInfo, error) {
 func (c *Cli) QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, error) {
 	return c.Chain.GetBucketInfo(owner, bucketname)
 }
+
+func (c *Cli) QueryGrantor(pubkey []byte) (bool, error) {
+	return c.Chain.IsGrantor(pubkey)
+}

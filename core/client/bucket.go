@@ -1,6 +1,9 @@
 package client
 
-import "github.com/CESSProject/sdk-go/core/chain"
+import (
+	"github.com/CESSProject/sdk-go/core/chain"
+	"github.com/CESSProject/sdk-go/core/utils"
+)
 
 func (c *Cli) CreateBucket(owner []byte, bucketname string) (string, error) {
 	var err error
@@ -24,4 +27,8 @@ func (c *Cli) QueryBuckets(owner []byte) ([]string, error) {
 
 func (c *Cli) DeleteBucket(owner []byte, bucketName string) (string, error) {
 	return c.Chain.DeleteBucket(owner, bucketName)
+}
+
+func (c *Cli) CheckBucketName(bucketname string) bool {
+	return utils.CheckBucketName(bucketname)
 }
