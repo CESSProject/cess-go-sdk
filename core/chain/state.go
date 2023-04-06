@@ -43,7 +43,7 @@ func (c *chainClient) GetChainStatus() bool {
 }
 
 // Get miner information on the chain
-func (c *chainClient) QueryStorageMinerInfo(pkey []byte) (MinerInfo, error) {
+func (c *chainClient) QueryStorageMiner(pkey []byte) (MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println(utils.RecoverError(err))
@@ -75,6 +75,41 @@ func (c *chainClient) QueryStorageMinerInfo(pkey []byte) (MinerInfo, error) {
 		return data, ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
+}
+
+// Get oss information on the chain
+func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.Bytes
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return "", ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		OSS,
+		OSS,
+		pubkey,
+	)
+	if err != nil {
+		return "", errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return "", errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return "", ERR_RPC_EMPTY_VALUE
+	}
+	return string(data), nil
 }
 
 // Get all miner information on the cess chain

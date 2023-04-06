@@ -23,6 +23,10 @@ type SegmentInfo struct {
 	FragmentHash []string
 }
 
+func (c *Cli) DeleteFile(owner []byte, roothash []string) (string, []chain.FileHash, error) {
+	return c.Chain.DeleteFile(owner, roothash)
+}
+
 func (c *Cli) PutFile(owner []byte, path, filename, bucketname string) (string, error) {
 	var err error
 	var ok bool
@@ -231,11 +235,11 @@ func (c *Cli) StorageData(roothash string, segment []SegmentInfo) error {
 func (c *Cli) QueryAssignedMiner(minerTaskList []chain.MinerTaskList) ([]string, error) {
 	var multiaddrs = make([]string, len(minerTaskList))
 	for i := 0; i < len(minerTaskList); i++ {
-		minerInfo, err := c.Chain.QueryStorageMinerInfo(minerTaskList[i].Account[:])
+		minerInfo, err := c.Chain.QueryStorageMiner(minerTaskList[i].Account[:])
 		if err != nil {
 			return multiaddrs, err
 		}
-		multiaddrs[i] = minerInfo.Ip
+		multiaddrs[i] = string(minerInfo.Ip)
 	}
 	return multiaddrs, nil
 }

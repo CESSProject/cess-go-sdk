@@ -14,6 +14,9 @@ import (
 // DOT is "." character
 const DOT = "."
 
+// Unit precision of CESS token
+const TokenPrecision_CESS = "000000000000"
+
 // Pallets
 const (
 	// OSS is a module about DeOSS
@@ -58,11 +61,20 @@ const (
 	TX_OSS_REGISTER = OSS + DOT + "register"
 	TX_OSS_UPDATE   = OSS + DOT + "update"
 
+	// SMINER
+	TX_BUCKET_REGISTER = SMINER + DOT + "register"
+
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET = FILEBANK + DOT + "create_bucket"
 	TX_FILEBANK_DELBUCKET = FILEBANK + DOT + "delete_bucket"
 	TX_FILEBANK_DELFILE   = FILEBANK + DOT + "delete_file"
 	TX_FILEBANK_UPLOADDEC = FILEBANK + DOT + "upload_declaration"
+)
+
+const (
+	Role_OSS    = "OSS"
+	Role_DEOSS  = "DEOSS"
+	Role_BUCKET = "BUCKET"
 )
 
 const (
@@ -97,7 +109,7 @@ type FileBlockId [68]types.U8
 type MinerInfo struct {
 	PeerId      types.U64
 	IncomeAcc   types.AccountID
-	Ip          Ipv4Type
+	Ip          types.Bytes
 	Collaterals types.U128
 	State       types.Bytes
 	Power       types.U128
@@ -111,30 +123,12 @@ type RewardInfo struct {
 	NotReceived types.U128
 }
 
-// cache storage miner
-type Cache_MinerInfo struct {
-	Peerid uint64 `json:"peerid"`
-	Ip     string `json:"ip"`
-}
-
 // file meta info
 type FileMetaInfo struct {
-	Size       types.U64
-	Index      types.U32
-	State      types.Bytes
-	UserBriefs []UserBrief
-	//Names      []types.Bytes
-	BlockInfo []BlockInfo
-}
-
-// file block info
-type BlockInfo struct {
-	MinerId   types.U64
-	BlockSize types.U64
-	BlockNum  types.U32
-	BlockId   [68]types.U8
-	MinerIp   Ipv4Type
-	MinerAcc  types.AccountID
+	Completion  types.U32
+	State       types.U8
+	Owner       []UserBrief
+	SegmentList []SegmentList
 }
 
 // filler meta info
@@ -183,11 +177,8 @@ type SpacePackage struct {
 }
 
 type BucketInfo struct {
-	Total_capacity     types.U32
-	Available_capacity types.U32
-	Objects_num        types.U32
-	Objects_list       []FileHash
-	Authority          []types.AccountID
+	Objects_list []FileHash
+	Authority    []types.AccountID
 }
 
 type UserBrief struct {

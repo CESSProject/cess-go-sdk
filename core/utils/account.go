@@ -14,29 +14,38 @@ var (
 	CessPrefix      = []byte{0x50, 0xac}
 )
 
-func DecodePublicKeyOfCessAccount(address string) ([]byte, error) {
+func ParsingPublickey(address string) ([]byte, error) {
 	err := VerityAddress(address, CessPrefix)
 	if err != nil {
-		return nil, errors.New("Invalid account")
+		err := VerityAddress(address, SubstratePrefix)
+		if err != nil {
+			return nil, errors.New("Invalid account")
+		}
+		data := base58.Decode(address)
+		if len(data) != (34 + len(SubstratePrefix)) {
+			return nil, errors.New("Public key decoding failed")
+		}
+		return data[len(SubstratePrefix) : len(data)-2], nil
+	} else {
+		data := base58.Decode(address)
+		if len(data) != (34 + len(CessPrefix)) {
+			return nil, errors.New("Public key decoding failed")
+		}
+		return data[len(CessPrefix) : len(data)-2], nil
 	}
-	data := base58.Decode(address)
-	if len(data) != (34 + len(CessPrefix)) {
-		return nil, errors.New("Public key decoding failed")
-	}
-	return data[len(CessPrefix) : len(data)-2], nil
 }
 
-func DecodePublicKeyOfSubstrateAccount(address string) ([]byte, error) {
-	err := VerityAddress(address, SubstratePrefix)
-	if err != nil {
-		return nil, errors.New("Invalid account")
-	}
-	data := base58.Decode(address)
-	if len(data) != (34 + len(SubstratePrefix)) {
-		return nil, errors.New("Public key decoding failed")
-	}
-	return data[len(SubstratePrefix) : len(data)-2], nil
-}
+// func DecodePublicKeyOfSubstrateAccount(address string) ([]byte, error) {
+// 	err := VerityAddress(address, SubstratePrefix)
+// 	if err != nil {
+// 		return nil, errors.New("Invalid account")
+// 	}
+// 	data := base58.Decode(address)
+// 	if len(data) != (34 + len(SubstratePrefix)) {
+// 		return nil, errors.New("Public key decoding failed")
+// 	}
+// 	return data[len(SubstratePrefix) : len(data)-2], nil
+// }
 
 func PubBytesToString(b []byte) string {
 	s := ""

@@ -15,9 +15,16 @@ import (
 )
 
 type Client interface {
+	Register(name, multiaddr string, income string, pledge uint64) (string, error)
+	QueryStorageMiner(pubkey []byte) (chain.MinerInfo, error)
+	QueryDeoss(pubkey []byte) (string, error)
+	QueryFile(roothash string) (chain.FileMetaInfo, error)
+	QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, error)
+	QueryBuckets(owner []byte) ([]string, error)
+	CreateBucket(owner []byte, bucketname string) (string, error)
 	PutFile(owner []byte, path, filename, bucketname string) (string, error)
-	DeleteFile(roothash string) error
-	DeleteBucket(bucketName string) error
+	DeleteFile(owner []byte, roothash []string) (string, []chain.FileHash, error)
+	DeleteBucket(owner []byte, bucketName string) (string, error)
 }
 
 type Cli struct {
