@@ -16,6 +16,8 @@ import (
 
 type Client interface {
 	Register(name, multiaddr string, income string, pledge uint64) (string, error)
+	QueryStorageMiner(pubkey []byte) (chain.MinerInfo, error)
+	QueryDeoss(pubkey []byte) (string, error)
 	PutFile(owner []byte, path, filename, bucketname string) (string, error)
 	DeleteFile(roothash string) error
 	DeleteBucket(bucketName string) error

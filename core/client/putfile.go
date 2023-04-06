@@ -231,7 +231,7 @@ func (c *Cli) StorageData(roothash string, segment []SegmentInfo) error {
 func (c *Cli) QueryAssignedMiner(minerTaskList []chain.MinerTaskList) ([]string, error) {
 	var multiaddrs = make([]string, len(minerTaskList))
 	for i := 0; i < len(minerTaskList); i++ {
-		minerInfo, err := c.Chain.QueryStorageMinerInfo(minerTaskList[i].Account[:])
+		minerInfo, err := c.Chain.QueryStorageMiner(minerTaskList[i].Account[:])
 		if err != nil {
 			return multiaddrs, err
 		}

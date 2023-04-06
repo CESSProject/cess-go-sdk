@@ -29,7 +29,9 @@ type Chain interface {
 	// GetChainStatus returns chain status
 	GetChainStatus() bool
 	// Getstorageminerinfo is used to get the details of the miner
-	QueryStorageMinerInfo(pkey []byte) (MinerInfo, error)
+	QueryStorageMiner(pkey []byte) (MinerInfo, error)
+	//
+	QueryDeoss(pubkey []byte) (string, error)
 	// Getallstorageminer is used to obtain the AccountID of all miners
 	GetAllStorageMiner() ([]types.AccountID, error)
 	// GetFileMetaInfo is used to get the meta information of the file
