@@ -27,57 +27,38 @@ func (c *Cli) DeleteFile(owner []byte, roothash []string) (string, []chain.FileH
 	return c.Chain.DeleteFile(owner, roothash)
 }
 
-func (c *Cli) PutFile(owner []byte, path, filename, bucketname string) (string, error) {
+func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (string, error) {
 	var err error
-	var ok bool
-	var roothash string
 
-	//
-	if ok = utils.CheckBucketName(bucketname); !ok {
-		return roothash, errors.New("Invalid bucketname")
+	var storageOrder chain.StorageOrder
+	for i := 0; i < 3; i++ {
+		storageOrder, err = c.Chain.QueryStorageOrder(roothash)
+		if err != nil {
+			if err.Error() != chain.ERR_Empty {
+				return "", err
+			}
+			err = c.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)
+			if err != nil {
+				return roothash, err
+			}
+			time.Sleep(rule.BlockInterval)
+			continue
+		}
+		break
 	}
-
-	//
-	ok, err = c.Chain.IsGrantor(owner)
 	if err != nil {
-		return roothash, err
+		return "", err
 	}
-	if !ok {
-		return roothash, errors.New("Unauthorized")
-	}
-
-	//
-	segment, err := c.ProcessingData(path)
-	if err != nil {
-		return roothash, err
-	}
-
-	segmenthash := ExtractSegmenthash(segment)
-
-	// Calculate merkle hash tree
-	hTree, err := hashtree.NewHashTree(segmenthash)
-	if err != nil {
-		return roothash, err
-	}
-	// Merkel root hash
-	roothash = hex.EncodeToString(hTree.MerkleRoot())
-
-	err = c.GenerateStorageOrder(roothash, segment, owner, filename, bucketname)
-	if err != nil {
-		return roothash, err
-	}
-
-	time.Sleep(rule.BlockInterval)
 
 	// store fragment to storage
-	err = c.StorageData(roothash, segment)
+	err = c.StorageData(roothash, segmentInfo, storageOrder.AssignedMiner)
 	if err != nil {
 		return roothash, err
 	}
 	return "", err
 }
 
-func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
+func (c *Cli) ProcessingData(path string) ([]SegmentInfo, string, error) {
 	var (
 		err          error
 		f            *os.File
@@ -88,10 +69,10 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 
 	fstat, err = os.Stat(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if fstat.IsDir() {
-		return nil, errors.New("Not a file")
+		return nil, "", errors.New("Not a file")
 	}
 
 	segmentCount = fstat.Size() / rule.SegmentSize
@@ -105,7 +86,7 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 
 	f, err = os.Open(path)
 	if err != nil {
-		return segment, err
+		return segment, "", err
 	}
 	defer f.Close()
 
@@ -113,14 +94,14 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 		f.Seek(rule.SegmentSize*i, 0)
 		num, err = f.Read(buf)
 		if err != nil && err != io.EOF {
-			return segment, err
+			return segment, "", err
 		}
 		if num == 0 {
 			break
 		}
 		if num < rule.SegmentSize {
 			if i+1 != segmentCount {
-				return segment, fmt.Errorf("Error reading %s", path)
+				return segment, "", fmt.Errorf("Error reading %s", path)
 			}
 			remainbuf := make([]byte, rule.SegmentSize-num)
 			copy(buf[num:], remainbuf)
@@ -128,7 +109,7 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 
 		hash, err := utils.CalcSHA256(buf)
 		if err != nil {
-			return segment, err
+			return segment, "", err
 		}
 
 		segmentPath := filepath.Join(c.Workspace(), rule.TempDir, hash)
@@ -136,17 +117,17 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 		if err != nil {
 			fsegment, err := os.Create(segmentPath)
 			if err != nil {
-				return segment, err
+				return segment, "", err
 			}
 			_, err = fsegment.Write(buf[:num])
 			if err != nil {
 				fsegment.Close()
-				return segment, err
+				return segment, "", err
 			}
 			err = fsegment.Sync()
 			if err != nil {
 				fsegment.Close()
-				return segment, err
+				return segment, "", err
 			}
 			fsegment.Close()
 		}
@@ -154,11 +135,19 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, error) {
 		segment[i].SegmentHash = segmentPath
 		segment[i].FragmentHash, err = erasure.ReedSolomon(segmentPath)
 		if err != nil {
-			return segment, err
+			return segment, "", err
 		}
 	}
 
-	return segment, err
+	segmenthash := ExtractSegmenthash(segment)
+
+	// Calculate merkle hash tree
+	hTree, err := hashtree.NewHashTree(segmenthash)
+	if err != nil {
+		return segment, "", err
+	}
+
+	return segment, hex.EncodeToString(hTree.MerkleRoot()), err
 }
 
 func (c *Cli) GenerateStorageOrder(roothash string, segment []SegmentInfo, owner []byte, filename, buckname string) error {
@@ -197,21 +186,11 @@ func ExtractSegmenthash(segment []SegmentInfo) []string {
 	return segmenthash
 }
 
-func (c *Cli) StorageData(roothash string, segment []SegmentInfo) error {
+func (c *Cli) StorageData(roothash string, segment []SegmentInfo, minerTaskList []chain.MinerTaskList) error {
 	var err error
-	var storageOrder chain.StorageOrder
-	for i := 0; i < 3; i++ {
-		storageOrder, err = c.Chain.QueryStorageOrder(roothash)
-		if err != nil && err.Error() != chain.ERR_Empty {
-			return err
-		}
-	}
-	if err != nil {
-		return err
-	}
 
 	// query all assigned miner multiaddr
-	multiaddrs, err := c.QueryAssignedMiner(storageOrder.AssignedMiner)
+	multiaddrs, err := c.QueryAssignedMiner(minerTaskList)
 	if err != nil {
 		return err
 	}
