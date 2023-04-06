@@ -8,6 +8,7 @@ package chain
 
 import (
 	"fmt"
+	"math/big"
 	"strconv"
 	"strings"
 	"time"
@@ -19,10 +20,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) Register(ip string, port int) (string, error) {
+func (c *chainClient) Register(name, multiaddr string, income string, pledge uint64) (string, error) {
 	var (
+		err         error
 		txhash      string
-		ipType      IpAddress
+		call        types.Call
 		accountInfo types.AccountInfo
 	)
 
@@ -40,25 +42,31 @@ func (c *chainClient) Register(ip string, port int) (string, error) {
 	}
 	c.SetChainState(true)
 
-	if utils.IsIPv4(ip) {
-		ipType.IPv4.Index = 0
-		ips := strings.Split(ip, ".")
-		for i := 0; i < len(ipType.IPv4.Value); i++ {
-			temp, _ := strconv.Atoi(ips[i])
-			ipType.IPv4.Value[i] = types.U8(temp)
+	switch name {
+	case Role_OSS, Role_DEOSS:
+		call, err = types.NewCall(c.metadata, TX_OSS_REGISTER, types.NewBytes([]byte(multiaddr)))
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewCall]")
 		}
-		ipType.IPv4.Port = types.U16(port)
-	} else {
-		return txhash, ERR_RPC_IP_FORMAT
-	}
-
-	call, err := types.NewCall(
-		c.metadata,
-		TX_OSS_REGISTER,
-		ipType.IPv4,
-	)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+	case Role_BUCKET:
+		pubkey, err := utils.ParsingPublickey(income)
+		if err != nil {
+			return txhash, errors.Wrap(err, "[DecodeToPub]")
+		}
+		acc, err := types.NewAccountID(pubkey)
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewAccountID]")
+		}
+		realTokens, ok := new(big.Int).SetString(strconv.FormatUint(pledge, 10)+TokenPrecision_CESS, 10)
+		if !ok {
+			return txhash, errors.New("[big.Int.SetString]")
+		}
+		call, err = types.NewCall(c.metadata, TX_BUCKET_REGISTER, *acc, types.NewBytes([]byte(multiaddr)), types.NewU128(*realTokens))
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewCall]")
+		}
+	default:
+		return "", fmt.Errorf("Invalid role name")
 	}
 
 	ext := types.NewExtrinsic(call)
@@ -66,12 +74,7 @@ func (c *chainClient) Register(ip string, port int) (string, error) {
 		return txhash, errors.Wrap(err, "[NewExtrinsic]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -104,29 +107,11 @@ func (c *chainClient) Register(ip string, port int) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if !strings.Contains(err.Error(), "Priority is too low") {
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-		}
-		var tryCount = 0
-		for tryCount < 20 {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + types.NewU32(1)))
-			// Sign the transaction
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err == nil {
-				break
-			}
-			tryCount++
-		}
-	}
-	if err != nil {
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
-	timeout := time.After(c.timeForBlockOut)
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -140,14 +125,21 @@ func (c *chainClient) Register(ip string, port int) (string, error) {
 
 				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
 
-				if len(events.Oss_OssRegister) > 0 {
-					return txhash, nil
+				switch name {
+				case Role_OSS, Role_DEOSS:
+					if len(events.Oss_OssRegister) > 0 {
+						return txhash, nil
+					}
+				case Role_BUCKET:
+					if len(events.Sminer_Registered) > 0 {
+						return txhash, nil
+					}
 				}
 				return txhash, errors.New(ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout:
+		case <-timeout.C:
 			return txhash, ERR_RPC_TIMEOUT
 		}
 	}

@@ -14,6 +14,9 @@ import (
 // DOT is "." character
 const DOT = "."
 
+// Unit precision of CESS token
+const TokenPrecision_CESS = "000000000000"
+
 // Pallets
 const (
 	// OSS is a module about DeOSS
@@ -58,11 +61,20 @@ const (
 	TX_OSS_REGISTER = OSS + DOT + "register"
 	TX_OSS_UPDATE   = OSS + DOT + "update"
 
+	// SMINER
+	TX_BUCKET_REGISTER = SMINER + DOT + "register"
+
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET = FILEBANK + DOT + "create_bucket"
 	TX_FILEBANK_DELBUCKET = FILEBANK + DOT + "delete_bucket"
 	TX_FILEBANK_DELFILE   = FILEBANK + DOT + "delete_file"
 	TX_FILEBANK_UPLOADDEC = FILEBANK + DOT + "upload_declaration"
+)
+
+const (
+	Role_OSS    = "OSS"
+	Role_DEOSS  = "DEOSS"
+	Role_BUCKET = "BUCKET"
 )
 
 const (

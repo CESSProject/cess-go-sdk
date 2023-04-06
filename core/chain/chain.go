@@ -54,8 +54,8 @@ type Chain interface {
 	GetGrantor(pkey []byte) (types.AccountID, error)
 	// GetState is used to obtain OSS status information
 	GetState(pubkey []byte) (string, error)
-	// Register is used to register oss services
-	Register(ip string, port int) (string, error)
+	// Register is used to register OSS or BUCKET roles
+	Register(name, multiaddr string, income string, pledge uint64) (string, error)
 	// Update is used to update the communication address of the scheduling service
 	Update(ip, port string) (string, error)
 	// CreateBucket is used to create a bucket for users

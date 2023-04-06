@@ -1,5 +1,5 @@
 package client
 
-func (c *Cli) RegisterDeoss(ip string, port int) (string, error) {
-	return c.Chain.Register(ip, port)
+func (c *Cli) Register(name, multiaddr string, income string, pledge uint64) (string, error) {
+	return c.Chain.Register(name, multiaddr, income, pledge)
 }

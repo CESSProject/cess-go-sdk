@@ -15,7 +15,7 @@ import (
 )
 
 type Client interface {
-	Register(name, multiaddr string, income ...string) (string, error)
+	Register(name, multiaddr string, income string, pledge uint64) (string, error)
 	PutFile(owner []byte, path, filename, bucketname string) (string, error)
 	DeleteFile(roothash string) error
 	DeleteBucket(bucketName string) error
