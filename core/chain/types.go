@@ -123,30 +123,12 @@ type RewardInfo struct {
 	NotReceived types.U128
 }
 
-// cache storage miner
-type Cache_MinerInfo struct {
-	Peerid uint64 `json:"peerid"`
-	Ip     string `json:"ip"`
-}
-
 // file meta info
 type FileMetaInfo struct {
-	Size       types.U64
-	Index      types.U32
-	State      types.Bytes
-	UserBriefs []UserBrief
-	//Names      []types.Bytes
-	BlockInfo []BlockInfo
-}
-
-// file block info
-type BlockInfo struct {
-	MinerId   types.U64
-	BlockSize types.U64
-	BlockNum  types.U32
-	BlockId   [68]types.U8
-	MinerIp   Ipv4Type
-	MinerAcc  types.AccountID
+	Completion  types.U32
+	State       types.U8
+	Owner       []UserBrief
+	SegmentList []SegmentList
 }
 
 // filler meta info

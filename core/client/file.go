@@ -23,6 +23,12 @@ type SegmentInfo struct {
 	FragmentHash []string
 }
 
+func (c *Cli) DeleteFile(roothash string) (string, error) {
+	var err error
+	var txhash string
+	return txhash, err
+}
+
 func (c *Cli) PutFile(owner []byte, path, filename, bucketname string) (string, error) {
 	var err error
 	var ok bool

@@ -9,3 +9,9 @@ func (c *Cli) QueryStorageMiner(pubkey []byte) (chain.MinerInfo, error) {
 func (c *Cli) QueryDeoss(pubkey []byte) (string, error) {
 	return c.Chain.QueryDeoss(pubkey)
 }
+
+func (c *Cli) QueryFile(roothash string) (chain.FileMetaInfo, error) {
+	var err error
+	var metadata chain.FileMetaInfo
+	return metadata, err
+}
