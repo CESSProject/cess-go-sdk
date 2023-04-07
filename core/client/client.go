@@ -28,6 +28,7 @@ type Client interface {
 	PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (string, error)
 	DeleteFile(owner []byte, roothash []string) (string, []chain.FileHash, error)
 	DeleteBucket(owner []byte, bucketName string) (string, error)
+	Workspace() string
 }
 
 type Cli struct {
