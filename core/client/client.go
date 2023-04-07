@@ -15,6 +15,7 @@ import (
 )
 
 type Client interface {
+	Workspace() string
 	Register(name string, income string, pledge uint64) (string, error)
 	QueryStorageMiner(pubkey []byte) (chain.MinerInfo, error)
 	QueryDeoss(pubkey []byte) (string, error)
@@ -28,7 +29,7 @@ type Client interface {
 	PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (string, error)
 	DeleteFile(owner []byte, roothash []string) (string, []chain.FileHash, error)
 	DeleteBucket(owner []byte, bucketName string) (string, error)
-	Workspace() string
+	Update(name string) (string, error)
 }
 
 type Cli struct {

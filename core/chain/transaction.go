@@ -61,7 +61,7 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 		if !ok {
 			return txhash, errors.New("[big.Int.SetString]")
 		}
-		call, err = types.NewCall(c.metadata, TX_BUCKET_REGISTER, *acc, types.NewBytes([]byte(multiaddr)), types.NewU128(*realTokens))
+		call, err = types.NewCall(c.metadata, TX_SMINER_REGISTER, *acc, types.NewBytes([]byte(multiaddr)), types.NewU128(*realTokens))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -145,10 +145,11 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 	}
 }
 
-func (c *chainClient) Update(ip, port string) (string, error) {
+func (c *chainClient) Update(name, multiaddr string) (string, error) {
 	var (
+		err         error
 		txhash      string
-		ipType      IpAddress
+		call        types.Call
 		accountInfo types.AccountInfo
 	)
 
@@ -166,26 +167,19 @@ func (c *chainClient) Update(ip, port string) (string, error) {
 	}
 	c.SetChainState(true)
 
-	if utils.IsIPv4(ip) {
-		ipType.IPv4.Index = 0
-		ips := strings.Split(ip, ".")
-		for i := 0; i < len(ipType.IPv4.Value); i++ {
-			temp, _ := strconv.Atoi(ips[i])
-			ipType.IPv4.Value[i] = types.U8(temp)
+	switch name {
+	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+		call, err = types.NewCall(c.metadata, TX_OSS_UPDATE, types.NewBytes([]byte(multiaddr)))
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewCall]")
 		}
-		temp, _ := strconv.Atoi(port)
-		ipType.IPv4.Port = types.U16(temp)
-	} else {
-		return txhash, ERR_RPC_IP_FORMAT
-	}
-
-	call, err := types.NewCall(
-		c.metadata,
-		TX_OSS_UPDATE,
-		ipType.IPv4,
-	)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+	case Role_BUCKET, "SMINER":
+		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEADDR, types.NewBytes([]byte(multiaddr)))
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewCall]")
+		}
+	default:
+		return "", fmt.Errorf("Invalid role name")
 	}
 
 	ext := types.NewExtrinsic(call)

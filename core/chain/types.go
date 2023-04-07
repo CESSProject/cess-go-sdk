@@ -62,7 +62,8 @@ const (
 	TX_OSS_UPDATE   = OSS + DOT + "update"
 
 	// SMINER
-	TX_BUCKET_REGISTER = SMINER + DOT + "register"
+	TX_SMINER_REGISTER   = SMINER + DOT + "register"
+	TX_SMINER_UPDATEADDR = SMINER + DOT + "update_ip"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET = FILEBANK + DOT + "create_bucket"
