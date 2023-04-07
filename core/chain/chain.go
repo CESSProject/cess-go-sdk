@@ -59,7 +59,7 @@ type Chain interface {
 	// Register is used to register OSS or BUCKET roles
 	Register(name, multiaddr string, income string, pledge uint64) (string, error)
 	// Update is used to update the communication address of the scheduling service
-	Update(ip, port string) (string, error)
+	Update(name, multiaddr string) (string, error)
 	// CreateBucket is used to create a bucket for users
 	CreateBucket(owner_pkey []byte, name string) (string, error)
 	// DeleteBucket is used to delete buckets created by users
