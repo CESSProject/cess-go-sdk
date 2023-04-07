@@ -43,12 +43,12 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 	c.SetChainState(true)
 
 	switch name {
-	case Role_OSS, Role_DEOSS:
+	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 		call, err = types.NewCall(c.metadata, TX_OSS_REGISTER, types.NewBytes([]byte(multiaddr)))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
-	case Role_BUCKET:
+	case Role_BUCKET, "SMINER":
 		pubkey, err := utils.ParsingPublickey(income)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[DecodeToPub]")

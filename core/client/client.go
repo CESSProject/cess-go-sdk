@@ -15,7 +15,7 @@ import (
 )
 
 type Client interface {
-	Register(name, multiaddr string, income string, pledge uint64) (string, error)
+	Register(name string, income string, pledge uint64) (string, error)
 	QueryStorageMiner(pubkey []byte) (chain.MinerInfo, error)
 	QueryDeoss(pubkey []byte) (string, error)
 	QueryFile(roothash string) (chain.FileMetaInfo, error)
@@ -66,9 +66,7 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port, timeou
 	// To construct a simple host with all the default settings, just use `New`
 	p2phost, err := p2pgo.New(
 		privatekeyPath,
-		p2pgo.ListenAddrStrings(
-			fmt.Sprintf("/ip4/%s/tcp/%d", addr, port), // regular tcp connections
-		),
+		p2pgo.ListenAddrStrings(addr, port), // regular tcp connections
 		p2pgo.Workspace(workspaceActual),
 	)
 	if err != nil {
