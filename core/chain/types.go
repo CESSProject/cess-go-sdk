@@ -62,7 +62,7 @@ const (
 	TX_OSS_UPDATE   = OSS + DOT + "update"
 
 	// SMINER
-	TX_SMINER_REGISTER   = SMINER + DOT + "register"
+	TX_SMINER_REGISTER   = SMINER + DOT + "regnstk"
 	TX_SMINER_UPDATEADDR = SMINER + DOT + "update_ip"
 
 	// FILEBANK
