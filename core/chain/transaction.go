@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/CESSProject/sdk-go/core/utils"
@@ -24,6 +23,8 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 	var (
 		err         error
 		txhash      string
+		pubkey      []byte
+		acc         *types.AccountID
 		call        types.Call
 		accountInfo types.AccountInfo
 	)
@@ -67,11 +68,11 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 			return "", nil
 		}
 
-		pubkey, err := utils.ParsingPublickey(income)
+		pubkey, err = utils.ParsingPublickey(income)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[DecodeToPub]")
 		}
-		acc, err := types.NewAccountID(pubkey)
+		acc, err = types.NewAccountID(pubkey)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewAccountID]")
 		}
@@ -85,11 +86,6 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 		}
 	default:
 		return "", fmt.Errorf("Invalid role name")
-	}
-
-	ext := types.NewExtrinsic(call)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewExtrinsic]")
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
@@ -115,6 +111,8 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 		Tip:                types.NewUCompactFromUInt(0),
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
+
+	ext := types.NewExtrinsic(call)
 
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
@@ -144,11 +142,11 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
 
 				switch name {
-				case Role_OSS, Role_DEOSS:
+				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssRegister) > 0 {
 						return txhash, nil
 					}
-				case Role_BUCKET:
+				case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 					if len(events.Sminer_Registered) > 0 {
 						return txhash, nil
 					}
@@ -191,18 +189,13 @@ func (c *chainClient) Update(name, multiaddr string) (string, error) {
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
-	case Role_BUCKET, "SMINER":
+	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEADDR, types.NewBytes([]byte(multiaddr)))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	default:
 		return "", fmt.Errorf("Invalid role name")
-	}
-
-	ext := types.NewExtrinsic(call)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewExtrinsic]")
 	}
 
 	key, err := types.CreateStorageKey(
@@ -233,6 +226,8 @@ func (c *chainClient) Update(name, multiaddr string) (string, error) {
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -242,29 +237,11 @@ func (c *chainClient) Update(name, multiaddr string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if !strings.Contains(err.Error(), "Priority is too low") {
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-		}
-		var tryCount = 0
-		for tryCount < 20 {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + types.NewU32(1)))
-			// Sign the transaction
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err == nil {
-				break
-			}
-			tryCount++
-		}
-	}
-	if err != nil {
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
-	timeout := time.After(c.timeForBlockOut)
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -285,7 +262,7 @@ func (c *chainClient) Update(name, multiaddr string) (string, error) {
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout:
+		case <-timeout.C:
 			return txhash, ERR_RPC_TIMEOUT
 		}
 	}
@@ -326,11 +303,6 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	ext := types.NewExtrinsic(call)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewExtrinsic]")
-	}
-
 	key, err := types.CreateStorageKey(
 		c.metadata,
 		SYSTEM,
@@ -359,6 +331,8 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -368,29 +342,11 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if !strings.Contains(err.Error(), "Priority is too low") {
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-		}
-		var tryCount = 0
-		for tryCount < 20 {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + types.NewU32(1)))
-			// Sign the transaction
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err == nil {
-				break
-			}
-			tryCount++
-		}
-	}
-	if err != nil {
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
-	timeout := time.After(c.timeForBlockOut)
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -411,7 +367,7 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout:
+		case <-timeout.C:
 			return txhash, ERR_RPC_TIMEOUT
 		}
 	}
@@ -452,11 +408,6 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	ext := types.NewExtrinsic(call)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewExtrinsic]")
-	}
-
 	key, err := types.CreateStorageKey(
 		c.metadata,
 		SYSTEM,
@@ -485,6 +436,8 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -494,29 +447,11 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if !strings.Contains(err.Error(), "Priority is too low") {
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-		}
-		var tryCount = 0
-		for tryCount < 20 {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + types.NewU32(1)))
-			// Sign the transaction
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err == nil {
-				break
-			}
-			tryCount++
-		}
-	}
-	if err != nil {
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
-	timeout := time.After(c.timeForBlockOut)
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -537,7 +472,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout:
+		case <-timeout.C:
 			return txhash, ERR_RPC_TIMEOUT
 		}
 	}
@@ -582,11 +517,6 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	ext := types.NewExtrinsic(call)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewExtrinsic]")
-	}
-
 	key, err := types.CreateStorageKey(
 		c.metadata,
 		SYSTEM,
@@ -615,6 +545,8 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -627,7 +559,8 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
-	timeout := time.After(c.timeForBlockOut)
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -648,7 +581,7 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout:
+		case <-timeout.C:
 			return txhash, ERR_RPC_TIMEOUT
 		}
 	}
@@ -700,11 +633,6 @@ func (c *chainClient) DeleteFile(owner_pkey []byte, filehash []string) (string, 
 		return txhash, nil, errors.Wrap(err, "[NewCall]")
 	}
 
-	ext := types.NewExtrinsic(call)
-	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[NewExtrinsic]")
-	}
-
 	key, err := types.CreateStorageKey(
 		c.metadata,
 		SYSTEM,
@@ -733,6 +661,8 @@ func (c *chainClient) DeleteFile(owner_pkey []byte, filehash []string) (string, 
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -742,29 +672,11 @@ func (c *chainClient) DeleteFile(owner_pkey []byte, filehash []string) (string, 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if !strings.Contains(err.Error(), "Priority is too low") {
-			return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-		}
-		var tryCount = 0
-		for tryCount < 20 {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + types.NewU32(1)))
-			// Sign the transaction
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return txhash, nil, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err == nil {
-				break
-			}
-			tryCount++
-		}
-	}
-	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
-	timeout := time.After(c.timeForBlockOut)
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -785,7 +697,7 @@ func (c *chainClient) DeleteFile(owner_pkey []byte, filehash []string) (string, 
 			}
 		case err = <-sub.Err():
 			return txhash, nil, errors.Wrap(err, "[sub]")
-		case <-timeout:
+		case <-timeout.C:
 			return txhash, nil, ERR_RPC_TIMEOUT
 		}
 	}
@@ -820,11 +732,6 @@ func (c *chainClient) SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error) {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	ext := types.NewExtrinsic(call)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewExtrinsic]")
-	}
-
 	key, err := types.CreateStorageKey(
 		c.metadata,
 		SYSTEM,
@@ -852,6 +759,8 @@ func (c *chainClient) SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error) {
 		Tip:                types.NewUCompactFromUInt(0),
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
+
+	ext := types.NewExtrinsic(call)
 
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
