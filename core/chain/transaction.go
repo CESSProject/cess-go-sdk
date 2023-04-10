@@ -44,11 +44,29 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 
 	switch name {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+		_, err = c.QueryDeoss(c.keyring.PublicKey)
+		if err != nil {
+			if err.Error() != ERR_Empty {
+				return txhash, err
+			}
+		} else {
+			return "", nil
+		}
+
 		call, err = types.NewCall(c.metadata, TX_OSS_REGISTER, types.NewBytes([]byte(multiaddr)))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	case Role_BUCKET, "SMINER":
+		_, err = c.QueryStorageMiner(c.keyring.PublicKey)
+		if err != nil {
+			if err.Error() != ERR_Empty {
+				return txhash, err
+			}
+		} else {
+			return "", nil
+		}
+
 		pubkey, err := utils.ParsingPublickey(income)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[DecodeToPub]")
