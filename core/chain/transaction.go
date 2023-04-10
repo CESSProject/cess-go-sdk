@@ -772,3 +772,105 @@ func (c *chainClient) DeleteFile(owner_pkey []byte, filehash []string) (string, 
 		}
 	}
 }
+
+func (c *chainClient) SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error) {
+	var (
+		txhash      string
+		accountInfo types.AccountInfo
+	)
+
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			fmt.Println(utils.RecoverError(err))
+		}
+	}()
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return txhash, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	call, err := types.NewCall(
+		c.metadata,
+		TX_FILEBANK_ADDIDLESPACE,
+		idlefiles,
+	)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewCall]")
+	}
+
+	ext := types.NewExtrinsic(call)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewExtrinsic]")
+	}
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		SYSTEM,
+		ACCOUNT,
+		c.keyring.PublicKey,
+	)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return txhash, ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				}
+
+				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+
+				// if len(events.FileBank_DeleteFile) > 0 {
+				// 	return txhash, events.FileBank_DeleteFile[0].FailedList
+				// }
+				return txhash, errors.New(ERR_Failed)
+			}
+		case err = <-sub.Err():
+			return txhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, ERR_RPC_TIMEOUT
+		}
+	}
+}
