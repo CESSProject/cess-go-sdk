@@ -57,7 +57,7 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
-	case Role_BUCKET, "SMINER":
+	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 		_, err = c.QueryStorageMiner(c.keyring.PublicKey)
 		if err != nil {
 			if err.Error() != ERR_Empty {
