@@ -70,6 +70,8 @@ type Chain interface {
 	UploadDeclaration(filehash string, dealinfo []SegmentList, user UserBrief) (string, error)
 	//
 	QueryStorageOrder(roothash string) (StorageOrder, error)
+	//
+	SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error)
 }
 
 type chainClient struct {

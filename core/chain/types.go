@@ -66,10 +66,11 @@ const (
 	TX_SMINER_UPDATEADDR = SMINER + DOT + "update_ip"
 
 	// FILEBANK
-	TX_FILEBANK_PUTBUCKET = FILEBANK + DOT + "create_bucket"
-	TX_FILEBANK_DELBUCKET = FILEBANK + DOT + "delete_bucket"
-	TX_FILEBANK_DELFILE   = FILEBANK + DOT + "delete_file"
-	TX_FILEBANK_UPLOADDEC = FILEBANK + DOT + "upload_declaration"
+	TX_FILEBANK_PUTBUCKET    = FILEBANK + DOT + "create_bucket"
+	TX_FILEBANK_DELBUCKET    = FILEBANK + DOT + "delete_bucket"
+	TX_FILEBANK_DELFILE      = FILEBANK + DOT + "delete_file"
+	TX_FILEBANK_UPLOADDEC    = FILEBANK + DOT + "upload_declaration"
+	TX_FILEBANK_ADDIDLESPACE = FILEBANK + DOT + "testAddIdleSpace"
 )
 
 const (
@@ -130,17 +131,6 @@ type FileMetaInfo struct {
 	State       types.U8
 	Owner       []UserBrief
 	SegmentList []SegmentList
-}
-
-// filler meta info
-type FillerMetaInfo struct {
-	Size      types.U64
-	Index     types.U32
-	BlockNum  types.U32
-	BlockSize types.U32
-	ScanSize  types.U32
-	Acc       types.AccountID
-	Hash      [64]types.U8
 }
 
 // scheduler info
@@ -217,4 +207,14 @@ type StorageOrder struct {
 	AssignedMiner []MinerTaskList
 	ShareInfo     SegmentInfo
 	CompleteList  []types.AccountID
+}
+
+// filler meta info
+type IdleMetaInfo struct {
+	Size      types.U64
+	BlockNum  types.U32
+	BlockSize types.U32
+	ScanSize  types.U32
+	Acc       types.AccountID
+	Hash      FileHash
 }
