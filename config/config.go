@@ -8,6 +8,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/CESSProject/sdk-go/core/client"
 )
 
@@ -19,13 +21,16 @@ type Config struct {
 	Addr      string
 	Name      string
 	Port      int
-	timeout   int
+	Timeout   time.Duration
 }
 
 // Option is a client config option that can be given to the client constructor
 type Option func(cfg *Config) error
 
 const DefaultName = "SDK"
+
+// BlockInterval is the time interval for generating blocks, in seconds
+const BlockInterval = time.Second * time.Duration(6)
 
 // NewNode constructs a new client from the Config.
 //
@@ -35,7 +40,7 @@ func (cfg *Config) NewClient(name string) (client.Client, error) {
 	if name != "" {
 		serviceName = name
 	}
-	return client.NewBasicCli(cfg.Rpc, serviceName, cfg.Phase, cfg.Workspace, cfg.Addr, cfg.Port, cfg.timeout)
+	return client.NewBasicCli(cfg.Rpc, serviceName, cfg.Phase, cfg.Workspace, cfg.Addr, cfg.Port, cfg.Timeout)
 }
 
 // Apply applies the given options to the config, returning the first error
