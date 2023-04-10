@@ -9,6 +9,8 @@ package sdkgo
 
 import (
 	"os"
+
+	"github.com/CESSProject/cess-oss/configs"
 )
 
 // DefaultRpcAddrs configures client to use default RPC address.
@@ -41,6 +43,11 @@ var DefaultWorkspace = func(cfg *Config) error {
 	return cfg.Apply(Workspace(workspace))
 }
 
+// DefaultListenPort configures client to use default listen port.
+var DefaultTimeout = func(cfg *Config) error {
+	return cfg.Apply(TransactionTimeout(configs.BlockInterval))
+}
+
 // Complete list of default options and when to fallback on them.
 //
 // Please *DON'T* specify default options any other way. Putting this all here
@@ -64,6 +71,10 @@ var defaults = []struct {
 	{
 		fallback: func(cfg *Config) bool { return cfg.Port == 0 },
 		opt:      DefaultListenPort,
+	},
+	{
+		fallback: func(cfg *Config) bool { return cfg.Timeout == 0 },
+		opt:      DefaultTimeout,
 	},
 }
 

@@ -38,11 +38,11 @@ type Cli struct {
 	*protocol.Protocol
 }
 
-func NewBasicCli(rpc []string, name, phase, workspace, addr string, port, timeout int) (Client, error) {
+func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, timeout time.Duration) (Client, error) {
 	var err error
 	var cli = &Cli{}
 
-	cli.Chain, err = chain.NewChainClient(rpc, phase, time.Duration(time.Second*time.Duration(timeout)))
+	cli.Chain, err = chain.NewChainClient(rpc, phase, timeout)
 	if err != nil {
 		return cli, err
 	}

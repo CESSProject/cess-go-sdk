@@ -7,6 +7,12 @@
 
 package sdkgo
 
+import (
+	"time"
+
+	"github.com/CESSProject/cess-oss/configs"
+)
+
 // ConnectRpcAddrs configures client to connect to the given RPC
 // addresses.
 func ConnectRpcAddrs(s []string) Option {
@@ -46,6 +52,18 @@ func Workspace(workspace string) Option {
 func Mnemonic(mnemonic string) Option {
 	return func(cfg *Config) error {
 		cfg.Phase = mnemonic
+		return nil
+	}
+}
+
+// TransactionTimeout configures the transaction timeout period.
+func TransactionTimeout(timeout time.Duration) Option {
+	return func(cfg *Config) error {
+		if timeout < configs.BlockInterval {
+			cfg.Timeout = configs.BlockInterval
+		} else {
+			cfg.Timeout = timeout
+		}
 		return nil
 	}
 }
