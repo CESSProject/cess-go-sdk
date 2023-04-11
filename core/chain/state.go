@@ -519,6 +519,52 @@ func (c *chainClient) GetStorageOrder(roothash string) (StorageOrder, error) {
 	return data, nil
 }
 
+func (c *chainClient) QueryPendingReplacements(owner_pkey []byte) (types.U32, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			//fmt.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.U32
+
+	acc, err := types.NewAccountID(owner_pkey)
+	if err != nil {
+		return data, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return data, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return data, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		FILEBANK,
+		PENDINGREPLACE,
+		owner,
+	)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 // Pallert
 const (
 	_FILEBANK = "FileBank"

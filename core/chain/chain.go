@@ -76,6 +76,8 @@ type Chain interface {
 	SubmitFileReport(roothash []FileHash) (string, []FileHash, error)
 	//
 	ReplaceFile(roothash []FileHash) (string, []FileHash, error)
+	//
+	QueryPendingReplacements(owner_pkey []byte) (types.U32, error)
 }
 
 type chainClient struct {

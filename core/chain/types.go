@@ -45,10 +45,11 @@ const (
 	SCHEDULERMAP = "SchedulerMap"
 
 	// FILEBANK
-	FILE       = "File"
-	BUCKET     = "Bucket"
-	BUCKETLIST = "UserBucketList"
-	DEALMAP    = "DealMap"
+	FILE           = "File"
+	BUCKET         = "Bucket"
+	BUCKETLIST     = "UserBucketList"
+	DEALMAP        = "DealMap"
+	PENDINGREPLACE = "PendingReplacements"
 
 	// SYSTEM
 	ACCOUNT = "Account"

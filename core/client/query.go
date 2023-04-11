@@ -1,6 +1,8 @@
 package client
 
-import "github.com/CESSProject/sdk-go/core/chain"
+import (
+	"github.com/CESSProject/sdk-go/core/chain"
+)
 
 func (c *Cli) Workspace() string {
 	return c.Node.Workspace()
@@ -28,4 +30,12 @@ func (c *Cli) QueryGrantor(pubkey []byte) (bool, error) {
 
 func (c *Cli) QueryStorageOrder(roothash string) (chain.StorageOrder, error) {
 	return c.Chain.GetStorageOrder(roothash)
+}
+
+func (c *Cli) QueryReplacements(pubkey []byte) (uint32, error) {
+	num, err := c.Chain.QueryPendingReplacements(pubkey)
+	if err != nil {
+		return 0, err
+	}
+	return uint32(num), nil
 }
