@@ -25,3 +25,7 @@ func (c *Cli) QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, er
 func (c *Cli) QueryGrantor(pubkey []byte) (bool, error) {
 	return c.Chain.IsGrantor(pubkey)
 }
+
+func (c *Cli) QueryStorageOrder(roothash string) (chain.StorageOrder, error) {
+	return c.Chain.GetStorageOrder(roothash)
+}

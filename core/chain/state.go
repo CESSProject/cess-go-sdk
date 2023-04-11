@@ -469,7 +469,7 @@ func (c *chainClient) GetSchedulerList() ([]SchedulerInfo, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
+func (c *chainClient) GetStorageOrder(roothash string) (StorageOrder, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
