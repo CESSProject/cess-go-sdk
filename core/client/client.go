@@ -24,6 +24,7 @@ type Client interface {
 	QueryBuckets(owner []byte) ([]string, error)
 	QueryGrantor(pubkey []byte) (bool, error)
 	QueryStorageOrder(roothash string) (chain.StorageOrder, error)
+	QueryReplacements(pubkey []byte) (uint32, error)
 	CheckBucketName(bucketname string) bool
 	CreateBucket(owner []byte, bucketname string) (string, error)
 	ProcessingData(path string) ([]SegmentInfo, string, error)
