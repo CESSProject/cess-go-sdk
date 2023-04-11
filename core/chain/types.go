@@ -201,8 +201,8 @@ type FragmentList struct {
 
 type StorageOrder struct {
 	Stage         types.U8
-	SegmentList   SegmentList
-	NeededList    SegmentList
+	SegmentList   []SegmentList
+	NeededList    []SegmentList
 	User          UserBrief
 	AssignedMiner []MinerTaskList
 	ShareInfo     []SegmentInfo

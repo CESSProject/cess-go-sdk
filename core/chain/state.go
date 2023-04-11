@@ -478,6 +478,20 @@ func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 		}
 	}()
 	var data StorageOrder
+	var hash FileHash
+
+	if len(hash) != len(roothash) {
+		return data, errors.New("invalid filehash")
+	}
+
+	for i := 0; i < len(hash); i++ {
+		hash[i] = types.U8(roothash[i])
+	}
+
+	b, err := codec.Encode(hash)
+	if err != nil {
+		return data, errors.Wrap(err, "[Encode]")
+	}
 
 	if !c.IsChainClientOk() {
 		c.SetChainState(false)
@@ -489,6 +503,7 @@ func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 		c.metadata,
 		FILEBANK,
 		DEALMAP,
+		b,
 	)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
