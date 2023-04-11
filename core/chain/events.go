@@ -157,12 +157,11 @@ type Event_EndOfBufferPeriod struct {
 
 // ------------------------FileBank----------------------
 type Event_DeleteFile struct {
-	Phase      types.Phase
-	Acc        types.AccountID
-	Owner      types.AccountID
-	Filehashs  []FileHash
-	FailedList []FileHash
-	Topics     []types.Hash
+	Phase    types.Phase
+	Operator types.AccountID
+	Owner    types.AccountID
+	Filehash FileHash
+	Topics   []types.Hash
 }
 
 type Event_FileUpload struct {
@@ -235,10 +234,9 @@ type Event_ReceiveSpace struct {
 
 type Event_UploadDeclaration struct {
 	Phase     types.Phase
-	Acc       types.AccountID
+	Operator  types.AccountID
 	Owner     types.AccountID
-	File_hash FileHash
-	File_name types.Bytes
+	Deal_hash FileHash
 	Topics    []types.Hash
 }
 
@@ -256,6 +254,26 @@ type Event_DeleteBucket struct {
 	Owner       types.AccountID
 	Bucket_name types.Bytes
 	Topics      []types.Hash
+}
+
+type Event_TransferReport struct {
+	Phase       types.Phase
+	Acc         types.AccountID
+	Failed_list []FileHash
+	Topics      []types.Hash
+}
+
+type Event_ReplaceFiller struct {
+	Phase       types.Phase
+	Acc         types.AccountID
+	Filler_list []FileHash
+	Topics      []types.Hash
+}
+
+type Event_CalculateEnd struct {
+	Phase     types.Phase
+	File_hash FileHash
+	Topics    []types.Hash
 }
 
 // ------------------------StorageHandler--------------------------------
@@ -397,6 +415,9 @@ type EventRecords struct {
 	FileBank_UploadDeclaration []Event_UploadDeclaration
 	FileBank_CreateBucket      []Event_CreateBucket
 	FileBank_DeleteBucket      []Event_DeleteBucket
+	FileBank_TransferReport    []Event_TransferReport
+	FileBank_ReplaceFiller     []Event_ReplaceFiller
+	FileBank_CalculateEnd      []Event_CalculateEnd
 	// StorageHandler
 	StorageHandler_BuySpace             []Event_BuySpace
 	StorageHandler_ExpansionSpace       []Event_ExpansionSpace

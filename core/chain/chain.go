@@ -65,7 +65,7 @@ type Chain interface {
 	// DeleteBucket is used to delete buckets created by users
 	DeleteBucket(owner_pkey []byte, name string) (string, error)
 	//
-	DeleteFile(owner_pkey []byte, filehash []string) (string, []FileHash, error)
+	DeleteFile(owner_pkey []byte, filehash string) (string, FileHash, error)
 	//
 	UploadDeclaration(filehash string, dealinfo []SegmentList, user UserBrief) (string, error)
 	//

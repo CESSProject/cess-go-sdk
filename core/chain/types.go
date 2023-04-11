@@ -129,8 +129,8 @@ type RewardInfo struct {
 type FileMetaInfo struct {
 	Completion  types.U32
 	State       types.U8
+	SegmentList []SegmentInfo
 	Owner       []UserBrief
-	SegmentList []SegmentList
 }
 
 // scheduler info
@@ -190,7 +190,7 @@ type MinerTaskList struct {
 
 type SegmentInfo struct {
 	Hash         FileHash
-	FragmentList FragmentList
+	FragmentList []FragmentList
 }
 
 type FragmentList struct {
@@ -205,7 +205,7 @@ type StorageOrder struct {
 	NeededList    SegmentList
 	User          UserBrief
 	AssignedMiner []MinerTaskList
-	ShareInfo     SegmentInfo
+	ShareInfo     []SegmentInfo
 	CompleteList  []types.AccountID
 }
 
