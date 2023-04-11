@@ -74,6 +74,8 @@ type Chain interface {
 	SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error)
 	//
 	SubmitFileReport(roothash []FileHash) (string, []FileHash, error)
+	//
+	ReplaceFile(roothash []FileHash) (string, []FileHash, error)
 }
 
 type chainClient struct {

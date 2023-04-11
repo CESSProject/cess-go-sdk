@@ -72,6 +72,7 @@ const (
 	TX_FILEBANK_UPLOADDEC    = FILEBANK + DOT + "upload_declaration"
 	TX_FILEBANK_ADDIDLESPACE = FILEBANK + DOT + "test_add_idle_space"
 	TX_FILEBANK_FILEREPORT   = FILEBANK + DOT + "transfer_report"
+	TX_FILEBANK_REPLACEFILE  = FILEBANK + DOT + "replace_file_report"
 )
 
 const (
