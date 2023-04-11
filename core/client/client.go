@@ -33,6 +33,7 @@ type Client interface {
 	Update(name string) (string, error)
 	SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, pubkey []byte, hash string) (string, error)
 	ReportFile(roothash []string) (string, []chain.FileHash, error)
+	ReplaceFile(roothash []string) (string, []chain.FileHash, error)
 }
 
 type Cli struct {
