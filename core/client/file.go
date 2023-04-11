@@ -23,23 +23,27 @@ type SegmentInfo struct {
 	FragmentHash []string
 }
 
-func (c *Cli) DeleteFile(owner []byte, roothash []string) (string, []chain.FileHash, error) {
+func (c *Cli) DeleteFile(owner []byte, roothash string) (string, chain.FileHash, error) {
 	return c.Chain.DeleteFile(owner, roothash)
 }
 
 func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (string, error) {
 	var err error
-
 	var storageOrder chain.StorageOrder
+
+	_, err = c.Chain.GetFileMetaInfo(roothash)
+	if err == nil {
+		return "", nil
+	}
+
 	for i := 0; i < 3; i++ {
 		storageOrder, err = c.Chain.QueryStorageOrder(roothash)
 		if err != nil {
-			if err.Error() != chain.ERR_Empty {
-				return "", err
-			}
-			err = c.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)
-			if err != nil {
-				return roothash, err
+			if err.Error() == chain.ERR_Empty {
+				err = c.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)
+				if err != nil {
+					return "", err
+				}
 			}
 			time.Sleep(rule.BlockInterval)
 			continue
@@ -75,6 +79,7 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, string, error) {
 		return nil, "", errors.New("Not a file")
 	}
 
+	baseDir := filepath.Dir(path)
 	segmentCount = fstat.Size() / rule.SegmentSize
 	if fstat.Size()%int64(rule.SegmentSize) != 0 {
 		segmentCount++
@@ -112,14 +117,14 @@ func (c *Cli) ProcessingData(path string) ([]SegmentInfo, string, error) {
 			return segment, "", err
 		}
 
-		segmentPath := filepath.Join(c.Workspace(), rule.TempDir, hash)
+		segmentPath := filepath.Join(baseDir, hash)
 		_, err = os.Stat(segmentPath)
 		if err != nil {
 			fsegment, err := os.Create(segmentPath)
 			if err != nil {
 				return segment, "", err
 			}
-			_, err = fsegment.Write(buf[:num])
+			_, err = fsegment.Write(buf)
 			if err != nil {
 				fsegment.Close()
 				return segment, "", err
@@ -206,7 +211,6 @@ func (c *Cli) StorageData(roothash string, segment []SegmentInfo, minerTaskList 
 				return err
 			}
 		}
-
 	}
 	return nil
 }
