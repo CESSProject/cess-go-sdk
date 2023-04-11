@@ -23,6 +23,7 @@ type Client interface {
 	QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, error)
 	QueryBuckets(owner []byte) ([]string, error)
 	QueryGrantor(pubkey []byte) (bool, error)
+	QueryStorageOrder(roothash string) (chain.StorageOrder, error)
 	CheckBucketName(bucketname string) bool
 	CreateBucket(owner []byte, bucketname string) (string, error)
 	ProcessingData(path string) ([]SegmentInfo, string, error)
