@@ -806,3 +806,102 @@ func (c *chainClient) SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error) {
 		}
 	}
 }
+
+func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash, error) {
+	var (
+		txhash      string
+		accountInfo types.AccountInfo
+	)
+
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			fmt.Println(utils.RecoverError(err))
+		}
+	}()
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return txhash, nil, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	call, err := types.NewCall(
+		c.metadata,
+		TX_FILEBANK_FILEREPORT,
+		roothash,
+	)
+	if err != nil {
+		return txhash, nil, errors.Wrap(err, "[NewCall]")
+	}
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		SYSTEM,
+		ACCOUNT,
+		c.keyring.PublicKey,
+	)
+	if err != nil {
+		return txhash, nil, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, nil, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return txhash, nil, ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, nil, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, nil, errors.Wrap(err, "[GetStorageRaw]")
+				}
+
+				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+
+				if len(events.FileBank_TransferReport) > 0 {
+					return txhash, events.FileBank_TransferReport[0].Failed_list, nil
+				}
+				return txhash, nil, err
+			}
+		case err = <-sub.Err():
+			return txhash, nil, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, nil, ERR_RPC_TIMEOUT
+		}
+	}
+}

@@ -31,6 +31,7 @@ type Client interface {
 	DeleteBucket(owner []byte, bucketName string) (string, error)
 	Update(name string) (string, error)
 	SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, pubkey []byte, hash string) (string, error)
+	ReportFile(roothash []string) (string, []chain.FileHash, error)
 }
 
 type Cli struct {
