@@ -72,6 +72,8 @@ type Chain interface {
 	QueryStorageOrder(roothash string) (StorageOrder, error)
 	//
 	SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error)
+	//
+	SubmitFileReport(roothash []FileHash) (string, []FileHash, error)
 }
 
 type chainClient struct {
