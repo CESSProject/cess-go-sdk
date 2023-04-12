@@ -30,9 +30,19 @@ func (c *Cli) GetFile(roothash, dir string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	defer func(basedir string) {
+		for _, segment := range fmeta.SegmentList {
+			os.Remove(filepath.Join(basedir, string(segment.Hash[:])))
+			for _, fragment := range segment.FragmentList {
+				os.Remove(filepath.Join(basedir, string(fragment.Hash[:])))
+			}
+		}
+	}(dir)
+
 	for _, segment := range fmeta.SegmentList {
+		fragmentpaths := make([]string, 0)
 		for _, fragment := range segment.FragmentList {
-			fragmentpaths := make([]string, 0)
 			miner, err := c.Chain.QueryStorageMiner(fragment.Miner[:])
 			if err != nil {
 				return "", err
@@ -54,6 +64,7 @@ func (c *Cli) GetFile(roothash, dir string) (string, error) {
 					return "", err
 				}
 				segmentspath = append(segmentspath, segmentpath)
+				break
 			}
 		}
 	}
