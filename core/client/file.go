@@ -200,18 +200,21 @@ func (c *Cli) StorageData(roothash string, segment []SegmentInfo, minerTaskList 
 		return err
 	}
 
-	for i := 0; i < len(segment); i++ {
-		for j := 0; j < len(segment[i].FragmentHash); j++ {
-			peerid, err := c.Protocol.AddMultiaddrToPearstore(multiaddrs[i], 0)
-			if err != nil {
-				return err
-			}
-			err = c.Protocol.WriteFileAction(peerid, roothash, segment[i].FragmentHash[j])
+	basedir := filepath.Dir(segment[0].FragmentHash[0])
+	for i := 0; i < len(multiaddrs); i++ {
+		peerid, err := c.Protocol.AddMultiaddrToPearstore(multiaddrs[i], 0)
+		if err != nil {
+			return err
+		}
+
+		for j := 0; j < len(minerTaskList[i].Hash); j++ {
+			err = c.Protocol.WriteFileAction(peerid, roothash, filepath.Join(basedir, string(minerTaskList[i].Hash[j][:])))
 			if err != nil {
 				return err
 			}
 		}
 	}
+
 	return nil
 }
 
