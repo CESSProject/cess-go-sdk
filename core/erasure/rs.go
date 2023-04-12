@@ -148,120 +148,47 @@ func ReedSolomon(path string) ([]string, error) {
 	// return shardspath, nil
 }
 
-func ReedSolomon_Restore(dir, fid string) error {
-	outfn := filepath.Join(dir, fid)
-
-	_, err := os.Stat(outfn)
+func ReedSolomon_Restore(outpath string, shardspath []string) error {
+	_, err := os.Stat(outpath)
 	if err == nil {
 		return nil
 	}
 
 	datashards, parshards := rule.DataShards, rule.ParShards
 
-	if datashards+parshards <= 6 {
-		enc, err := reedsolomon.New(datashards, parshards)
-		if err != nil {
-			return err
-		}
-		shards := make([][]byte, datashards+parshards)
-		for i := range shards {
-			infn := fmt.Sprintf("%s.00%d", outfn, i)
-			shards[i], err = ioutil.ReadFile(infn)
-			if err != nil {
-				shards[i] = nil
-			}
-		}
-
-		// Verify the shards
-		ok, _ := enc.Verify(shards)
-		if !ok {
-			err = enc.Reconstruct(shards)
-			if err != nil {
-				return err
-			}
-			ok, err = enc.Verify(shards)
-			if !ok {
-				return err
-			}
-		}
-		f, err := os.Create(outfn)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		err = enc.Join(f, shards, len(shards[0])*datashards)
-		return err
-	}
-
-	enc, err := reedsolomon.NewStream(datashards, parshards)
+	enc, err := reedsolomon.New(datashards, parshards)
 	if err != nil {
 		return err
 	}
-
-	// Open the inputs
-	shards, size, err := openInput(datashards, parshards, outfn)
-	if err != nil {
-		return err
+	shards := make([][]byte, datashards+parshards)
+	for k, v := range shardspath {
+		//infn := fmt.Sprintf("%s.00%d", outfn, i)
+		shards[k], err = ioutil.ReadFile(v)
+		if err != nil {
+			shards[k] = nil
+		}
 	}
 
 	// Verify the shards
-	ok, err := enc.Verify(shards)
+	ok, _ := enc.Verify(shards)
 	if !ok {
-		shards, size, err = openInput(datashards, parshards, outfn)
+		err = enc.Reconstruct(shards)
 		if err != nil {
 			return err
 		}
-
-		out := make([]io.Writer, len(shards))
-		for i := range out {
-			if shards[i] == nil {
-				var outfn string
-				if i < 10 {
-					outfn = fmt.Sprintf("%s.00%d", outfn, i)
-				} else {
-					outfn = fmt.Sprintf("%s.0%d", outfn, i)
-				}
-				out[i], err = os.Create(outfn)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		err = enc.Reconstruct(shards, out)
-		if err != nil {
-			return err
-		}
-
-		for i := range out {
-			if out[i] != nil {
-				err := out[i].(*os.File).Close()
-				if err != nil {
-					return err
-				}
-			}
-		}
-		shards, size, err = openInput(datashards, parshards, outfn)
 		ok, err = enc.Verify(shards)
 		if !ok {
 			return err
 		}
-		if err != nil {
-			return err
-		}
 	}
-
-	f, err := os.Create(outfn)
+	f, err := os.Create(outpath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	shards, size, err = openInput(datashards, parshards, outfn)
-	if err != nil {
-		return err
-	}
-
-	err = enc.Join(f, shards, int64(datashards)*size)
+	err = enc.Join(f, shards, len(shards[0])*datashards)
 	return err
+
 }
 
 func openInput(dataShards, parShards int, fname string) (r []io.Reader, size int64, err error) {

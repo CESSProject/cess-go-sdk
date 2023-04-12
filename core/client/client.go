@@ -29,6 +29,7 @@ type Client interface {
 	CreateBucket(owner []byte, bucketname string) (string, error)
 	ProcessingData(path string) ([]SegmentInfo, string, error)
 	PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (string, error)
+	GetFile(roothash, dir string) (string, error)
 	DeleteFile(owner []byte, roothash string) (string, chain.FileHash, error)
 	DeleteBucket(owner []byte, bucketName string) (string, error)
 	Update(name string) (string, error)

@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/CESSProject/cess-oss v0.1.2
-	github.com/CESSProject/p2p-go v0.0.6
+	github.com/CESSProject/p2p-go v0.0.7
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/centrifuge/go-substrate-rpc-client v2.0.0+incompatible
