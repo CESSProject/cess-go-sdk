@@ -7,6 +7,7 @@
 package chain
 
 import (
+	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -75,6 +76,8 @@ type Chain interface {
 	QueryPendingReplacements(owner_pkey []byte) (types.U32, error)
 	//
 	QueryUserSpaceInfo(pubkey []byte) (UserSpaceInfo, error)
+	//
+	IncreaseStakes(tokens *big.Int) (string, error)
 }
 
 type chainClient struct {
