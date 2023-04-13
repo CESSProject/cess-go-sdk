@@ -27,6 +27,8 @@ const (
 	TEEWORKER = "TeeWorker"
 	// SMINER is a module about storage miners
 	SMINER = "Sminer"
+	// SMINER is a module about storage miners
+	STORAGEHANDLER = "StorageHandler"
 	// SYSTEM is a module about the system
 	SYSTEM = "System"
 )
@@ -50,6 +52,9 @@ const (
 	BUCKETLIST     = "UserBucketList"
 	DEALMAP        = "DealMap"
 	PENDINGREPLACE = "PendingReplacements"
+
+	// STORAGEHANDLER
+	USERSPACEINFO = "UserOwnedSpace"
 
 	// SYSTEM
 	ACCOUNT = "Account"
@@ -83,8 +88,10 @@ const (
 )
 
 const (
-	FILE_STATE_ACTIVE  = "active"
-	FILE_STATE_PENDING = "pending"
+	Active = iota
+	Calculate
+	Missing
+	Recovery
 )
 
 const (
@@ -99,7 +106,6 @@ const (
 	ERR_Empty   = "empty"
 )
 
-// error type
 var (
 	ERR_RPC_CONNECTION  = errors.New("rpc connection failed")
 	ERR_RPC_IP_FORMAT   = errors.New("unsupported ip format")
@@ -109,7 +115,6 @@ var (
 
 type FileHash [64]types.U8
 
-// storage miner info
 type MinerInfo struct {
 	PeerId      types.U64
 	IncomeAcc   types.AccountID
@@ -127,7 +132,6 @@ type RewardInfo struct {
 	NotReceived types.U128
 }
 
-// file meta info
 type FileMetaInfo struct {
 	Completion  types.U32
 	State       types.U8
@@ -178,7 +182,6 @@ type StorageOrder struct {
 	CompleteList  []types.AccountID
 }
 
-// idle meta info
 type IdleMetaInfo struct {
 	Size      types.U64
 	BlockNum  types.U32
@@ -186,4 +189,14 @@ type IdleMetaInfo struct {
 	ScanSize  types.U32
 	Acc       types.AccountID
 	Hash      FileHash
+}
+
+type UserSpaceInfo struct {
+	TotalSpace     types.U128
+	UsedSpace      types.U128
+	LockedSpace    types.U128
+	RemainingSpace types.U128
+	Start          types.U32
+	Deadline       types.U32
+	State          types.Bytes
 }

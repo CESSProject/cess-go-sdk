@@ -524,6 +524,50 @@ func (c *chainClient) QueryPendingReplacements(owner_pkey []byte) (types.U32, er
 	return data, nil
 }
 
+func (c *chainClient) QueryUserSpaceInfo(pubkey []byte) (UserSpaceInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			print(utils.RecoverError(err))
+		}
+	}()
+	var data UserSpaceInfo
+
+	acc, err := types.NewAccountID(pubkey)
+	if err != nil {
+		return data, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return data, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return data, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		STORAGEHANDLER,
+		USERSPACEINFO,
+		owner,
+	)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 // Pallert
 const (
 	_FILEBANK = "FileBank"

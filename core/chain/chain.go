@@ -73,6 +73,8 @@ type Chain interface {
 	ReplaceFile(roothash []FileHash) (string, []FileHash, error)
 	//
 	QueryPendingReplacements(owner_pkey []byte) (types.U32, error)
+	//
+	QueryUserSpaceInfo(pubkey []byte) (UserSpaceInfo, error)
 }
 
 type chainClient struct {
