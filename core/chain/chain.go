@@ -7,6 +7,7 @@
 package chain
 
 import (
+	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -40,14 +41,9 @@ type Chain interface {
 	GetCessAccount() (string, error)
 	// GetAccountInfo is used to get account information
 	GetAccountInfo(pkey []byte) (types.AccountInfo, error)
-	//KeepConnect()
-	KeepConnect()
-
 	//
 	IsGrantor(pubkey []byte) (bool, error)
 
-	// GetSchedulerList is used to get information about all schedules
-	GetSchedulerList() ([]SchedulerInfo, error)
 	// GetBucketList is used to obtain all buckets of the user
 	GetBucketList(owner_pkey []byte) ([]types.Bytes, error)
 	// GetBucketInfo is used to query bucket details
@@ -78,6 +74,10 @@ type Chain interface {
 	ReplaceFile(roothash []FileHash) (string, []FileHash, error)
 	//
 	QueryPendingReplacements(owner_pkey []byte) (types.U32, error)
+	//
+	QueryUserSpaceInfo(pubkey []byte) (UserSpaceInfo, error)
+	//
+	IncreaseStakes(tokens *big.Int) (string, error)
 }
 
 type chainClient struct {

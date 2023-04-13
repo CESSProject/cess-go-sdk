@@ -25,6 +25,7 @@ type Client interface {
 	QueryGrantor(pubkey []byte) (bool, error)
 	QueryStorageOrder(roothash string) (chain.StorageOrder, error)
 	QueryReplacements(pubkey []byte) (uint32, error)
+	QueryUserSpaceInfo(pubkey []byte) (chain.UserSpaceInfo, error)
 	CheckBucketName(bucketname string) bool
 	CreateBucket(owner []byte, bucketname string) (string, error)
 	ProcessingData(path string) ([]SegmentInfo, string, error)
@@ -36,6 +37,7 @@ type Client interface {
 	SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, pubkey []byte, hash string) (string, error)
 	ReportFile(roothash []string) (string, []chain.FileHash, error)
 	ReplaceFile(roothash []string) (string, []chain.FileHash, error)
+	IncreaseStakes(token string) (string, error)
 }
 
 type Cli struct {

@@ -27,6 +27,8 @@ const (
 	TEEWORKER = "TeeWorker"
 	// SMINER is a module about storage miners
 	SMINER = "Sminer"
+	// SMINER is a module about storage miners
+	STORAGEHANDLER = "StorageHandler"
 	// SYSTEM is a module about the system
 	SYSTEM = "System"
 )
@@ -51,6 +53,9 @@ const (
 	DEALMAP        = "DealMap"
 	PENDINGREPLACE = "PendingReplacements"
 
+	// STORAGEHANDLER
+	USERSPACEINFO = "UserOwnedSpace"
+
 	// SYSTEM
 	ACCOUNT = "Account"
 	EVENTS  = "Events"
@@ -63,8 +68,9 @@ const (
 	TX_OSS_UPDATE   = OSS + DOT + "update"
 
 	// SMINER
-	TX_SMINER_REGISTER   = SMINER + DOT + "regnstk"
-	TX_SMINER_UPDATEADDR = SMINER + DOT + "update_ip"
+	TX_SMINER_REGISTER       = SMINER + DOT + "regnstk"
+	TX_SMINER_UPDATEADDR     = SMINER + DOT + "update_ip"
+	TX_SMINER_INCREASESTAKES = SMINER + DOT + "increase_collateral"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET    = FILEBANK + DOT + "create_bucket"
@@ -83,8 +89,10 @@ const (
 )
 
 const (
-	FILE_STATE_ACTIVE  = "active"
-	FILE_STATE_PENDING = "pending"
+	Active = iota
+	Calculate
+	Missing
+	Recovery
 )
 
 const (
@@ -99,7 +107,6 @@ const (
 	ERR_Empty   = "empty"
 )
 
-// error type
 var (
 	ERR_RPC_CONNECTION  = errors.New("rpc connection failed")
 	ERR_RPC_IP_FORMAT   = errors.New("unsupported ip format")
@@ -108,9 +115,7 @@ var (
 )
 
 type FileHash [64]types.U8
-type FileBlockId [68]types.U8
 
-// storage miner info
 type MinerInfo struct {
 	PeerId      types.U64
 	IncomeAcc   types.AccountID
@@ -128,46 +133,11 @@ type RewardInfo struct {
 	NotReceived types.U128
 }
 
-// file meta info
 type FileMetaInfo struct {
 	Completion  types.U32
 	State       types.U8
 	SegmentList []SegmentInfo
 	Owner       []UserBrief
-}
-
-// scheduler info
-type SchedulerInfo struct {
-	Ip             Ipv4Type
-	StashUser      types.AccountID
-	ControllerUser types.AccountID
-}
-
-type IpAddress struct {
-	IPv4 Ipv4Type
-	IPv6 Ipv6Type
-}
-type Ipv4Type struct {
-	Index types.U8
-	Value [4]types.U8
-	Port  types.U16
-}
-type Ipv6Type struct {
-	Index types.U8
-	Value [8]types.U16
-	Port  types.U16
-}
-
-// user space package Info
-type SpacePackage struct {
-	Space           types.U128
-	Used_space      types.U128
-	Remaining_space types.U128
-	Tenancy         types.U32
-	Package_type    types.U8
-	Start           types.U32
-	Deadline        types.U32
-	State           types.Bytes
 }
 
 type BucketInfo struct {
@@ -213,7 +183,6 @@ type StorageOrder struct {
 	CompleteList  []types.AccountID
 }
 
-// filler meta info
 type IdleMetaInfo struct {
 	Size      types.U64
 	BlockNum  types.U32
@@ -221,4 +190,14 @@ type IdleMetaInfo struct {
 	ScanSize  types.U32
 	Acc       types.AccountID
 	Hash      FileHash
+}
+
+type UserSpaceInfo struct {
+	TotalSpace     types.U128
+	UsedSpace      types.U128
+	LockedSpace    types.U128
+	RemainingSpace types.U128
+	Start          types.U32
+	Deadline       types.U32
+	State          types.Bytes
 }

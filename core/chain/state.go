@@ -7,7 +7,6 @@
 package chain
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/CESSProject/sdk-go/core/utils"
@@ -46,7 +45,7 @@ func (c *chainClient) GetChainStatus() bool {
 func (c *chainClient) QueryStorageMiner(pkey []byte) (MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data MinerInfo
@@ -81,7 +80,7 @@ func (c *chainClient) QueryStorageMiner(pkey []byte) (MinerInfo, error) {
 func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.Bytes
@@ -116,7 +115,7 @@ func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
 func (c *chainClient) GetAllStorageMiner() ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data []types.AccountID
@@ -150,7 +149,7 @@ func (c *chainClient) GetAllStorageMiner() ([]types.AccountID, error) {
 func (c *chainClient) GetFileMetaInfo(fid string) (FileMetaInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var (
@@ -204,7 +203,7 @@ func (c *chainClient) GetCessAccount() (string, error) {
 func (c *chainClient) GetAccountInfo(pkey []byte) (types.AccountInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.AccountInfo
@@ -248,10 +247,10 @@ func (c *chainClient) GetAccountInfo(pkey []byte) (types.AccountInfo, error) {
 func (c *chainClient) GetState(pubkey []byte) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
-	var data Ipv4Type
+	var data types.Bytes
 
 	if !c.IsChainClientOk() {
 		c.SetChainState(false)
@@ -287,18 +286,13 @@ func (c *chainClient) GetState(pubkey []byte) (string, error) {
 		return "", ERR_RPC_EMPTY_VALUE
 	}
 
-	return fmt.Sprintf("%d.%d.%d.%d:%d",
-		data.Value[0],
-		data.Value[1],
-		data.Value[2],
-		data.Value[3],
-		data.Port), nil
+	return string(data), nil
 }
 
 func (c *chainClient) GetGrantor(pkey []byte) (types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.AccountID
@@ -342,7 +336,7 @@ func (c *chainClient) GetGrantor(pkey []byte) (types.AccountID, error) {
 func (c *chainClient) GetBucketInfo(owner_pkey []byte, name string) (BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data BucketInfo
@@ -392,7 +386,7 @@ func (c *chainClient) GetBucketInfo(owner_pkey []byte, name string) (BucketInfo,
 func (c *chainClient) GetBucketList(owner_pkey []byte) ([]types.Bytes, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data []types.Bytes
@@ -433,48 +427,10 @@ func (c *chainClient) GetBucketList(owner_pkey []byte) ([]types.Bytes, error) {
 	return data, nil
 }
 
-// Get scheduler information on the cess chain
-func (c *chainClient) GetSchedulerList() ([]SchedulerInfo, error) {
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			//fmt.Println(utils.RecoverError(err))
-		}
-	}()
-	var data []SchedulerInfo
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
-		return data, ERR_RPC_CONNECTION
-	}
-	c.SetChainState(true)
-
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		TEEWORKER,
-		SCHEDULERMAP,
-	)
-	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
 func (c *chainClient) GetStorageOrder(roothash string) (StorageOrder, error) {
-	c.lock.Lock()
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
-			//fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data StorageOrder
@@ -520,11 +476,9 @@ func (c *chainClient) GetStorageOrder(roothash string) (StorageOrder, error) {
 }
 
 func (c *chainClient) QueryPendingReplacements(owner_pkey []byte) (types.U32, error) {
-	c.lock.Lock()
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
-			//fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.U32
@@ -565,6 +519,50 @@ func (c *chainClient) QueryPendingReplacements(owner_pkey []byte) (types.U32, er
 	return data, nil
 }
 
+func (c *chainClient) QueryUserSpaceInfo(pubkey []byte) (UserSpaceInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			println(utils.RecoverError(err))
+		}
+	}()
+	var data UserSpaceInfo
+
+	acc, err := types.NewAccountID(pubkey)
+	if err != nil {
+		return data, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return data, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return data, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		STORAGEHANDLER,
+		USERSPACEINFO,
+		owner,
+	)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 // Pallert
 const (
 	_FILEBANK = "FileBank"
@@ -585,7 +583,7 @@ const (
 
 type CacherInfo struct {
 	Acc       types.AccountID
-	Ip        Ipv4Type
+	Ip        types.Bytes
 	BytePrice types.U128
 }
 
