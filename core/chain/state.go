@@ -7,7 +7,6 @@
 package chain
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/CESSProject/sdk-go/core/utils"
@@ -46,7 +45,7 @@ func (c *chainClient) GetChainStatus() bool {
 func (c *chainClient) QueryStorageMiner(pkey []byte) (MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data MinerInfo
@@ -81,7 +80,7 @@ func (c *chainClient) QueryStorageMiner(pkey []byte) (MinerInfo, error) {
 func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.Bytes
@@ -116,7 +115,7 @@ func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
 func (c *chainClient) GetAllStorageMiner() ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data []types.AccountID
@@ -150,7 +149,7 @@ func (c *chainClient) GetAllStorageMiner() ([]types.AccountID, error) {
 func (c *chainClient) GetFileMetaInfo(fid string) (FileMetaInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var (
@@ -204,7 +203,7 @@ func (c *chainClient) GetCessAccount() (string, error) {
 func (c *chainClient) GetAccountInfo(pkey []byte) (types.AccountInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.AccountInfo
@@ -248,7 +247,7 @@ func (c *chainClient) GetAccountInfo(pkey []byte) (types.AccountInfo, error) {
 func (c *chainClient) GetState(pubkey []byte) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.Bytes
@@ -293,7 +292,7 @@ func (c *chainClient) GetState(pubkey []byte) (string, error) {
 func (c *chainClient) GetGrantor(pkey []byte) (types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.AccountID
@@ -337,7 +336,7 @@ func (c *chainClient) GetGrantor(pkey []byte) (types.AccountID, error) {
 func (c *chainClient) GetBucketInfo(owner_pkey []byte, name string) (BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data BucketInfo
@@ -387,7 +386,7 @@ func (c *chainClient) GetBucketInfo(owner_pkey []byte, name string) (BucketInfo,
 func (c *chainClient) GetBucketList(owner_pkey []byte) ([]types.Bytes, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data []types.Bytes
@@ -429,11 +428,9 @@ func (c *chainClient) GetBucketList(owner_pkey []byte) ([]types.Bytes, error) {
 }
 
 func (c *chainClient) GetStorageOrder(roothash string) (StorageOrder, error) {
-	c.lock.Lock()
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
-			//fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data StorageOrder
@@ -479,11 +476,9 @@ func (c *chainClient) GetStorageOrder(roothash string) (StorageOrder, error) {
 }
 
 func (c *chainClient) QueryPendingReplacements(owner_pkey []byte) (types.U32, error) {
-	c.lock.Lock()
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
-			//fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data types.U32
@@ -527,7 +522,7 @@ func (c *chainClient) QueryPendingReplacements(owner_pkey []byte) (types.U32, er
 func (c *chainClient) QueryUserSpaceInfo(pubkey []byte) (UserSpaceInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			print(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 	var data UserSpaceInfo

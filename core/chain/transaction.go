@@ -150,8 +150,9 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 					if len(events.Sminer_Registered) > 0 {
 						return txhash, nil
 					}
+				default:
+					return txhash, errors.New(ERR_Failed)
 				}
-				return txhash, errors.New(ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
