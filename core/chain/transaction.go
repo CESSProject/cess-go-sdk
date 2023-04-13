@@ -896,7 +896,7 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 				if len(events.FileBank_TransferReport) > 0 {
 					return txhash, events.FileBank_TransferReport[0].Failed_list, nil
 				}
-				return txhash, nil, err
+				return txhash, nil, errors.New(ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, nil, errors.Wrap(err, "[sub]")
@@ -995,7 +995,7 @@ func (c *chainClient) ReplaceFile(roothash []FileHash) (string, []FileHash, erro
 				if len(events.FileBank_ReplaceFiller) > 0 {
 					return txhash, events.FileBank_ReplaceFiller[0].Filler_list, nil
 				}
-				return txhash, nil, err
+				return txhash, nil, errors.New(ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, nil, errors.Wrap(err, "[sub]")
