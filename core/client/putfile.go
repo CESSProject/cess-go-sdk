@@ -27,13 +27,13 @@ func (c *Cli) DeleteFile(owner []byte, roothash string) (string, chain.FileHash,
 	return c.Chain.DeleteFile(owner, roothash)
 }
 
-func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (string, error) {
+func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (uint8, error) {
 	var err error
 	var storageOrder chain.StorageOrder
 
 	_, err = c.Chain.GetFileMetaInfo(roothash)
 	if err == nil {
-		return "", nil
+		return 0, nil
 	}
 
 	for i := 0; i < 3; i++ {
@@ -42,7 +42,7 @@ func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filenam
 			if err.Error() == chain.ERR_Empty {
 				err = c.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)
 				if err != nil {
-					return "", err
+					return 0, err
 				}
 			}
 			time.Sleep(rule.BlockInterval)
@@ -51,15 +51,15 @@ func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filenam
 		break
 	}
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	// store fragment to storage
 	err = c.StorageData(roothash, segmentInfo, storageOrder.AssignedMiner)
 	if err != nil {
-		return roothash, err
+		return 0, err
 	}
-	return "", err
+	return uint8(storageOrder.Count), nil
 }
 
 func (c *Cli) ProcessingData(path string) ([]SegmentInfo, string, error) {

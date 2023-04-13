@@ -28,7 +28,7 @@ type Client interface {
 	CheckBucketName(bucketname string) bool
 	CreateBucket(owner []byte, bucketname string) (string, error)
 	ProcessingData(path string) ([]SegmentInfo, string, error)
-	PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (string, error)
+	PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (uint8, error)
 	GetFile(roothash, dir string) (string, error)
 	DeleteFile(owner []byte, roothash string) (string, chain.FileHash, error)
 	DeleteBucket(owner []byte, bucketName string) (string, error)
@@ -93,7 +93,6 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 	//
 	os.MkdirAll(filepath.Join(workspaceActual, rule.FileDir), rule.DirMode)
 	os.MkdirAll(filepath.Join(workspaceActual, rule.TempDir), rule.DirMode)
-	os.MkdirAll(filepath.Join(workspaceActual, rule.DbDir), rule.DirMode)
 
 	return cli, nil
 }
