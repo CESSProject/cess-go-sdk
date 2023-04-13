@@ -1,7 +1,6 @@
 package rule
 
-const DirMode = 0755
+const DirMode = 0644
 
 const FileDir = "file"
 const TempDir = "tmp"
-const DbDir = "db"
