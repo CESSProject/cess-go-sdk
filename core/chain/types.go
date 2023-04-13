@@ -108,7 +108,6 @@ var (
 )
 
 type FileHash [64]types.U8
-type FileBlockId [68]types.U8
 
 // storage miner info
 type MinerInfo struct {
@@ -134,40 +133,6 @@ type FileMetaInfo struct {
 	State       types.U8
 	SegmentList []SegmentInfo
 	Owner       []UserBrief
-}
-
-// scheduler info
-type SchedulerInfo struct {
-	Ip             Ipv4Type
-	StashUser      types.AccountID
-	ControllerUser types.AccountID
-}
-
-type IpAddress struct {
-	IPv4 Ipv4Type
-	IPv6 Ipv6Type
-}
-type Ipv4Type struct {
-	Index types.U8
-	Value [4]types.U8
-	Port  types.U16
-}
-type Ipv6Type struct {
-	Index types.U8
-	Value [8]types.U16
-	Port  types.U16
-}
-
-// user space package Info
-type SpacePackage struct {
-	Space           types.U128
-	Used_space      types.U128
-	Remaining_space types.U128
-	Tenancy         types.U32
-	Package_type    types.U8
-	Start           types.U32
-	Deadline        types.U32
-	State           types.Bytes
 }
 
 type BucketInfo struct {
@@ -213,7 +178,7 @@ type StorageOrder struct {
 	CompleteList  []types.AccountID
 }
 
-// filler meta info
+// idle meta info
 type IdleMetaInfo struct {
 	Size      types.U64
 	BlockNum  types.U32

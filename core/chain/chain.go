@@ -40,14 +40,9 @@ type Chain interface {
 	GetCessAccount() (string, error)
 	// GetAccountInfo is used to get account information
 	GetAccountInfo(pkey []byte) (types.AccountInfo, error)
-	//KeepConnect()
-	KeepConnect()
-
 	//
 	IsGrantor(pubkey []byte) (bool, error)
 
-	// GetSchedulerList is used to get information about all schedules
-	GetSchedulerList() ([]SchedulerInfo, error)
 	// GetBucketList is used to obtain all buckets of the user
 	GetBucketList(owner_pkey []byte) ([]types.Bytes, error)
 	// GetBucketInfo is used to query bucket details

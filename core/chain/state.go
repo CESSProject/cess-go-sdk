@@ -251,7 +251,7 @@ func (c *chainClient) GetState(pubkey []byte) (string, error) {
 			fmt.Println(utils.RecoverError(err))
 		}
 	}()
-	var data Ipv4Type
+	var data types.Bytes
 
 	if !c.IsChainClientOk() {
 		c.SetChainState(false)
@@ -287,12 +287,7 @@ func (c *chainClient) GetState(pubkey []byte) (string, error) {
 		return "", ERR_RPC_EMPTY_VALUE
 	}
 
-	return fmt.Sprintf("%d.%d.%d.%d:%d",
-		data.Value[0],
-		data.Value[1],
-		data.Value[2],
-		data.Value[3],
-		data.Port), nil
+	return string(data), nil
 }
 
 func (c *chainClient) GetGrantor(pkey []byte) (types.AccountID, error) {
@@ -433,42 +428,6 @@ func (c *chainClient) GetBucketList(owner_pkey []byte) ([]types.Bytes, error) {
 	return data, nil
 }
 
-// Get scheduler information on the cess chain
-func (c *chainClient) GetSchedulerList() ([]SchedulerInfo, error) {
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			//fmt.Println(utils.RecoverError(err))
-		}
-	}()
-	var data []SchedulerInfo
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
-		return data, ERR_RPC_CONNECTION
-	}
-	c.SetChainState(true)
-
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		TEEWORKER,
-		SCHEDULERMAP,
-	)
-	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
 func (c *chainClient) GetStorageOrder(roothash string) (StorageOrder, error) {
 	c.lock.Lock()
 	defer func() {
@@ -585,7 +544,7 @@ const (
 
 type CacherInfo struct {
 	Acc       types.AccountID
-	Ip        Ipv4Type
+	Ip        types.Bytes
 	BytePrice types.U128
 }
 

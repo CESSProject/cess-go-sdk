@@ -138,8 +138,8 @@ type Event_UpdataBeneficiary struct {
 type Event_UpdataIp struct {
 	Phase  types.Phase
 	Acc    types.AccountID
-	Old    Ipv4Type
-	New    Ipv4Type
+	Old    types.Bytes
+	New    types.Bytes
 	Topics []types.Hash
 }
 
@@ -319,14 +319,14 @@ type Event_LeaseExpireIn24Hours struct {
 type Event_RegistrationScheduler struct {
 	Phase  types.Phase
 	Acc    types.AccountID
-	Ip     Ipv4Type
+	Ip     types.Bytes
 	Topics []types.Hash
 }
 
 type Event_UpdateScheduler struct {
 	Phase    types.Phase
 	Acc      types.AccountID
-	Endpoint Ipv4Type
+	Endpoint types.Bytes
 	Topics   []types.Hash
 }
 
@@ -334,14 +334,14 @@ type Event_UpdateScheduler struct {
 type Event_OssRegister struct {
 	Phase    types.Phase
 	Acc      types.AccountID
-	Endpoint Ipv4Type
+	Endpoint types.Bytes
 	Topics   []types.Hash
 }
 
 type Event_OssUpdate struct {
 	Phase        types.Phase
 	Acc          types.AccountID
-	New_endpoint Ipv4Type
+	New_endpoint types.Bytes
 	Topics       []types.Hash
 }
 
