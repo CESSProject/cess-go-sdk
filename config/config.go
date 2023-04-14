@@ -29,9 +29,6 @@ type Option func(cfg *Config) error
 
 const DefaultName = "SDK"
 
-// BlockInterval is the time interval for generating blocks, in seconds
-const BlockInterval = time.Second * time.Duration(6)
-
 // NewNode constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
