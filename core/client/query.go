@@ -43,3 +43,7 @@ func (c *Cli) QueryReplacements(pubkey []byte) (uint32, error) {
 func (c *Cli) QueryUserSpaceInfo(pubkey []byte) (chain.UserSpaceInfo, error) {
 	return c.Chain.QueryUserSpaceInfo(pubkey)
 }
+
+func (c *Cli) QuerySpacePricePerGib() (string, error) {
+	return c.Chain.QuerySpacePricePerGib()
+}

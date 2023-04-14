@@ -26,6 +26,7 @@ type Client interface {
 	QueryStorageOrder(roothash string) (chain.StorageOrder, error)
 	QueryReplacements(pubkey []byte) (uint32, error)
 	QueryUserSpaceInfo(pubkey []byte) (chain.UserSpaceInfo, error)
+	QuerySpacePricePerGib() (string, error)
 	CheckBucketName(bucketname string) bool
 	CreateBucket(owner []byte, bucketname string) (string, error)
 	ProcessingData(path string) ([]SegmentInfo, string, error)
@@ -33,11 +34,13 @@ type Client interface {
 	GetFile(roothash, dir string) (string, error)
 	DeleteFile(owner []byte, roothash string) (string, chain.FileHash, error)
 	DeleteBucket(owner []byte, bucketName string) (string, error)
-	Update(name string) (string, error)
+	UpdateAddress(name string) (string, error)
+	UpdateIncomeAccount(income string) (string, error)
 	SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, pubkey []byte, hash string) (string, error)
 	ReportFile(roothash []string) (string, []chain.FileHash, error)
 	ReplaceFile(roothash []string) (string, []chain.FileHash, error)
 	IncreaseStakes(token string) (string, error)
+	Exit(role string) (string, error)
 }
 
 type Cli struct {
