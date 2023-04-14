@@ -54,7 +54,7 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 			}
 		} else {
 			if address != multiaddr {
-				return c.UpdateAddress(name, multiaddr)
+				return c.updateAddress(name, multiaddr)
 			}
 			return "", nil
 		}
@@ -71,7 +71,7 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 			}
 		} else {
 			if string(minerinfo.Ip) != multiaddr {
-				return c.UpdateAddress(name, multiaddr)
+				return c.updateAddress(name, multiaddr)
 			}
 			return "", nil
 		}
@@ -191,6 +191,99 @@ func (c *chainClient) UpdateAddress(name, multiaddr string) (string, error) {
 		return txhash, ERR_RPC_CONNECTION
 	}
 	c.SetChainState(true)
+
+	switch name {
+	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+		call, err = types.NewCall(c.metadata, TX_OSS_UPDATE, types.NewBytes([]byte(multiaddr)))
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewCall]")
+		}
+	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEADDR, types.NewBytes([]byte(multiaddr)))
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewCall]")
+		}
+	default:
+		return "", fmt.Errorf("Invalid role name")
+	}
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		SYSTEM,
+		ACCOUNT,
+		c.keyring.PublicKey,
+	)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return txhash, ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				}
+
+				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+
+				if len(events.Oss_OssUpdate) > 0 {
+					return txhash, nil
+				}
+				return txhash, errors.New(ERR_Failed)
+			}
+		case err = <-sub.Err():
+			return txhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, ERR_RPC_TIMEOUT
+		}
+	}
+}
+
+func (c *chainClient) updateAddress(name, multiaddr string) (string, error) {
+	var (
+		err         error
+		txhash      string
+		call        types.Call
+		accountInfo types.AccountInfo
+	)
 
 	switch name {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
@@ -898,14 +991,14 @@ func (c *chainClient) SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				//events := EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
+				// h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				// if err != nil {
+				// 	return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				// }
 
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				// types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
 
 				// if len(events.FileBank_DeleteFile) > 0 {
 				// 	return txhash, events.FileBank_DeleteFile[0].FailedList
