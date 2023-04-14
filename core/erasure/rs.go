@@ -1,9 +1,14 @@
+/*
+	Copyright (C) CESS. All rights reserved.
+	Copyright (C) Cumulus Encrypted Storage System. All rights reserved.
+
+	SPDX-License-Identifier: Apache-2.0
+*/
+
 package erasure
 
 import (
 	"errors"
-	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -14,10 +19,6 @@ import (
 )
 
 // ReedSolomon uses reed-solomon algorithm to redundancy files
-// Return:
-//
-//  1. All file blocks (sorted sequentially)
-//  2. Error message
 func ReedSolomon(path string) ([]string, error) {
 	var shardspath = make([]string, 0)
 	fstat, err := os.Stat(path)
@@ -71,81 +72,6 @@ func ReedSolomon(path string) ([]string, error) {
 		shardspath = append(shardspath, newpath)
 	}
 	return shardspath, nil
-
-	// Create encoding matrix.
-	// enc, err := reedsolomon.NewStream(datashards, parshards)
-	// if err != nil {
-	// 	return shardspath, err
-	// }
-
-	// f, err := os.Open(path)
-	// if err != nil {
-	// 	return shardspath, err
-	// }
-
-	// instat, err := f.Stat()
-	// if err != nil {
-	// 	return shardspath, err
-	// }
-
-	// shards := datashards + parshards
-	// out := make([]*os.File, shards)
-
-	// // Create the resulting files.
-	// dir, file := filepath.Split(path)
-
-	// for i := range out {
-	// 	var outfn string
-	// 	if i < 10 {
-	// 		outfn = fmt.Sprintf("%s.00%d", file, i)
-	// 	} else {
-	// 		outfn = fmt.Sprintf("%s.0%d", file, i)
-	// 	}
-	// 	out[i], err = os.Create(filepath.Join(dir, outfn))
-	// 	if err != nil {
-	// 		return shardspath, err
-	// 	}
-	// 	//out[i].Close()
-	// 	shardspath = append(shardspath, filepath.Join(dir, outfn))
-	// }
-
-	// // Split into files.
-	// data := make([]io.Writer, datashards)
-	// for i := range data {
-	// 	data[i] = out[i]
-	// }
-	// // Do the split
-	// err = enc.Split(f, data, instat.Size())
-	// if err != nil {
-	// 	return shardspath, err
-	// }
-
-	// // Close and re-open the files.
-	// input := make([]io.Reader, datashards)
-
-	// for i := range data {
-	// 	f, err := os.Open(out[i].Name())
-	// 	if err != nil {
-	// 		return shardspath, err
-	// 	}
-	// 	input[i] = f
-	// 	defer f.Close()
-	// }
-
-	// // Create parity output writers
-	// parity := make([]io.Writer, parshards)
-	// for i := range parity {
-	// 	parity[i] = out[datashards+i]
-	// 	defer out[datashards+i].Close()
-	// }
-
-	// // Encode parity
-	// err = enc.Encode(input, parity)
-	// if err != nil {
-	// 	return shardspath, err
-	// }
-
-	// return shardspath, nil
 }
 
 func ReedSolomon_Restore(outpath string, shardspath []string) error {
@@ -189,33 +115,4 @@ func ReedSolomon_Restore(outpath string, shardspath []string) error {
 	err = enc.Join(f, shards, len(shards[0])*datashards)
 	return err
 
-}
-
-func openInput(dataShards, parShards int, fname string) (r []io.Reader, size int64, err error) {
-	shards := make([]io.Reader, dataShards+parShards)
-	for i := range shards {
-		var infn string
-		if i < 10 {
-			infn = fmt.Sprintf("%s.00%d", fname, i)
-		} else {
-			infn = fmt.Sprintf("%s.0%d", fname, i)
-		}
-		f, err := os.Open(infn)
-		if err != nil {
-			shards[i] = nil
-			continue
-		} else {
-			shards[i] = f
-		}
-		stat, err := f.Stat()
-		if err != nil {
-			return nil, 0, err
-		}
-		if stat.Size() > 0 {
-			size = stat.Size()
-		} else {
-			shards[i] = nil
-		}
-	}
-	return shards, size, nil
 }
