@@ -22,8 +22,10 @@ import (
 func (c *chainClient) Register(name, multiaddr string, income string, pledge uint64) (string, error) {
 	var (
 		err         error
+		address     string
 		txhash      string
 		pubkey      []byte
+		minerinfo   MinerInfo
 		acc         *types.AccountID
 		call        types.Call
 		accountInfo types.AccountInfo
@@ -33,7 +35,7 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -45,12 +47,15 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 
 	switch name {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-		_, err = c.QueryDeoss(c.keyring.PublicKey)
+		address, err = c.QueryDeoss(c.keyring.PublicKey)
 		if err != nil {
 			if err.Error() != ERR_Empty {
 				return txhash, err
 			}
 		} else {
+			if address != multiaddr {
+				return c.UpdateAddress(name, multiaddr)
+			}
 			return "", nil
 		}
 
@@ -59,12 +64,15 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		_, err = c.QueryStorageMiner(c.keyring.PublicKey)
+		minerinfo, err = c.QueryStorageMiner(c.keyring.PublicKey)
 		if err != nil {
 			if err.Error() != ERR_Empty {
 				return txhash, err
 			}
 		} else {
+			if string(minerinfo.Ip) != multiaddr {
+				return c.UpdateAddress(name, multiaddr)
+			}
 			return "", nil
 		}
 
@@ -162,7 +170,7 @@ func (c *chainClient) Register(name, multiaddr string, income string, pledge uin
 	}
 }
 
-func (c *chainClient) Update(name, multiaddr string) (string, error) {
+func (c *chainClient) UpdateAddress(name, multiaddr string) (string, error) {
 	var (
 		err         error
 		txhash      string
@@ -174,7 +182,7 @@ func (c *chainClient) Update(name, multiaddr string) (string, error) {
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -269,6 +277,110 @@ func (c *chainClient) Update(name, multiaddr string) (string, error) {
 	}
 }
 
+func (c *chainClient) UpdateIncomeAccount(pubkey []byte) (string, error) {
+	var (
+		txhash      string
+		accountInfo types.AccountInfo
+	)
+
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			println(utils.RecoverError(err))
+		}
+	}()
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return txhash, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	acc, err := types.NewAccountID(pubkey)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	call, err := types.NewCall(
+		c.metadata,
+		TX_SMINER_UPDATEINCOME,
+		*acc,
+	)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewCall]")
+	}
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		SYSTEM,
+		ACCOUNT,
+		c.keyring.PublicKey,
+	)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return txhash, ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				}
+
+				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+
+				if len(events.Sminer_UpdataBeneficiary) > 0 {
+					return txhash, nil
+				}
+				return txhash, errors.New(ERR_Failed)
+			}
+		case err = <-sub.Err():
+			return txhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, ERR_RPC_TIMEOUT
+		}
+	}
+}
+
 func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, error) {
 	var (
 		txhash      string
@@ -279,7 +391,7 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -384,7 +496,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -489,7 +601,7 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -598,7 +710,7 @@ func (c *chainClient) DeleteFile(owner_pkey []byte, filehash string) (string, Fi
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -719,7 +831,7 @@ func (c *chainClient) SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error) {
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -818,7 +930,7 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -917,7 +1029,7 @@ func (c *chainClient) ReplaceFile(roothash []FileHash) (string, []FileHash, erro
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -1017,7 +1129,7 @@ func (c *chainClient) IncreaseStakes(tokens *big.Int) (string, error) {
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			fmt.Println(utils.RecoverError(err))
+			println(utils.RecoverError(err))
 		}
 	}()
 
@@ -1097,6 +1209,117 @@ func (c *chainClient) IncreaseStakes(tokens *big.Int) (string, error) {
 					return txhash, nil
 				}
 				return txhash, errors.New(ERR_Failed)
+			}
+		case err = <-sub.Err():
+			return txhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, ERR_RPC_TIMEOUT
+		}
+	}
+}
+
+func (c *chainClient) Exit(role string) (string, error) {
+	var (
+		err         error
+		txhash      string
+		call        types.Call
+		accountInfo types.AccountInfo
+	)
+
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			println(utils.RecoverError(err))
+		}
+	}()
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return txhash, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	switch role {
+	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+		call, err = types.NewCall(c.metadata, TX_OSS_DESTORY)
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewCall]")
+		}
+	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+		call, err = types.NewCall(c.metadata, TX_SMINER_EXIT)
+		if err != nil {
+			return txhash, errors.Wrap(err, "[NewCall]")
+		}
+	default:
+		return "", fmt.Errorf("Invalid role name")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+	}
+
+	if !ok {
+		return txhash, ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+	timeout := time.NewTimer(c.timeForBlockOut)
+	defer timeout.Stop()
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				}
+
+				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+
+				switch role {
+				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+					if len(events.Oss_OssDestroy) > 0 {
+						return txhash, nil
+					}
+				case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+					if len(events.Sminer_MinerExit) > 0 {
+						return txhash, nil
+					}
+				default:
+					return txhash, errors.New(ERR_Failed)
+				}
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")

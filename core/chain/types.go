@@ -66,11 +66,14 @@ const (
 	// OSS
 	TX_OSS_REGISTER = OSS + DOT + "register"
 	TX_OSS_UPDATE   = OSS + DOT + "update"
+	TX_OSS_DESTORY  = OSS + DOT + "destroy"
 
 	// SMINER
 	TX_SMINER_REGISTER       = SMINER + DOT + "regnstk"
-	TX_SMINER_UPDATEADDR     = SMINER + DOT + "update_ip"
+	TX_SMINER_EXIT           = SMINER + DOT + "exit_miner"
 	TX_SMINER_INCREASESTAKES = SMINER + DOT + "increase_collateral"
+	TX_SMINER_UPDATEADDR     = SMINER + DOT + "update_ip"
+	TX_SMINER_UPDATEINCOME   = SMINER + DOT + "update_beneficiary"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET    = FILEBANK + DOT + "create_bucket"
