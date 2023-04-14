@@ -82,6 +82,8 @@ type Chain interface {
 	IncreaseStakes(tokens *big.Int) (string, error)
 	//
 	Exit(role string) (string, error)
+	//
+	QuerySpacePricePerGib() (string, error)
 }
 
 type chainClient struct {

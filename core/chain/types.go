@@ -55,6 +55,7 @@ const (
 
 	// STORAGEHANDLER
 	USERSPACEINFO = "UserOwnedSpace"
+	UNITPRICE     = "UnitPrice"
 
 	// SYSTEM
 	ACCOUNT = "Account"
