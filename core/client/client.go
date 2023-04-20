@@ -36,6 +36,9 @@ type Client interface {
 	QuerySpacePricePerGib() (string, error)
 	QueryNetSnapShot() (chain.NetSnapShot, error)
 	QueryChallenge(pubkey []byte) (ChallengeInfo, error)
+	QueryTeePodr2Puk() ([]byte, error)
+	QueryTeeWorkerPeerID(pubkey []byte) ([]byte, error)
+	QueryTeeWorkerList() ([]chain.TeeWorkerInfo, error)
 	CheckBucketName(bucketname string) bool
 	CreateBucket(owner []byte, bucketname string) (string, error)
 	ProcessingData(path string) ([]SegmentInfo, string, error)
