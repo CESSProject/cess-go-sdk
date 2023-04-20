@@ -30,6 +30,8 @@ const (
 	SMINER = "Sminer"
 	// SMINER is a module about storage miners
 	STORAGEHANDLER = "StorageHandler"
+	//
+	NETSNAPSHOT = "NetSnapShotStorage"
 	// SYSTEM is a module about the system
 	SYSTEM = "System"
 )
@@ -57,6 +59,9 @@ const (
 	// STORAGEHANDLER
 	USERSPACEINFO = "UserOwnedSpace"
 	UNITPRICE     = "UnitPrice"
+
+	// NetSnapShotStorage
+	NETSNAPSHOTSTORAGE = "NetSnapShotStorage"
 
 	// SYSTEM
 	ACCOUNT = "Account"
@@ -120,6 +125,7 @@ var (
 )
 
 type FileHash [64]types.U8
+type Random [20]types.U8
 
 type MinerInfo struct {
 	PeerId      types.U64
@@ -205,4 +211,23 @@ type UserSpaceInfo struct {
 	Start          types.U32
 	Deadline       types.U32
 	State          types.Bytes
+}
+
+type NetSnapShot struct {
+	NetSnapShot   NetSnapShotStorage
+	MinerSnapShot []MinerSnapShot
+}
+
+type NetSnapShotStorage struct {
+	Start               types.U32
+	Total_reward        types.U128
+	Total_idle_space    types.U128
+	Total_service_space types.U128
+	Random              Random
+}
+
+type MinerSnapShot struct {
+	Miner         types.AccountID
+	Idle_space    types.U128
+	Service_space types.U128
 }
