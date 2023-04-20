@@ -235,7 +235,13 @@ type MinerSnapShot struct {
 	Service_space types.U128
 }
 
+type NodePublickey struct {
+	Node_publickey [32]types.U8
+}
+
 type TeeWorkerInfo struct {
-	Peer_id       PeerID
-	Stash_account types.AccountID
+	Controller_account types.AccountID
+	Peer_id            PeerID
+	Node_key           NodePublickey
+	Stash_account      types.AccountID
 }
