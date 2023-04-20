@@ -54,3 +54,7 @@ func (c *Cli) QueryUserSpaceInfo(pubkey []byte) (chain.UserSpaceInfo, error) {
 func (c *Cli) QuerySpacePricePerGib() (string, error) {
 	return c.Chain.QuerySpacePricePerGib()
 }
+
+func (c *Cli) QueryTeePodr2Puk() ([]byte, error) {
+	return c.Chain.QueryTeePodr2Puk()
+}

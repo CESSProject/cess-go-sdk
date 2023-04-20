@@ -87,6 +87,7 @@ type Chain interface {
 	QuerySpacePricePerGib() (string, error)
 	//
 	QueryNetSnapShot() (NetSnapShot, error)
+	QueryTeePodr2Puk() ([]byte, error)
 }
 
 type chainClient struct {

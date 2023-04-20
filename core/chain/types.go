@@ -48,6 +48,7 @@ const (
 
 	// TEEWORKER
 	SCHEDULERMAP = "SchedulerMap"
+	TEEPODR2Pk   = "TeePodr2Pk"
 
 	// FILEBANK
 	FILE           = "File"
@@ -126,6 +127,7 @@ var (
 
 type FileHash [64]types.U8
 type Random [20]types.U8
+type TeePodr2Pk [294]types.U8
 
 type MinerInfo struct {
 	PeerId      types.U64

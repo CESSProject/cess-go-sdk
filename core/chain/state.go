@@ -633,6 +633,40 @@ func (c *chainClient) QueryNetSnapShot() (NetSnapShot, error) {
 	return data, nil
 }
 
+func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			println(utils.RecoverError(err))
+		}
+	}()
+	var data TeePodr2Pk
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return nil, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		NETSNAPSHOT,
+		NETSNAPSHOTSTORAGE,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return nil, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return nil, ERR_RPC_EMPTY_VALUE
+	}
+
+	return []byte(string(data[:])), nil
+}
+
 // Pallert
 const (
 	_FILEBANK = "FileBank"
