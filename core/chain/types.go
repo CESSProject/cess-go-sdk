@@ -47,7 +47,7 @@ const (
 	MINERITEMS = "MinerItems"
 
 	// TEEWORKER
-	SCHEDULERMAP = "SchedulerMap"
+	TEEWORKERMAP = "TeeWorkerMap"
 	TEEPODR2Pk   = "TeePodr2Pk"
 
 	// FILEBANK
@@ -128,6 +128,7 @@ var (
 type FileHash [64]types.U8
 type Random [20]types.U8
 type TeePodr2Pk [294]types.U8
+type PeerID [53]types.U8
 
 type MinerInfo struct {
 	PeerId      types.U64
@@ -232,4 +233,9 @@ type MinerSnapShot struct {
 	Miner         types.AccountID
 	Idle_space    types.U128
 	Service_space types.U128
+}
+
+type TeeWorkerInfo struct {
+	Peer_id       PeerID
+	Stash_account types.AccountID
 }

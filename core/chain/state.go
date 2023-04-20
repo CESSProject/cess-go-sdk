@@ -649,8 +649,8 @@ func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 
 	key, err := types.CreateStorageKey(
 		c.metadata,
-		NETSNAPSHOT,
-		NETSNAPSHOTSTORAGE,
+		TEEWORKER,
+		TEEPODR2Pk,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "[CreateStorageKey]")
@@ -665,6 +665,75 @@ func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 	}
 
 	return []byte(string(data[:])), nil
+}
+
+func (c *chainClient) QueryTeeWorker(pubkey []byte) ([]byte, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			println(utils.RecoverError(err))
+		}
+	}()
+	var data TeeWorkerInfo
+
+	acc, err := types.NewAccountID(pubkey)
+	if err != nil {
+		return nil, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return nil, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return nil, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		TEEWORKER,
+		TEEWORKERMAP,
+		owner,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return nil, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return nil, ERR_RPC_EMPTY_VALUE
+	}
+
+	return []byte(string(data.Peer_id[:])), nil
+}
+
+func (c *chainClient) QueryTeeWorkerList() ([]TeeWorkerInfo, error) {
+	var list []TeeWorkerInfo
+	key := createPrefixedKey(TEEWORKER, TEEWORKERMAP)
+	keys, err := c.api.RPC.State.GetKeysLatest(key)
+	if err != nil {
+		return list, errors.Wrap(err, "[GetKeysLatest]")
+	}
+	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
+	if err != nil {
+		return list, errors.Wrap(err, "[QueryStorageAtLatest]")
+	}
+	for _, elem := range set {
+		for _, change := range elem.Changes {
+			var teeWorker TeeWorkerInfo
+			if err := codec.Decode(change.StorageData, &teeWorker); err != nil {
+				log.Println(err)
+				continue
+			}
+			list = append(list, teeWorker)
+		}
+	}
+	return list, nil
 }
 
 // Pallert
