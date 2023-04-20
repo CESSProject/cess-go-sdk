@@ -599,6 +599,40 @@ func (c *chainClient) QuerySpacePricePerGib() (string, error) {
 	return fmt.Sprintf("%v", data), nil
 }
 
+func (c *chainClient) QueryNetSnapShot() (NetSnapShot, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			println(utils.RecoverError(err))
+		}
+	}()
+	var data NetSnapShot
+
+	if !c.IsChainClientOk() {
+		c.SetChainState(false)
+		return data, ERR_RPC_CONNECTION
+	}
+	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(
+		c.metadata,
+		NETSNAPSHOT,
+		NETSNAPSHOTSTORAGE,
+	)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+
+	return data, nil
+}
+
 // Pallert
 const (
 	_FILEBANK = "FileBank"

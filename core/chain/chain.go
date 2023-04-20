@@ -85,6 +85,8 @@ type Chain interface {
 	Exit(role string) (string, error)
 	//
 	QuerySpacePricePerGib() (string, error)
+	//
+	QueryNetSnapShot() (NetSnapShot, error)
 }
 
 type chainClient struct {
