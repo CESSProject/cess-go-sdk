@@ -616,7 +616,7 @@ func (c *chainClient) QueryNetSnapShot() (NetSnapShot, error) {
 	key, err := types.CreateStorageKey(
 		c.metadata,
 		NETSNAPSHOT,
-		NETSNAPSHOTSTORAGE,
+		CHALLENGESNAPSHOT,
 	)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")

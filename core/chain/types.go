@@ -61,8 +61,8 @@ const (
 	USERSPACEINFO = "UserOwnedSpace"
 	UNITPRICE     = "UnitPrice"
 
-	// NetSnapShotStorage
-	NETSNAPSHOTSTORAGE = "NetSnapShotStorage"
+	// NETSNAPSHOT
+	CHALLENGESNAPSHOT = "ChallengeSnapShot"
 
 	// SYSTEM
 	ACCOUNT = "Account"
