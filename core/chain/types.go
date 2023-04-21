@@ -197,7 +197,7 @@ type StorageOrder struct {
 	CompleteList  []types.AccountID
 }
 
-type IdleMetaInfo struct {
+type IdleMetadata struct {
 	Size      types.U64
 	BlockNum  types.U32
 	BlockSize types.U32
@@ -216,12 +216,12 @@ type UserSpaceInfo struct {
 	State          types.Bytes
 }
 
-type NetSnapShot struct {
-	NetSnapShot   NetSnapShotStorage
+type ChallengeSnapShot struct {
+	NetSnapshot   NetSnapShot
 	MinerSnapShot []MinerSnapShot
 }
 
-type NetSnapShotStorage struct {
+type NetSnapShot struct {
 	Start               types.U32
 	Total_reward        types.U128
 	Total_idle_space    types.U128

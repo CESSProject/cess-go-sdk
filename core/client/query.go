@@ -41,13 +41,13 @@ func (c *Cli) QueryGrantor(puk []byte) (bool, error) {
 		return false, err
 	}
 	account_chain, _ := utils.EncodePublicKeyAsCessAccount(grantor[:])
-	account_local, _ := c.GetCessAccount()
+	account_local := c.Chain.GetSignatureAcc()
 
 	return account_chain == account_local, nil
 }
 
 func (c *Cli) QueryStorageOrder(roothash string) (chain.StorageOrder, error) {
-	return c.Chain.GetStorageOrder(roothash)
+	return c.Chain.QueryStorageOrder(roothash)
 }
 
 func (c *Cli) QueryReplacements(pubkey []byte) (uint32, error) {
@@ -71,9 +71,13 @@ func (c *Cli) QueryTeePodr2Puk() ([]byte, error) {
 }
 
 func (c *Cli) QueryTeeWorkerList() ([]chain.TeeWorkerInfo, error) {
-	return c.Chain.QueryTeeWorkerList()
+	return c.Chain.QueryTeeInfoList()
 }
 
-func (c *Cli) QueryTeeWorkerPeerID(pubkey []byte) ([]byte, error) {
-	return c.Chain.QueryTeeWorker(pubkey)
+func (c *Cli) QueryTeeWorkerPeerID(puk []byte) ([]byte, error) {
+	peerid, err := c.Chain.QueryTeePeerID(puk)
+	if err != nil {
+		return nil, err
+	}
+	return []byte(string(peerid[:])), nil
 }

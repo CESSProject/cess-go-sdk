@@ -14,9 +14,9 @@ func (c *Cli) UpdateAddress(name string) (string, error) {
 }
 
 func (c *Cli) UpdateIncomeAccount(income string) (string, error) {
-	pubkey, err := utils.ParsingPublickey(income)
+	puk, err := utils.ParsingPublickey(income)
 	if err != nil {
 		return "", err
 	}
-	return c.Chain.UpdateIncomeAccount(pubkey)
+	return c.Chain.UpdateIncomeAcc(puk)
 }

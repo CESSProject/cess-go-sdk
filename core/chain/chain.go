@@ -13,19 +13,17 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/CESSProject/sdk-go/core/utils"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/xxhash"
 )
 
 type Chain interface {
-	// QueryBlockHeight queries the block height corresponding to the block hash.
+	// QueryBlockHeight queries the block height corresponding to the block hash,
 	// If the blockhash is empty, query the latest block height.
 	QueryBlockHeight(blockhash string) (uint32, error)
-
-	// ExtractAccountPuk extracts the public key of the account,
-	// and returns its own public key if the account is empty.
-	ExtractAccountPuk(account string) ([]byte, error)
 
 	// QueryNodeSynchronizationSt returns the synchronization status of the current node.
 	QueryNodeSynchronizationSt() (bool, error)
@@ -33,71 +31,96 @@ type Chain interface {
 	// QueryNodeConnectionSt queries the connection status of the node.
 	QueryNodeConnectionSt() bool
 
-	// QueryStorageMiner queries storage node information.
-	QueryStorageMiner(puk []byte) (MinerInfo, error)
-
 	// QueryDeoss queries deoss information.
 	QueryDeoss(puk []byte) (string, error)
 
-	// QuaryAuthorizedAcc queries the account authorized by puk
+	// QuaryAuthorizedAcc queries the account authorized by puk.
 	QuaryAuthorizedAcc(puk []byte) (types.AccountID, error)
 
-	// QueryBucketInfo queries the information of the "bucketname" bucket of the puk
+	// QueryBucketInfo queries the information of the "bucketname" bucket of the puk.
 	QueryBucketInfo(puk []byte, bucketname string) (BucketInfo, error)
 
-	// QueryBucketList queries all buckets of the puk
+	// QueryBucketList queries all buckets of the puk.
 	QueryBucketList(puk []byte) ([]types.Bytes, error)
 
-	// QueryFileMetaInfo queries the metadata of the roothash file
+	// QueryFileMetaInfo queries the metadata of the roothash file.
 	QueryFileMetadata(roothash string) (FileMetadata, error)
 
-	// Getallstorageminer is used to obtain the AccountID of all miners
-	GetAllStorageMiner() ([]types.AccountID, error)
-	// GetCessAccount is used to get the account in cess chain format
-	GetCessAccount() (string, error)
-	// GetAccountInfo is used to get account information
-	GetAccountInfo(pkey []byte) (types.AccountInfo, error)
+	// QueryStorageMiner queries storage node information.
+	QueryStorageMiner(puk []byte) (MinerInfo, error)
 
-	// Register is used to register OSS or BUCKET roles
-	Register(name, multiaddr string, income string, pledge uint64) (string, error)
-	// Update is used to update the communication address of the scheduling service
-	UpdateAddress(name, multiaddr string) (string, error)
-	//
-	UpdateIncomeAccount(pubkey []byte) (string, error)
-	// CreateBucket is used to create a bucket for users
-	CreateBucket(owner_pkey []byte, name string) (string, error)
-	// DeleteBucket is used to delete buckets created by users
-	DeleteBucket(owner_pkey []byte, name string) (string, error)
-	//
-	DeleteFile(owner_pkey []byte, filehash string) (string, FileHash, error)
-	//
-	UploadDeclaration(filehash string, dealinfo []SegmentList, user UserBrief) (string, error)
-	//
-	GetStorageOrder(roothash string) (StorageOrder, error)
-	//
-	SubmitIdleFile(idlefiles []IdleMetaInfo) (string, error)
-	//
-	SubmitFileReport(roothash []FileHash) (string, []FileHash, error)
-	//
-	ReplaceFile(roothash []FileHash) (string, []FileHash, error)
-	//
-	QueryPendingReplacements(owner_pkey []byte) (types.U32, error)
-	//
-	QueryUserSpaceInfo(pubkey []byte) (UserSpaceInfo, error)
-	//
-	IncreaseStakes(tokens *big.Int) (string, error)
-	//
-	Exit(role string) (string, error)
-	//
+	// QuerySminerList queries the accounts of all storage miners.
+	QuerySminerList() ([]types.AccountID, error)
+
+	// QueryAccountInfo query account information.
+	QueryAccountInfo(puk []byte) (types.AccountInfo, error)
+
+	// QueryStorageOrder query storage order information.
+	QueryStorageOrder(roothash string) (StorageOrder, error)
+
+	// QueryPendingReplacements queries the amount of idle data that can be replaced.
+	QueryPendingReplacements(puk []byte) (types.U32, error)
+
+	// QueryUserSpaceInfo queries the space information purchased by the user.
+	QueryUserSpaceInfo(puk []byte) (UserSpaceInfo, error)
+
+	// QuerySpacePricePerGib query space price per GiB.
 	QuerySpacePricePerGib() (string, error)
-	//
-	QueryNetSnapShot() (NetSnapShot, error)
-	//
+
+	// QueryChallengeSnapshot query challenge information snapshot.
+	QueryChallengeSnapshot() (ChallengeSnapShot, error)
+
+	// QueryTeePodr2Puk queries the public key of the TEE.
 	QueryTeePodr2Puk() ([]byte, error)
-	//
-	QueryTeeWorker(pubkey []byte) ([]byte, error)
-	//
-	QueryTeeWorkerList() ([]TeeWorkerInfo, error)
+
+	// QueryTeePeerID queries the peerid of the Tee worker.
+	QueryTeePeerID(puk []byte) (PeerID, error)
+
+	// QueryTeeInfoList queries the information of all tee workers.
+	QueryTeeInfoList() ([]TeeWorkerInfo, error)
+
+	// Register is used to register OSS or BUCKET roles.
+	Register(role, multiaddr string, income string, pledge uint64) (string, error)
+
+	// UpdateAddress updates the address of oss or sminer.
+	UpdateAddress(role, multiaddr string) (string, error)
+
+	// UpdateIncomeAcc update income account.
+	UpdateIncomeAcc(puk []byte) (string, error)
+
+	// CreateBucket creates a bucket for puk.
+	CreateBucket(puk []byte, bucketname string) (string, error)
+
+	// DeleteBucket deletes buckets for puk.
+	DeleteBucket(puk []byte, bucketname string) (string, error)
+
+	// DeleteFile deletes files for puk.
+	DeleteFile(puk []byte, roothash string) (string, FileHash, error)
+
+	// UploadDeclaration creates a storage order.
+	UploadDeclaration(roothash string, dealinfo []SegmentList, user UserBrief) (string, error)
+
+	// SubmitIdleMetadata Submit idle file metadata.
+	SubmitIdleMetadata(idlefiles []IdleMetadata) (string, error)
+
+	// SubmitFileReport submits a stored file report.
+	SubmitFileReport(roothash []FileHash) (string, []FileHash, error)
+
+	// ReplaceIdleFiles replaces idle files.
+	ReplaceIdleFiles(roothash []FileHash) (string, []FileHash, error)
+
+	// IncreaseStakes increase stakes.
+	IncreaseStakes(tokens *big.Int) (string, error)
+
+	// Exit exit the cess network.
+	Exit(role string) (string, error)
+
+	// ExtractAccountPuk extracts the public key of the account,
+	// and returns its own public key if the account is empty.
+	ExtractAccountPuk(account string) ([]byte, error)
+
+	// GetSignatureAcc returns the signature account.
+	GetSignatureAcc() string
 }
 
 type chainClient struct {
@@ -191,9 +214,27 @@ func (c *chainClient) GetChainState() bool {
 	return c.chainState.Load()
 }
 
+// QueryNodeConnectionSt
+func (c *chainClient) QueryNodeConnectionSt() bool {
+	return c.GetChainState()
+}
+
 func (c *chainClient) NewAccountId(pubkey []byte) types.AccountID {
 	acc, _ := types.NewAccountID(pubkey)
 	return *acc
+}
+
+func (c *chainClient) GetSignatureAcc() string {
+	acc, _ := utils.EncodePublicKeyAsCessAccount(c.keyring.PublicKey)
+	return acc
+}
+
+// ExtractAccountPublickey
+func (c *chainClient) ExtractAccountPuk(account string) ([]byte, error) {
+	if account != "" {
+		return utils.ParsingPublickey(account)
+	}
+	return c.keyring.PublicKey, nil
 }
 
 func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
@@ -220,4 +261,8 @@ func (c *chainClient) KeepConnect() {
 	case <-tick.C:
 		healthchek(c.api)
 	}
+}
+
+func createPrefixedKey(method, prefix string) []byte {
+	return append(xxhash.New128([]byte(prefix)).Sum(nil), xxhash.New128([]byte(method)).Sum(nil)...)
 }

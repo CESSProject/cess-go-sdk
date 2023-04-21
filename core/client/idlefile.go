@@ -27,7 +27,7 @@ func (c *Cli) SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, 
 	for i := 0; i < len(hash); i++ {
 		filehash[i] = types.U8(hash[i])
 	}
-	var idlefiles = []chain.IdleMetaInfo{
+	var idlefiles = []chain.IdleMetadata{
 		{
 			Size:      types.NewU64(size),
 			BlockNum:  types.NewU32(blockNum),
@@ -37,5 +37,5 @@ func (c *Cli) SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, 
 			Hash:      filehash,
 		},
 	}
-	return c.Chain.SubmitIdleFile(idlefiles)
+	return c.Chain.SubmitIdleMetadata(idlefiles)
 }
