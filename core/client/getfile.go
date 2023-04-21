@@ -33,7 +33,7 @@ func (c *Cli) GetFile(roothash, dir string) (string, error) {
 	}
 	defer f.Close()
 
-	fmeta, err := c.Chain.GetFileMetaInfo(roothash)
+	fmeta, err := c.Chain.QueryFileMetadata(roothash)
 	if err != nil {
 		return "", err
 	}

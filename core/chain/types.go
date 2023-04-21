@@ -147,7 +147,7 @@ type RewardInfo struct {
 	NotReceived types.U128
 }
 
-type FileMetaInfo struct {
+type FileMetadata struct {
 	Completion  types.U32
 	State       types.U8
 	SegmentList []SegmentInfo

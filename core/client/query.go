@@ -9,6 +9,7 @@ package client
 
 import (
 	"github.com/CESSProject/sdk-go/core/chain"
+	"github.com/CESSProject/sdk-go/core/utils"
 )
 
 func (c *Cli) Workspace() string {
@@ -23,16 +24,26 @@ func (c *Cli) QueryDeoss(pubkey []byte) (string, error) {
 	return c.Chain.QueryDeoss(pubkey)
 }
 
-func (c *Cli) QueryFile(roothash string) (chain.FileMetaInfo, error) {
-	return c.Chain.GetFileMetaInfo(roothash)
+func (c *Cli) QueryFile(roothash string) (chain.FileMetadata, error) {
+	return c.Chain.QueryFileMetadata(roothash)
 }
 
 func (c *Cli) QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, error) {
-	return c.Chain.GetBucketInfo(owner, bucketname)
+	return c.Chain.QueryBucketInfo(owner, bucketname)
 }
 
-func (c *Cli) QueryGrantor(pubkey []byte) (bool, error) {
-	return c.Chain.IsGrantor(pubkey)
+func (c *Cli) QueryGrantor(puk []byte) (bool, error) {
+	grantor, err := c.Chain.QuaryAuthorizedAcc(puk)
+	if err != nil {
+		if err.Error() == chain.ERR_Empty {
+			return false, nil
+		}
+		return false, err
+	}
+	account_chain, _ := utils.EncodePublicKeyAsCessAccount(grantor[:])
+	account_local, _ := c.GetCessAccount()
+
+	return account_chain == account_local, nil
 }
 
 func (c *Cli) QueryStorageOrder(roothash string) (chain.StorageOrder, error) {

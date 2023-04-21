@@ -20,8 +20,8 @@ import (
 
 type Chain interface {
 	// QueryBlockHeight queries the block height corresponding to the block hash.
-	// If the block hash is empty, query the latest block height.
-	QueryBlockHeight(hash string) (uint32, error)
+	// If the blockhash is empty, query the latest block height.
+	QueryBlockHeight(blockhash string) (uint32, error)
 
 	// ExtractAccountPuk extracts the public key of the account,
 	// and returns its own public key if the account is empty.
@@ -34,33 +34,30 @@ type Chain interface {
 	QueryNodeConnectionSt() bool
 
 	// QueryStorageMiner queries storage node information.
-	QueryStorageMiner(pkey []byte) (MinerInfo, error)
+	QueryStorageMiner(puk []byte) (MinerInfo, error)
 
 	// QueryDeoss queries deoss information.
-	QueryDeoss(pubkey []byte) (string, error)
+	QueryDeoss(puk []byte) (string, error)
 
 	// QuaryAuthorizedAcc queries the account authorized by puk
 	QuaryAuthorizedAcc(puk []byte) (types.AccountID, error)
 
-	// IsGrantor indicates whether to authorize the puk account
-	IsGrantor(puk []byte) (bool, error)
+	// QueryBucketInfo queries the information of the "bucketname" bucket of the puk
+	QueryBucketInfo(puk []byte, bucketname string) (BucketInfo, error)
+
+	// QueryBucketList queries all buckets of the puk
+	QueryBucketList(puk []byte) ([]types.Bytes, error)
+
+	// QueryFileMetaInfo queries the metadata of the roothash file
+	QueryFileMetadata(roothash string) (FileMetadata, error)
 
 	// Getallstorageminer is used to obtain the AccountID of all miners
 	GetAllStorageMiner() ([]types.AccountID, error)
-	// GetFileMetaInfo is used to get the meta information of the file
-	GetFileMetaInfo(fid string) (FileMetaInfo, error)
 	// GetCessAccount is used to get the account in cess chain format
 	GetCessAccount() (string, error)
 	// GetAccountInfo is used to get account information
 	GetAccountInfo(pkey []byte) (types.AccountInfo, error)
 
-	// GetBucketList is used to obtain all buckets of the user
-	GetBucketList(owner_pkey []byte) ([]types.Bytes, error)
-	// GetBucketInfo is used to query bucket details
-	GetBucketInfo(owner_pkey []byte, name string) (BucketInfo, error)
-
-	// GetState is used to obtain OSS status information
-	GetState(pubkey []byte) (string, error)
 	// Register is used to register OSS or BUCKET roles
 	Register(name, multiaddr string, income string, pledge uint64) (string, error)
 	// Update is used to update the communication address of the scheduling service

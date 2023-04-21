@@ -42,25 +42,6 @@ func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
 	return string(data), nil
 }
 
-// IsGrantor indicates whether to authorize the puk account
-func (c *chainClient) IsGrantor(puk []byte) (bool, error) {
-	var (
-		err     error
-		grantor types.AccountID
-	)
-
-	grantor, err = c.QuaryAuthorizedAcc(puk)
-	if err != nil {
-		if err.Error() == ERR_Empty {
-			return false, nil
-		}
-		return false, err
-	}
-	account_chain, _ := utils.EncodePublicKeyAsCessAccount(grantor[:])
-	account_local, _ := c.GetCessAccount()
-	return account_chain == account_local, nil
-}
-
 func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {

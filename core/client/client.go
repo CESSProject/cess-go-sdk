@@ -26,7 +26,7 @@ type Client interface {
 	Register(name string, income string, pledge uint64) (string, error)
 	QueryStorageMiner(pubkey []byte) (chain.MinerInfo, error)
 	QueryDeoss(pubkey []byte) (string, error)
-	QueryFile(roothash string) (chain.FileMetaInfo, error)
+	QueryFile(roothash string) (chain.FileMetadata, error)
 	QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, error)
 	QueryBuckets(owner []byte) ([]string, error)
 	QueryGrantor(pubkey []byte) (bool, error)
