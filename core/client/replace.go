@@ -19,5 +19,5 @@ func (c *Cli) ReplaceFile(roothash []string) (string, []chain.FileHash, error) {
 			hashs[i][j] = types.U8(roothash[i][j])
 		}
 	}
-	return c.Chain.ReplaceFile(hashs)
+	return c.Chain.ReplaceIdleFiles(hashs)
 }

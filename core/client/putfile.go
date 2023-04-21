@@ -38,13 +38,13 @@ func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filenam
 	var err error
 	var storageOrder chain.StorageOrder
 
-	_, err = c.Chain.GetFileMetaInfo(roothash)
+	_, err = c.Chain.QueryFileMetadata(roothash)
 	if err == nil {
 		return 0, nil
 	}
 
 	for i := 0; i < 3; i++ {
-		storageOrder, err = c.Chain.GetStorageOrder(roothash)
+		storageOrder, err = c.Chain.QueryStorageOrder(roothash)
 		if err != nil {
 			if err.Error() == chain.ERR_Empty {
 				err = c.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)

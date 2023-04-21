@@ -19,7 +19,7 @@ func (c *Cli) CreateBucket(owner []byte, bucketname string) (string, error) {
 }
 
 func (c *Cli) QueryBuckets(owner []byte) ([]string, error) {
-	bucketlist, err := c.Chain.GetBucketList(owner)
+	bucketlist, err := c.Chain.QueryBucketList(owner)
 	if err != nil {
 		if err.Error() != chain.ERR_Empty {
 			return nil, err

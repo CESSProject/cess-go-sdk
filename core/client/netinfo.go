@@ -17,8 +17,8 @@ type ChallengeInfo struct {
 	Start  uint32
 }
 
-func (c *Cli) QueryNetSnapShot() (chain.NetSnapShot, error) {
-	return c.Chain.QueryNetSnapShot()
+func (c *Cli) QueryNetSnapShot() (chain.ChallengeSnapShot, error) {
+	return c.Chain.QueryChallengeSnapshot()
 }
 
 func (c *Cli) QueryChallenge(pubkey []byte) (ChallengeInfo, error) {
@@ -27,17 +27,17 @@ func (c *Cli) QueryChallenge(pubkey []byte) (ChallengeInfo, error) {
 	if err != nil {
 		return chal, err
 	}
-	netinfo, err := c.Chain.QueryNetSnapShot()
+	netinfo, err := c.Chain.QueryChallengeSnapshot()
 	if err != nil {
 		return chal, err
 	}
-	chal.Random = make([]byte, len(netinfo.NetSnapShot.Random))
+	chal.Random = make([]byte, len(netinfo.NetSnapshot.Random))
 	for _, v := range netinfo.MinerSnapShot {
 		if v.Miner == *acc {
-			for i := 0; i < len(netinfo.NetSnapShot.Random); i++ {
-				chal.Random[i] = byte(netinfo.NetSnapShot.Random[i])
+			for i := 0; i < len(netinfo.NetSnapshot.Random); i++ {
+				chal.Random[i] = byte(netinfo.NetSnapshot.Random[i])
 			}
-			chal.Start = uint32(netinfo.NetSnapShot.Start)
+			chal.Start = uint32(netinfo.NetSnapshot.Start)
 			break
 		}
 	}

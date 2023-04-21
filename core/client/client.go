@@ -19,6 +19,8 @@ import (
 	"github.com/CESSProject/p2p-go/protocol"
 	"github.com/CESSProject/sdk-go/core/chain"
 	"github.com/CESSProject/sdk-go/core/rule"
+	"github.com/CESSProject/sdk-go/core/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 )
 
 type Client interface {
@@ -26,7 +28,7 @@ type Client interface {
 	Register(name string, income string, pledge uint64) (string, error)
 	QueryStorageMiner(pubkey []byte) (chain.MinerInfo, error)
 	QueryDeoss(pubkey []byte) (string, error)
-	QueryFile(roothash string) (chain.FileMetaInfo, error)
+	QueryFile(roothash string) (chain.FileMetadata, error)
 	QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, error)
 	QueryBuckets(owner []byte) ([]string, error)
 	QueryGrantor(pubkey []byte) (bool, error)
@@ -34,7 +36,7 @@ type Client interface {
 	QueryReplacements(pubkey []byte) (uint32, error)
 	QueryUserSpaceInfo(pubkey []byte) (chain.UserSpaceInfo, error)
 	QuerySpacePricePerGib() (string, error)
-	QueryNetSnapShot() (chain.NetSnapShot, error)
+	QueryNetSnapShot() (chain.ChallengeSnapShot, error)
 	QueryChallenge(pubkey []byte) (ChallengeInfo, error)
 	QueryTeePodr2Puk() ([]byte, error)
 	QueryTeeWorkerPeerID(pubkey []byte) ([]byte, error)
@@ -68,7 +70,13 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 	if err != nil {
 		return cli, err
 	}
-	account, err := cli.Chain.GetCessAccount()
+
+	keyring, err := signature.KeyringPairFromSecret(phase, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	account, err := utils.EncodePublicKeyAsCessAccount(keyring.PublicKey)
 	if err != nil {
 		return cli, err
 	}
