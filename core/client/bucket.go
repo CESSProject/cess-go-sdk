@@ -12,13 +12,7 @@ import (
 	"github.com/CESSProject/sdk-go/core/utils"
 )
 
-func (c *Cli) CreateBucket(owner []byte, bucketname string) (string, error) {
-	var err error
-	var txhash string
-	return txhash, err
-}
-
-func (c *Cli) QueryBuckets(owner []byte) ([]string, error) {
+func (c *Cli) QueryAllBucketName(owner []byte) ([]string, error) {
 	bucketlist, err := c.Chain.QueryBucketList(owner)
 	if err != nil {
 		if err.Error() != chain.ERR_Empty {
@@ -30,10 +24,6 @@ func (c *Cli) QueryBuckets(owner []byte) ([]string, error) {
 		buckets[i] = string(bucketlist[i])
 	}
 	return buckets, nil
-}
-
-func (c *Cli) DeleteBucket(owner []byte, bucketName string) (string, error) {
-	return c.Chain.DeleteBucket(owner, bucketName)
 }
 
 func (c *Cli) CheckBucketName(bucketname string) bool {

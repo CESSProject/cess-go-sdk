@@ -12,12 +12,17 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
-func (c *Cli) ReportFile(roothash []string) (string, []chain.FileHash, error) {
+func (c *Cli) ReportFiles(roothash []string) (string, []string, error) {
 	var hashs = make([]chain.FileHash, len(roothash))
 	for i := 0; i < len(roothash); i++ {
 		for j := 0; j < len(roothash[i]); j++ {
 			hashs[i][j] = types.U8(roothash[i][j])
 		}
 	}
-	return c.Chain.SubmitFileReport(hashs)
+	txhash, failed, err := c.Chain.SubmitFileReport(hashs)
+	var failedfiles = make([]string, len(failed))
+	for k, v := range failed {
+		failedfiles[k] = string(v[:])
+	}
+	return txhash, failedfiles, err
 }

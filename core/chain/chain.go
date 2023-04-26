@@ -59,7 +59,7 @@ type Chain interface {
 	QueryStorageOrder(roothash string) (StorageOrder, error)
 
 	// QueryPendingReplacements queries the amount of idle data that can be replaced.
-	QueryPendingReplacements(puk []byte) (types.U32, error)
+	QueryPendingReplacements(puk []byte) (uint32, error)
 
 	// QueryUserSpaceInfo queries the space information purchased by the user.
 	QueryUserSpaceInfo(puk []byte) (UserSpaceInfo, error)

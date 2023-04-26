@@ -12,12 +12,17 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
-func (c *Cli) ReplaceFile(roothash []string) (string, []chain.FileHash, error) {
+func (c *Cli) ReplaceFile(roothash []string) (string, []string, error) {
 	var hashs = make([]chain.FileHash, len(roothash))
 	for i := 0; i < len(roothash); i++ {
 		for j := 0; j < len(roothash[i]); j++ {
 			hashs[i][j] = types.U8(roothash[i][j])
 		}
 	}
-	return c.Chain.ReplaceIdleFiles(hashs)
+	txhash, failed, err := c.Chain.ReplaceIdleFiles(hashs)
+	var failedFiles = make([]string, len(failed))
+	for k, v := range failed {
+		failedFiles[k] = string(v[:])
+	}
+	return txhash, failedFiles, err
 }

@@ -202,7 +202,7 @@ func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryPendingReplacements(puk []byte) (types.U32, error) {
+func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			println(utils.RecoverError(err))
@@ -212,17 +212,17 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (types.U32, error) {
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
-		return data, errors.Wrap(err, "[NewAccountID]")
+		return 0, errors.Wrap(err, "[NewAccountID]")
 	}
 
 	owner, err := codec.Encode(*acc)
 	if err != nil {
-		return data, errors.Wrap(err, "[EncodeToBytes]")
+		return 0, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
 	if !c.IsChainClientOk() {
 		c.SetChainState(false)
-		return data, ERR_RPC_CONNECTION
+		return 0, ERR_RPC_CONNECTION
 	}
 	c.SetChainState(true)
 
@@ -233,17 +233,17 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (types.U32, error) {
 		owner,
 	)
 	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
+		return 0, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
+		return 0, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return 0, ERR_RPC_EMPTY_VALUE
 	}
-	return data, nil
+	return uint32(data), nil
 }
 
 func (c *chainClient) SubmitIdleMetadata(idlefiles []IdleMetadata) (string, error) {

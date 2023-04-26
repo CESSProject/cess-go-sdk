@@ -16,23 +16,7 @@ func (c *Cli) Workspace() string {
 	return c.Node.Workspace()
 }
 
-func (c *Cli) QueryStorageMiner(pubkey []byte) (chain.MinerInfo, error) {
-	return c.Chain.QueryStorageMiner(pubkey)
-}
-
-func (c *Cli) QueryDeoss(pubkey []byte) (string, error) {
-	return c.Chain.QueryDeoss(pubkey)
-}
-
-func (c *Cli) QueryFile(roothash string) (chain.FileMetadata, error) {
-	return c.Chain.QueryFileMetadata(roothash)
-}
-
-func (c *Cli) QueryBucket(owner []byte, bucketname string) (chain.BucketInfo, error) {
-	return c.Chain.QueryBucketInfo(owner, bucketname)
-}
-
-func (c *Cli) QueryGrantor(puk []byte) (bool, error) {
+func (c *Cli) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
 	grantor, err := c.Chain.QuaryAuthorizedAcc(puk)
 	if err != nil {
 		if err.Error() == chain.ERR_Empty {
@@ -46,32 +30,41 @@ func (c *Cli) QueryGrantor(puk []byte) (bool, error) {
 	return account_chain == account_local, nil
 }
 
-func (c *Cli) QueryStorageOrder(roothash string) (chain.StorageOrder, error) {
-	return c.Chain.QueryStorageOrder(roothash)
-}
-
-func (c *Cli) QueryReplacements(pubkey []byte) (uint32, error) {
-	num, err := c.Chain.QueryPendingReplacements(pubkey)
+func (c *Cli) QueryUserSpaceSt(puk []byte) (UserSpaceSt, error) {
+	var userSpaceSt UserSpaceSt
+	spaceinfo, err := c.Chain.QueryUserSpaceInfo(puk)
 	if err != nil {
-		return 0, err
+		return userSpaceSt, err
 	}
-	return uint32(num), nil
+	userSpaceSt.Start = uint32(spaceinfo.Start)
+	userSpaceSt.Deadline = uint32(spaceinfo.Deadline)
+	userSpaceSt.TotalSpace = spaceinfo.TotalSpace.String()
+	userSpaceSt.UsedSpace = spaceinfo.UsedSpace.String()
+	userSpaceSt.RemainingSpace = spaceinfo.RemainingSpace.String()
+	userSpaceSt.LockedSpace = spaceinfo.LockedSpace.String()
+	userSpaceSt.State = string(spaceinfo.State)
+	return userSpaceSt, nil
 }
 
-func (c *Cli) QueryUserSpaceInfo(pubkey []byte) (chain.UserSpaceInfo, error) {
-	return c.Chain.QueryUserSpaceInfo(pubkey)
-}
-
-func (c *Cli) QuerySpacePricePerGib() (string, error) {
-	return c.Chain.QuerySpacePricePerGib()
-}
-
-func (c *Cli) QueryTeePodr2Puk() ([]byte, error) {
-	return c.Chain.QueryTeePodr2Puk()
-}
-
-func (c *Cli) QueryTeeWorkerList() ([]chain.TeeWorkerInfo, error) {
-	return c.Chain.QueryTeeInfoList()
+func (c *Cli) QueryTeeWorkerList() ([]TeeWorkerSt, error) {
+	teelist, err := c.Chain.QueryTeeInfoList()
+	if err != nil {
+		return nil, err
+	}
+	var results = make([]TeeWorkerSt, len(teelist))
+	for k, v := range teelist {
+		results[k].Node_key = []byte(string(v.Node_key.Node_publickey[:]))
+		results[k].Peer_id = []byte(string(v.Peer_id[:]))
+		results[k].Controller_account, err = utils.EncodePublicKeyAsCessAccount(v.Controller_account[:])
+		if err != nil {
+			return results, err
+		}
+		results[k].Stash_account, err = utils.EncodePublicKeyAsCessAccount(v.Stash_account[:])
+		if err != nil {
+			return results, err
+		}
+	}
+	return results, nil
 }
 
 func (c *Cli) QueryTeeWorkerPeerID(puk []byte) ([]byte, error) {
@@ -80,4 +73,20 @@ func (c *Cli) QueryTeeWorkerPeerID(puk []byte) ([]byte, error) {
 		return nil, err
 	}
 	return []byte(string(peerid[:])), nil
+}
+
+func (c *Cli) QueryNodeSynchronizationSt() (bool, error) {
+	return c.Chain.QueryNodeSynchronizationSt()
+}
+
+func (c *Cli) QueryNodeConnectionSt() bool {
+	return c.Chain.QueryNodeConnectionSt()
+}
+
+func (c *Cli) QuaryAuthorizedAcc(puk []byte) (string, error) {
+	acc, err := c.Chain.QuaryAuthorizedAcc(puk)
+	if err != nil {
+		return "", err
+	}
+	return utils.EncodePublicKeyAsCessAccount(acc[:])
 }

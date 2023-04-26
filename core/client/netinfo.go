@@ -8,17 +8,29 @@
 package client
 
 import (
-	"github.com/CESSProject/sdk-go/core/chain"
+	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
-type ChallengeInfo struct {
-	Random []byte
-	Start  uint32
-}
-
-func (c *Cli) QueryNetSnapShot() (chain.ChallengeSnapShot, error) {
-	return c.Chain.QueryChallengeSnapshot()
+func (c *Cli) QueryChallengeSt() (ChallengeSnapshot, error) {
+	var challengeSnapshot ChallengeSnapshot
+	chall, err := c.Chain.QueryChallengeSnapshot()
+	if err != nil {
+		return challengeSnapshot, err
+	}
+	challengeSnapshot.NetSnapshot.Start = uint32(chall.NetSnapshot.Start)
+	challengeSnapshot.NetSnapshot.Total_idle_space = chall.NetSnapshot.Total_idle_space.String()
+	challengeSnapshot.NetSnapshot.Total_reward = chall.NetSnapshot.Total_reward.String()
+	challengeSnapshot.MinerSnapshot = make([]MinerSnapshot, len(chall.MinerSnapShot))
+	for k, v := range chall.MinerSnapShot {
+		challengeSnapshot.MinerSnapshot[k].Idle_space = v.Idle_space.String()
+		challengeSnapshot.MinerSnapshot[k].Service_space = v.Service_space.String()
+		challengeSnapshot.MinerSnapshot[k].Miner, err = utils.EncodePublicKeyAsCessAccount(v.Miner[:])
+		if err != nil {
+			return challengeSnapshot, err
+		}
+	}
+	return challengeSnapshot, nil
 }
 
 func (c *Cli) QueryChallenge(pubkey []byte) (ChallengeInfo, error) {
