@@ -130,6 +130,12 @@ type Chain interface {
 
 	// GetChainState returns chain node state
 	GetChainState() bool
+
+	//
+	GetMetadata() *types.Metadata
+
+	//
+	GetKeyEvents() types.StorageKey
 }
 
 type chainClient struct {
@@ -238,6 +244,10 @@ func (c *chainClient) GetSignatureAcc() string {
 	return acc
 }
 
+func (c *chainClient) GetKeyEvents() types.StorageKey {
+	return c.keyEvents
+}
+
 // ExtractAccountPublickey
 func (c *chainClient) ExtractAccountPuk(account string) ([]byte, error) {
 	if account != "" {
@@ -252,6 +262,9 @@ func (c *chainClient) GetSignatureURI() string {
 
 func (c *chainClient) GetSubstrateAPI() *gsrpc.SubstrateAPI {
 	return c.api
+}
+func (c *chainClient) GetMetadata() *types.Metadata {
+	return c.metadata
 }
 
 func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
