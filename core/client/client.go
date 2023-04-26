@@ -107,6 +107,7 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 	cli.Protocol.TagProtocol = protocol.NewTagProtocol(p2pnode)
 	cli.Protocol.IdleProtocol = protocol.NewIdleProtocol(p2pnode)
 
+
 	//
 	os.MkdirAll(filepath.Join(workspaceActual, rule.FileDir), rule.DirMode)
 	os.MkdirAll(filepath.Join(workspaceActual, rule.TempDir), rule.DirMode)
