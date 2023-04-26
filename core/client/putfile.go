@@ -30,8 +30,9 @@ type SegmentInfo struct {
 	FragmentHash []string
 }
 
-func (c *Cli) DeleteFile(owner []byte, roothash string) (string, chain.FileHash, error) {
-	return c.Chain.DeleteFile(owner, roothash)
+func (c *Cli) DeleteFiles(owner []byte, roothash string) (string, string, error) {
+	txhash, failed, err := c.Chain.DeleteFile(owner, roothash)
+	return txhash, string(failed[:]), err
 }
 
 func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (uint8, error) {

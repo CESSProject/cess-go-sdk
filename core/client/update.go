@@ -9,7 +9,7 @@ package client
 
 import "github.com/CESSProject/sdk-go/core/utils"
 
-func (c *Cli) UpdateAddress(name string) (string, error) {
+func (c *Cli) UpdateRoleAddress(name string) (string, error) {
 	return c.Chain.UpdateAddress(name, c.Node.Multiaddr())
 }
 
