@@ -105,6 +105,8 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 	cli.Protocol.ReadFileProtocol = protocol.NewReadFileProtocol(p2pnode)
 	cli.Protocol.MusProtocol = protocol.NewMusProtocol(p2pnode)
 	cli.Protocol.TagProtocol = protocol.NewTagProtocol(p2pnode)
+	cli.Protocol.IdleProtocol = protocol.NewIdleProtocol(p2pnode)
+
 
 	//
 	os.MkdirAll(filepath.Join(workspaceActual, rule.FileDir), rule.DirMode)
@@ -113,4 +115,8 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 	os.MkdirAll(filepath.Join(workspaceActual, rule.MusDir), rule.DirMode)
 
 	return cli, nil
+}
+
+func (c *Cli) Sign(msg []byte) ([]byte, error) {
+	return signature.Sign(msg, c.GetSignatureURI())
 }

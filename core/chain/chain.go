@@ -121,6 +121,21 @@ type Chain interface {
 
 	// GetSignatureAcc returns the signature account.
 	GetSignatureAcc() string
+
+	// GetSignatureURI to get the private key of the signing account
+	GetSignatureURI() string
+
+	// GetSubstrateAPI returns Substrate API
+	GetSubstrateAPI() *gsrpc.SubstrateAPI
+
+	// GetChainState returns chain node state
+	GetChainState() bool
+
+	//
+	GetMetadata() *types.Metadata
+
+	//
+	GetKeyEvents() types.StorageKey
 }
 
 type chainClient struct {
@@ -229,12 +244,27 @@ func (c *chainClient) GetSignatureAcc() string {
 	return acc
 }
 
+func (c *chainClient) GetKeyEvents() types.StorageKey {
+	return c.keyEvents
+}
+
 // ExtractAccountPublickey
 func (c *chainClient) ExtractAccountPuk(account string) ([]byte, error) {
 	if account != "" {
 		return utils.ParsingPublickey(account)
 	}
 	return c.keyring.PublicKey, nil
+}
+
+func (c *chainClient) GetSignatureURI() string {
+	return c.keyring.URI
+}
+
+func (c *chainClient) GetSubstrateAPI() *gsrpc.SubstrateAPI {
+	return c.api
+}
+func (c *chainClient) GetMetadata() *types.Metadata {
+	return c.metadata
 }
 
 func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
