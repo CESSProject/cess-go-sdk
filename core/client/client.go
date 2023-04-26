@@ -114,3 +114,7 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 
 	return cli, nil
 }
+
+func (c *Cli) Sign(msg []byte) ([]byte, error) {
+	return signature.Sign(msg, c.GetSignatureURI())
+}

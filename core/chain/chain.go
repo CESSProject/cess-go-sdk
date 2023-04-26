@@ -121,6 +121,9 @@ type Chain interface {
 
 	// GetSignatureAcc returns the signature account.
 	GetSignatureAcc() string
+
+	// GetSignatureURI to get the private key of the signing account
+	GetSignatureURI() string
 }
 
 type chainClient struct {
@@ -235,6 +238,10 @@ func (c *chainClient) ExtractAccountPuk(account string) ([]byte, error) {
 		return utils.ParsingPublickey(account)
 	}
 	return c.keyring.PublicKey, nil
+}
+
+func (c *chainClient) GetSignatureURI() string {
+	return c.keyring.URI
 }
 
 func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
