@@ -49,8 +49,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/CESSProject/cess-oss v0.1.2 h1:ChrPFzEVVtk5B/1AihAbaVl0kIrdWADX9W6NMQc27YM=
 github.com/CESSProject/cess-oss v0.1.2/go.mod h1:VAQHNgfoNxGev+h1Zf7I3mLjh9I0vHKNAoCrB9v6LVQ=
-github.com/CESSProject/p2p-go v0.0.10 h1:4/VN2PC/Sh3b4PuRy3B6hK/5bFco5NH7D3xkJR57qMQ=
-github.com/CESSProject/p2p-go v0.0.10/go.mod h1:9EOXR2dZpWM6l7sFz75IPQr5AYEAp3FvCXliINQ0hPw=
+github.com/CESSProject/p2p-go v0.0.11 h1:fWHkFO71Arx/bpqK0SlI3swwM/1/invdS+NMjrCs9hc=
+github.com/CESSProject/p2p-go v0.0.11/go.mod h1:9EOXR2dZpWM6l7sFz75IPQr5AYEAp3FvCXliINQ0hPw=
 github.com/ChainSafe/go-schnorrkel v1.0.0 h1:3aDA67lAykLaG1y3AOjs88dMxC88PgUuHRrLeDnvGIM=
 github.com/ChainSafe/go-schnorrkel v1.0.0/go.mod h1:dpzHYVxLZcp8pjlV+O+UR8K0Hp/z7vcchBSbMBEhCw4=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
