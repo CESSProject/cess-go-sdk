@@ -78,19 +78,20 @@ const (
 
 	// SMINER
 	TX_SMINER_REGISTER       = SMINER + DOT + "regnstk"
-	TX_SMINER_EXIT           = SMINER + DOT + "exit_miner"
 	TX_SMINER_INCREASESTAKES = SMINER + DOT + "increase_collateral"
 	TX_SMINER_UPDATEADDR     = SMINER + DOT + "update_ip"
 	TX_SMINER_UPDATEINCOME   = SMINER + DOT + "update_beneficiary"
+	TX_SMINER_CLAIMREWARD    = SMINER + DOT + "receive_reward"
 
 	// FILEBANK
-	TX_FILEBANK_PUTBUCKET    = FILEBANK + DOT + "create_bucket"
-	TX_FILEBANK_DELBUCKET    = FILEBANK + DOT + "delete_bucket"
-	TX_FILEBANK_DELFILE      = FILEBANK + DOT + "delete_file"
-	TX_FILEBANK_UPLOADDEC    = FILEBANK + DOT + "upload_declaration"
-	TX_FILEBANK_ADDIDLESPACE = FILEBANK + DOT + "test_add_idle_space"
-	TX_FILEBANK_FILEREPORT   = FILEBANK + DOT + "transfer_report"
-	TX_FILEBANK_REPLACEFILE  = FILEBANK + DOT + "replace_file_report"
+	TX_FILEBANK_PUTBUCKET     = FILEBANK + DOT + "create_bucket"
+	TX_FILEBANK_DELBUCKET     = FILEBANK + DOT + "delete_bucket"
+	TX_FILEBANK_DELFILE       = FILEBANK + DOT + "delete_file"
+	TX_FILEBANK_UPLOADDEC     = FILEBANK + DOT + "upload_declaration"
+	TX_FILEBANK_ADDIDLESPACE  = FILEBANK + DOT + "test_add_idle_space"
+	TX_FILEBANK_FILEREPORT    = FILEBANK + DOT + "transfer_report"
+	TX_FILEBANK_REPLACEFILE   = FILEBANK + DOT + "replace_file_report"
+	TX_FILEBANK_MINEREXITPREP = FILEBANK + DOT + "miner_exit_prep"
 )
 
 const (
@@ -110,6 +111,7 @@ const (
 	MINER_STATE_POSITIVE = "positive"
 	MINER_STATE_FROZEN   = "frozen"
 	MINER_STATE_EXIT     = "exit"
+	MINER_STATE_LOCK     = "lock"
 )
 
 const (
@@ -128,23 +130,31 @@ var (
 type FileHash [64]types.U8
 type Random [20]types.U8
 type TeePodr2Pk [294]types.U8
-type PeerID [53]types.U8
+type PeerID [52]types.U8
 
 type MinerInfo struct {
-	PeerId      types.U64
-	IncomeAcc   types.AccountID
-	Ip          types.Bytes
-	Collaterals types.U128
-	State       types.Bytes
-	Power       types.U128
-	Space       types.U128
-	RewardInfo  RewardInfo
+	BeneficiaryAcc types.AccountID
+	PeerId         PeerID
+	Collaterals    types.U128
+	Debt           types.U128
+	State          types.Bytes
+	IdleSpace      types.U128
+	ServiceSpace   types.U128
+	LockSpace      types.U128
 }
 
 type RewardInfo struct {
-	Total       types.U128
-	Received    types.U128
-	NotReceived types.U128
+	TotalReward              types.U128
+	RewardIssued             types.U128
+	CurrentlyAvailableReward types.U128
+	OrderList                []RewardOrder
+}
+
+type RewardOrder struct {
+	OrderReward types.U128
+	EachShare   types.U128
+	AwardCount  types.U128
+	HasIssued   types.U128
 }
 
 type FileMetadata struct {
@@ -155,14 +165,14 @@ type FileMetadata struct {
 }
 
 type BucketInfo struct {
-	Objects_list []FileHash
-	Authority    []types.AccountID
+	ObjectsList []FileHash
+	Authority   []types.AccountID
 }
 
 type UserBrief struct {
-	User        types.AccountID
-	File_name   types.Bytes
-	Bucket_name types.Bytes
+	User       types.AccountID
+	FileName   types.Bytes
+	BucketName types.Bytes
 }
 
 type SegmentList struct {
@@ -222,26 +232,26 @@ type ChallengeSnapShot struct {
 }
 
 type NetSnapShot struct {
-	Start               types.U32
-	Total_reward        types.U128
-	Total_idle_space    types.U128
-	Total_service_space types.U128
-	Random              Random
+	Start             types.U32
+	TotalReward       types.U128
+	TotalIdleSpace    types.U128
+	TotalServiceSpace types.U128
+	Random            Random
 }
 
 type MinerSnapShot struct {
-	Miner         types.AccountID
-	Idle_space    types.U128
-	Service_space types.U128
+	Miner        types.AccountID
+	IdleSpace    types.U128
+	ServiceSpace types.U128
 }
 
 type NodePublickey struct {
-	Node_publickey [32]types.U8
+	NodePublickey [32]types.U8
 }
 
 type TeeWorkerInfo struct {
-	Controller_account types.AccountID
-	Peer_id            PeerID
-	Node_key           NodePublickey
-	Stash_account      types.AccountID
+	ControllerAccount types.AccountID
+	PeerId            PeerID
+	NodeKey           NodePublickey
+	StashAccount      types.AccountID
 }
