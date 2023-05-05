@@ -19,12 +19,12 @@ func (c *Cli) QueryChallengeSt() (ChallengeSnapshot, error) {
 		return challengeSnapshot, err
 	}
 	challengeSnapshot.NetSnapshot.Start = uint32(chall.NetSnapshot.Start)
-	challengeSnapshot.NetSnapshot.Total_idle_space = chall.NetSnapshot.Total_idle_space.String()
-	challengeSnapshot.NetSnapshot.Total_reward = chall.NetSnapshot.Total_reward.String()
+	challengeSnapshot.NetSnapshot.Total_idle_space = chall.NetSnapshot.TotalIdleSpace.String()
+	challengeSnapshot.NetSnapshot.Total_reward = chall.NetSnapshot.TotalReward.String()
 	challengeSnapshot.MinerSnapshot = make([]MinerSnapshot, len(chall.MinerSnapShot))
 	for k, v := range chall.MinerSnapShot {
-		challengeSnapshot.MinerSnapshot[k].Idle_space = v.Idle_space.String()
-		challengeSnapshot.MinerSnapshot[k].Service_space = v.Service_space.String()
+		challengeSnapshot.MinerSnapshot[k].Idle_space = v.IdleSpace.String()
+		challengeSnapshot.MinerSnapshot[k].Service_space = v.ServiceSpace.String()
 		challengeSnapshot.MinerSnapshot[k].Miner, err = utils.EncodePublicKeyAsCessAccount(v.Miner[:])
 		if err != nil {
 			return challengeSnapshot, err

@@ -63,7 +63,7 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 				return txhash, err
 			}
 		} else {
-			if string(minerinfo.PeerId) != multiaddr {
+			if string(minerinfo.PeerId[:]) != multiaddr {
 				txhash, err = c.updateAddress(role, multiaddr)
 				if err != nil {
 					return txhash, err
@@ -420,7 +420,7 @@ func (c *chainClient) Exit(role string) (string, error) {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		call, err = types.NewCall(c.metadata, TX_SMINER_EXIT)
+		call, err = types.NewCall(c.metadata, TX_FILEBANK_MINEREXITPREP)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}

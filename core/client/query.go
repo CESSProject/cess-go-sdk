@@ -53,13 +53,13 @@ func (c *Cli) QueryTeeWorkerList() ([]TeeWorkerSt, error) {
 	}
 	var results = make([]TeeWorkerSt, len(teelist))
 	for k, v := range teelist {
-		results[k].Node_key = []byte(string(v.Node_key.Node_publickey[:]))
-		results[k].Peer_id = []byte(string(v.Peer_id[:]))
-		results[k].Controller_account, err = utils.EncodePublicKeyAsCessAccount(v.Controller_account[:])
+		results[k].Node_key = []byte(string(v.NodeKey.NodePublickey[:]))
+		results[k].Peer_id = []byte(string(v.PeerId[:]))
+		results[k].Controller_account, err = utils.EncodePublicKeyAsCessAccount(v.ControllerAccount[:])
 		if err != nil {
 			return results, err
 		}
-		results[k].Stash_account, err = utils.EncodePublicKeyAsCessAccount(v.Stash_account[:])
+		results[k].Stash_account, err = utils.EncodePublicKeyAsCessAccount(v.StashAccount[:])
 		if err != nil {
 			return results, err
 		}

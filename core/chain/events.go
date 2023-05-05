@@ -156,12 +156,19 @@ type Event_EndOfBufferPeriod struct {
 	Topics []types.Hash
 }
 
+type Event_Receive struct {
+	Phase  types.Phase
+	Acc    types.AccountID
+	Reward types.U128
+	Topics []types.Hash
+}
+
 // ------------------------FileBank----------------------
 type Event_DeleteFile struct {
 	Phase    types.Phase
 	Operator types.AccountID
 	Owner    types.AccountID
-	Filehash FileHash
+	Filehash []FileHash
 	Topics   []types.Hash
 }
 
@@ -407,6 +414,7 @@ type EventRecords struct {
 	Sminer_UpdataIp            []Event_UpdataIp
 	Sminer_StartOfBufferPeriod []Event_StartOfBufferPeriod
 	Sminer_EndOfBufferPeriod   []Event_EndOfBufferPeriod
+	Sminer_Receive             []Event_Receive
 	// FILEBANK
 	FileBank_DeleteFile        []Event_DeleteFile
 	FileBank_FileUpload        []Event_FileUpload

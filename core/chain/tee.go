@@ -107,5 +107,5 @@ func (c *chainClient) QueryTeePeerID(puk []byte) (PeerID, error) {
 		return PeerID{}, ERR_RPC_EMPTY_VALUE
 	}
 
-	return data.Peer_id, nil
+	return data.PeerId, nil
 }

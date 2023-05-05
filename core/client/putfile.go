@@ -30,11 +30,6 @@ type SegmentInfo struct {
 	FragmentHash []string
 }
 
-func (c *Cli) DeleteFiles(owner []byte, roothash string) (string, string, error) {
-	txhash, failed, err := c.Chain.DeleteFile(owner, roothash)
-	return txhash, string(failed[:]), err
-}
-
 func (c *Cli) PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (uint8, error) {
 	var err error
 	var storageOrder chain.StorageOrder
@@ -185,8 +180,8 @@ func (c *Cli) GenerateStorageOrder(roothash string, segment []SegmentInfo, owner
 		return err
 	}
 	user.User = *acc
-	user.Bucket_name = types.NewBytes([]byte(buckname))
-	user.File_name = types.NewBytes([]byte(filename))
+	user.BucketName = types.NewBytes([]byte(buckname))
+	user.FileName = types.NewBytes([]byte(filename))
 	_, err = c.Chain.UploadDeclaration(roothash, segmentList, user)
 	return err
 }
@@ -233,7 +228,7 @@ func (c *Cli) QueryAssignedMiner(minerTaskList []chain.MinerTaskList) ([]string,
 		if err != nil {
 			return multiaddrs, err
 		}
-		multiaddrs[i] = string(minerInfo.PeerId)
+		multiaddrs[i] = string(minerInfo.PeerId[:])
 	}
 	return multiaddrs, nil
 }

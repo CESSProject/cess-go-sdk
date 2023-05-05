@@ -95,7 +95,7 @@ type Chain interface {
 	DeleteBucket(puk []byte, bucketname string) (string, error)
 
 	// DeleteFile deletes files for puk.
-	DeleteFile(puk []byte, roothash string) (string, FileHash, error)
+	DeleteFile(puk []byte, roothash []string) (string, []FileHash, error)
 
 	// UploadDeclaration creates a storage order.
 	UploadDeclaration(roothash string, dealinfo []SegmentList, user UserBrief) (string, error)
@@ -136,6 +136,9 @@ type Chain interface {
 
 	//
 	GetKeyEvents() types.StorageKey
+
+	//
+	ClaimRewards() (string, error)
 }
 
 type chainClient struct {
