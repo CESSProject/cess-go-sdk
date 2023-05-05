@@ -110,6 +110,7 @@ const (
 	MINER_STATE_POSITIVE = "positive"
 	MINER_STATE_FROZEN   = "frozen"
 	MINER_STATE_EXIT     = "exit"
+	MINER_STATE_LOCK     = "lock"
 )
 
 const (
@@ -131,20 +132,28 @@ type TeePodr2Pk [294]types.U8
 type PeerID [53]types.U8
 
 type MinerInfo struct {
-	PeerId      types.U64
-	IncomeAcc   types.AccountID
-	Ip          types.Bytes
-	Collaterals types.U128
-	State       types.Bytes
-	Power       types.U128
-	Space       types.U128
-	RewardInfo  RewardInfo
+	BeneficiaryAcc types.AccountID
+	PeerId         types.Bytes
+	Collaterals    types.U128
+	Debt           types.U128
+	State          types.Bytes
+	IdleSpace      types.U128
+	ServiceSpace   types.U128
+	LockSpace      types.U128
 }
 
 type RewardInfo struct {
-	Total       types.U128
-	Received    types.U128
-	NotReceived types.U128
+	TotalReward              types.U128
+	RewardIssued             types.U128
+	CurrentlyAvailableReward types.U128
+	OrderList                []RewardOrder
+}
+
+type RewardOrder struct {
+	OrderReward types.U128
+	EachShare   types.U128
+	AwardCount  types.U128
+	HasIssued   types.U128
 }
 
 type FileMetadata struct {

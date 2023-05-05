@@ -63,13 +63,13 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 				return txhash, err
 			}
 		} else {
-			if string(minerinfo.Ip) != multiaddr {
+			if string(minerinfo.PeerId) != multiaddr {
 				txhash, err = c.updateAddress(role, multiaddr)
 				if err != nil {
 					return txhash, err
 				}
 			}
-			acc, _ := utils.EncodePublicKeyAsCessAccount(minerinfo.IncomeAcc[:])
+			acc, _ := utils.EncodePublicKeyAsCessAccount(minerinfo.BeneficiaryAcc[:])
 			if acc != income {
 				puk, err := utils.ParsingPublickey(income)
 				if err != nil {
@@ -369,8 +369,17 @@ func (c *chainClient) updateAddress(name, multiaddr string) (string, error) {
 
 				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
 
-				if len(events.Oss_OssUpdate) > 0 {
-					return txhash, nil
+				switch name {
+				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+					if len(events.Oss_OssUpdate) > 0 {
+						return txhash, nil
+					}
+				case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+					if len(events.Sminer_UpdataIp) > 0 {
+						return txhash, nil
+					}
+				default:
+					return txhash, errors.New(ERR_Failed)
 				}
 				return txhash, errors.New(ERR_Failed)
 			}
