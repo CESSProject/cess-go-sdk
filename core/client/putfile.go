@@ -17,9 +17,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/CESSProject/cess-oss/pkg/hashtree"
 	"github.com/CESSProject/sdk-go/core/chain"
 	"github.com/CESSProject/sdk-go/core/erasure"
+	"github.com/CESSProject/sdk-go/core/hashtree"
 	"github.com/CESSProject/sdk-go/core/rule"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
