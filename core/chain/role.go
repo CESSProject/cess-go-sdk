@@ -92,7 +92,11 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 		if !ok {
 			return txhash, errors.New("[big.Int.SetString]")
 		}
-		call, err = types.NewCall(c.metadata, TX_SMINER_REGISTER, *acc, types.NewBytes([]byte(multiaddr)), types.NewU128(*realTokens))
+		var peerid PeerID
+		for i := 0; i < len(multiaddr); i++ {
+			peerid[i] = types.U8(multiaddr[i])
+		}
+		call, err = types.NewCall(c.metadata, TX_SMINER_REGISTER, *acc, peerid, types.NewU128(*realTokens))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -304,7 +308,11 @@ func (c *chainClient) updateAddress(name, multiaddr string) (string, error) {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEADDR, types.NewBytes([]byte(multiaddr)))
+		var peerid PeerID
+		for i := 0; i < len(multiaddr); i++ {
+			peerid[i] = types.U8(multiaddr[i])
+		}
+		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEADDR, peerid)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
