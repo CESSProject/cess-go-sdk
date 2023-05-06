@@ -2,6 +2,7 @@ package chain
 
 import (
 	"fmt"
+	"log"
 	"math/big"
 	"strconv"
 	"time"
@@ -13,6 +14,14 @@ import (
 )
 
 func (c *chainClient) Register(role, multiaddr string, income string, pledge uint64) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		err         error
 		address     string
@@ -24,19 +33,14 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 		accountInfo types.AccountInfo
 	)
 
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
-		}
-	}()
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
+
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+	}
 
 	switch role {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
@@ -47,7 +51,7 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 			}
 		} else {
 			if address != multiaddr {
-				return c.updateAddress(role, multiaddr)
+				return c.updateAddress(key, role, multiaddr)
 			}
 			return "", nil
 		}
@@ -64,7 +68,7 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 			}
 		} else {
 			if string(minerinfo.PeerId[:]) != multiaddr {
-				txhash, err = c.updateAddress(role, multiaddr)
+				txhash, err = c.updateAddress(key, role, multiaddr)
 				if err != nil {
 					return txhash, err
 				}
@@ -75,7 +79,7 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 				if err != nil {
 					return txhash, err
 				}
-				return c.UpdateIncomeAcc(puk)
+				return c.updateIncomeAcc(key, puk)
 			}
 			return "", nil
 		}
@@ -101,12 +105,7 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	default:
-		return "", fmt.Errorf("Invalid role name")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		return "", fmt.Errorf("invalid role name")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -142,8 +141,10 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -154,9 +155,10 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 				if err != nil {
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
-
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil {
+					return txhash, nil
+				}
 				switch role {
 				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssRegister) > 0 {
@@ -179,6 +181,14 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 }
 
 func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		err         error
 		txhash      string
@@ -186,19 +196,9 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 		accountInfo types.AccountInfo
 	)
 
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
-		}
-	}()
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	switch role {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
@@ -215,12 +215,7 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 		return "", fmt.Errorf("Invalid role name")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -257,8 +252,10 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -269,9 +266,10 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 				if err != nil {
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
-
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil {
+					return txhash, nil
+				}
 				switch role {
 				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssUpdate) > 0 {
@@ -293,7 +291,7 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 	}
 }
 
-func (c *chainClient) updateAddress(name, multiaddr string) (string, error) {
+func (c *chainClient) updateAddress(key types.StorageKey, name, multiaddr string) (string, error) {
 	var (
 		err         error
 		txhash      string
@@ -320,16 +318,6 @@ func (c *chainClient) updateAddress(name, multiaddr string) (string, error) {
 		return "", fmt.Errorf("Invalid role name")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
@@ -374,9 +362,10 @@ func (c *chainClient) updateAddress(name, multiaddr string) (string, error) {
 				if err != nil {
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
-
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil {
+					return txhash, nil
+				}
 				switch name {
 				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssUpdate) > 0 {
@@ -400,6 +389,14 @@ func (c *chainClient) updateAddress(name, multiaddr string) (string, error) {
 }
 
 func (c *chainClient) Exit(role string) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		err         error
 		txhash      string
@@ -407,19 +404,9 @@ func (c *chainClient) Exit(role string) (string, error) {
 		accountInfo types.AccountInfo
 	)
 
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
-		}
-	}()
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	switch role {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
@@ -474,8 +461,10 @@ func (c *chainClient) Exit(role string) (string, error) {
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -486,9 +475,10 @@ func (c *chainClient) Exit(role string) (string, error) {
 				if err != nil {
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
-
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil {
+					return txhash, nil
+				}
 				switch role {
 				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssDestroy) > 0 {
