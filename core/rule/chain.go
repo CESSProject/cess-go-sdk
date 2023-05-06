@@ -11,3 +11,6 @@ import "time"
 
 // BlockInterval is the time interval for generating blocks, in seconds
 const BlockInterval = time.Second * time.Duration(6)
+
+// CESSTokenSymbol is the symbol of the CESS token
+const CESSTokenSymbol = "TCESS"

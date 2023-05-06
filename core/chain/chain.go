@@ -8,7 +8,10 @@
 package chain
 
 import (
+	"io"
+	"log"
 	"math/big"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -160,6 +163,9 @@ func NewChainClient(rpcAddr []string, secret string, t time.Duration) (Chain, er
 		cli = &chainClient{}
 	)
 
+	defer log.SetOutput(os.Stdout)
+	log.SetOutput(io.Discard)
+
 	for i := 0; i < len(rpcAddr); i++ {
 		cli.api, err = gsrpc.NewSubstrateAPI(rpcAddr[i])
 		if err == nil {
@@ -203,6 +209,7 @@ func NewChainClient(rpcAddr []string, secret string, t time.Duration) (Chain, er
 	cli.chainState.Store(true)
 	cli.timeForBlockOut = t
 	cli.rpcAddr = rpcAddr
+	cli.SetChainState(true)
 	return cli, nil
 }
 
@@ -273,6 +280,8 @@ func (c *chainClient) GetMetadata() *types.Metadata {
 func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
 	var err error
 	var api *gsrpc.SubstrateAPI
+	defer log.SetOutput(os.Stdout)
+	log.SetOutput(io.Discard)
 	for i := 0; i < len(rpcAddr); i++ {
 		api, err = gsrpc.NewSubstrateAPI(rpcAddr[i])
 		if err == nil {

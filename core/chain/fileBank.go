@@ -1,6 +1,7 @@
 package chain
 
 import (
+	"log"
 	"time"
 
 	"github.com/CESSProject/sdk-go/core/utils"
@@ -12,16 +13,14 @@ import (
 func (c *chainClient) QueryBucketInfo(puk []byte, bucketname string) (BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
 	var data BucketInfo
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
@@ -62,16 +61,15 @@ func (c *chainClient) QueryBucketInfo(puk []byte, bucketname string) (BucketInfo
 func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data []types.Bytes
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
@@ -107,19 +105,18 @@ func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 func (c *chainClient) QueryFileMetadata(roothash string) (FileMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var (
 		data FileMetadata
 		hash FileHash
 	)
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	if len(hash) != len(roothash) {
 		return data, errors.New("invalid filehash")

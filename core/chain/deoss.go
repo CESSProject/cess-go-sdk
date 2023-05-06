@@ -1,6 +1,8 @@
 package chain
 
 import (
+	"log"
+
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
@@ -11,23 +13,16 @@ import (
 func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Panicln(utils.RecoverError(err))
 		}
 	}()
 	var data types.Bytes
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return "", ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		OSS,
-		OSS,
-		pubkey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, OSS, OSS, pubkey)
 	if err != nil {
 		return "", errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -45,16 +40,14 @@ func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
 func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
 	var data types.AccountID
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
@@ -66,12 +59,7 @@ func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		OSS,
-		AUTHORITYLIST,
-		b,
-	)
+	key, err := types.CreateStorageKey(c.metadata, OSS, AUTHORITYLIST, b)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
