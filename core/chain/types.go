@@ -79,7 +79,7 @@ const (
 	// SMINER
 	TX_SMINER_REGISTER       = SMINER + DOT + "regnstk"
 	TX_SMINER_INCREASESTAKES = SMINER + DOT + "increase_collateral"
-	TX_SMINER_UPDATEADDR     = SMINER + DOT + "update_ip"
+	TX_SMINER_UPDATEPEERID   = SMINER + DOT + "update_peer_id"
 	TX_SMINER_UPDATEINCOME   = SMINER + DOT + "update_beneficiary"
 	TX_SMINER_CLAIMREWARD    = FILEBANK + DOT + "receive_reward"
 

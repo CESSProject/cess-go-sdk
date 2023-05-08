@@ -207,7 +207,7 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEADDR, types.NewBytes([]byte(multiaddr)))
+		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEPEERID, types.NewBytes([]byte(multiaddr)))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -310,7 +310,7 @@ func (c *chainClient) updateAddress(key types.StorageKey, name, multiaddr string
 		for i := 0; i < len(multiaddr); i++ {
 			peerid[i] = types.U8(multiaddr[i])
 		}
-		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEADDR, peerid)
+		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEPEERID, peerid)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
