@@ -11,6 +11,12 @@ import (
 
 // QueryNodeSynchronizationSt
 func (c *chainClient) QueryNodeSynchronizationSt() (bool, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	if !c.GetChainState() {
 		return false, ERR_RPC_CONNECTION
 	}
@@ -24,7 +30,9 @@ func (c *chainClient) QueryNodeSynchronizationSt() (bool, error) {
 // QueryBlockHeight
 func (c *chainClient) QueryBlockHeight(hash string) (uint32, error) {
 	defer func() {
-		recover()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
 	}()
 
 	if hash != "" {

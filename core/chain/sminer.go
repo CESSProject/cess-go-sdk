@@ -435,7 +435,7 @@ func (c *chainClient) Withdraw() (string, error) {
 		return txhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_SMINER_WITHDRAW)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_WITHDRAW)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}

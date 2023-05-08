@@ -166,7 +166,6 @@ type Event_Receive struct {
 type Event_Withdraw struct {
 	Phase  types.Phase
 	Acc    types.AccountID
-	Reward types.U128
 	Topics []types.Hash
 }
 

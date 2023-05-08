@@ -79,6 +79,7 @@ func (c *chainClient) QueryTeePeerID(puk []byte) (PeerID, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data TeeWorkerInfo
 
 	if !c.GetChainState() {
