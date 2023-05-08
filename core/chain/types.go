@@ -82,6 +82,7 @@ const (
 	TX_SMINER_UPDATEADDR     = SMINER + DOT + "update_ip"
 	TX_SMINER_UPDATEINCOME   = SMINER + DOT + "update_beneficiary"
 	TX_SMINER_CLAIMREWARD    = SMINER + DOT + "receive_reward"
+	TX_SMINER_WITHDRAW       = SMINER + DOT + "withdraw"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET     = FILEBANK + DOT + "create_bucket"

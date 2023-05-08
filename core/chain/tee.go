@@ -1,6 +1,8 @@
 package chain
 
 import (
+	"log"
+
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
@@ -10,22 +12,17 @@ import (
 func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data TeePodr2Pk
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return nil, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		TEEWORKER,
-		TEEPODR2Pk,
-	)
+	key, err := types.CreateStorageKey(c.metadata, TEEWORKER, TEEPODR2Pk)
 	if err != nil {
 		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -42,7 +39,18 @@ func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 }
 
 func (c *chainClient) QueryTeeInfoList() ([]TeeWorkerInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var list []TeeWorkerInfo
+
+	if !c.GetChainState() {
+		return list, ERR_RPC_CONNECTION
+	}
+
 	key := createPrefixedKey(TEEWORKER, TEEWORKERMAP)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
@@ -68,10 +76,14 @@ func (c *chainClient) QueryTeeInfoList() ([]TeeWorkerInfo, error) {
 func (c *chainClient) QueryTeePeerID(puk []byte) (PeerID, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
 	var data TeeWorkerInfo
+
+	if !c.GetChainState() {
+		return PeerID{}, ERR_RPC_CONNECTION
+	}
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
@@ -83,18 +95,7 @@ func (c *chainClient) QueryTeePeerID(puk []byte) (PeerID, error) {
 		return PeerID{}, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
-		return PeerID{}, ERR_RPC_CONNECTION
-	}
-	c.SetChainState(true)
-
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		TEEWORKER,
-		TEEWORKERMAP,
-		owner,
-	)
+	key, err := types.CreateStorageKey(c.metadata, TEEWORKER, TEEWORKERMAP, owner)
 	if err != nil {
 		return PeerID{}, errors.Wrap(err, "[CreateStorageKey]")
 	}

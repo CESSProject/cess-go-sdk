@@ -1,6 +1,8 @@
 package chain
 
 import (
+	"log"
+
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
@@ -9,22 +11,17 @@ import (
 func (c *chainClient) QueryChallengeSnapshot() (ChallengeSnapShot, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data ChallengeSnapShot
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		NETSNAPSHOT,
-		CHALLENGESNAPSHOT,
-	)
+	key, err := types.CreateStorageKey(c.metadata, NETSNAPSHOT, CHALLENGESNAPSHOT)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}

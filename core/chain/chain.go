@@ -118,6 +118,12 @@ type Chain interface {
 	// Exit exit the cess network.
 	Exit(role string) (string, error)
 
+	// ClaimRewards is used to claim rewards
+	ClaimRewards() (string, error)
+
+	// Withdraw is used to withdraw staking
+	Withdraw() (string, error)
+
 	// ExtractAccountPuk extracts the public key of the account,
 	// and returns its own public key if the account is empty.
 	ExtractAccountPuk(account string) ([]byte, error)
@@ -139,9 +145,6 @@ type Chain interface {
 
 	//
 	GetKeyEvents() types.StorageKey
-
-	//
-	ClaimRewards() (string, error)
 }
 
 type chainClient struct {
