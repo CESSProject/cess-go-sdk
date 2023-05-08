@@ -81,7 +81,7 @@ const (
 	TX_SMINER_INCREASESTAKES = SMINER + DOT + "increase_collateral"
 	TX_SMINER_UPDATEADDR     = SMINER + DOT + "update_ip"
 	TX_SMINER_UPDATEINCOME   = SMINER + DOT + "update_beneficiary"
-	TX_SMINER_CLAIMREWARD    = SMINER + DOT + "receive_reward"
+	TX_SMINER_CLAIMREWARD    = FILEBANK + DOT + "receive_reward"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET     = FILEBANK + DOT + "create_bucket"
@@ -92,6 +92,7 @@ const (
 	TX_FILEBANK_FILEREPORT    = FILEBANK + DOT + "transfer_report"
 	TX_FILEBANK_REPLACEFILE   = FILEBANK + DOT + "replace_file_report"
 	TX_FILEBANK_MINEREXITPREP = FILEBANK + DOT + "miner_exit_prep"
+	TX_FILEBANK_WITHDRAW      = FILEBANK + DOT + "withdraw"
 )
 
 const (

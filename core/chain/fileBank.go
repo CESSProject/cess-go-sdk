@@ -1,6 +1,7 @@
 package chain
 
 import (
+	"log"
 	"time"
 
 	"github.com/CESSProject/sdk-go/core/utils"
@@ -12,16 +13,15 @@ import (
 func (c *chainClient) QueryBucketInfo(puk []byte, bucketname string) (BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data BucketInfo
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
@@ -33,18 +33,12 @@ func (c *chainClient) QueryBucketInfo(puk []byte, bucketname string) (BucketInfo
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	name_byte, err := codec.Encode(bucketname)
+	name, err := codec.Encode(bucketname)
 	if err != nil {
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		FILEBANK,
-		BUCKET,
-		owner,
-		name_byte,
-	)
+	key, err := types.CreateStorageKey(c.metadata, FILEBANK, BUCKET, owner, name)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -62,16 +56,15 @@ func (c *chainClient) QueryBucketInfo(puk []byte, bucketname string) (BucketInfo
 func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data []types.Bytes
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
@@ -83,12 +76,7 @@ func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		FILEBANK,
-		BUCKETLIST,
-		owner,
-	)
+	key, err := types.CreateStorageKey(c.metadata, FILEBANK, BUCKETLIST, owner)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -107,19 +95,18 @@ func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 func (c *chainClient) QueryFileMetadata(roothash string) (FileMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var (
 		data FileMetadata
 		hash FileHash
 	)
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	if len(hash) != len(roothash) {
 		return data, errors.New("invalid filehash")
@@ -134,12 +121,7 @@ func (c *chainClient) QueryFileMetadata(roothash string) (FileMetadata, error) {
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		FILEBANK,
-		FILE,
-		b,
-	)
+	key, err := types.CreateStorageKey(c.metadata, FILEBANK, FILE, b)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -157,11 +139,14 @@ func (c *chainClient) QueryFileMetadata(roothash string) (FileMetadata, error) {
 func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data StorageOrder
-	var hash FileHash
+
+	var (
+		data StorageOrder
+		hash FileHash
+	)
 
 	if len(hash) != len(roothash) {
 		return data, errors.New("invalid filehash")
@@ -176,18 +161,11 @@ func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		FILEBANK,
-		DEALMAP,
-		b,
-	)
+	key, err := types.CreateStorageKey(c.metadata, FILEBANK, DEALMAP, b)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -205,9 +183,10 @@ func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data types.U32
 
 	acc, err := types.NewAccountID(puk)
@@ -220,18 +199,11 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 		return 0, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return 0, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		FILEBANK,
-		PENDINGREPLACE,
-		owner,
-	)
+	key, err := types.CreateStorageKey(c.metadata, FILEBANK, PENDINGREPLACE, owner)
 	if err != nil {
 		return 0, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -247,40 +219,29 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 }
 
 func (c *chainClient) SubmitIdleMetadata(idlefiles []IdleMetadata) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
 	)
 
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
-		}
-	}()
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	call, err := types.NewCall(
-		c.metadata,
-		TX_FILEBANK_ADDIDLESPACE,
-		idlefiles,
-	)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_ADDIDLESPACE, idlefiles)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -317,8 +278,10 @@ func (c *chainClient) SubmitIdleMetadata(idlefiles []IdleMetadata) (string, erro
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -346,46 +309,34 @@ func (c *chainClient) SubmitIdleMetadata(idlefiles []IdleMetadata) (string, erro
 }
 
 func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
 	)
 
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
-		}
-	}()
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	acc, err := types.NewAccountID(owner_pkey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(
-		c.metadata,
-		TX_FILEBANK_PUTBUCKET,
-		*acc,
-		types.NewBytes([]byte(name)),
-	)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_PUTBUCKET, *acc, types.NewBytes([]byte(name)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -422,8 +373,10 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -435,11 +388,11 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
-				if len(events.FileBank_CreateBucket) > 0 {
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.FileBank_CreateBucket) > 0 {
 					return txhash, nil
 				}
+
 				return txhash, errors.New(ERR_Failed)
 			}
 		case err = <-sub.Err():
@@ -451,46 +404,34 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 }
 
 func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
 	)
 
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
-		}
-	}()
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
 	acc, err := types.NewAccountID(owner_pkey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(
-		c.metadata,
-		TX_FILEBANK_DELBUCKET,
-		*acc,
-		types.NewBytes([]byte(name)),
-	)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_DELBUCKET, *acc, types.NewBytes([]byte(name)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -527,8 +468,10 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -540,11 +483,11 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
-				if len(events.FileBank_DeleteBucket) > 0 {
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.FileBank_DeleteBucket) > 0 {
 					return txhash, nil
 				}
+
 				return txhash, errors.New(ERR_Failed)
 			}
 		case err = <-sub.Err():
@@ -556,26 +499,24 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 }
 
 func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList, user UserBrief) (string, error) {
-	var (
-		txhash      string
-		accountInfo types.AccountInfo
-	)
-
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	var (
+		txhash      string
+		hash        FileHash
+		accountInfo types.AccountInfo
+	)
+
+	if !c.GetChainState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	var hash FileHash
 	if len(filehash) != len(hash) {
 		return txhash, errors.New("invalid filehash")
 	}
@@ -583,23 +524,12 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 		hash[i] = types.U8(filehash[i])
 	}
 
-	call, err := types.NewCall(
-		c.metadata,
-		TX_FILEBANK_UPLOADDEC,
-		hash,
-		dealinfo,
-		user,
-	)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_UPLOADDEC, hash, dealinfo, user)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -636,8 +566,10 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -648,10 +580,8 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 				if err != nil {
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
-
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
-				if len(events.FileBank_UploadDeclaration) > 0 {
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.FileBank_UploadDeclaration) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(ERR_Failed)
@@ -665,20 +595,23 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 }
 
 func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileHash, error) {
-	var (
-		txhash      string
-		accountInfo types.AccountInfo
-	)
-
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var hashs = make([]FileHash, len(filehash))
+	var (
+		txhash      string
+		accountInfo types.AccountInfo
+		hashs       = make([]FileHash, len(filehash))
+	)
+
+	if !c.GetChainState() {
+		return txhash, hashs, ERR_RPC_CONNECTION
+	}
 
 	for j := 0; j < len(filehash); j++ {
 		if len(filehash[j]) != len(hashs[j]) {
@@ -689,38 +622,17 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileH
 		}
 	}
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
-		return txhash, hashs, ERR_RPC_CONNECTION
-	}
-	c.SetChainState(true)
-
-	// var hash FileHash
-	// for i := 0; i < len(filehash); i++ {
-	// 	hash[i] = types.U8(filehash[i])
-	// }
-
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
 		return txhash, hashs, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(
-		c.metadata,
-		TX_FILEBANK_DELFILE,
-		*acc,
-		hashs,
-	)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_DELFILE, *acc, hashs)
 	if err != nil {
 		return txhash, hashs, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, hashs, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -769,10 +681,8 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileH
 				if err != nil {
 					return txhash, hashs, errors.Wrap(err, "[GetStorageRaw]")
 				}
-
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
-				if len(events.FileBank_DeleteFile) > 0 {
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.FileBank_DeleteFile) > 0 {
 					return txhash, events.FileBank_DeleteFile[0].Filehash, nil
 				}
 				return txhash, hashs, errors.New(ERR_Failed)
@@ -786,40 +696,29 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileH
 }
 
 func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
 	)
 
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
-		}
-	}()
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return txhash, nil, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	call, err := types.NewCall(
-		c.metadata,
-		TX_FILEBANK_FILEREPORT,
-		roothash,
-	)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_FILEREPORT, roothash)
 	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -856,8 +755,10 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 		return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -868,10 +769,8 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 				if err != nil {
 					return txhash, nil, errors.Wrap(err, "[GetStorageRaw]")
 				}
-
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
-				if len(events.FileBank_TransferReport) > 0 {
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.FileBank_TransferReport) > 0 {
 					return txhash, events.FileBank_TransferReport[0].Failed_list, nil
 				}
 				return txhash, nil, errors.New(ERR_Failed)
@@ -885,40 +784,29 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 }
 
 func (c *chainClient) ReplaceIdleFiles(roothash []FileHash) (string, []FileHash, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
 	)
 
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
-		}
-	}()
-
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return txhash, nil, ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	call, err := types.NewCall(
-		c.metadata,
-		TX_FILEBANK_REPLACEFILE,
-		roothash,
-	)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_REPLACEFILE, roothash)
 	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		SYSTEM,
-		ACCOUNT,
-		c.keyring.PublicKey,
-	)
+	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -955,8 +843,10 @@ func (c *chainClient) ReplaceIdleFiles(roothash []FileHash) (string, []FileHash,
 		return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.timeForBlockOut)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -967,10 +857,8 @@ func (c *chainClient) ReplaceIdleFiles(roothash []FileHash) (string, []FileHash,
 				if err != nil {
 					return txhash, nil, errors.Wrap(err, "[GetStorageRaw]")
 				}
-
-				types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
-				if len(events.FileBank_ReplaceFiller) > 0 {
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.FileBank_ReplaceFiller) > 0 {
 					return txhash, events.FileBank_ReplaceFiller[0].Filler_list, nil
 				}
 				return txhash, nil, errors.New(ERR_Failed)

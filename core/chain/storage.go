@@ -2,6 +2,7 @@ package chain
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -12,22 +13,17 @@ import (
 func (c *chainClient) QuerySpacePricePerGib() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data types.U128
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
+	if !c.GetChainState() {
 		return "", ERR_RPC_CONNECTION
 	}
-	c.SetChainState(true)
 
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		STORAGEHANDLER,
-		UNITPRICE,
-	)
+	key, err := types.CreateStorageKey(c.metadata, STORAGEHANDLER, UNITPRICE)
 	if err != nil {
 		return "", errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -46,10 +42,15 @@ func (c *chainClient) QuerySpacePricePerGib() (string, error) {
 func (c *chainClient) QueryUserSpaceInfo(puk []byte) (UserSpaceInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			println(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
+
 	var data UserSpaceInfo
+
+	if !c.GetChainState() {
+		return data, ERR_RPC_CONNECTION
+	}
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
@@ -61,18 +62,7 @@ func (c *chainClient) QueryUserSpaceInfo(puk []byte) (UserSpaceInfo, error) {
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	if !c.IsChainClientOk() {
-		c.SetChainState(false)
-		return data, ERR_RPC_CONNECTION
-	}
-	c.SetChainState(true)
-
-	key, err := types.CreateStorageKey(
-		c.metadata,
-		STORAGEHANDLER,
-		USERSPACEINFO,
-		owner,
-	)
+	key, err := types.CreateStorageKey(c.metadata, STORAGEHANDLER, USERSPACEINFO, owner)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
