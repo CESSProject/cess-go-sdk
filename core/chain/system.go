@@ -134,3 +134,17 @@ func (c *chainClient) SysVersion() (string, error) {
 	err := c.api.Client.Call(&data, RPC_SYS_Version)
 	return string(data), err
 }
+
+func (c *chainClient) NetListening() (bool, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.Bool
+	if !c.GetChainState() {
+		return false, ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, RPC_NET_Listening)
+	return bool(data), err
+}

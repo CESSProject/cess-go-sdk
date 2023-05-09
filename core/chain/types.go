@@ -101,6 +101,9 @@ const (
 	RPC_SYS_Properties = "system_properties"
 	RPC_SYS_SyncState  = "system_syncState"
 	RPC_SYS_Version    = "system_version"
+
+	//Net
+	RPC_NET_Listening = "net_listening"
 )
 
 const (

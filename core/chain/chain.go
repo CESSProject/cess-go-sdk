@@ -154,6 +154,9 @@ type Chain interface {
 
 	//
 	SysVersion() (string, error)
+
+	//
+	NetListening() (bool, error)
 }
 
 type chainClient struct {
