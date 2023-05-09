@@ -68,10 +68,7 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 			}
 		} else {
 			if string(minerinfo.PeerId[:]) != multiaddr {
-				txhash, err = c.updateAddress(key, role, multiaddr)
-				if err != nil {
-					return txhash, err
-				}
+				return c.updateAddress(key, role, multiaddr)
 			}
 			acc, _ := utils.EncodePublicKeyAsCessAccount(minerinfo.BeneficiaryAcc[:])
 			if acc != income {

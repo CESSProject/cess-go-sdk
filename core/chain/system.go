@@ -92,3 +92,59 @@ func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 	}
 	return data, nil
 }
+
+func (c *chainClient) SysProperties() (SysProperties, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data SysProperties
+	if !c.GetChainState() {
+		return data, ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, RPC_SYS_Properties)
+	return data, err
+}
+
+func (c *chainClient) SyncState() (SysSyncState, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data SysSyncState
+	if !c.GetChainState() {
+		return data, ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, RPC_SYS_SyncState)
+	return data, err
+}
+
+func (c *chainClient) SysVersion() (string, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.Text
+	if !c.GetChainState() {
+		return "", ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, RPC_SYS_Version)
+	return string(data), err
+}
+
+func (c *chainClient) NetListening() (bool, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.Bool
+	if !c.GetChainState() {
+		return false, ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, RPC_NET_Listening)
+	return bool(data), err
+}
