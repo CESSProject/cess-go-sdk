@@ -95,6 +95,14 @@ const (
 	TX_FILEBANK_WITHDRAW      = FILEBANK + DOT + "withdraw"
 )
 
+// RPC Call
+const (
+	// System
+	RPC_SYS_Properties = "system_properties"
+	RPC_SYS_SyncState  = "system_syncState"
+	RPC_SYS_Version    = "system_version"
+)
+
 const (
 	Role_OSS    = "OSS"
 	Role_DEOSS  = "DEOSS"
@@ -132,6 +140,19 @@ type FileHash [64]types.U8
 type Random [20]types.U8
 type TeePodr2Pk [294]types.U8
 type PeerID [52]types.U8
+
+type SysProperties struct {
+	Ss58Format    types.U8
+	TokenDecimals types.U8
+	TokenSymbol   types.Text
+	SS58Prefix    types.U32
+}
+
+type SysSyncState struct {
+	StartingBlock types.U32
+	CurrentBlock  types.U32
+	HighestBlock  types.U32
+}
 
 type MinerInfo struct {
 	BeneficiaryAcc types.AccountID

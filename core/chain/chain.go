@@ -145,6 +145,15 @@ type Chain interface {
 
 	//
 	GetKeyEvents() types.StorageKey
+
+	//
+	SysProperties() (SysProperties, error)
+
+	//
+	SyncState() (SysSyncState, error)
+
+	//
+	SysVersion() (string, error)
 }
 
 type chainClient struct {
@@ -158,6 +167,7 @@ type chainClient struct {
 	keyring         signature.KeyringPair
 	rpcAddr         []string
 	timeForBlockOut time.Duration
+	tokenSymbol     string
 }
 
 func NewChainClient(rpcAddr []string, secret string, t time.Duration) (Chain, error) {
@@ -192,12 +202,7 @@ func NewChainClient(rpcAddr []string, secret string, t time.Duration) (Chain, er
 	if err != nil {
 		return nil, err
 	}
-	cli.keyEvents, err = types.CreateStorageKey(
-		cli.metadata,
-		SYSTEM,
-		EVENTS,
-		nil,
-	)
+	cli.keyEvents, err = types.CreateStorageKey(cli.metadata, SYSTEM, EVENTS, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -207,6 +212,11 @@ func NewChainClient(rpcAddr []string, secret string, t time.Duration) (Chain, er
 			return nil, err
 		}
 	}
+	properties, err := cli.SysProperties()
+	if err != nil {
+		return nil, err
+	}
+	cli.tokenSymbol = string(properties.TokenSymbol)
 	cli.lock = new(sync.Mutex)
 	cli.chainState = &atomic.Bool{}
 	cli.chainState.Store(true)
@@ -276,8 +286,13 @@ func (c *chainClient) GetSignatureURI() string {
 func (c *chainClient) GetSubstrateAPI() *gsrpc.SubstrateAPI {
 	return c.api
 }
+
 func (c *chainClient) GetMetadata() *types.Metadata {
 	return c.metadata
+}
+
+func (c *chainClient) GetTokenSymbol() string {
+	return c.tokenSymbol
 }
 
 func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
@@ -288,7 +303,7 @@ func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
 	for i := 0; i < len(rpcAddr); i++ {
 		api, err = gsrpc.NewSubstrateAPI(rpcAddr[i])
 		if err == nil {
-			break
+			return api, nil
 		}
 	}
 	return api, err
