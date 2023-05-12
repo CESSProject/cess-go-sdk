@@ -141,6 +141,12 @@ type Chain interface {
 	GetChainState() bool
 
 	//
+	SetChainState(state bool)
+
+	//
+	Reconnect() error
+
+	//
 	GetMetadata() *types.Metadata
 
 	//
@@ -229,22 +235,21 @@ func NewChainClient(rpcAddr []string, secret string, t time.Duration) (Chain, er
 	return cli, nil
 }
 
-func (c *chainClient) IsChainClientOk() bool {
-	err := healthchek(c.api)
-	if err != nil {
-		c.api = nil
-		cli, err := reconnectChainClient(c.rpcAddr)
-		if err != nil {
-			return false
-		}
-		c.api = cli
-		c.metadata, err = c.api.RPC.State.GetMetadataLatest()
-		if err != nil {
-			return false
-		}
-		return true
+func (c *chainClient) Reconnect() error {
+	var err error
+	if c.api.Client != nil {
+		c.api.Client.Close()
 	}
-	return true
+	c.api = nil
+	c.api, err = reconnectChainClient(c.rpcAddr)
+	if err != nil {
+		return err
+	}
+	c.metadata, err = c.api.RPC.State.GetMetadataLatest()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *chainClient) SetChainState(state bool) {
@@ -310,20 +315,6 @@ func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
 		}
 	}
 	return api, err
-}
-
-func healthchek(a *gsrpc.SubstrateAPI) error {
-	defer func() { recover() }()
-	_, err := a.RPC.System.Health()
-	return err
-}
-
-func (c *chainClient) KeepConnect() {
-	tick := time.NewTicker(time.Second * 20)
-	select {
-	case <-tick.C:
-		healthchek(c.api)
-	}
 }
 
 func createPrefixedKey(method, prefix string) []byte {
