@@ -10,31 +10,31 @@ import (
 )
 
 // QueryDeoss
-func (c *chainClient) QueryDeoss(pubkey []byte) (string, error) {
+func (c *chainClient) QueryDeoss(pubkey []byte) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Panicln(utils.RecoverError(err))
 		}
 	}()
-	var data types.Bytes
+	var data PeerPuk
 
 	if !c.GetChainState() {
-		return "", ERR_RPC_CONNECTION
+		return nil, ERR_RPC_CONNECTION
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, OSS, OSS, pubkey)
 	if err != nil {
-		return "", errors.Wrap(err, "[CreateStorageKey]")
+		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return "", errors.Wrap(err, "[GetStorageLatest]")
+		return nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return "", ERR_RPC_EMPTY_VALUE
+		return nil, ERR_RPC_EMPTY_VALUE
 	}
-	return string(data), nil
+	return []byte(string(data[:])), nil
 }
 
 func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {

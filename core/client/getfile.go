@@ -54,7 +54,7 @@ func (c *Cli) GetFile(roothash, dir string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			peerid, err := c.AddMultiaddrToPearstore(string(miner.PeerId[:]), time.Hour)
+			peerid, err := c.AddMultiaddrToPearstore(string(miner.PeerPuk[:]), time.Hour)
 			if err != nil {
 				return "", err
 			}
