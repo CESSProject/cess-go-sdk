@@ -39,7 +39,7 @@ type Client interface {
 	GetFile(roothash, dir string) (string, error)
 	UpdateRoleAddress(name string) (string, error)
 	UpdateIncomeAccount(income string) (string, error)
-	SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, pubkey []byte, hash string) (string, error)
+	SubmitIdleFile(teeAcc []byte, idlefiles []IdleFileMeta) (string, error)
 	ReportFiles(roothash []string) (string, []string, error)
 	ReplaceFile(roothash []string) (string, []string, error)
 	IncreaseSminerStakes(token string) (string, error)
@@ -106,12 +106,7 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 	cli.Protocol.CustomDataTagProtocol = protocol.NewCustomDataTagProtocol(p2pnode)
 	cli.Protocol.IdleDataTagProtocol = protocol.NewIdleDataTagProtocol(p2pnode)
 	cli.Protocol.FileProtocol = protocol.NewFileProtocol(p2pnode)
-
-	//
-	os.MkdirAll(filepath.Join(workspaceActual, rule.FileDir), rule.DirMode)
-	os.MkdirAll(filepath.Join(workspaceActual, rule.TempDir), rule.DirMode)
-	os.MkdirAll(filepath.Join(workspaceActual, rule.TagDir), rule.DirMode)
-	os.MkdirAll(filepath.Join(workspaceActual, rule.MusDir), rule.DirMode)
+	cli.Protocol.PushTagProtocol = protocol.NewPushTagProtocol(p2pnode)
 
 	return cli, nil
 }

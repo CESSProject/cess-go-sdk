@@ -218,7 +218,7 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 	return uint32(data), nil
 }
 
-func (c *chainClient) SubmitIdleMetadata(idlefiles []IdleMetadata) (string, error) {
+func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []IdleMetadata) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -236,7 +236,17 @@ func (c *chainClient) SubmitIdleMetadata(idlefiles []IdleMetadata) (string, erro
 		return txhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_ADDIDLESPACE, idlefiles)
+	acc, err := types.NewAccountID(teeAcc)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_UPLOADFILLER, owner, idlefiles)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}

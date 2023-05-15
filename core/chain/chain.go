@@ -107,7 +107,7 @@ type Chain interface {
 	UploadDeclaration(roothash string, dealinfo []SegmentList, user UserBrief) (string, error)
 
 	// SubmitIdleMetadata Submit idle file metadata.
-	SubmitIdleMetadata(idlefiles []IdleMetadata) (string, error)
+	SubmitIdleMetadata(teeAcc []byte, idlefiles []IdleMetadata) (string, error)
 
 	// SubmitFileReport submits a stored file report.
 	SubmitFileReport(roothash []FileHash) (string, []FileHash, error)

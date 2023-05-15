@@ -8,34 +8,49 @@
 package client
 
 import (
-	"fmt"
-
 	"github.com/CESSProject/sdk-go/core/chain"
+	"github.com/CESSProject/sdk-go/core/rule"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
-func (c *Cli) SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, pubkey []byte, hash string) (string, error) {
-	acc, err := types.NewAccountID(pubkey)
-	if err != nil {
-		return "", err
-	}
-	if len(hash) != len(chain.FileHash{}) {
-		return "", fmt.Errorf("Invalid file hash: %s", hash)
-	}
-	var filehash chain.FileHash
+type IdleFileMeta struct {
+	Size      uint64
+	BlockNum  uint32
+	BlockSize uint32
+	ScanSize  uint32
+	minerAcc  []byte
+	Hash      string
+}
 
-	for i := 0; i < len(hash); i++ {
-		filehash[i] = types.U8(hash[i])
-	}
-	var idlefiles = []chain.IdleMetadata{
-		{
-			Size:      types.NewU64(size),
-			BlockNum:  types.NewU32(blockNum),
-			BlockSize: types.NewU32(blocksize),
-			ScanSize:  types.NewU32(scansize),
+func (c *Cli) SubmitIdleFile(teeAcc []byte, idlefiles []IdleFileMeta) (string, error) {
+	var submit = make([]chain.IdleMetadata, 0)
+	for i := 0; i < len(idlefiles); i++ {
+		var filehash chain.FileHash
+		acc, err := types.NewAccountID(idlefiles[i].minerAcc)
+		if err != nil {
+			continue
+		}
+
+		if len(idlefiles[i].Hash) != len(chain.FileHash{}) {
+			continue
+		}
+
+		for j := 0; j < len(idlefiles[i].Hash); j++ {
+			filehash[j] = types.U8(idlefiles[i].Hash[j])
+		}
+
+		var ele = chain.IdleMetadata{
+			Size:      types.NewU64(idlefiles[i].Size),
+			BlockNum:  types.NewU32(idlefiles[i].BlockNum),
+			BlockSize: types.NewU32(idlefiles[i].BlockSize),
+			ScanSize:  types.NewU32(idlefiles[i].ScanSize),
 			Acc:       *acc,
 			Hash:      filehash,
-		},
+		}
+		submit = append(submit, ele)
+		if len(submit) >= rule.MaxSubmitedIdleFileMeta {
+			break
+		}
 	}
-	return c.Chain.SubmitIdleMetadata(idlefiles)
+	return c.Chain.SubmitIdleMetadata(teeAcc, submit)
 }
