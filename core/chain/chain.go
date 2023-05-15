@@ -82,6 +82,9 @@ type Chain interface {
 	// QueryTeeInfoList queries the information of all tee workers.
 	QueryTeeInfoList() ([]TeeWorkerInfo, error)
 
+	//
+	QueryUnverifyProof() ([]AllProofInfo, error)
+
 	// Register is used to register OSS or BUCKET roles.
 	Register(role string, puk []byte, income string, pledge uint64) (string, error)
 
@@ -123,6 +126,9 @@ type Chain interface {
 
 	// Withdraw is used to withdraw staking
 	Withdraw() (string, error)
+
+	//
+	ReportProof(idlesigma, servicesigma string) (string, error)
 
 	// ExtractAccountPuk extracts the public key of the account,
 	// and returns its own public key if the account is empty.

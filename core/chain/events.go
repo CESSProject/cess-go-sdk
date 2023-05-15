@@ -13,21 +13,7 @@ import "github.com/centrifuge/go-substrate-rpc-client/v4/types"
 // cess event type
 // ******************************************************
 
-// ------------------------SegmentBook-------------------
-type Event_PPBNoOnTimeSubmit struct {
-	Phase     types.Phase
-	Acc       types.AccountID
-	SegmentId types.U64
-	Topics    []types.Hash
-}
-
-type Event_PPDNoOnTimeSubmit struct {
-	Phase     types.Phase
-	Acc       types.AccountID
-	SegmentId types.U64
-	Topics    []types.Hash
-}
-
+// ------------------------Audit-------------------
 type Event_ChallengeProof struct {
 	Phase  types.Phase
 	Miner  types.AccountID
@@ -36,16 +22,20 @@ type Event_ChallengeProof struct {
 }
 
 type Event_VerifyProof struct {
+	Phase     types.Phase
+	TeeWorker types.AccountID
+	Miner     types.AccountID
+	Topics    []types.Hash
+}
+
+type Event_SubmitProof struct {
 	Phase  types.Phase
 	Miner  types.AccountID
-	Fileid types.Bytes
 	Topics []types.Hash
 }
 
-type Event_OutstandingChallenges struct {
+type Event_GenerateChallenge struct {
 	Phase  types.Phase
-	Miner  types.AccountID
-	Fileid types.Bytes
 	Topics []types.Hash
 }
 
@@ -55,11 +45,6 @@ type Event_Registered struct {
 	Acc        types.AccountID
 	StakingVal types.U128
 	Topics     []types.Hash
-}
-
-type Event_TimedTask struct {
-	Phase  types.Phase
-	Topics []types.Hash
 }
 
 type Event_DrawFaucetMoney struct {
@@ -110,25 +95,6 @@ type Event_Deposit struct {
 	Topics  []types.Hash
 }
 
-type Event_Redeemed struct {
-	Phase   types.Phase
-	Acc     types.AccountID
-	Deposit types.U128
-	Topics  []types.Hash
-}
-
-type Event_Claimed struct {
-	Phase   types.Phase
-	Acc     types.AccountID
-	Deposit types.U128
-	Topics  []types.Hash
-}
-
-type Event_TimingStorageSpace struct {
-	Phase  types.Phase
-	Topics []types.Hash
-}
-
 type Event_UpdataBeneficiary struct {
 	Phase  types.Phase
 	Acc    types.AccountID
@@ -141,18 +107,6 @@ type Event_UpdataIp struct {
 	Acc    types.AccountID
 	Old    types.Bytes
 	New    types.Bytes
-	Topics []types.Hash
-}
-
-type Event_StartOfBufferPeriod struct {
-	Phase  types.Phase
-	When   types.U32
-	Topics []types.Hash
-}
-
-type Event_EndOfBufferPeriod struct {
-	Phase  types.Phase
-	When   types.U32
 	Topics []types.Hash
 }
 
@@ -397,31 +351,25 @@ type Event_Balances_Withdraw struct {
 // Events
 type EventRecords struct {
 	// AUDIT
-	SegmentBook_PPBNoOnTimeSubmit     []Event_PPBNoOnTimeSubmit
-	SegmentBook_PPDNoOnTimeSubmit     []Event_PPDNoOnTimeSubmit
-	SegmentBook_ChallengeProof        []Event_ChallengeProof
-	SegmentBook_VerifyProof           []Event_VerifyProof
-	SegmentBook_OutstandingChallenges []Event_OutstandingChallenges
+	Audit_VerifyProof       []Event_VerifyProof
+	Audit_SubmitProof       []Event_SubmitProof
+	Audit_GenerateChallenge []Event_GenerateChallenge
+
 	// SMINER
-	Sminer_Registered          []Event_Registered
-	Sminer_TimedTask           []Event_TimedTask
-	Sminer_DrawFaucetMoney     []Event_DrawFaucetMoney
-	Sminer_FaucetTopUpMoney    []Event_FaucetTopUpMoney
-	Sminer_LessThan24Hours     []Event_LessThan24Hours
-	Sminer_AlreadyFrozen       []Event_AlreadyFrozen
-	Sminer_MinerExit           []Event_MinerExit
-	Sminer_MinerClaim          []Event_MinerClaim
-	Sminer_IncreaseCollateral  []Event_IncreaseCollateral
-	Sminer_Deposit             []Event_Deposit
-	Sminer_Redeemed            []Event_Redeemed
-	Sminer_Claimed             []Event_Claimed
-	Sminer_TimingStorageSpace  []Event_TimingStorageSpace
-	Sminer_UpdataBeneficiary   []Event_UpdataBeneficiary
-	Sminer_UpdataIp            []Event_UpdataIp
-	Sminer_StartOfBufferPeriod []Event_StartOfBufferPeriod
-	Sminer_EndOfBufferPeriod   []Event_EndOfBufferPeriod
-	Sminer_Receive             []Event_Receive
-	Sminer_Withdraw            []Event_Withdraw
+	Sminer_Registered         []Event_Registered
+	Sminer_DrawFaucetMoney    []Event_DrawFaucetMoney
+	Sminer_FaucetTopUpMoney   []Event_FaucetTopUpMoney
+	Sminer_LessThan24Hours    []Event_LessThan24Hours
+	Sminer_AlreadyFrozen      []Event_AlreadyFrozen
+	Sminer_MinerExit          []Event_MinerExit
+	Sminer_MinerClaim         []Event_MinerClaim
+	Sminer_IncreaseCollateral []Event_IncreaseCollateral
+	Sminer_Deposit            []Event_Deposit
+	Sminer_UpdataBeneficiary  []Event_UpdataBeneficiary
+	Sminer_UpdataIp           []Event_UpdataIp
+	Sminer_Receive            []Event_Receive
+	Sminer_Withdraw           []Event_Withdraw
+
 	// FILEBANK
 	FileBank_DeleteFile        []Event_DeleteFile
 	FileBank_FileUpload        []Event_FileUpload
@@ -440,19 +388,23 @@ type EventRecords struct {
 	FileBank_TransferReport    []Event_TransferReport
 	FileBank_ReplaceFiller     []Event_ReplaceFiller
 	FileBank_CalculateEnd      []Event_CalculateEnd
+
 	// StorageHandler
 	StorageHandler_BuySpace             []Event_BuySpace
 	StorageHandler_ExpansionSpace       []Event_ExpansionSpace
 	StorageHandler_RenewalSpace         []Event_RenewalSpace
 	StorageHandler_LeaseExpired         []Event_LeaseExpired
 	StorageHandler_LeaseExpireIn24Hours []Event_LeaseExpireIn24Hours
+
 	// TeeWorker
 	TeeWorker_RegistrationScheduler []Event_RegistrationScheduler
 	TeeWorker_UpdateScheduler       []Event_UpdateScheduler
+
 	// OSS
 	Oss_OssRegister []Event_OssRegister
 	Oss_OssUpdate   []Event_OssUpdate
 	Oss_OssDestroy  []Event_OssDestroy
+
 	// System
 	types.EventRecords
 }

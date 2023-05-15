@@ -16,7 +16,7 @@ func (c *chainClient) QueryDeoss(pubkey []byte) ([]byte, error) {
 			log.Panicln(utils.RecoverError(err))
 		}
 	}()
-	var data PeerPuk
+	var data PeerId
 
 	if !c.GetChainState() {
 		return nil, ERR_RPC_CONNECTION

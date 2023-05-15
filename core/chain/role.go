@@ -36,12 +36,12 @@ func (c *chainClient) Register(role string, puk []byte, income string, pledge ui
 		return txhash, ERR_RPC_CONNECTION
 	}
 
-	var peerpuk PeerPuk
-	if len(pubkey) != len(puk) {
-		return txhash, fmt.Errorf("invalid pubkey: %v", pubkey)
+	var peerid PeerId
+	if len(peerid) != len(puk) {
+		return txhash, fmt.Errorf("invalid peerid: %v", puk)
 	}
-	for i := 0; i < len(pubkey); i++ {
-		peerpuk[i] = types.U8(pubkey[i])
+	for i := 0; i < len(peerid); i++ {
+		peerid[i] = types.U8(puk[i])
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
@@ -51,19 +51,19 @@ func (c *chainClient) Register(role string, puk []byte, income string, pledge ui
 
 	switch role {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-		pk, err := c.QueryDeoss(c.keyring.PublicKey)
+		id, err := c.QueryDeoss(c.keyring.PublicKey)
 		if err != nil {
 			if err.Error() != ERR_Empty {
 				return txhash, err
 			}
 		} else {
-			if !CompareSlice(pk, puk) {
-				return c.updateAddress(key, role, peerpuk)
+			if !CompareSlice(id, puk) {
+				return c.updateAddress(key, role, peerid)
 			}
 			return "", nil
 		}
 
-		call, err = types.NewCall(c.metadata, TX_OSS_REGISTER, peerpuk)
+		call, err = types.NewCall(c.metadata, TX_OSS_REGISTER, peerid)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -74,8 +74,8 @@ func (c *chainClient) Register(role string, puk []byte, income string, pledge ui
 				return txhash, err
 			}
 		} else {
-			if minerinfo.PeerPuk != peerpuk {
-				return c.updateAddress(key, role, peerpuk)
+			if !CompareSlice([]byte(string(minerinfo.PeerId[:])), puk) {
+				return c.updateAddress(key, role, peerid)
 			}
 			acc, _ := utils.EncodePublicKeyAsCessAccount(minerinfo.BeneficiaryAcc[:])
 			if acc != income {
@@ -100,7 +100,7 @@ func (c *chainClient) Register(role string, puk []byte, income string, pledge ui
 		if !ok {
 			return txhash, errors.New("[big.Int.SetString]")
 		}
-		call, err = types.NewCall(c.metadata, TX_SMINER_REGISTER, *acc, peerpuk, types.NewU128(*realTokens))
+		call, err = types.NewCall(c.metadata, TX_SMINER_REGISTER, *acc, peerid, types.NewU128(*realTokens))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -291,7 +291,7 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 	}
 }
 
-func (c *chainClient) updateAddress(key types.StorageKey, name string, pubkey PeerPuk) (string, error) {
+func (c *chainClient) updateAddress(key types.StorageKey, name string, peerid PeerId) (string, error) {
 	var (
 		err         error
 		txhash      string
@@ -302,12 +302,12 @@ func (c *chainClient) updateAddress(key types.StorageKey, name string, pubkey Pe
 	switch name {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 
-		call, err = types.NewCall(c.metadata, TX_OSS_UPDATE, pubkey)
+		call, err = types.NewCall(c.metadata, TX_OSS_UPDATE, peerid)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEPEERID, pubkey)
+		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEPEERID, peerid)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}

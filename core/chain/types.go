@@ -20,6 +20,8 @@ const TokenPrecision_CESS = "000000000000"
 
 // Pallets
 const (
+	//
+	AUDIT = "Audit"
 	// OSS is a module about DeOSS
 	OSS = "Oss"
 	// FILEBANK is a module about data metadata, bucket info, etc.
@@ -38,6 +40,9 @@ const (
 
 // Chain state
 const (
+	//AUDIT
+	UNVERIFYPROOF = "UnverifyProof"
+
 	// OSS
 	// OSS
 	AUTHORITYLIST = "AuthorityList"
@@ -71,6 +76,9 @@ const (
 
 // Extrinsics
 const (
+	//AUDIT
+	TX_AUDIT_SUBMITPROOF = AUDIT + DOT + "submit_proof"
+
 	// OSS
 	TX_OSS_REGISTER = OSS + DOT + "register"
 	TX_OSS_UPDATE   = OSS + DOT + "update"
@@ -142,7 +150,7 @@ var (
 type FileHash [64]types.U8
 type Random [20]types.U8
 type TeePodr2Pk [294]types.U8
-type PeerPuk [38]types.U8
+type PeerId [38]types.U8
 
 type SysProperties struct {
 	Ss58Format    types.U8
@@ -159,7 +167,7 @@ type SysSyncState struct {
 
 type MinerInfo struct {
 	BeneficiaryAcc types.AccountID
-	PeerPuk        PeerPuk
+	PeerId         PeerId
 	Collaterals    types.U128
 	Debt           types.U128
 	State          types.Bytes
@@ -276,9 +284,20 @@ type NodePublickey struct {
 
 type TeeWorkerInfo struct {
 	ControllerAccount types.AccountID
-	PeerPuk           PeerPuk
+	PeerId            PeerId
 	NodeKey           NodePublickey
 	StashAccount      types.AccountID
+}
+
+type ProveInfo struct {
+	SnapShot     MinerSnapShot
+	IdleProve    types.Bytes
+	ServiceProve types.Bytes
+}
+
+type AllProofInfo struct {
+	Acc               types.AccountID
+	UnverifyProofList []ProveInfo
 }
 
 func CompareSlice(s1, s2 []byte) bool {
