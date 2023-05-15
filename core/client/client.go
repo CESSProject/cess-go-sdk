@@ -106,12 +106,7 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 	cli.Protocol.CustomDataTagProtocol = protocol.NewCustomDataTagProtocol(p2pnode)
 	cli.Protocol.IdleDataTagProtocol = protocol.NewIdleDataTagProtocol(p2pnode)
 	cli.Protocol.FileProtocol = protocol.NewFileProtocol(p2pnode)
-
-	//
-	os.MkdirAll(filepath.Join(workspaceActual, rule.FileDir), rule.DirMode)
-	os.MkdirAll(filepath.Join(workspaceActual, rule.TempDir), rule.DirMode)
-	os.MkdirAll(filepath.Join(workspaceActual, rule.TagDir), rule.DirMode)
-	os.MkdirAll(filepath.Join(workspaceActual, rule.MusDir), rule.DirMode)
+	cli.Protocol.PushTagProtocol = protocol.NewPushTagProtocol(p2pnode)
 
 	return cli, nil
 }
