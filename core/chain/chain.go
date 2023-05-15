@@ -35,7 +35,7 @@ type Chain interface {
 	QueryNodeConnectionSt() bool
 
 	// QueryDeoss queries deoss information.
-	QueryDeoss(puk []byte) (string, error)
+	QueryDeoss(pubkey []byte) ([]byte, error)
 
 	// QuaryAuthorizedAcc queries the account authorized by puk.
 	QuaryAuthorizedAcc(puk []byte) (types.AccountID, error)
@@ -77,13 +77,13 @@ type Chain interface {
 	QueryTeePodr2Puk() ([]byte, error)
 
 	// QueryTeePeerID queries the peerid of the Tee worker.
-	QueryTeePeerID(puk []byte) (PeerID, error)
+	QueryTeePeerID(puk []byte) ([]byte, error)
 
 	// QueryTeeInfoList queries the information of all tee workers.
 	QueryTeeInfoList() ([]TeeWorkerInfo, error)
 
 	// Register is used to register OSS or BUCKET roles.
-	Register(role, multiaddr string, income string, pledge uint64) (string, error)
+	Register(role string, puk []byte, income string, pledge uint64) (string, error)
 
 	// UpdateAddress updates the address of oss or sminer.
 	UpdateAddress(role, multiaddr string) (string, error)

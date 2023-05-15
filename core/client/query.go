@@ -54,7 +54,7 @@ func (c *Cli) QueryTeeWorkerList() ([]TeeWorkerSt, error) {
 	var results = make([]TeeWorkerSt, len(teelist))
 	for k, v := range teelist {
 		results[k].Node_key = []byte(string(v.NodeKey.NodePublickey[:]))
-		results[k].Peer_id = []byte(string(v.PeerId[:]))
+		results[k].Peer_id = []byte(string(v.PeerPuk[:]))
 		results[k].Controller_account, err = utils.EncodePublicKeyAsCessAccount(v.ControllerAccount[:])
 		if err != nil {
 			return results, err

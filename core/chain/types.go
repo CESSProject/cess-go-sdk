@@ -142,7 +142,7 @@ var (
 type FileHash [64]types.U8
 type Random [20]types.U8
 type TeePodr2Pk [294]types.U8
-type PeerID [52]types.U8
+type PeerPuk [38]types.U8
 
 type SysProperties struct {
 	Ss58Format    types.U8
@@ -159,7 +159,7 @@ type SysSyncState struct {
 
 type MinerInfo struct {
 	BeneficiaryAcc types.AccountID
-	PeerId         PeerID
+	PeerPuk        PeerPuk
 	Collaterals    types.U128
 	Debt           types.U128
 	State          types.Bytes
@@ -276,7 +276,19 @@ type NodePublickey struct {
 
 type TeeWorkerInfo struct {
 	ControllerAccount types.AccountID
-	PeerId            PeerID
+	PeerPuk           PeerPuk
 	NodeKey           NodePublickey
 	StashAccount      types.AccountID
+}
+
+func CompareSlice(s1, s2 []byte) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := 0; i < len(s1); i++ {
+		if s1[i] != s2[2] {
+			return false
+		}
+	}
+	return true
 }

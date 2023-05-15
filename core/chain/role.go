@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) Register(role, multiaddr string, income string, pledge uint64) (string, error) {
+func (c *chainClient) Register(role string, puk []byte, income string, pledge uint64) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -24,7 +24,6 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 
 	var (
 		err         error
-		address     string
 		txhash      string
 		pubkey      []byte
 		minerinfo   MinerInfo
@@ -37,6 +36,14 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 		return txhash, ERR_RPC_CONNECTION
 	}
 
+	var peerpuk PeerPuk
+	if len(pubkey) != len(puk) {
+		return txhash, fmt.Errorf("invalid pubkey: %v", pubkey)
+	}
+	for i := 0; i < len(pubkey); i++ {
+		peerpuk[i] = types.U8(pubkey[i])
+	}
+
 	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
@@ -44,19 +51,19 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 
 	switch role {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-		address, err = c.QueryDeoss(c.keyring.PublicKey)
+		pk, err := c.QueryDeoss(c.keyring.PublicKey)
 		if err != nil {
 			if err.Error() != ERR_Empty {
 				return txhash, err
 			}
 		} else {
-			if address != multiaddr {
-				return c.updateAddress(key, role, multiaddr)
+			if !CompareSlice(pk, puk) {
+				return c.updateAddress(key, role, peerpuk)
 			}
 			return "", nil
 		}
 
-		call, err = types.NewCall(c.metadata, TX_OSS_REGISTER, types.NewBytes([]byte(multiaddr)))
+		call, err = types.NewCall(c.metadata, TX_OSS_REGISTER, peerpuk)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -67,8 +74,8 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 				return txhash, err
 			}
 		} else {
-			if string(minerinfo.PeerId[:]) != multiaddr {
-				return c.updateAddress(key, role, multiaddr)
+			if minerinfo.PeerPuk != peerpuk {
+				return c.updateAddress(key, role, peerpuk)
 			}
 			acc, _ := utils.EncodePublicKeyAsCessAccount(minerinfo.BeneficiaryAcc[:])
 			if acc != income {
@@ -93,11 +100,7 @@ func (c *chainClient) Register(role, multiaddr string, income string, pledge uin
 		if !ok {
 			return txhash, errors.New("[big.Int.SetString]")
 		}
-		var peerid PeerID
-		for i := 0; i < len(multiaddr); i++ {
-			peerid[i] = types.U8(multiaddr[i])
-		}
-		call, err = types.NewCall(c.metadata, TX_SMINER_REGISTER, *acc, peerid, types.NewU128(*realTokens))
+		call, err = types.NewCall(c.metadata, TX_SMINER_REGISTER, *acc, peerpuk, types.NewU128(*realTokens))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -288,7 +291,7 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 	}
 }
 
-func (c *chainClient) updateAddress(key types.StorageKey, name, multiaddr string) (string, error) {
+func (c *chainClient) updateAddress(key types.StorageKey, name string, pubkey PeerPuk) (string, error) {
 	var (
 		err         error
 		txhash      string
@@ -298,16 +301,13 @@ func (c *chainClient) updateAddress(key types.StorageKey, name, multiaddr string
 
 	switch name {
 	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-		call, err = types.NewCall(c.metadata, TX_OSS_UPDATE, types.NewBytes([]byte(multiaddr)))
+
+		call, err = types.NewCall(c.metadata, TX_OSS_UPDATE, pubkey)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
 	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		var peerid PeerID
-		for i := 0; i < len(multiaddr); i++ {
-			peerid[i] = types.U8(multiaddr[i])
-		}
-		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEPEERID, peerid)
+		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEPEERID, pubkey)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}

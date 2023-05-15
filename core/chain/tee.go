@@ -73,7 +73,7 @@ func (c *chainClient) QueryTeeInfoList() ([]TeeWorkerInfo, error) {
 	return list, nil
 }
 
-func (c *chainClient) QueryTeePeerID(puk []byte) (PeerID, error) {
+func (c *chainClient) QueryTeePeerID(puk []byte) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -83,31 +83,31 @@ func (c *chainClient) QueryTeePeerID(puk []byte) (PeerID, error) {
 	var data TeeWorkerInfo
 
 	if !c.GetChainState() {
-		return PeerID{}, ERR_RPC_CONNECTION
+		return nil, ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
-		return PeerID{}, errors.Wrap(err, "[NewAccountID]")
+		return nil, errors.Wrap(err, "[NewAccountID]")
 	}
 
 	owner, err := codec.Encode(*acc)
 	if err != nil {
-		return PeerID{}, errors.Wrap(err, "[EncodeToBytes]")
+		return nil, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, TEEWORKER, TEEWORKERMAP, owner)
 	if err != nil {
-		return PeerID{}, errors.Wrap(err, "[CreateStorageKey]")
+		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return PeerID{}, errors.Wrap(err, "[GetStorageLatest]")
+		return nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return PeerID{}, ERR_RPC_EMPTY_VALUE
+		return nil, ERR_RPC_EMPTY_VALUE
 	}
 
-	return data.PeerId, nil
+	return []byte(string(data.PeerPuk[:])), nil
 }
