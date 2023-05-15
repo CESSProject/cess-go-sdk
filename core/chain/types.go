@@ -142,7 +142,7 @@ var (
 type FileHash [64]types.U8
 type Random [20]types.U8
 type TeePodr2Pk [294]types.U8
-type PeerPuk [38]types.U8
+type PeerId [38]types.U8
 
 type SysProperties struct {
 	Ss58Format    types.U8
@@ -159,7 +159,7 @@ type SysSyncState struct {
 
 type MinerInfo struct {
 	BeneficiaryAcc types.AccountID
-	PeerPuk        PeerPuk
+	PeerId         PeerId
 	Collaterals    types.U128
 	Debt           types.U128
 	State          types.Bytes
@@ -276,7 +276,7 @@ type NodePublickey struct {
 
 type TeeWorkerInfo struct {
 	ControllerAccount types.AccountID
-	PeerPuk           PeerPuk
+	PeerId            PeerId
 	NodeKey           NodePublickey
 	StashAccount      types.AccountID
 }
