@@ -39,7 +39,7 @@ type Client interface {
 	GetFile(roothash, dir string) (string, error)
 	UpdateRoleAddress(name string) (string, error)
 	UpdateIncomeAccount(income string) (string, error)
-	SubmitIdleFile(size uint64, blockNum, blocksize, scansize uint32, pubkey []byte, hash string) (string, error)
+	SubmitIdleFile(teeAcc []byte, idlefiles []IdleFileMeta) (string, error)
 	ReportFiles(roothash []string) (string, []string, error)
 	ReplaceFile(roothash []string) (string, []string, error)
 	IncreaseSminerStakes(token string) (string, error)
