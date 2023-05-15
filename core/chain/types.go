@@ -40,6 +40,9 @@ const (
 
 // Chain state
 const (
+	//AUDIT
+	UNVERIFYPROOF = "UnverifyProof"
+
 	// OSS
 	// OSS
 	AUTHORITYLIST = "AuthorityList"
@@ -284,6 +287,17 @@ type TeeWorkerInfo struct {
 	PeerId            PeerId
 	NodeKey           NodePublickey
 	StashAccount      types.AccountID
+}
+
+type ProveInfo struct {
+	SnapShot     MinerSnapShot
+	IdleProve    types.Bytes
+	ServiceProve types.Bytes
+}
+
+type AllProofInfo struct {
+	Acc               types.AccountID
+	UnverifyProofList []ProveInfo
 }
 
 func CompareSlice(s1, s2 []byte) bool {

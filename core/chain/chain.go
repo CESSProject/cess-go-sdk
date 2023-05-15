@@ -82,6 +82,9 @@ type Chain interface {
 	// QueryTeeInfoList queries the information of all tee workers.
 	QueryTeeInfoList() ([]TeeWorkerInfo, error)
 
+	//
+	QueryUnverifyProof() ([]AllProofInfo, error)
+
 	// Register is used to register OSS or BUCKET roles.
 	Register(role string, puk []byte, income string, pledge uint64) (string, error)
 
