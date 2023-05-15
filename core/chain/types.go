@@ -20,6 +20,8 @@ const TokenPrecision_CESS = "000000000000"
 
 // Pallets
 const (
+	//
+	AUDIT = "Audit"
 	// OSS is a module about DeOSS
 	OSS = "Oss"
 	// FILEBANK is a module about data metadata, bucket info, etc.
@@ -71,6 +73,9 @@ const (
 
 // Extrinsics
 const (
+	//AUDIT
+	TX_AUDIT_SUBMITPROOF = AUDIT + DOT + "submit_proof"
+
 	// OSS
 	TX_OSS_REGISTER = OSS + DOT + "register"
 	TX_OSS_UPDATE   = OSS + DOT + "update"

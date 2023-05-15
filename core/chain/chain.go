@@ -124,6 +124,9 @@ type Chain interface {
 	// Withdraw is used to withdraw staking
 	Withdraw() (string, error)
 
+	//
+	ReportProof(idlesigma, servicesigma string) (string, error)
+
 	// ExtractAccountPuk extracts the public key of the account,
 	// and returns its own public key if the account is empty.
 	ExtractAccountPuk(account string) ([]byte, error)
