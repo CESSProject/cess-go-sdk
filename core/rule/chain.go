@@ -15,4 +15,6 @@ const BlockInterval = time.Second * time.Duration(6)
 // CESSTokenSymbol is the symbol of the CESS token
 const CESSTokenSymbol = "TCESS"
 
+const CESSTokenDecimals = "000000000000"
+
 const MaxSubmitedIdleFileMeta = 30
