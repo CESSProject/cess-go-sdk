@@ -241,12 +241,7 @@ func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []IdleMetadata
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	owner, err := codec.Encode(*acc)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[EncodeToBytes]")
-	}
-
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_UPLOADFILLER, owner, idlefiles)
+	call, err := types.NewCall(c.metadata, TX_FILEBANK_UPLOADFILLER, *acc, idlefiles)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
