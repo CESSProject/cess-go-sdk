@@ -18,7 +18,7 @@ type IdleFileMeta struct {
 	BlockNum  uint32
 	BlockSize uint32
 	ScanSize  uint32
-	minerAcc  []byte
+	MinerAcc  []byte
 	Hash      string
 }
 
@@ -26,7 +26,7 @@ func (c *Cli) SubmitIdleFile(teeAcc []byte, idlefiles []IdleFileMeta) (string, e
 	var submit = make([]chain.IdleMetadata, 0)
 	for i := 0; i < len(idlefiles); i++ {
 		var filehash chain.FileHash
-		acc, err := types.NewAccountID(idlefiles[i].minerAcc)
+		acc, err := types.NewAccountID(idlefiles[i].MinerAcc)
 		if err != nil {
 			continue
 		}
