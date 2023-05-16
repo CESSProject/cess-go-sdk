@@ -1,6 +1,7 @@
 package chain
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/CESSProject/sdk-go/core/utils"
@@ -56,15 +57,17 @@ func (c *chainClient) QueryTeeInfoList() ([]TeeWorkerInfo, error) {
 	if err != nil {
 		return list, errors.Wrap(err, "[GetKeysLatest]")
 	}
+
 	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
 	if err != nil {
 		return list, errors.Wrap(err, "[QueryStorageAtLatest]")
 	}
+
 	for _, elem := range set {
 		for _, change := range elem.Changes {
 			var teeWorker TeeWorkerInfo
 			if err := codec.Decode(change.StorageData, &teeWorker); err != nil {
-				println(err)
+				fmt.Println(err)
 				continue
 			}
 			list = append(list, teeWorker)

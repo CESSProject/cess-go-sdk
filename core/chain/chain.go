@@ -323,6 +323,6 @@ func reconnectChainClient(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
 	return api, err
 }
 
-func createPrefixedKey(method, prefix string) []byte {
-	return append(xxhash.New128([]byte(prefix)).Sum(nil), xxhash.New128([]byte(method)).Sum(nil)...)
+func createPrefixedKey(pallet, method string) []byte {
+	return append(xxhash.New128([]byte(pallet)).Sum(nil), xxhash.New128([]byte(method)).Sum(nil)...)
 }
