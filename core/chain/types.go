@@ -305,7 +305,7 @@ func CompareSlice(s1, s2 []byte) bool {
 		return false
 	}
 	for i := 0; i < len(s1); i++ {
-		if s1[i] != s2[2] {
+		if s1[i] != s2[i] {
 			return false
 		}
 	}
