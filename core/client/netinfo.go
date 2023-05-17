@@ -19,8 +19,17 @@ func (c *Cli) QueryChallengeSt() (ChallengeSnapshot, error) {
 		return challengeSnapshot, err
 	}
 	challengeSnapshot.NetSnapshot.Start = uint32(chall.NetSnapshot.Start)
+	challengeSnapshot.NetSnapshot.Life = uint32(chall.NetSnapshot.Life)
 	challengeSnapshot.NetSnapshot.Total_idle_space = chall.NetSnapshot.TotalIdleSpace.String()
 	challengeSnapshot.NetSnapshot.Total_reward = chall.NetSnapshot.TotalReward.String()
+	challengeSnapshot.NetSnapshot.Random_index_list = make([]uint32, len(chall.NetSnapshot.RandomIndexList))
+	for k, v := range chall.NetSnapshot.RandomIndexList {
+		challengeSnapshot.NetSnapshot.Random_index_list[k] = uint32(v)
+	}
+	challengeSnapshot.NetSnapshot.Random = make([][]byte, len(chall.NetSnapshot.Random))
+	for k, v := range chall.NetSnapshot.Random {
+		challengeSnapshot.NetSnapshot.Random[k] = []byte(string(v[:]))
+	}
 	challengeSnapshot.MinerSnapshot = make([]MinerSnapshot, len(chall.MinerSnapShot))
 	for k, v := range chall.MinerSnapShot {
 		challengeSnapshot.MinerSnapshot[k].Idle_space = v.IdleSpace.String()
@@ -43,11 +52,11 @@ func (c *Cli) QueryChallenge(pubkey []byte) (ChallengeInfo, error) {
 	if err != nil {
 		return chal, err
 	}
-	chal.Random = make([]byte, len(netinfo.NetSnapshot.Random))
+	chal.Random = make([][]byte, len(netinfo.NetSnapshot.Random))
 	for _, v := range netinfo.MinerSnapShot {
 		if v.Miner == *acc {
-			for i := 0; i < len(netinfo.NetSnapshot.Random); i++ {
-				chal.Random[i] = byte(netinfo.NetSnapshot.Random[i])
+			for k, value := range netinfo.NetSnapshot.Random {
+				chal.Random[k] = []byte(string(value[:]))
 			}
 			chal.Start = uint32(netinfo.NetSnapshot.Start)
 			break

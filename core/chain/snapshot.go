@@ -21,7 +21,7 @@ func (c *chainClient) QueryChallengeSnapshot() (ChallengeSnapShot, error) {
 		return data, ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, NETSNAPSHOT, CHALLENGESNAPSHOT)
+	key, err := types.CreateStorageKey(c.metadata, AUDIT, CHALLENGESNAPSHOT)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}

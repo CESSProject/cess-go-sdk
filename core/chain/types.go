@@ -32,8 +32,6 @@ const (
 	SMINER = "Sminer"
 	// SMINER is a module about storage miners
 	STORAGEHANDLER = "StorageHandler"
-	//
-	NETSNAPSHOT = "NetSnapShotStorage"
 	// SYSTEM is a module about the system
 	SYSTEM = "System"
 )
@@ -149,7 +147,7 @@ var (
 
 type FileHash [64]types.U8
 type Random [20]types.U8
-type TeePodr2Pk [294]types.U8
+type TeePodr2Pk [270]types.U8
 type PeerId [38]types.U8
 
 type SysProperties struct {
@@ -266,10 +264,12 @@ type ChallengeSnapShot struct {
 
 type NetSnapShot struct {
 	Start             types.U32
+	Life              types.U32
 	TotalReward       types.U128
 	TotalIdleSpace    types.U128
 	TotalServiceSpace types.U128
-	Random            Random
+	RandomIndexList   []types.U32
+	Random            []Random
 }
 
 type MinerSnapShot struct {

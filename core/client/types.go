@@ -11,8 +11,9 @@ type UserSpaceSt struct {
 }
 
 type ChallengeInfo struct {
-	Random []byte
-	Start  uint32
+	Random          [][]byte
+	RandomIndexList []uint32
+	Start           uint32
 }
 
 type ChallengeSnapshot struct {
@@ -22,10 +23,12 @@ type ChallengeSnapshot struct {
 
 type NetSnapshot struct {
 	Start               uint32
+	Life                uint32
 	Total_reward        string
 	Total_idle_space    string
 	Total_service_space string
-	Random              []byte
+	Random_index_list   []uint32
+	Random              [][]byte
 }
 
 type MinerSnapshot struct {
