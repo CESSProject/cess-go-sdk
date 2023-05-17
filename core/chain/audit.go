@@ -10,20 +10,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryUnverifyProof() ([]AllProofInfo, error) {
-	var list []AllProofInfo
+func (c *chainClient) QueryUnverifyProof() ([]ProofAssignmentInfo, error) {
+	var list []ProofAssignmentInfo
 	key := createPrefixedKey(AUDIT, UNVERIFYPROOF)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		return list, errors.Wrap(err, "[GetKeysLatest]")
 	}
 	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
+
 	if err != nil {
 		return list, errors.Wrap(err, "[QueryStorageAtLatest]")
 	}
 	for _, elem := range set {
 		for _, change := range elem.Changes {
-			var data AllProofInfo
+			var data ProofAssignmentInfo
 			if err := codec.Decode(change.StorageData, &data); err != nil {
 				log.Println(err)
 				continue
