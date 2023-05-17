@@ -10,8 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryAssignedProof() ([]ProofAssignmentInfo, error) {
-	var list []ProofAssignmentInfo
+func (c *chainClient) QueryAssignedProof() ([][]ProofAssignmentInfo, error) {
+	var list [][]ProofAssignmentInfo
 	key := createPrefixedKey(AUDIT, UNVERIFYPROOF)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
@@ -24,7 +24,7 @@ func (c *chainClient) QueryAssignedProof() ([]ProofAssignmentInfo, error) {
 	}
 	for _, elem := range set {
 		for _, change := range elem.Changes {
-			var data ProofAssignmentInfo
+			var data []ProofAssignmentInfo
 			if err := codec.Decode(change.StorageData, &data); err != nil {
 				log.Println(err)
 				continue
@@ -35,13 +35,13 @@ func (c *chainClient) QueryAssignedProof() ([]ProofAssignmentInfo, error) {
 	return list, nil
 }
 
-func (c *chainClient) QueryTeeAssignedProof(puk []byte) (ProofAssignmentInfo, error) {
+func (c *chainClient) QueryTeeAssignedProof(puk []byte) ([]ProofAssignmentInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Panicln(utils.RecoverError(err))
 		}
 	}()
-	var data ProofAssignmentInfo
+	var data []ProofAssignmentInfo
 
 	if !c.GetChainState() {
 		return data, ERR_RPC_CONNECTION
