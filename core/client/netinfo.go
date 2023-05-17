@@ -52,11 +52,13 @@ func (c *Cli) QueryChallenge(pubkey []byte) (ChallengeInfo, error) {
 	if err != nil {
 		return chal, err
 	}
+	chal.RandomIndexList = make([]uint32, len(netinfo.NetSnapshot.RandomIndexList))
 	chal.Random = make([][]byte, len(netinfo.NetSnapshot.Random))
 	for _, v := range netinfo.MinerSnapShot {
 		if v.Miner == *acc {
 			for k, value := range netinfo.NetSnapshot.Random {
 				chal.Random[k] = []byte(string(value[:]))
+				chal.RandomIndexList[k] = uint32(netinfo.NetSnapshot.RandomIndexList[k])
 			}
 			chal.Start = uint32(netinfo.NetSnapshot.Start)
 			break
