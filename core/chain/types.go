@@ -289,15 +289,10 @@ type TeeWorkerInfo struct {
 	StashAccount      types.AccountID
 }
 
-type ProveInfo struct {
+type ProofAssignmentInfo struct {
 	SnapShot     MinerSnapShot
 	IdleProve    types.Bytes
 	ServiceProve types.Bytes
-}
-
-type AllProofInfo struct {
-	Acc               types.AccountID
-	UnverifyProofList []ProveInfo
 }
 
 func CompareSlice(s1, s2 []byte) bool {
