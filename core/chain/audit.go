@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryUnverifyProof() ([]ProofAssignmentInfo, error) {
+func (c *chainClient) QueryAssignedProof() ([]ProofAssignmentInfo, error) {
 	var list []ProofAssignmentInfo
 	key := createPrefixedKey(AUDIT, UNVERIFYPROOF)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
@@ -33,6 +33,33 @@ func (c *chainClient) QueryUnverifyProof() ([]ProofAssignmentInfo, error) {
 		}
 	}
 	return list, nil
+}
+
+func (c *chainClient) QueryTeeAssignedProof(puk []byte) (ProofAssignmentInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Panicln(utils.RecoverError(err))
+		}
+	}()
+	var data ProofAssignmentInfo
+
+	if !c.GetChainState() {
+		return data, ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, AUDIT, UNVERIFYPROOF, puk)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
 }
 
 func (c *chainClient) ReportProof(idlesigma, servicesigma string) (string, error) {
