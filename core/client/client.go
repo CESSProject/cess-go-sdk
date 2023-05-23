@@ -25,7 +25,7 @@ import (
 
 type Client interface {
 	Workspace() string
-	RegisterRole(name string, income string, pledge uint64) (string, error)
+	RegisterRole(name string, earnings string, pledge uint64) (string, string, error)
 	QueryAllBucketName(owner []byte) ([]string, error)
 	CheckSpaceUsageAuthorization(puk []byte) (bool, error)
 	QueryUserSpaceSt(puk []byte) (UserSpaceSt, error)

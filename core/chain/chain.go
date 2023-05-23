@@ -89,7 +89,7 @@ type Chain interface {
 	QueryTeeAssignedProof(puk []byte) ([]ProofAssignmentInfo, error)
 
 	// Register is used to register OSS or BUCKET roles.
-	Register(role string, puk []byte, income string, pledge uint64) (string, error)
+	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
 
 	// UpdateAddress updates the address of oss or sminer.
 	UpdateAddress(role, multiaddr string) (string, error)

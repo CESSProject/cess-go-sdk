@@ -34,7 +34,7 @@ func Example_registerOss() {
 	if err != nil {
 		panic(err)
 	}
-	txhash, err := cli.RegisterRole("oss", "", 0)
+	txhash, _, err := cli.RegisterRole("oss", "", 0)
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +53,7 @@ func Example_registerMiner() {
 	if err != nil {
 		panic(err)
 	}
-	txhash, err := cli.RegisterRole("bucket", "cXxxx...xxx", 100000)
+	txhash, _, err := cli.RegisterRole("bucket", "cXxxx...xxx", 100000)
 	if err != nil {
 		panic(err)
 	}

@@ -7,6 +7,6 @@
 
 package client
 
-func (c *Cli) RegisterRole(name string, income string, pledge uint64) (string, error) {
-	return c.Chain.Register(name, c.Node.PeerId, income, pledge)
+func (c *Cli) RegisterRole(name string, earnings string, pledge uint64) (string, string, error) {
+	return c.Chain.Register(name, c.Node.PeerId, earnings, pledge)
 }
