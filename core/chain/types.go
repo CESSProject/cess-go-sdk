@@ -88,7 +88,7 @@ const (
 	TX_SMINER_INCREASESTAKES = SMINER + DOT + "increase_collateral"
 	TX_SMINER_UPDATEPEERID   = SMINER + DOT + "update_peer_id"
 	TX_SMINER_UPDATEINCOME   = SMINER + DOT + "update_beneficiary"
-	TX_SMINER_CLAIMREWARD    = FILEBANK + DOT + "receive_reward"
+	TX_SMINER_CLAIMREWARD    = SMINER + DOT + "receive_reward"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET     = FILEBANK + DOT + "create_bucket"
