@@ -25,7 +25,7 @@ import (
 
 type Client interface {
 	Workspace() string
-	RegisterRole(name string, income string, pledge uint64) (string, error)
+	RegisterRole(name string, earnings string, pledge uint64) (string, string, error)
 	QueryAllBucketName(owner []byte) ([]string, error)
 	CheckSpaceUsageAuthorization(puk []byte) (bool, error)
 	QueryUserSpaceSt(puk []byte) (UserSpaceSt, error)
@@ -33,6 +33,7 @@ type Client interface {
 	QueryChallenge(puk []byte) (ChallengeInfo, error)
 	QueryTeeWorkerPeerID(puk []byte) ([]byte, error)
 	QueryTeeWorkerList() ([]TeeWorkerSt, error)
+	QuaryRewards(puk []byte) (RewardsType, error)
 	CheckBucketName(bucketname string) bool
 	ProcessingData(path string) ([]SegmentInfo, string, error)
 	PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (uint8, error)

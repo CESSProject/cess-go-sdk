@@ -48,6 +48,7 @@ const (
 	// SMINER
 	ALLMINER   = "AllMiner"
 	MINERITEMS = "MinerItems"
+	REWARDMAP  = "RewardMap"
 
 	// TEEWORKER
 	TEEWORKERMAP = "TeeWorkerMap"
@@ -174,18 +175,18 @@ type MinerInfo struct {
 	LockSpace      types.U128
 }
 
-type RewardInfo struct {
+type RewardOrder struct {
+	OrderReward types.U128
+	EachShare   types.U128
+	AwardCount  types.U8
+	HasIssued   types.Bool
+}
+
+type MinerReward struct {
 	TotalReward              types.U128
 	RewardIssued             types.U128
 	CurrentlyAvailableReward types.U128
 	OrderList                []RewardOrder
-}
-
-type RewardOrder struct {
-	OrderReward types.U128
-	EachShare   types.U128
-	AwardCount  types.U128
-	HasIssued   types.U128
 }
 
 type FileMetadata struct {

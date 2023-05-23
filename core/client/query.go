@@ -12,6 +12,12 @@ import (
 	"github.com/CESSProject/sdk-go/core/utils"
 )
 
+type RewardsType struct {
+	Total     string
+	Claimed   string
+	Available string
+}
+
 func (c *Cli) Workspace() string {
 	return c.Node.Workspace()
 }
@@ -89,4 +95,18 @@ func (c *Cli) QuaryAuthorizedAcc(puk []byte) (string, error) {
 		return "", err
 	}
 	return utils.EncodePublicKeyAsCessAccount(acc[:])
+}
+
+func (c *Cli) QuaryRewards(puk []byte) (RewardsType, error) {
+	var reward RewardsType
+	rewards, err := c.Chain.QueryMinerRewards(puk)
+	if err != nil {
+		return reward, err
+	}
+
+	reward.Total = rewards.TotalReward.String()
+	reward.Claimed = rewards.RewardIssued.String()
+	reward.Available = rewards.CurrentlyAvailableReward.String()
+
+	return reward, nil
 }
