@@ -83,7 +83,7 @@ func (c *chainClient) QueryMinerRewards(puk []byte) (MinerReward, error) {
 		return data, ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SMINER, REWARDMAP)
+	key, err := types.CreateStorageKey(c.metadata, SMINER, REWARDMAP, puk)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
