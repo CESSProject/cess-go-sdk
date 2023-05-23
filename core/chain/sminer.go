@@ -69,6 +69,35 @@ func (c *chainClient) QuerySminerList() ([]types.AccountID, error) {
 	return data, nil
 }
 
+// QueryMinerRewards
+func (c *chainClient) QueryMinerRewards(puk []byte) (MinerReward, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data MinerReward
+
+	if !c.GetChainState() {
+		return data, ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, SMINER, REWARDMAP)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 func (c *chainClient) UpdateIncomeAcc(puk []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {

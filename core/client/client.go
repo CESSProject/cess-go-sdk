@@ -33,6 +33,7 @@ type Client interface {
 	QueryChallenge(puk []byte) (ChallengeInfo, error)
 	QueryTeeWorkerPeerID(puk []byte) ([]byte, error)
 	QueryTeeWorkerList() ([]TeeWorkerSt, error)
+	QuaryRewards(puk []byte) (RewardsType, error)
 	CheckBucketName(bucketname string) bool
 	ProcessingData(path string) ([]SegmentInfo, string, error)
 	PutFile(owner []byte, segmentInfo []SegmentInfo, roothash, filename, bucketname string) (uint8, error)

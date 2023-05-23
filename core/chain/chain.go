@@ -88,6 +88,9 @@ type Chain interface {
 	//
 	QueryTeeAssignedProof(puk []byte) ([]ProofAssignmentInfo, error)
 
+	//
+	QueryMinerRewards(puk []byte) (MinerReward, error)
+
 	// Register is used to register OSS or BUCKET roles.
 	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
 
