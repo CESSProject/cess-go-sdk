@@ -8,8 +8,6 @@
 package sdkgo
 
 import (
-	"os"
-
 	"github.com/CESSProject/sdk-go/core/rule"
 )
 
@@ -34,15 +32,6 @@ var DefaultListenPort = func(cfg *Config) error {
 	return cfg.Apply(ListenPort(port))
 }
 
-// DefaultWorkspace configures client to use default workspace.
-var DefaultWorkspace = func(cfg *Config) error {
-	workspace, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	return cfg.Apply(Workspace(workspace))
-}
-
 // DefaultListenPort configures client to use default listen port.
 var DefaultTimeout = func(cfg *Config) error {
 	return cfg.Apply(TransactionTimeout(rule.BlockInterval))
@@ -63,10 +52,6 @@ var defaults = []struct {
 	{
 		fallback: func(cfg *Config) bool { return cfg.Addr == "" },
 		opt:      DefaultListenAddr,
-	},
-	{
-		fallback: func(cfg *Config) bool { return cfg.Workspace == "" },
-		opt:      DefaultWorkspace,
 	},
 	{
 		fallback: func(cfg *Config) bool { return cfg.Port == 0 },

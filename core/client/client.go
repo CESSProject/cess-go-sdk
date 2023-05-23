@@ -70,6 +70,10 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 		return cli, err
 	}
 
+	if workspace == "" {
+		return cli, nil
+	}
+
 	workspaceActual := filepath.Join(workspace, account, name)
 	fstat, err := os.Stat(workspaceActual)
 	if err != nil {
