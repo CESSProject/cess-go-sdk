@@ -99,7 +99,7 @@ const (
 	TX_FILEBANK_FILEREPORT    = FILEBANK + DOT + "transfer_report"
 	TX_FILEBANK_REPLACEFILE   = FILEBANK + DOT + "replace_file_report"
 	TX_FILEBANK_MINEREXITPREP = FILEBANK + DOT + "miner_exit_prep"
-	TX_FILEBANK_WITHDRAW      = FILEBANK + DOT + "withdraw"
+	TX_FILEBANK_WITHDRAW      = FILEBANK + DOT + "miner_withdraw"
 )
 
 // RPC Call
