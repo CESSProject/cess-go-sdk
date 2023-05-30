@@ -8,33 +8,28 @@ import (
 )
 
 func Example_newClient() {
-	cli, err := New(
+	_, err := New(
 		config.DefaultName,
 		ConnectRpcAddrs([]string{""}),
-		ListenPort(15000),
-		Workspace("/"),
 		Mnemonic("xxx xxx ... xxx"),
 		TransactionTimeout(time.Duration(time.Second*10)),
 	)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Client created successfully and the workspace is %s\n", cli.Workspace())
 }
 
 func Example_registerOss() {
 	cli, err := New(
 		"oss",
 		ConnectRpcAddrs([]string{""}),
-		ListenPort(15000),
-		Workspace("/"),
 		Mnemonic(""),
 		TransactionTimeout(time.Duration(time.Second*10)),
 	)
 	if err != nil {
 		panic(err)
 	}
-	txhash, _, err := cli.RegisterRole("oss", "", 0)
+	txhash, _, err := cli.Register("oss", nil, "", 0)
 	if err != nil {
 		panic(err)
 	}
@@ -45,15 +40,13 @@ func Example_registerMiner() {
 	cli, err := New(
 		"bucket",
 		ConnectRpcAddrs([]string{""}),
-		ListenPort(15000),
-		Workspace("/"),
 		Mnemonic(""),
 		TransactionTimeout(time.Duration(time.Second*10)),
 	)
 	if err != nil {
 		panic(err)
 	}
-	txhash, _, err := cli.RegisterRole("bucket", "cXxxx...xxx", 100000)
+	txhash, _, err := cli.Register("bucket", nil, "cXxxx...xxx", 100000)
 	if err != nil {
 		panic(err)
 	}

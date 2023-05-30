@@ -8,6 +8,7 @@
 package chain
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -47,6 +48,10 @@ func NewChainSDK(rpcs []string, name, mnemonic string, t time.Duration) (*ChainS
 		err      error
 		chainSDK = &ChainSDK{}
 	)
+
+	if name == "" {
+		return nil, fmt.Errorf("empty name")
+	}
 
 	defer log.SetOutput(os.Stdout)
 	log.SetOutput(io.Discard)
@@ -128,11 +133,6 @@ func (c *ChainSDK) GetChainState() bool {
 	return c.chainState.Load()
 }
 
-// QueryNodeConnectionSt
-func (c *ChainSDK) QueryNodeConnectionSt() bool {
-	return c.GetChainState()
-}
-
 func (c *ChainSDK) NewAccountId(pubkey []byte) types.AccountID {
 	acc, _ := types.NewAccountID(pubkey)
 	return *acc
@@ -155,7 +155,7 @@ func (c *ChainSDK) ExtractAccountPuk(account string) ([]byte, error) {
 	return c.keyring.PublicKey, nil
 }
 
-func (c *ChainSDK) GetSignatureURI() string {
+func (c *ChainSDK) GetSignatureURIs() string {
 	return c.keyring.URI
 }
 
@@ -172,7 +172,7 @@ func (c *ChainSDK) GetTokenSymbol() string {
 }
 
 func (c *ChainSDK) Sign(msg []byte) ([]byte, error) {
-	return signature.Sign(msg, c.GetSignatureURI())
+	return signature.Sign(msg, c.keyring.URI)
 }
 
 func reconnectChainSDK(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {

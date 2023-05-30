@@ -20,18 +20,6 @@ var DefaultRpcAddrs = func(cfg *Config) error {
 	return cfg.Apply(ConnectRpcAddrs(rpcAddrs))
 }
 
-// DefaultListenAddr configures client to use default listen address.
-var DefaultListenAddr = func(cfg *Config) error {
-	addrs := "0.0.0.0"
-	return cfg.Apply(ListenAddrStrings(addrs))
-}
-
-// DefaultListenPort configures client to use default listen port.
-var DefaultListenPort = func(cfg *Config) error {
-	port := 15000
-	return cfg.Apply(ListenPort(port))
-}
-
 // DefaultListenPort configures client to use default listen port.
 var DefaultTimeout = func(cfg *Config) error {
 	return cfg.Apply(TransactionTimeout(rule.BlockInterval))
@@ -48,14 +36,6 @@ var defaults = []struct {
 	{
 		fallback: func(cfg *Config) bool { return cfg.Rpc == nil },
 		opt:      DefaultRpcAddrs,
-	},
-	{
-		fallback: func(cfg *Config) bool { return cfg.Addr == "" },
-		opt:      DefaultListenAddr,
-	},
-	{
-		fallback: func(cfg *Config) bool { return cfg.Port == 0 },
-		opt:      DefaultListenPort,
 	},
 	{
 		fallback: func(cfg *Config) bool { return cfg.Timeout == 0 },

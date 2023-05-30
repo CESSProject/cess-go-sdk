@@ -16,9 +16,6 @@ type SDK interface {
 	// QueryNodeSynchronizationSt returns the synchronization status of the current node.
 	QueryNodeSynchronizationSt() (bool, error)
 
-	// QueryNodeConnectionSt queries the connection status of the node.
-	QueryNodeConnectionSt() bool
-
 	// QueryDeoss queries deoss information.
 	QueryDeoss(pubkey []byte) ([]byte, error)
 
@@ -140,9 +137,6 @@ type SDK interface {
 	// GetSignatureAcc returns the signature account.
 	GetSignatureAcc() string
 
-	// GetSignatureURI to get the private key of the signing account
-	GetSignatureURI() string
-
 	// GetSubstrateAPI returns Substrate API
 	GetSubstrateAPI() *gsrpc.SubstrateAPI
 
@@ -175,4 +169,19 @@ type SDK interface {
 
 	//
 	Sign(msg []byte) ([]byte, error)
+
+	//
+
+	//
+	GetFile(roothash, dir string) (string, error)
+	//
+	PutFile(owner []byte, segmentInfo []pattern.SegmentDataInfo, roothash, filename, bucketname string) (uint8, error)
+	//
+	ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error)
+	//
+	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string) error
+	//
+	StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error
+	//
+	QueryAssignedMiner(minerTaskList []pattern.MinerTaskList) ([]string, error)
 }

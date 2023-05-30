@@ -16,13 +16,10 @@ import (
 
 // Config describes a set of settings for a client
 type Config struct {
-	Rpc       []string
-	Phase     string
-	Workspace string
-	Addr      string
-	Name      string
-	Port      int
-	Timeout   time.Duration
+	Rpc      []string
+	Mnemonic string
+	Name     string
+	Timeout  time.Duration
 }
 
 // Option is a client config option that can be given to the client constructor
@@ -38,8 +35,7 @@ func (cfg *Config) NewSDK(name string) (sdk.SDK, error) {
 	if name != "" {
 		serviceName = name
 	}
-	return chain.NewChainSDK(cfg.Rpc, serviceName, cfg.Phase, cfg.Timeout)
-	//return client.NewBasicCli(cfg.Rpc, serviceName, cfg.Phase, cfg.Workspace, cfg.Addr, cfg.Port, cfg.Timeout)
+	return chain.NewChainSDK(cfg.Rpc, serviceName, cfg.Mnemonic, cfg.Timeout)
 }
 
 // Apply applies the given options to the config, returning the first error
