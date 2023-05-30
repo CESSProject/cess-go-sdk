@@ -1,29 +1,37 @@
+/*
+	Copyright (C) CESS. All rights reserved.
+	Copyright (C) Cumulus Encrypted Storage System. All rights reserved.
+
+	SPDX-License-Identifier: Apache-2.0
+*/
+
 package chain
 
 import (
 	"fmt"
 	"log"
 
+	"github.com/CESSProject/sdk-go/core/pattern"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
+func (c *ChainSDK) QueryTeePodr2Puk() ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data TeePodr2Pk
+	var data pattern.TeePodr2Pk
 
 	if !c.GetChainState() {
-		return nil, ERR_RPC_CONNECTION
+		return nil, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, TEEWORKER, TEEPODR2Pk)
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEPODR2Pk)
 	if err != nil {
 		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -33,26 +41,26 @@ func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 		return nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return nil, ERR_RPC_EMPTY_VALUE
+		return nil, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	return []byte(string(data[:])), nil
 }
 
-func (c *chainClient) QueryTeeInfoList() ([]TeeWorkerInfo, error) {
+func (c *ChainSDK) QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var list []TeeWorkerInfo
+	var list []pattern.TeeWorkerInfo
 
 	if !c.GetChainState() {
-		return list, ERR_RPC_CONNECTION
+		return list, pattern.ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(TEEWORKER, TEEWORKERMAP)
+	key := createPrefixedKey(pattern.TEEWORKER, pattern.TEEWORKERMAP)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		return list, errors.Wrap(err, "[GetKeysLatest]")
@@ -65,7 +73,7 @@ func (c *chainClient) QueryTeeInfoList() ([]TeeWorkerInfo, error) {
 
 	for _, elem := range set {
 		for _, change := range elem.Changes {
-			var teeWorker TeeWorkerInfo
+			var teeWorker pattern.TeeWorkerInfo
 			if err := codec.Decode(change.StorageData, &teeWorker); err != nil {
 				fmt.Println(err)
 				continue
@@ -76,17 +84,17 @@ func (c *chainClient) QueryTeeInfoList() ([]TeeWorkerInfo, error) {
 	return list, nil
 }
 
-func (c *chainClient) QueryTeePeerID(puk []byte) ([]byte, error) {
+func (c *ChainSDK) QueryTeePeerID(puk []byte) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data TeeWorkerInfo
+	var data pattern.TeeWorkerInfo
 
 	if !c.GetChainState() {
-		return nil, ERR_RPC_CONNECTION
+		return nil, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(puk)
@@ -99,7 +107,7 @@ func (c *chainClient) QueryTeePeerID(puk []byte) ([]byte, error) {
 		return nil, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, TEEWORKER, TEEWORKERMAP, owner)
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWORKERMAP, owner)
 	if err != nil {
 		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -109,8 +117,29 @@ func (c *chainClient) QueryTeePeerID(puk []byte) ([]byte, error) {
 		return nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return nil, ERR_RPC_EMPTY_VALUE
+		return nil, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	return []byte(string(data.PeerId[:])), nil
+}
+
+func (c *ChainSDK) QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error) {
+	teelist, err := c.QueryTeeInfoList()
+	if err != nil {
+		return nil, err
+	}
+	var results = make([]pattern.TeeWorkerSt, len(teelist))
+	for k, v := range teelist {
+		results[k].Node_key = []byte(string(v.NodeKey.NodePublickey[:]))
+		results[k].Peer_id = []byte(string(v.PeerId[:]))
+		results[k].Controller_account, err = utils.EncodePublicKeyAsCessAccount(v.ControllerAccount[:])
+		if err != nil {
+			return results, err
+		}
+		results[k].Stash_account, err = utils.EncodePublicKeyAsCessAccount(v.StashAccount[:])
+		if err != nil {
+			return results, err
+		}
+	}
+	return results, nil
 }

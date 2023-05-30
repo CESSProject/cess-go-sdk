@@ -10,18 +10,16 @@ package config
 import (
 	"time"
 
-	"github.com/CESSProject/sdk-go/core/client"
+	"github.com/CESSProject/sdk-go/chain"
+	"github.com/CESSProject/sdk-go/core/sdk"
 )
 
 // Config describes a set of settings for a client
 type Config struct {
-	Rpc       []string
-	Phase     string
-	Workspace string
-	Addr      string
-	Name      string
-	Port      int
-	Timeout   time.Duration
+	Rpc      []string
+	Mnemonic string
+	Name     string
+	Timeout  time.Duration
 }
 
 // Option is a client config option that can be given to the client constructor
@@ -29,15 +27,15 @@ type Option func(cfg *Config) error
 
 const DefaultName = "SDK"
 
-// NewNode constructs a new client from the Config.
+// NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
-func (cfg *Config) NewClient(name string) (client.Client, error) {
+func (cfg *Config) NewSDK(name string) (sdk.SDK, error) {
 	var serviceName = DefaultName
 	if name != "" {
 		serviceName = name
 	}
-	return client.NewBasicCli(cfg.Rpc, serviceName, cfg.Phase, cfg.Workspace, cfg.Addr, cfg.Port, cfg.Timeout)
+	return chain.NewChainSDK(cfg.Rpc, serviceName, cfg.Mnemonic, cfg.Timeout)
 }
 
 // Apply applies the given options to the config, returning the first error

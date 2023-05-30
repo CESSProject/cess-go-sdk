@@ -5,7 +5,7 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package chain
+package pattern
 
 import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -99,7 +99,7 @@ const (
 	TX_FILEBANK_FILEREPORT    = FILEBANK + DOT + "transfer_report"
 	TX_FILEBANK_REPLACEFILE   = FILEBANK + DOT + "replace_file_report"
 	TX_FILEBANK_MINEREXITPREP = FILEBANK + DOT + "miner_exit_prep"
-	TX_FILEBANK_WITHDRAW      = FILEBANK + DOT + "withdraw"
+	TX_FILEBANK_WITHDRAW      = FILEBANK + DOT + "miner_withdraw"
 )
 
 // RPC Call
@@ -294,6 +294,71 @@ type ProofAssignmentInfo struct {
 	SnapShot     MinerSnapShot
 	IdleProve    types.Bytes
 	ServiceProve types.Bytes
+}
+
+// --------------------customer-----------------
+type IdleFileMeta struct {
+	Size      uint64
+	BlockNum  uint32
+	BlockSize uint32
+	ScanSize  uint32
+	MinerAcc  []byte
+	Hash      string
+}
+
+type UserSpaceSt struct {
+	TotalSpace     string
+	UsedSpace      string
+	LockedSpace    string
+	RemainingSpace string
+	State          string
+	Start          uint32
+	Deadline       uint32
+}
+
+type ChallengeInfo struct {
+	Random          [][]byte
+	RandomIndexList []uint32
+	Start           uint32
+}
+
+type ChallengeSnapshot struct {
+	NetSnapshot   NetSnapshot
+	MinerSnapshot []MinerSnapshot
+}
+
+type NetSnapshot struct {
+	Start               uint32
+	Life                uint32
+	Total_reward        string
+	Total_idle_space    string
+	Total_service_space string
+	Random_index_list   []uint32
+	Random              [][]byte
+}
+
+type MinerSnapshot struct {
+	Miner         string
+	Idle_space    string
+	Service_space string
+}
+
+type TeeWorkerSt struct {
+	Controller_account string
+	Peer_id            []byte
+	Node_key           []byte
+	Stash_account      string
+}
+
+type RewardsType struct {
+	Total     string
+	Claimed   string
+	Available string
+}
+
+type SegmentDataInfo struct {
+	SegmentHash  string
+	FragmentHash []string
 }
 
 func CompareSlice(s1, s2 []byte) bool {

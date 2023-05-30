@@ -5,16 +5,49 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package client
+package chain
 
 import (
+	"log"
+
+	"github.com/CESSProject/sdk-go/core/pattern"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/pkg/errors"
 )
 
-func (c *Cli) QueryChallengeSt() (ChallengeSnapshot, error) {
-	var challengeSnapshot ChallengeSnapshot
-	chall, err := c.Chain.QueryChallengeSnapshot()
+func (c *ChainSDK) QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data pattern.ChallengeSnapShot
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.CHALLENGESNAPSHOT)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	return data, nil
+}
+
+func (c *ChainSDK) QueryChallengeSt() (pattern.ChallengeSnapshot, error) {
+	var challengeSnapshot pattern.ChallengeSnapshot
+	chall, err := c.QueryChallengeSnapshot()
 	if err != nil {
 		return challengeSnapshot, err
 	}
@@ -30,7 +63,7 @@ func (c *Cli) QueryChallengeSt() (ChallengeSnapshot, error) {
 	for k, v := range chall.NetSnapshot.Random {
 		challengeSnapshot.NetSnapshot.Random[k] = []byte(string(v[:]))
 	}
-	challengeSnapshot.MinerSnapshot = make([]MinerSnapshot, len(chall.MinerSnapShot))
+	challengeSnapshot.MinerSnapshot = make([]pattern.MinerSnapshot, len(chall.MinerSnapShot))
 	for k, v := range chall.MinerSnapShot {
 		challengeSnapshot.MinerSnapshot[k].Idle_space = v.IdleSpace.String()
 		challengeSnapshot.MinerSnapshot[k].Service_space = v.ServiceSpace.String()
@@ -42,13 +75,13 @@ func (c *Cli) QueryChallengeSt() (ChallengeSnapshot, error) {
 	return challengeSnapshot, nil
 }
 
-func (c *Cli) QueryChallenge(pubkey []byte) (ChallengeInfo, error) {
-	var chal ChallengeInfo
+func (c *ChainSDK) QueryChallenge(pubkey []byte) (pattern.ChallengeInfo, error) {
+	var chal pattern.ChallengeInfo
 	acc, err := types.NewAccountID(pubkey)
 	if err != nil {
 		return chal, err
 	}
-	netinfo, err := c.Chain.QueryChallengeSnapshot()
+	netinfo, err := c.QueryChallengeSnapshot()
 	if err != nil {
 		return chal, err
 	}

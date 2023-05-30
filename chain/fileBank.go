@@ -1,26 +1,36 @@
+/*
+	Copyright (C) CESS. All rights reserved.
+	Copyright (C) Cumulus Encrypted Storage System. All rights reserved.
+
+	SPDX-License-Identifier: Apache-2.0
+*/
+
 package chain
 
 import (
 	"log"
 	"time"
 
+	"github.com/CESSProject/sdk-go/core/event"
+	"github.com/CESSProject/sdk-go/core/pattern"
+	"github.com/CESSProject/sdk-go/core/rule"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryBucketInfo(puk []byte, bucketname string) (BucketInfo, error) {
+func (c *ChainSDK) QueryBucketInfo(puk []byte, bucketname string) (pattern.BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data BucketInfo
+	var data pattern.BucketInfo
 
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(puk)
@@ -38,7 +48,7 @@ func (c *chainClient) QueryBucketInfo(puk []byte, bucketname string) (BucketInfo
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, FILEBANK, BUCKET, owner, name)
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.BUCKET, owner, name)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -48,12 +58,12 @@ func (c *chainClient) QueryBucketInfo(puk []byte, bucketname string) (BucketInfo
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }
 
-func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
+func (c *ChainSDK) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -63,7 +73,7 @@ func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 	var data []types.Bytes
 
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(puk)
@@ -76,7 +86,7 @@ func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, FILEBANK, BUCKETLIST, owner)
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.BUCKETLIST, owner)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -86,13 +96,27 @@ func (c *chainClient) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
+}
+
+func (c *ChainSDK) QueryAllBucketName(owner []byte) ([]string, error) {
+	bucketlist, err := c.QueryBucketList(owner)
+	if err != nil {
+		if err.Error() != pattern.ERR_Empty {
+			return nil, err
+		}
+	}
+	var buckets = make([]string, len(bucketlist))
+	for i := 0; i < len(bucketlist); i++ {
+		buckets[i] = string(bucketlist[i])
+	}
+	return buckets, nil
 }
 
 // QueryFileMetaData
-func (c *chainClient) QueryFileMetadata(roothash string) (FileMetadata, error) {
+func (c *ChainSDK) QueryFileMetadata(roothash string) (pattern.FileMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -100,12 +124,12 @@ func (c *chainClient) QueryFileMetadata(roothash string) (FileMetadata, error) {
 	}()
 
 	var (
-		data FileMetadata
-		hash FileHash
+		data pattern.FileMetadata
+		hash pattern.FileHash
 	)
 
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
 
 	if len(hash) != len(roothash) {
@@ -121,7 +145,7 @@ func (c *chainClient) QueryFileMetadata(roothash string) (FileMetadata, error) {
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, FILEBANK, FILE, b)
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.FILE, b)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -131,12 +155,12 @@ func (c *chainClient) QueryFileMetadata(roothash string) (FileMetadata, error) {
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }
 
-func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
+func (c *ChainSDK) QueryStorageOrder(roothash string) (pattern.StorageOrder, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -144,8 +168,8 @@ func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 	}()
 
 	var (
-		data StorageOrder
-		hash FileHash
+		data pattern.StorageOrder
+		hash pattern.FileHash
 	)
 
 	if len(hash) != len(roothash) {
@@ -162,10 +186,10 @@ func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 	}
 
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, FILEBANK, DEALMAP, b)
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.DEALMAP, b)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -175,12 +199,12 @@ func (c *chainClient) QueryStorageOrder(roothash string) (StorageOrder, error) {
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }
 
-func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
+func (c *ChainSDK) QueryPendingReplacements(puk []byte) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -200,10 +224,10 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 	}
 
 	if !c.GetChainState() {
-		return 0, ERR_RPC_CONNECTION
+		return 0, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, FILEBANK, PENDINGREPLACE, owner)
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.PENDINGREPLACE, owner)
 	if err != nil {
 		return 0, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -213,12 +237,12 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 		return 0, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return 0, ERR_RPC_EMPTY_VALUE
+		return 0, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return uint32(data), nil
 }
 
-func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []IdleMetadata) (string, error) {
+func (c *ChainSDK) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -233,7 +257,7 @@ func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []IdleMetadata
 	)
 
 	if !c.GetChainState() {
-		return txhash, ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(teeAcc)
@@ -241,12 +265,12 @@ func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []IdleMetadata
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_UPLOADFILLER, *acc, idlefiles)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADFILLER, *acc, idlefiles)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -256,7 +280,7 @@ func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []IdleMetadata
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -308,12 +332,45 @@ func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []IdleMetadata
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, error) {
+func (c *ChainSDK) SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error) {
+	var submit = make([]pattern.IdleMetadata, 0)
+	for i := 0; i < len(idlefiles); i++ {
+		var filehash pattern.FileHash
+		acc, err := types.NewAccountID(idlefiles[i].MinerAcc)
+		if err != nil {
+			continue
+		}
+
+		if len(idlefiles[i].Hash) != len(pattern.FileHash{}) {
+			continue
+		}
+
+		for j := 0; j < len(idlefiles[i].Hash); j++ {
+			filehash[j] = types.U8(idlefiles[i].Hash[j])
+		}
+
+		var ele = pattern.IdleMetadata{
+			Size:      types.NewU64(idlefiles[i].Size),
+			BlockNum:  types.NewU32(idlefiles[i].BlockNum),
+			BlockSize: types.NewU32(idlefiles[i].BlockSize),
+			ScanSize:  types.NewU32(idlefiles[i].ScanSize),
+			Acc:       *acc,
+			Hash:      filehash,
+		}
+		submit = append(submit, ele)
+		if len(submit) >= rule.MaxSubmitedIdleFileMeta {
+			break
+		}
+	}
+	return c.SubmitIdleMetadata(teeAcc, submit)
+}
+
+func (c *ChainSDK) CreateBucket(owner_pkey []byte, name string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -328,7 +385,7 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 	)
 
 	if !c.GetChainState() {
-		return txhash, ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(owner_pkey)
@@ -336,12 +393,12 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_PUTBUCKET, *acc, types.NewBytes([]byte(name)))
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_PUTBUCKET, *acc, types.NewBytes([]byte(name)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -351,7 +408,7 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -386,7 +443,7 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -398,17 +455,17 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 					return txhash, nil
 				}
 
-				return txhash, errors.New(ERR_Failed)
+				return txhash, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, error) {
+func (c *ChainSDK) DeleteBucket(owner_pkey []byte, name string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -423,7 +480,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	)
 
 	if !c.GetChainState() {
-		return txhash, ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(owner_pkey)
@@ -431,12 +488,12 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_DELBUCKET, *acc, types.NewBytes([]byte(name)))
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_DELBUCKET, *acc, types.NewBytes([]byte(name)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -446,7 +503,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -481,7 +538,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -493,17 +550,17 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 					return txhash, nil
 				}
 
-				return txhash, errors.New(ERR_Failed)
+				return txhash, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList, user UserBrief) (string, error) {
+func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -514,12 +571,12 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 
 	var (
 		txhash      string
-		hash        FileHash
+		hash        pattern.FileHash
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
 	if len(filehash) != len(hash) {
@@ -529,12 +586,12 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 		hash[i] = types.U8(filehash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_UPLOADDEC, hash, dealinfo, user)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADDEC, hash, dealinfo, user)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -544,7 +601,7 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -579,7 +636,7 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -589,17 +646,17 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []SegmentList,
 				if err != nil || len(events.FileBank_UploadDeclaration) > 0 {
 					return txhash, nil
 				}
-				return txhash, errors.New(ERR_Failed)
+				return txhash, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileHash, error) {
+func (c *ChainSDK) DeleteFile(puk []byte, filehash []string) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -611,11 +668,11 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileH
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
-		hashs       = make([]FileHash, len(filehash))
+		hashs       = make([]pattern.FileHash, len(filehash))
 	)
 
 	if !c.GetChainState() {
-		return txhash, hashs, ERR_RPC_CONNECTION
+		return txhash, hashs, pattern.ERR_RPC_CONNECTION
 	}
 
 	for j := 0; j < len(filehash); j++ {
@@ -632,12 +689,12 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileH
 		return txhash, hashs, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_DELFILE, *acc, hashs)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_DELFILE, *acc, hashs)
 	if err != nil {
 		return txhash, hashs, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, hashs, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -647,7 +704,7 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileH
 		return txhash, hashs, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, hashs, ERR_RPC_EMPTY_VALUE
+		return txhash, hashs, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -680,7 +737,7 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileH
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -690,17 +747,17 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []FileH
 				if err != nil || len(events.FileBank_DeleteFile) > 0 {
 					return txhash, events.FileBank_DeleteFile[0].Filehash, nil
 				}
-				return txhash, hashs, errors.New(ERR_Failed)
+				return txhash, hashs, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, hashs, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, hashs, ERR_RPC_TIMEOUT
+			return txhash, hashs, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash, error) {
+func (c *ChainSDK) SubmitFileReport(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -715,15 +772,15 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 	)
 
 	if !c.GetChainState() {
-		return txhash, nil, ERR_RPC_CONNECTION
+		return txhash, nil, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_FILEREPORT, roothash)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_FILEREPORT, roothash)
 	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -733,7 +790,7 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 		return txhash, nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, nil, ERR_RPC_EMPTY_VALUE
+		return txhash, nil, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -768,7 +825,7 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -778,17 +835,32 @@ func (c *chainClient) SubmitFileReport(roothash []FileHash) (string, []FileHash,
 				if err != nil || len(events.FileBank_TransferReport) > 0 {
 					return txhash, events.FileBank_TransferReport[0].Failed_list, nil
 				}
-				return txhash, nil, errors.New(ERR_Failed)
+				return txhash, nil, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, nil, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, nil, ERR_RPC_TIMEOUT
+			return txhash, nil, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) ReplaceIdleFiles(roothash []FileHash) (string, []FileHash, error) {
+func (c *ChainSDK) ReportFiles(roothash []string) (string, []string, error) {
+	var hashs = make([]pattern.FileHash, len(roothash))
+	for i := 0; i < len(roothash); i++ {
+		for j := 0; j < len(roothash[i]); j++ {
+			hashs[i][j] = types.U8(roothash[i][j])
+		}
+	}
+	txhash, failed, err := c.SubmitFileReport(hashs)
+	var failedfiles = make([]string, len(failed))
+	for k, v := range failed {
+		failedfiles[k] = string(v[:])
+	}
+	return txhash, failedfiles, err
+}
+
+func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -803,15 +875,15 @@ func (c *chainClient) ReplaceIdleFiles(roothash []FileHash) (string, []FileHash,
 	)
 
 	if !c.GetChainState() {
-		return txhash, nil, ERR_RPC_CONNECTION
+		return txhash, nil, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FILEBANK_REPLACEFILE, roothash)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEFILE, roothash)
 	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -821,7 +893,7 @@ func (c *chainClient) ReplaceIdleFiles(roothash []FileHash) (string, []FileHash,
 		return txhash, nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, nil, ERR_RPC_EMPTY_VALUE
+		return txhash, nil, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -856,7 +928,7 @@ func (c *chainClient) ReplaceIdleFiles(roothash []FileHash) (string, []FileHash,
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -866,12 +938,27 @@ func (c *chainClient) ReplaceIdleFiles(roothash []FileHash) (string, []FileHash,
 				if err != nil || len(events.FileBank_ReplaceFiller) > 0 {
 					return txhash, events.FileBank_ReplaceFiller[0].Filler_list, nil
 				}
-				return txhash, nil, errors.New(ERR_Failed)
+				return txhash, nil, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, nil, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, nil, ERR_RPC_TIMEOUT
+			return txhash, nil, pattern.ERR_RPC_TIMEOUT
 		}
 	}
+}
+
+func (c *ChainSDK) ReplaceFile(roothash []string) (string, []string, error) {
+	var hashs = make([]pattern.FileHash, len(roothash))
+	for i := 0; i < len(roothash); i++ {
+		for j := 0; j < len(roothash[i]); j++ {
+			hashs[i][j] = types.U8(roothash[i][j])
+		}
+	}
+	txhash, failed, err := c.ReplaceIdleFiles(hashs)
+	var failedFiles = make([]string, len(failed))
+	for k, v := range failed {
+		failedFiles[k] = string(v[:])
+	}
+	return txhash, failedFiles, err
 }

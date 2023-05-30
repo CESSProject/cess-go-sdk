@@ -1,8 +1,16 @@
+/*
+	Copyright (C) CESS. All rights reserved.
+	Copyright (C) Cumulus Encrypted Storage System. All rights reserved.
+
+	SPDX-License-Identifier: Apache-2.0
+*/
+
 package chain
 
 import (
 	"log"
 
+	"github.com/CESSProject/sdk-go/core/pattern"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
@@ -10,7 +18,7 @@ import (
 )
 
 // QueryNodeSynchronizationSt
-func (c *chainClient) QueryNodeSynchronizationSt() (bool, error) {
+func (c *ChainSDK) QueryNodeSynchronizationSt() (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -18,7 +26,7 @@ func (c *chainClient) QueryNodeSynchronizationSt() (bool, error) {
 	}()
 
 	if !c.GetChainState() {
-		return false, ERR_RPC_CONNECTION
+		return false, pattern.ERR_RPC_CONNECTION
 	}
 	h, err := c.api.RPC.System.Health()
 	if err != nil {
@@ -28,7 +36,7 @@ func (c *chainClient) QueryNodeSynchronizationSt() (bool, error) {
 }
 
 // QueryBlockHeight
-func (c *chainClient) QueryBlockHeight(hash string) (uint32, error) {
+func (c *ChainSDK) QueryBlockHeight(hash string) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -56,7 +64,7 @@ func (c *chainClient) QueryBlockHeight(hash string) (uint32, error) {
 }
 
 // QueryAccountInfo
-func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
+func (c *ChainSDK) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -65,7 +73,7 @@ func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 	var data types.AccountInfo
 
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(puk)
@@ -78,7 +86,7 @@ func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, b)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, b)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -88,40 +96,40 @@ func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }
 
-func (c *chainClient) SysProperties() (SysProperties, error) {
+func (c *ChainSDK) SysProperties() (pattern.SysProperties, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data SysProperties
+	var data pattern.SysProperties
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
-	err := c.api.Client.Call(&data, RPC_SYS_Properties)
+	err := c.api.Client.Call(&data, pattern.RPC_SYS_Properties)
 	return data, err
 }
 
-func (c *chainClient) SyncState() (SysSyncState, error) {
+func (c *ChainSDK) SyncState() (pattern.SysSyncState, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data SysSyncState
+	var data pattern.SysSyncState
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
-	err := c.api.Client.Call(&data, RPC_SYS_SyncState)
+	err := c.api.Client.Call(&data, pattern.RPC_SYS_SyncState)
 	return data, err
 }
 
-func (c *chainClient) SysVersion() (string, error) {
+func (c *ChainSDK) SysVersion() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -129,13 +137,13 @@ func (c *chainClient) SysVersion() (string, error) {
 	}()
 	var data types.Text
 	if !c.GetChainState() {
-		return "", ERR_RPC_CONNECTION
+		return "", pattern.ERR_RPC_CONNECTION
 	}
-	err := c.api.Client.Call(&data, RPC_SYS_Version)
+	err := c.api.Client.Call(&data, pattern.RPC_SYS_Version)
 	return string(data), err
 }
 
-func (c *chainClient) NetListening() (bool, error) {
+func (c *ChainSDK) NetListening() (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -143,8 +151,8 @@ func (c *chainClient) NetListening() (bool, error) {
 	}()
 	var data types.Bool
 	if !c.GetChainState() {
-		return false, ERR_RPC_CONNECTION
+		return false, pattern.ERR_RPC_CONNECTION
 	}
-	err := c.api.Client.Call(&data, RPC_NET_Listening)
+	err := c.api.Client.Call(&data, pattern.RPC_NET_Listening)
 	return bool(data), err
 }

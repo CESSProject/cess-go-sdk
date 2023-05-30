@@ -1,3 +1,10 @@
+/*
+	Copyright (C) CESS. All rights reserved.
+	Copyright (C) Cumulus Encrypted Storage System. All rights reserved.
+
+	SPDX-License-Identifier: Apache-2.0
+*/
+
 package chain
 
 import (
@@ -7,13 +14,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CESSProject/sdk-go/core/event"
+	"github.com/CESSProject/sdk-go/core/pattern"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error) {
+func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -26,17 +35,17 @@ func (c *chainClient) Register(role string, puk []byte, earnings string, pledge 
 		err         error
 		txhash      string
 		pubkey      []byte
-		minerinfo   MinerInfo
+		minerinfo   pattern.MinerInfo
 		acc         *types.AccountID
 		call        types.Call
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, earnings, ERR_RPC_CONNECTION
+		return txhash, earnings, pattern.ERR_RPC_CONNECTION
 	}
 
-	var peerid PeerId
+	var peerid pattern.PeerId
 	if len(peerid) != len(puk) {
 		return txhash, earnings, fmt.Errorf("invalid peerid: %v", puk)
 	}
@@ -44,38 +53,38 @@ func (c *chainClient) Register(role string, puk []byte, earnings string, pledge 
 		peerid[i] = types.U8(puk[i])
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, earnings, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	switch role {
-	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+	case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 		id, err := c.QueryDeoss(c.keyring.PublicKey)
 		if err != nil {
-			if err.Error() != ERR_Empty {
+			if err.Error() != pattern.ERR_Empty {
 				return txhash, earnings, err
 			}
 		} else {
-			if !CompareSlice(id, puk) {
+			if !utils.CompareSlice(id, puk) {
 				txhash, err = c.updateAddress(key, role, peerid)
 				return txhash, earnings, err
 			}
 			return "", earnings, nil
 		}
 
-		call, err = types.NewCall(c.metadata, TX_OSS_REGISTER, peerid)
+		call, err = types.NewCall(c.metadata, pattern.TX_OSS_REGISTER, peerid)
 		if err != nil {
 			return txhash, earnings, errors.Wrap(err, "[NewCall]")
 		}
-	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+	case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 		minerinfo, err = c.QueryStorageMiner(c.keyring.PublicKey)
 		if err != nil {
-			if err.Error() != ERR_Empty {
+			if err.Error() != pattern.ERR_Empty {
 				return txhash, earnings, err
 			}
 		} else {
-			if !CompareSlice([]byte(string(minerinfo.PeerId[:])), puk) {
+			if !utils.CompareSlice([]byte(string(minerinfo.PeerId[:])), puk) {
 				txhash, err = c.updateAddress(key, role, peerid)
 				return txhash, earnings, err
 			}
@@ -101,11 +110,11 @@ func (c *chainClient) Register(role string, puk []byte, earnings string, pledge 
 		if err != nil {
 			return txhash, earnings, errors.Wrap(err, "[NewAccountID]")
 		}
-		realTokens, ok := new(big.Int).SetString(strconv.FormatUint(pledge, 10)+TokenPrecision_CESS, 10)
+		realTokens, ok := new(big.Int).SetString(strconv.FormatUint(pledge, 10)+pattern.TokenPrecision_CESS, 10)
 		if !ok {
 			return txhash, earnings, errors.New("[big.Int.SetString]")
 		}
-		call, err = types.NewCall(c.metadata, TX_SMINER_REGISTER, *acc, peerid, types.NewU128(*realTokens))
+		call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTER, *acc, peerid, types.NewU128(*realTokens))
 		if err != nil {
 			return txhash, earnings, errors.Wrap(err, "[NewCall]")
 		}
@@ -119,7 +128,7 @@ func (c *chainClient) Register(role string, puk []byte, earnings string, pledge 
 	}
 
 	if !ok {
-		return txhash, earnings, ERR_RPC_EMPTY_VALUE
+		return txhash, earnings, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -154,7 +163,7 @@ func (c *chainClient) Register(role string, puk []byte, earnings string, pledge 
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -165,27 +174,27 @@ func (c *chainClient) Register(role string, puk []byte, earnings string, pledge 
 					return txhash, earnings, nil
 				}
 				switch role {
-				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+				case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssRegister) > 0 {
 						return txhash, earnings, nil
 					}
-				case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+				case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 					if len(events.Sminer_Registered) > 0 {
 						return txhash, earnings, nil
 					}
 				default:
-					return txhash, earnings, errors.New(ERR_Failed)
+					return txhash, earnings, errors.New(pattern.ERR_Failed)
 				}
 			}
 		case err = <-sub.Err():
 			return txhash, earnings, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, earnings, ERR_RPC_TIMEOUT
+			return txhash, earnings, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
+func (c *ChainSDK) UpdateAddress(role, multiaddr string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -202,17 +211,17 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 	)
 
 	if !c.GetChainState() {
-		return txhash, ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
 	switch role {
-	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-		call, err = types.NewCall(c.metadata, TX_OSS_UPDATE, types.NewBytes([]byte(multiaddr)))
+	case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+		call, err = types.NewCall(c.metadata, pattern.TX_OSS_UPDATE, types.NewBytes([]byte(multiaddr)))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
-	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEPEERID, types.NewBytes([]byte(multiaddr)))
+	case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+		call, err = types.NewCall(c.metadata, pattern.TX_SMINER_UPDATEPEERID, types.NewBytes([]byte(multiaddr)))
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -220,7 +229,7 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 		return "", fmt.Errorf("Invalid role name")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -230,7 +239,7 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -265,7 +274,7 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -276,27 +285,27 @@ func (c *chainClient) UpdateAddress(role, multiaddr string) (string, error) {
 					return txhash, nil
 				}
 				switch role {
-				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+				case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssUpdate) > 0 {
 						return txhash, nil
 					}
-				case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+				case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 					if len(events.Sminer_UpdataIp) > 0 {
 						return txhash, nil
 					}
 				default:
-					return txhash, errors.New(ERR_Failed)
+					return txhash, errors.New(pattern.ERR_Failed)
 				}
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) updateAddress(key types.StorageKey, name string, peerid PeerId) (string, error) {
+func (c *ChainSDK) updateAddress(key types.StorageKey, name string, peerid pattern.PeerId) (string, error) {
 	var (
 		err         error
 		txhash      string
@@ -305,14 +314,14 @@ func (c *chainClient) updateAddress(key types.StorageKey, name string, peerid Pe
 	)
 
 	switch name {
-	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+	case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 
-		call, err = types.NewCall(c.metadata, TX_OSS_UPDATE, peerid)
+		call, err = types.NewCall(c.metadata, pattern.TX_OSS_UPDATE, peerid)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
-	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		call, err = types.NewCall(c.metadata, TX_SMINER_UPDATEPEERID, peerid)
+	case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+		call, err = types.NewCall(c.metadata, pattern.TX_SMINER_UPDATEPEERID, peerid)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -325,7 +334,7 @@ func (c *chainClient) updateAddress(key types.StorageKey, name string, peerid Pe
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -358,7 +367,7 @@ func (c *chainClient) updateAddress(key types.StorageKey, name string, peerid Pe
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -369,28 +378,28 @@ func (c *chainClient) updateAddress(key types.StorageKey, name string, peerid Pe
 					return txhash, nil
 				}
 				switch name {
-				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+				case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssUpdate) > 0 {
 						return txhash, nil
 					}
-				case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+				case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 					if len(events.Sminer_UpdataIp) > 0 {
 						return txhash, nil
 					}
 				default:
-					return txhash, errors.New(ERR_Failed)
+					return txhash, errors.New(pattern.ERR_Failed)
 				}
-				return txhash, errors.New(ERR_Failed)
+				return txhash, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) Exit(role string) (string, error) {
+func (c *ChainSDK) Exit(role string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -407,17 +416,17 @@ func (c *chainClient) Exit(role string) (string, error) {
 	)
 
 	if !c.GetChainState() {
-		return txhash, ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
 	switch role {
-	case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-		call, err = types.NewCall(c.metadata, TX_OSS_DESTORY)
+	case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+		call, err = types.NewCall(c.metadata, pattern.TX_OSS_DESTORY)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
-	case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		call, err = types.NewCall(c.metadata, TX_FILEBANK_MINEREXITPREP)
+	case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+		call, err = types.NewCall(c.metadata, pattern.TX_FILEBANK_MINEREXITPREP)
 		if err != nil {
 			return txhash, errors.Wrap(err, "[NewCall]")
 		}
@@ -425,7 +434,7 @@ func (c *chainClient) Exit(role string) (string, error) {
 		return "", fmt.Errorf("Invalid role name")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -436,7 +445,7 @@ func (c *chainClient) Exit(role string) (string, error) {
 	}
 
 	if !ok {
-		return txhash, ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -471,7 +480,7 @@ func (c *chainClient) Exit(role string) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -482,22 +491,22 @@ func (c *chainClient) Exit(role string) (string, error) {
 					return txhash, nil
 				}
 				switch role {
-				case Role_OSS, Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
+				case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssDestroy) > 0 {
 						return txhash, nil
 					}
-				case Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
+				case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 					if len(events.Sminer_MinerExit) > 0 {
 						return txhash, nil
 					}
 				default:
-					return txhash, errors.New(ERR_Failed)
+					return txhash, errors.New(pattern.ERR_Failed)
 				}
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
