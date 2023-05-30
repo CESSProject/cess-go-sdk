@@ -3,6 +3,7 @@ package chain
 import (
 	"log"
 
+	"github.com/CESSProject/sdk-go/core/pattern"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
@@ -10,19 +11,19 @@ import (
 )
 
 // QueryDeoss
-func (c *chainClient) QueryDeoss(pubkey []byte) ([]byte, error) {
+func (c *ChainSDK) QueryDeoss(pubkey []byte) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Panicln(utils.RecoverError(err))
 		}
 	}()
-	var data PeerId
+	var data pattern.PeerId
 
 	if !c.GetChainState() {
-		return nil, ERR_RPC_CONNECTION
+		return nil, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, OSS, OSS, pubkey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.OSS, pattern.OSS, pubkey)
 	if err != nil {
 		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -32,12 +33,12 @@ func (c *chainClient) QueryDeoss(pubkey []byte) ([]byte, error) {
 		return nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return nil, ERR_RPC_EMPTY_VALUE
+		return nil, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return []byte(string(data[:])), nil
 }
 
-func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
+func (c *ChainSDK) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -46,7 +47,7 @@ func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	var data types.AccountID
 
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(puk)
@@ -59,7 +60,7 @@ func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, OSS, AUTHORITYLIST, b)
+	key, err := types.CreateStorageKey(c.metadata, pattern.OSS, pattern.AUTHORITYLIST, b)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -69,7 +70,7 @@ func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }

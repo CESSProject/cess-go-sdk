@@ -5,9 +5,12 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package chain
+package event
 
-import "github.com/centrifuge/go-substrate-rpc-client/v4/types"
+import (
+	"github.com/CESSProject/sdk-go/core/pattern"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+)
 
 // ******************************************************
 // cess event type
@@ -128,7 +131,7 @@ type Event_DeleteFile struct {
 	Phase    types.Phase
 	Operator types.AccountID
 	Owner    types.AccountID
-	Filehash []FileHash
+	Filehash []pattern.FileHash
 	Topics   []types.Hash
 }
 
@@ -204,7 +207,7 @@ type Event_UploadDeclaration struct {
 	Phase     types.Phase
 	Operator  types.AccountID
 	Owner     types.AccountID
-	Deal_hash FileHash
+	Deal_hash pattern.FileHash
 	Topics    []types.Hash
 }
 
@@ -227,20 +230,20 @@ type Event_DeleteBucket struct {
 type Event_TransferReport struct {
 	Phase       types.Phase
 	Acc         types.AccountID
-	Failed_list []FileHash
+	Failed_list []pattern.FileHash
 	Topics      []types.Hash
 }
 
 type Event_ReplaceFiller struct {
 	Phase       types.Phase
 	Acc         types.AccountID
-	Filler_list []FileHash
+	Filler_list []pattern.FileHash
 	Topics      []types.Hash
 }
 
 type Event_CalculateEnd struct {
 	Phase     types.Phase
-	File_hash FileHash
+	File_hash pattern.FileHash
 	Topics    []types.Hash
 }
 

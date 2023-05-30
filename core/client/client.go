@@ -16,7 +16,6 @@ import (
 
 	p2pgo "github.com/CESSProject/p2p-go"
 	"github.com/CESSProject/p2p-go/core"
-	"github.com/CESSProject/p2p-go/protocol"
 	"github.com/CESSProject/sdk-go/core/chain"
 	"github.com/CESSProject/sdk-go/core/rule"
 	"github.com/CESSProject/sdk-go/core/utils"
@@ -24,6 +23,7 @@ import (
 )
 
 type Client interface {
+	chain.Chain
 	Workspace() string
 	RegisterRole(name string, earnings string, pledge uint64) (string, string, error)
 	QueryAllBucketName(owner []byte) ([]string, error)
@@ -48,14 +48,13 @@ type Client interface {
 
 type Cli struct {
 	chain.Chain
-	*protocol.Protocol
 }
 
 func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, timeout time.Duration) (Client, error) {
 	var err error
 	var cli = &Cli{}
 
-	cli.Chain, err = chain.NewChainClient(rpc, phase, timeout)
+	cli.Chain, err = chain.NewChainSDK(rpc, phase, timeout)
 	if err != nil {
 		return cli, err
 	}
@@ -103,15 +102,6 @@ func NewBasicCli(rpc []string, name, phase, workspace, addr string, port int, ti
 	if !ok {
 		return cli, errors.New("p2p host type error")
 	}
-
-	cli.Protocol = protocol.NewProtocol(p2pnode)
-	cli.Protocol.WriteFileProtocol = protocol.NewWriteFileProtocol(p2pnode)
-	cli.Protocol.ReadFileProtocol = protocol.NewReadFileProtocol(p2pnode)
-	cli.Protocol.AggrProofProtocol = protocol.NewAggrProofProtocol(p2pnode)
-	cli.Protocol.CustomDataTagProtocol = protocol.NewCustomDataTagProtocol(p2pnode)
-	cli.Protocol.IdleDataTagProtocol = protocol.NewIdleDataTagProtocol(p2pnode)
-	cli.Protocol.FileProtocol = protocol.NewFileProtocol(p2pnode)
-	cli.Protocol.PushTagProtocol = protocol.NewPushTagProtocol(p2pnode)
 
 	return cli, nil
 }

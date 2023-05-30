@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/CESSProject/sdk-go/core/pattern"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QuerySpacePricePerGib() (string, error) {
+func (c *ChainSDK) QuerySpacePricePerGib() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -20,10 +21,10 @@ func (c *chainClient) QuerySpacePricePerGib() (string, error) {
 	var data types.U128
 
 	if !c.GetChainState() {
-		return "", ERR_RPC_CONNECTION
+		return "", pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, STORAGEHANDLER, UNITPRICE)
+	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.UNITPRICE)
 	if err != nil {
 		return "", errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -33,23 +34,23 @@ func (c *chainClient) QuerySpacePricePerGib() (string, error) {
 		return "", errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return "", ERR_RPC_EMPTY_VALUE
+		return "", pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	return fmt.Sprintf("%v", data), nil
 }
 
-func (c *chainClient) QueryUserSpaceInfo(puk []byte) (UserSpaceInfo, error) {
+func (c *ChainSDK) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data UserSpaceInfo
+	var data pattern.UserSpaceInfo
 
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(puk)
@@ -62,7 +63,7 @@ func (c *chainClient) QueryUserSpaceInfo(puk []byte) (UserSpaceInfo, error) {
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, STORAGEHANDLER, USERSPACEINFO, owner)
+	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.USERSPACEINFO, owner)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -72,7 +73,7 @@ func (c *chainClient) QueryUserSpaceInfo(puk []byte) (UserSpaceInfo, error) {
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }

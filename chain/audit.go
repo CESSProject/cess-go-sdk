@@ -4,15 +4,17 @@ import (
 	"log"
 	"time"
 
+	"github.com/CESSProject/sdk-go/core/event"
+	"github.com/CESSProject/sdk-go/core/pattern"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryAssignedProof() ([][]ProofAssignmentInfo, error) {
-	var list [][]ProofAssignmentInfo
-	key := createPrefixedKey(AUDIT, UNVERIFYPROOF)
+func (c *ChainSDK) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error) {
+	var list [][]pattern.ProofAssignmentInfo
+	key := createPrefixedKey(pattern.AUDIT, pattern.UNVERIFYPROOF)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		return list, errors.Wrap(err, "[GetKeysLatest]")
@@ -24,7 +26,7 @@ func (c *chainClient) QueryAssignedProof() ([][]ProofAssignmentInfo, error) {
 	}
 	for _, elem := range set {
 		for _, change := range elem.Changes {
-			var data []ProofAssignmentInfo
+			var data []pattern.ProofAssignmentInfo
 			if err := codec.Decode(change.StorageData, &data); err != nil {
 				log.Println(err)
 				continue
@@ -35,19 +37,19 @@ func (c *chainClient) QueryAssignedProof() ([][]ProofAssignmentInfo, error) {
 	return list, nil
 }
 
-func (c *chainClient) QueryTeeAssignedProof(puk []byte) ([]ProofAssignmentInfo, error) {
+func (c *ChainSDK) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Panicln(utils.RecoverError(err))
 		}
 	}()
-	var data []ProofAssignmentInfo
+	var data []pattern.ProofAssignmentInfo
 
 	if !c.GetChainState() {
-		return data, ERR_RPC_CONNECTION
+		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, AUDIT, UNVERIFYPROOF, puk)
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYPROOF, puk)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -57,12 +59,12 @@ func (c *chainClient) QueryTeeAssignedProof(puk []byte) ([]ProofAssignmentInfo, 
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return data, ERR_RPC_EMPTY_VALUE
+		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }
 
-func (c *chainClient) ReportProof(idlesigma, servicesigma string) (string, error) {
+func (c *ChainSDK) ReportProof(idlesigma, servicesigma string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -77,15 +79,15 @@ func (c *chainClient) ReportProof(idlesigma, servicesigma string) (string, error
 	)
 
 	if !c.GetChainState() {
-		return txhash, ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_AUDIT_SUBMITPROOF, types.NewBytes([]byte(idlesigma)), types.NewBytes([]byte(servicesigma)))
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITPROOF, types.NewBytes([]byte(idlesigma)), types.NewBytes([]byte(servicesigma)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, SYSTEM, ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -95,7 +97,7 @@ func (c *chainClient) ReportProof(idlesigma, servicesigma string) (string, error
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -130,7 +132,7 @@ func (c *chainClient) ReportProof(idlesigma, servicesigma string) (string, error
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
@@ -140,12 +142,12 @@ func (c *chainClient) ReportProof(idlesigma, servicesigma string) (string, error
 				if err != nil || len(events.Audit_SubmitProof) > 0 {
 					return txhash, nil
 				}
-				return txhash, errors.New(ERR_Failed)
+				return txhash, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }

@@ -5,7 +5,7 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package chain
+package pattern
 
 import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"

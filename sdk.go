@@ -9,7 +9,7 @@ package sdkgo
 
 import (
 	"github.com/CESSProject/sdk-go/config"
-	"github.com/CESSProject/sdk-go/core/client"
+	"github.com/CESSProject/sdk-go/core/sdk"
 )
 
 // Config describes a set of settings for a client.
@@ -29,7 +29,7 @@ type Option = config.Option
 //
 // - If no working directory is provided, the client uses the current
 // directory as the working directory;
-func New(name string, opts ...Option) (client.Client, error) {
+func New(name string, opts ...Option) (sdk.SDK, error) {
 	return NewWithoutDefaults(name, append(opts, FallbackDefaults)...)
 }
 
@@ -39,10 +39,10 @@ func New(name string, opts ...Option) (client.Client, error) {
 // Warning: This function should not be considered a stable interface. We may
 // choose to add required services at any time and, by using this function, you
 // opt-out of any defaults we may provide.
-func NewWithoutDefaults(name string, opts ...Option) (client.Client, error) {
+func NewWithoutDefaults(name string, opts ...Option) (sdk.SDK, error) {
 	var cfg Config
 	if err := cfg.Apply(opts...); err != nil {
 		return nil, err
 	}
-	return cfg.NewClient(name)
+	return cfg.NewSDK(name)
 }
