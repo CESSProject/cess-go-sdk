@@ -24,12 +24,16 @@ type SDK interface {
 
 	// QuaryAuthorizedAcc queries the account authorized by puk.
 	QuaryAuthorizedAcc(puk []byte) (types.AccountID, error)
+	QuaryAuthorizedAccount(puk []byte) (string, error)
+	CheckSpaceUsageAuthorization(puk []byte) (bool, error)
 
 	// QueryBucketInfo queries the information of the "bucketname" bucket of the puk.
 	QueryBucketInfo(puk []byte, bucketname string) (pattern.BucketInfo, error)
 
 	// QueryBucketList queries all buckets of the puk.
+	// QueryAllBucketName
 	QueryBucketList(puk []byte) ([]types.Bytes, error)
+	QueryAllBucketName(puk []byte) ([]string, error)
 
 	// QueryFileMetaInfo queries the metadata of the roothash file.
 	QueryFileMetadata(roothash string) (pattern.FileMetadata, error)
@@ -51,6 +55,7 @@ type SDK interface {
 
 	// QueryUserSpaceInfo queries the space information purchased by the user.
 	QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error)
+	QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error)
 
 	// QuerySpacePricePerGib query space price per GiB.
 	QuerySpacePricePerGib() (string, error)
@@ -66,6 +71,7 @@ type SDK interface {
 
 	// QueryTeeInfoList queries the information of all tee workers.
 	QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error)
+	QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error)
 
 	//
 	QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error)
@@ -75,6 +81,7 @@ type SDK interface {
 
 	//
 	QueryMinerRewards(puk []byte) (pattern.MinerReward, error)
+	QuaryRewards(puk []byte) (pattern.RewardsType, error)
 
 	// Register is used to register OSS or BUCKET roles.
 	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
@@ -84,6 +91,7 @@ type SDK interface {
 
 	// UpdateIncomeAcc update income account.
 	UpdateIncomeAcc(puk []byte) (string, error)
+	UpdateIncomeAccount(income string) (string, error)
 
 	// CreateBucket creates a bucket for puk.
 	CreateBucket(puk []byte, bucketname string) (string, error)
@@ -99,15 +107,19 @@ type SDK interface {
 
 	// SubmitIdleMetadata Submit idle file metadata.
 	SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error)
+	SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error)
 
 	// SubmitFileReport submits a stored file report.
 	SubmitFileReport(roothash []pattern.FileHash) (string, []pattern.FileHash, error)
+	ReportFiles(roothash []string) (string, []string, error)
 
 	// ReplaceIdleFiles replaces idle files.
 	ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error)
+	ReplaceFile(roothash []string) (string, []string, error)
 
 	// IncreaseStakes increase stakes.
 	IncreaseStakes(tokens *big.Int) (string, error)
+	IncreaseSminerStakes(token string) (string, error)
 
 	// Exit exit the cess network.
 	Exit(role string) (string, error)
@@ -160,4 +172,7 @@ type SDK interface {
 
 	//
 	NetListening() (bool, error)
+
+	//
+	Sign(msg []byte) ([]byte, error)
 }

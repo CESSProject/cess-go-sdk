@@ -77,3 +77,19 @@ func (c *ChainSDK) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error)
 	}
 	return data, nil
 }
+
+func (c *ChainSDK) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
+	var userSpaceSt pattern.UserSpaceSt
+	spaceinfo, err := c.QueryUserSpaceInfo(puk)
+	if err != nil {
+		return userSpaceSt, err
+	}
+	userSpaceSt.Start = uint32(spaceinfo.Start)
+	userSpaceSt.Deadline = uint32(spaceinfo.Deadline)
+	userSpaceSt.TotalSpace = spaceinfo.TotalSpace.String()
+	userSpaceSt.UsedSpace = spaceinfo.UsedSpace.String()
+	userSpaceSt.RemainingSpace = spaceinfo.RemainingSpace.String()
+	userSpaceSt.LockedSpace = spaceinfo.LockedSpace.String()
+	userSpaceSt.State = string(spaceinfo.State)
+	return userSpaceSt, nil
+}

@@ -74,3 +74,25 @@ func (c *ChainSDK) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	}
 	return data, nil
 }
+
+func (c *ChainSDK) QuaryAuthorizedAccount(puk []byte) (string, error) {
+	acc, err := c.QuaryAuthorizedAcc(puk)
+	if err != nil {
+		return "", err
+	}
+	return utils.EncodePublicKeyAsCessAccount(acc[:])
+}
+
+func (c *ChainSDK) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
+	grantor, err := c.QuaryAuthorizedAcc(puk)
+	if err != nil {
+		if err.Error() == pattern.ERR_Empty {
+			return false, nil
+		}
+		return false, err
+	}
+	account_chain, _ := utils.EncodePublicKeyAsCessAccount(grantor[:])
+	account_local := c.GetSignatureAcc()
+
+	return account_chain == account_local, nil
+}

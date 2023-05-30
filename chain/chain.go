@@ -171,6 +171,10 @@ func (c *ChainSDK) GetTokenSymbol() string {
 	return c.tokenSymbol
 }
 
+func (c *ChainSDK) Sign(msg []byte) ([]byte, error) {
+	return signature.Sign(msg, c.GetSignatureURI())
+}
+
 func reconnectChainSDK(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
 	var err error
 	var api *gsrpc.SubstrateAPI

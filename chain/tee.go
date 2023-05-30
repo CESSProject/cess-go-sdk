@@ -115,3 +115,24 @@ func (c *ChainSDK) QueryTeePeerID(puk []byte) ([]byte, error) {
 
 	return []byte(string(data.PeerId[:])), nil
 }
+
+func (c *ChainSDK) QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error) {
+	teelist, err := c.QueryTeeInfoList()
+	if err != nil {
+		return nil, err
+	}
+	var results = make([]pattern.TeeWorkerSt, len(teelist))
+	for k, v := range teelist {
+		results[k].Node_key = []byte(string(v.NodeKey.NodePublickey[:]))
+		results[k].Peer_id = []byte(string(v.PeerId[:]))
+		results[k].Controller_account, err = utils.EncodePublicKeyAsCessAccount(v.ControllerAccount[:])
+		if err != nil {
+			return results, err
+		}
+		results[k].Stash_account, err = utils.EncodePublicKeyAsCessAccount(v.StashAccount[:])
+		if err != nil {
+			return results, err
+		}
+	}
+	return results, nil
+}

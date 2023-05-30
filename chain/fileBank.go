@@ -6,6 +6,7 @@ import (
 
 	"github.com/CESSProject/sdk-go/core/event"
 	"github.com/CESSProject/sdk-go/core/pattern"
+	"github.com/CESSProject/sdk-go/core/rule"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
@@ -91,6 +92,20 @@ func (c *ChainSDK) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
+}
+
+func (c *ChainSDK) QueryAllBucketName(owner []byte) ([]string, error) {
+	bucketlist, err := c.QueryBucketList(owner)
+	if err != nil {
+		if err.Error() != pattern.ERR_Empty {
+			return nil, err
+		}
+	}
+	var buckets = make([]string, len(bucketlist))
+	for i := 0; i < len(bucketlist); i++ {
+		buckets[i] = string(bucketlist[i])
+	}
+	return buckets, nil
 }
 
 // QueryFileMetaData
@@ -313,6 +328,39 @@ func (c *ChainSDK) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMet
 			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
+}
+
+func (c *ChainSDK) SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error) {
+	var submit = make([]pattern.IdleMetadata, 0)
+	for i := 0; i < len(idlefiles); i++ {
+		var filehash pattern.FileHash
+		acc, err := types.NewAccountID(idlefiles[i].MinerAcc)
+		if err != nil {
+			continue
+		}
+
+		if len(idlefiles[i].Hash) != len(pattern.FileHash{}) {
+			continue
+		}
+
+		for j := 0; j < len(idlefiles[i].Hash); j++ {
+			filehash[j] = types.U8(idlefiles[i].Hash[j])
+		}
+
+		var ele = pattern.IdleMetadata{
+			Size:      types.NewU64(idlefiles[i].Size),
+			BlockNum:  types.NewU32(idlefiles[i].BlockNum),
+			BlockSize: types.NewU32(idlefiles[i].BlockSize),
+			ScanSize:  types.NewU32(idlefiles[i].ScanSize),
+			Acc:       *acc,
+			Hash:      filehash,
+		}
+		submit = append(submit, ele)
+		if len(submit) >= rule.MaxSubmitedIdleFileMeta {
+			break
+		}
+	}
+	return c.SubmitIdleMetadata(teeAcc, submit)
 }
 
 func (c *ChainSDK) CreateBucket(owner_pkey []byte, name string) (string, error) {
@@ -790,6 +838,21 @@ func (c *ChainSDK) SubmitFileReport(roothash []pattern.FileHash) (string, []patt
 	}
 }
 
+func (c *ChainSDK) ReportFiles(roothash []string) (string, []string, error) {
+	var hashs = make([]pattern.FileHash, len(roothash))
+	for i := 0; i < len(roothash); i++ {
+		for j := 0; j < len(roothash[i]); j++ {
+			hashs[i][j] = types.U8(roothash[i][j])
+		}
+	}
+	txhash, failed, err := c.SubmitFileReport(hashs)
+	var failedfiles = make([]string, len(failed))
+	for k, v := range failed {
+		failedfiles[k] = string(v[:])
+	}
+	return txhash, failedfiles, err
+}
+
 func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
@@ -876,4 +939,19 @@ func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []patt
 			return txhash, nil, pattern.ERR_RPC_TIMEOUT
 		}
 	}
+}
+
+func (c *ChainSDK) ReplaceFile(roothash []string) (string, []string, error) {
+	var hashs = make([]pattern.FileHash, len(roothash))
+	for i := 0; i < len(roothash); i++ {
+		for j := 0; j < len(roothash[i]); j++ {
+			hashs[i][j] = types.U8(roothash[i][j])
+		}
+	}
+	txhash, failed, err := c.ReplaceIdleFiles(hashs)
+	var failedFiles = make([]string, len(failed))
+	for k, v := range failed {
+		failedFiles[k] = string(v[:])
+	}
+	return txhash, failedFiles, err
 }

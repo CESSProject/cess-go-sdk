@@ -1,6 +1,7 @@
 package chain
 
 import (
+	"fmt"
 	"log"
 	"math/big"
 	"time"
@@ -98,6 +99,20 @@ func (c *ChainSDK) QueryMinerRewards(puk []byte) (pattern.MinerReward, error) {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
+}
+
+func (c *ChainSDK) QuaryRewards(puk []byte) (pattern.RewardsType, error) {
+	var reward pattern.RewardsType
+	rewards, err := c.QueryMinerRewards(puk)
+	if err != nil {
+		return reward, err
+	}
+
+	reward.Total = rewards.TotalReward.String()
+	reward.Claimed = rewards.RewardIssued.String()
+	reward.Available = rewards.CurrentlyAvailableReward.String()
+
+	return reward, nil
 }
 
 func (c *ChainSDK) UpdateIncomeAcc(puk []byte) (string, error) {
@@ -269,6 +284,14 @@ func (c *ChainSDK) updateIncomeAcc(key types.StorageKey, puk []byte) (string, er
 	}
 }
 
+func (c *ChainSDK) UpdateIncomeAccount(income string) (string, error) {
+	puk, err := utils.ParsingPublickey(income)
+	if err != nil {
+		return "", err
+	}
+	return c.UpdateIncomeAcc(puk)
+}
+
 // Storage miners increase deposit function
 func (c *ChainSDK) IncreaseStakes(tokens *big.Int) (string, error) {
 	c.lock.Lock()
@@ -356,6 +379,14 @@ func (c *ChainSDK) IncreaseStakes(tokens *big.Int) (string, error) {
 			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
+}
+
+func (c *ChainSDK) IncreaseSminerStakes(token string) (string, error) {
+	tokens, ok := new(big.Int).SetString(token+pattern.TokenPrecision_CESS, 10)
+	if !ok {
+		return "", fmt.Errorf("Invalid tokens: %s", token)
+	}
+	return c.IncreaseStakes(tokens)
 }
 
 // ClaimRewards
