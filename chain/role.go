@@ -1,3 +1,10 @@
+/*
+	Copyright (C) CESS. All rights reserved.
+	Copyright (C) Cumulus Encrypted Storage System. All rights reserved.
+
+	SPDX-License-Identifier: Apache-2.0
+*/
+
 package chain
 
 import (
@@ -59,7 +66,7 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 				return txhash, earnings, err
 			}
 		} else {
-			if !CompareSlice(id, puk) {
+			if !utils.CompareSlice(id, puk) {
 				txhash, err = c.updateAddress(key, role, peerid)
 				return txhash, earnings, err
 			}
@@ -77,7 +84,7 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 				return txhash, earnings, err
 			}
 		} else {
-			if !CompareSlice([]byte(string(minerinfo.PeerId[:])), puk) {
+			if !utils.CompareSlice([]byte(string(minerinfo.PeerId[:])), puk) {
 				txhash, err = c.updateAddress(key, role, peerid)
 				return txhash, earnings, err
 			}
