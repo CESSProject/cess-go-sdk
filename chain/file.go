@@ -19,7 +19,6 @@ import (
 	"github.com/CESSProject/sdk-go/core/erasure"
 	"github.com/CESSProject/sdk-go/core/hashtree"
 	"github.com/CESSProject/sdk-go/core/pattern"
-	"github.com/CESSProject/sdk-go/core/rule"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
@@ -34,7 +33,7 @@ func (c *ChainSDK) GetFile(roothash, dir string) (string, error) {
 	if err == nil {
 		return userfile, nil
 	}
-	os.MkdirAll(dir, rule.DirMode)
+	os.MkdirAll(dir, pattern.DirMode)
 	f, err := os.Create(userfile)
 	if err != nil {
 		return "", err
@@ -73,7 +72,7 @@ func (c *ChainSDK) GetFile(roothash, dir string) (string, error) {
 			// }
 			fragmentpaths = append(fragmentpaths, fragmentpath)
 			segmentpath := filepath.Join(dir, string(segment.Hash[:]))
-			if len(fragmentpaths) >= rule.DataShards {
+			if len(fragmentpaths) >= pattern.DataShards {
 				err = erasure.ReedSolomon_Restore(segmentpath, fragmentpaths)
 				if err != nil {
 					return "", err
@@ -125,7 +124,7 @@ func (c *ChainSDK) PutFile(owner []byte, segmentInfo []pattern.SegmentDataInfo, 
 					return 0, err
 				}
 			}
-			time.Sleep(rule.BlockInterval)
+			time.Sleep(pattern.BlockInterval)
 			continue
 		}
 		break
@@ -160,14 +159,14 @@ func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, strin
 	}
 
 	baseDir := filepath.Dir(path)
-	segmentCount = fstat.Size() / rule.SegmentSize
-	if fstat.Size()%int64(rule.SegmentSize) != 0 {
+	segmentCount = fstat.Size() / pattern.SegmentSize
+	if fstat.Size()%int64(pattern.SegmentSize) != 0 {
 		segmentCount++
 	}
 
 	segment := make([]pattern.SegmentDataInfo, segmentCount)
 
-	buf := make([]byte, rule.SegmentSize)
+	buf := make([]byte, pattern.SegmentSize)
 
 	f, err = os.Open(path)
 	if err != nil {
@@ -176,7 +175,7 @@ func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, strin
 	defer f.Close()
 
 	for i := int64(0); i < segmentCount; i++ {
-		f.Seek(rule.SegmentSize*i, 0)
+		f.Seek(pattern.SegmentSize*i, 0)
 		num, err = f.Read(buf)
 		if err != nil && err != io.EOF {
 			return segment, "", err
@@ -184,11 +183,11 @@ func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, strin
 		if num == 0 {
 			break
 		}
-		if num < rule.SegmentSize {
+		if num < pattern.SegmentSize {
 			if i+1 != segmentCount {
 				return segment, "", fmt.Errorf("Error reading %s", path)
 			}
-			remainbuf := make([]byte, rule.SegmentSize-num)
+			remainbuf := make([]byte, pattern.SegmentSize-num)
 			copy(buf[num:], remainbuf)
 		}
 

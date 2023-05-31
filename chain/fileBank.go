@@ -13,7 +13,6 @@ import (
 
 	"github.com/CESSProject/sdk-go/core/event"
 	"github.com/CESSProject/sdk-go/core/pattern"
-	"github.com/CESSProject/sdk-go/core/rule"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
@@ -355,15 +354,12 @@ func (c *ChainSDK) SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMet
 		}
 
 		var ele = pattern.IdleMetadata{
-			Size:      types.NewU64(idlefiles[i].Size),
-			BlockNum:  types.NewU32(idlefiles[i].BlockNum),
-			BlockSize: types.NewU32(idlefiles[i].BlockSize),
-			ScanSize:  types.NewU32(idlefiles[i].ScanSize),
-			Acc:       *acc,
-			Hash:      filehash,
+			BlockNum: types.NewU32(idlefiles[i].BlockNum),
+			Acc:      *acc,
+			Hash:     filehash,
 		}
 		submit = append(submit, ele)
-		if len(submit) >= rule.MaxSubmitedIdleFileMeta {
+		if len(submit) >= pattern.MaxSubmitedIdleFileMeta {
 			break
 		}
 	}

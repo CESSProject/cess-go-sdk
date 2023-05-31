@@ -13,7 +13,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/CESSProject/sdk-go/core/rule"
+	"github.com/CESSProject/sdk-go/core/pattern"
 	"github.com/CESSProject/sdk-go/core/utils"
 	"github.com/klauspost/reedsolomon"
 )
@@ -28,11 +28,11 @@ func ReedSolomon(path string) ([]string, error) {
 	if fstat.IsDir() {
 		return nil, errors.New("not a file")
 	}
-	if fstat.Size() != rule.SegmentSize {
+	if fstat.Size() != pattern.SegmentSize {
 		return nil, errors.New("invalid size")
 	}
 
-	datashards, parshards := rule.DataShards, rule.ParShards
+	datashards, parshards := pattern.DataShards, pattern.ParShards
 	basedir := filepath.Dir(path)
 
 	enc, err := reedsolomon.New(datashards, parshards)
@@ -80,7 +80,7 @@ func ReedSolomon_Restore(outpath string, shardspath []string) error {
 		return nil
 	}
 
-	datashards, parshards := rule.DataShards, rule.ParShards
+	datashards, parshards := pattern.DataShards, pattern.ParShards
 
 	enc, err := reedsolomon.New(datashards, parshards)
 	if err != nil {

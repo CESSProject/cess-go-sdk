@@ -7,9 +7,7 @@
 
 package sdkgo
 
-import (
-	"github.com/CESSProject/sdk-go/core/rule"
-)
+import "github.com/CESSProject/sdk-go/core/pattern"
 
 // DefaultRpcAddrs configures client to use default RPC address.
 var DefaultRpcAddrs = func(cfg *Config) error {
@@ -22,7 +20,7 @@ var DefaultRpcAddrs = func(cfg *Config) error {
 
 // DefaultListenPort configures client to use default listen port.
 var DefaultTimeout = func(cfg *Config) error {
-	return cfg.Apply(TransactionTimeout(rule.BlockInterval))
+	return cfg.Apply(TransactionTimeout(pattern.BlockInterval))
 }
 
 // Complete list of default options and when to fallback on them.
