@@ -66,6 +66,8 @@ type SDK interface {
 
 	// QueryChallengeSnapshot query challenge information snapshot.
 	QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error)
+	QueryChallengeSt() (pattern.ChallengeSnapshot, error)
+	QueryChallenge(pubkey []byte) (pattern.ChallengeInfo, error)
 
 	// QueryTeePodr2Puk queries the public key of the TEE.
 	QueryTeePodr2Puk() ([]byte, error)
