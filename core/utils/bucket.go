@@ -11,11 +11,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/CESSProject/sdk-go/core/rule"
+	"github.com/CESSProject/sdk-go/core/pattern"
 )
 
 func CheckBucketName(name string) bool {
-	if len(name) < rule.MinBucketNameLength || len(name) > rule.MaxBucketNameLength {
+	if len(name) < pattern.MinBucketNameLength || len(name) > pattern.MaxBucketNameLength {
 		return false
 	}
 

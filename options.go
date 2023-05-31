@@ -10,7 +10,7 @@ package sdkgo
 import (
 	"time"
 
-	"github.com/CESSProject/sdk-go/core/rule"
+	"github.com/CESSProject/sdk-go/core/pattern"
 )
 
 // ConnectRpcAddrs configures client to connect to the given RPC
@@ -33,8 +33,8 @@ func Mnemonic(mnemonic string) Option {
 // TransactionTimeout configures the transaction timeout period.
 func TransactionTimeout(timeout time.Duration) Option {
 	return func(cfg *Config) error {
-		if timeout < rule.BlockInterval {
-			cfg.Timeout = rule.BlockInterval
+		if timeout < pattern.BlockInterval {
+			cfg.Timeout = pattern.BlockInterval
 		} else {
 			cfg.Timeout = timeout
 		}

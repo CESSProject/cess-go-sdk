@@ -8,6 +8,8 @@
 package pattern
 
 import (
+	"time"
+
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
 )
@@ -17,6 +19,11 @@ const DOT = "."
 
 // Unit precision of CESS token
 const TokenPrecision_CESS = "000000000000"
+
+// BlockInterval is the time interval for generating blocks, in seconds
+const BlockInterval = time.Second * time.Duration(6)
+
+const MaxSubmitedIdleFileMeta = 30
 
 // Pallets
 const (
@@ -119,6 +126,8 @@ const (
 	Role_BUCKET = "BUCKET"
 )
 
+const DirMode = 0644
+
 const (
 	Active = iota
 	Calculate
@@ -137,6 +146,26 @@ const (
 	ERR_Failed  = "failed"
 	ERR_Timeout = "timeout"
 	ERR_Empty   = "empty"
+)
+
+const (
+	MinBucketNameLength = 3
+	MaxBucketNameLength = 63
+)
+
+// byte size
+const (
+	SIZE_1KiB = 1024
+	SIZE_1MiB = 1024 * SIZE_1KiB
+	SIZE_1GiB = 1024 * SIZE_1MiB
+)
+
+const (
+	SegmentSize  = 16 * SIZE_1MiB
+	FragmentSize = 8 * SIZE_1MiB
+	BlockNumber  = 1024
+	DataShards   = 2
+	ParShards    = 1
 )
 
 var (
@@ -240,12 +269,9 @@ type StorageOrder struct {
 }
 
 type IdleMetadata struct {
-	Size      types.U64
-	BlockNum  types.U32
-	BlockSize types.U32
-	ScanSize  types.U32
-	Acc       types.AccountID
-	Hash      FileHash
+	BlockNum types.U32
+	Acc      types.AccountID
+	Hash     FileHash
 }
 
 type UserSpaceInfo struct {
@@ -298,12 +324,9 @@ type ProofAssignmentInfo struct {
 
 // --------------------customer-----------------
 type IdleFileMeta struct {
-	Size      uint64
-	BlockNum  uint32
-	BlockSize uint32
-	ScanSize  uint32
-	MinerAcc  []byte
-	Hash      string
+	BlockNum uint32
+	MinerAcc []byte
+	Hash     string
 }
 
 type UserSpaceSt struct {
@@ -359,16 +382,4 @@ type RewardsType struct {
 type SegmentDataInfo struct {
 	SegmentHash  string
 	FragmentHash []string
-}
-
-func CompareSlice(s1, s2 []byte) bool {
-	if len(s1) != len(s2) {
-		return false
-	}
-	for i := 0; i < len(s1); i++ {
-		if s1[i] != s2[i] {
-			return false
-		}
-	}
-	return true
 }
