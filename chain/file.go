@@ -14,7 +14,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/CESSProject/sdk-go/core/erasure"
 	"github.com/CESSProject/sdk-go/core/hashtree"
@@ -23,123 +22,6 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
 )
-
-func (c *ChainSDK) GetFile(roothash, dir string) (string, error) {
-	var (
-		segmentspath = make([]string, 0)
-	)
-	userfile := filepath.Join(dir, roothash)
-	_, err := os.Stat(userfile)
-	if err == nil {
-		return userfile, nil
-	}
-	os.MkdirAll(dir, pattern.DirMode)
-	f, err := os.Create(userfile)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	fmeta, err := c.QueryFileMetadata(roothash)
-	if err != nil {
-		return "", err
-	}
-
-	defer func(basedir string) {
-		for _, segment := range fmeta.SegmentList {
-			os.Remove(filepath.Join(basedir, string(segment.Hash[:])))
-			for _, fragment := range segment.FragmentList {
-				os.Remove(filepath.Join(basedir, string(fragment.Hash[:])))
-			}
-		}
-	}(dir)
-
-	for _, segment := range fmeta.SegmentList {
-		fragmentpaths := make([]string, 0)
-		for _, fragment := range segment.FragmentList {
-			//miner, err := c.QueryStorageMiner(fragment.Miner[:])
-			if err != nil {
-				return "", err
-			}
-			// peerid, err := c.AddMultiaddrToPearstore(string(miner.PeerId[:]), time.Hour)
-			// if err != nil {
-			// 	return "", err
-			// }
-			fragmentpath := filepath.Join(dir, string(fragment.Hash[:]))
-			// err = c.Protocol.ReadFileAction(peerid, roothash, string(fragment.Hash[:]), fragmentpath, rule.FragmentSize)
-			// if err != nil {
-			// 	continue
-			// }
-			fragmentpaths = append(fragmentpaths, fragmentpath)
-			segmentpath := filepath.Join(dir, string(segment.Hash[:]))
-			if len(fragmentpaths) >= pattern.DataShards {
-				err = erasure.ReedSolomon_Restore(segmentpath, fragmentpaths)
-				if err != nil {
-					return "", err
-				}
-				segmentspath = append(segmentspath, segmentpath)
-				break
-			}
-		}
-	}
-
-	if len(segmentspath) != len(fmeta.SegmentList) {
-		return "", fmt.Errorf("Download failed")
-	}
-	var writecount = 0
-	for i := 0; i < len(fmeta.SegmentList); i++ {
-		for j := 0; j < len(segmentspath); j++ {
-			if string(fmeta.SegmentList[i].Hash[:]) == filepath.Base(segmentspath[j]) {
-				buf, err := os.ReadFile(segmentspath[j])
-				if err != nil {
-					return "", err
-				}
-				f.Write(buf)
-				writecount++
-				break
-			}
-		}
-	}
-	if writecount != len(fmeta.SegmentList) {
-		return "", fmt.Errorf("Write failed")
-	}
-	return userfile, nil
-}
-
-func (c *ChainSDK) PutFile(owner []byte, segmentInfo []pattern.SegmentDataInfo, roothash, filename, bucketname string) (uint8, error) {
-	var err error
-	var storageOrder pattern.StorageOrder
-
-	_, err = c.QueryFileMetadata(roothash)
-	if err == nil {
-		return 0, nil
-	}
-
-	for i := 0; i < 3; i++ {
-		storageOrder, err = c.QueryStorageOrder(roothash)
-		if err != nil {
-			if err.Error() == pattern.ERR_Empty {
-				err = c.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)
-				if err != nil {
-					return 0, err
-				}
-			}
-			time.Sleep(pattern.BlockInterval)
-			continue
-		}
-		break
-	}
-	if err != nil {
-		return 0, err
-	}
-
-	// store fragment to storage
-	err = c.StorageData(roothash, segmentInfo, storageOrder.AssignedMiner)
-	if err != nil {
-		return 0, err
-	}
-	return uint8(storageOrder.Count), nil
-}
 
 func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error) {
 	var (
@@ -268,43 +150,4 @@ func ExtractSegmenthash(segment []pattern.SegmentDataInfo) []string {
 		segmenthash[i] = segment[i].SegmentHash
 	}
 	return segmenthash
-}
-
-func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
-	// var err error
-
-	// query all assigned miner multiaddr
-	// multiaddrs, err := c.QueryAssignedMiner(minerTaskList)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// basedir := filepath.Dir(segment[0].FragmentHash[0])
-	// for i := 0; i < len(multiaddrs); i++ {
-	// 	peerid, err := c.Protocol.AddMultiaddrToPearstore(multiaddrs[i], 0)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	for j := 0; j < len(minerTaskList[i].Hash); j++ {
-	// 		err = c.Protocol.WriteFileAction(peerid, roothash, filepath.Join(basedir, string(minerTaskList[i].Hash[j][:])))
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 	}
-	// }
-
-	return nil
-}
-
-func (c *ChainSDK) QueryAssignedMiner(minerTaskList []pattern.MinerTaskList) ([]string, error) {
-	var multiaddrs = make([]string, len(minerTaskList))
-	for i := 0; i < len(minerTaskList); i++ {
-		minerInfo, err := c.QueryStorageMiner(minerTaskList[i].Account[:])
-		if err != nil {
-			return multiaddrs, err
-		}
-		multiaddrs[i] = string(minerInfo.PeerId[:])
-	}
-	return multiaddrs, nil
 }
