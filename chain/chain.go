@@ -36,7 +36,7 @@ type ChainSDK struct {
 	rpcAddr         []string
 	timeForBlockOut time.Duration
 	tokenSymbol     string
-	stakingAcc      string
+	signatureAcc    string
 	name            string
 }
 
@@ -83,7 +83,7 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration) (
 		if err != nil {
 			return nil, err
 		}
-		chainSDK.stakingAcc, err = utils.EncodePublicKeyAsCessAccount(chainSDK.keyring.PublicKey)
+		chainSDK.signatureAcc, err = utils.EncodePublicKeyAsCessAccount(chainSDK.keyring.PublicKey)
 		if err != nil {
 			return nil, err
 		}
@@ -128,30 +128,16 @@ func (c *ChainSDK) GetChainState() bool {
 	return c.chainState.Load()
 }
 
-func (c *ChainSDK) NewAccountId(pubkey []byte) types.AccountID {
-	acc, _ := types.NewAccountID(pubkey)
-	return *acc
-}
-
 func (c *ChainSDK) GetSignatureAcc() string {
-	acc, _ := utils.EncodePublicKeyAsCessAccount(c.keyring.PublicKey)
-	return acc
+	return c.signatureAcc
 }
 
 func (c *ChainSDK) GetKeyEvents() types.StorageKey {
 	return c.keyEvents
 }
 
-// ExtractAccountPublickey
-func (c *ChainSDK) ExtractAccountPuk(account string) ([]byte, error) {
-	if account != "" {
-		return utils.ParsingPublickey(account)
-	}
-	return c.keyring.PublicKey, nil
-}
-
-func (c *ChainSDK) GetSignatureURIs() string {
-	return c.keyring.URI
+func (c *ChainSDK) GetSignatureAccPulickey() []byte {
+	return c.keyring.PublicKey
 }
 
 func (c *ChainSDK) GetSubstrateAPI() *gsrpc.SubstrateAPI {
@@ -166,8 +152,16 @@ func (c *ChainSDK) GetTokenSymbol() string {
 	return c.tokenSymbol
 }
 
+func (c *ChainSDK) GetCharacterName() string {
+	return c.name
+}
+
 func (c *ChainSDK) Sign(msg []byte) ([]byte, error) {
 	return signature.Sign(msg, c.keyring.URI)
+}
+
+func (c *ChainSDK) Verify(msg []byte, sig []byte) (bool, error) {
+	return signature.Verify(msg, sig, c.keyring.URI)
 }
 
 func reconnectChainSDK(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {

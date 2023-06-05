@@ -9,7 +9,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/btcsuite/btcutil/base58"
 	"golang.org/x/crypto/blake2b"
@@ -40,27 +39,6 @@ func ParsingPublickey(address string) ([]byte, error) {
 		}
 		return data[len(CessPrefix) : len(data)-2], nil
 	}
-}
-
-// func DecodePublicKeyOfSubstrateAccount(address string) ([]byte, error) {
-// 	err := VerityAddress(address, SubstratePrefix)
-// 	if err != nil {
-// 		return nil, errors.New("Invalid account")
-// 	}
-// 	data := base58.Decode(address)
-// 	if len(data) != (34 + len(SubstratePrefix)) {
-// 		return nil, errors.New("Public key decoding failed")
-// 	}
-// 	return data[len(SubstratePrefix) : len(data)-2], nil
-// }
-
-func PubBytesToString(b []byte) string {
-	s := ""
-	for i := 0; i < len(b); i++ {
-		tmp := fmt.Sprintf("%#02x", b[i])
-		s += tmp[2:]
-	}
-	return s
 }
 
 func EncodePublicKeyAsSubstrateAccount(publicKey []byte) (string, error) {

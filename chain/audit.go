@@ -20,6 +20,14 @@ import (
 )
 
 func (c *ChainSDK) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	if !c.GetChainState() {
+		return nil, pattern.ERR_RPC_CONNECTION
+	}
 	var list [][]pattern.ProofAssignmentInfo
 	key := createPrefixedKey(pattern.AUDIT, pattern.UNVERIFYPROOF)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
@@ -47,7 +55,7 @@ func (c *ChainSDK) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error)
 func (c *ChainSDK) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Panicln(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
 	var data []pattern.ProofAssignmentInfo

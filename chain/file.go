@@ -37,7 +37,7 @@ func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, strin
 		return nil, "", err
 	}
 	if fstat.IsDir() {
-		return nil, "", errors.New("Not a file")
+		return nil, "", errors.New("not a file")
 	}
 
 	baseDir := filepath.Dir(path)
