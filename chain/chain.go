@@ -8,7 +8,6 @@
 package chain
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -43,15 +42,11 @@ type ChainSDK struct {
 
 var _ sdk.SDK = (*ChainSDK)(nil)
 
-func NewChainSDK(rpcs []string, name, mnemonic string, t time.Duration) (*ChainSDK, error) {
+func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration) (*ChainSDK, error) {
 	var (
 		err      error
 		chainSDK = &ChainSDK{}
 	)
-
-	if name == "" {
-		return nil, fmt.Errorf("empty name")
-	}
 
 	defer log.SetOutput(os.Stdout)
 	log.SetOutput(io.Discard)

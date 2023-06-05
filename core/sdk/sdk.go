@@ -183,5 +183,5 @@ type SDK interface {
 	ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error)
 
 	//
-	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string) error
+	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string) (string, error)
 }

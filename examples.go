@@ -16,7 +16,7 @@ import (
 
 func Example_newClient() {
 	_, err := New(
-		config.DefaultName,
+		config.CharacterName_Client,
 		ConnectRpcAddrs([]string{""}),
 		Mnemonic("xxx xxx ... xxx"),
 		TransactionTimeout(time.Duration(time.Second*10)),

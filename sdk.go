@@ -12,25 +12,24 @@ import (
 	"github.com/CESSProject/sdk-go/core/sdk"
 )
 
-// Config describes a set of settings for a client.
+// Config describes a set of settings for the sdk.
 type Config = config.Config
 
 // Option is a client config option that can be given to the client constructor
 type Option = config.Option
 
-// New constructs a new client with the given options, falling back on
+// New constructs a new sdk client with the given options, falling back on
 // reasonable defaults. The defaults are:
 //
-// - If no transport and listen addresses are provided, the node listens to
-// the default addresses "/ip4/0.0.0.0/tcp/15000";
-//
-// - If no Rpc address is provided, the client uses the default address
+// - If no rpc address is provided, the sdk client uses the default address
 // "wss://testnet-rpc0.cess.cloud/ws/"" or "wss://testnet-rpc1.cess.cloud/ws/";
 //
-// - If no working directory is provided, the client uses the current
-// directory as the working directory;
-func New(name string, opts ...Option) (sdk.SDK, error) {
-	return NewWithoutDefaults(name, append(opts, FallbackDefaults)...)
+// - If no transaction timeout is provided, the sdk client uses the default
+// timeout: time.Duration(time.Second * 6)
+//
+// - The characterName available in the sdk are: client, bucket, deoss
+func New(characterName string, opts ...Option) (sdk.SDK, error) {
+	return NewWithoutDefaults(characterName, append(opts, FallbackDefaults)...)
 }
 
 // NewWithoutDefaults constructs a new client with the given options but
