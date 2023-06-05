@@ -27,19 +27,22 @@ type SDK interface {
 	QueryDeoss(pubkey []byte) ([]byte, error)
 
 	// QuaryAuthorizedAcc queries the account authorized by puk.
+	// QuaryAuthorizedAccount query account in string form.
 	QuaryAuthorizedAcc(puk []byte) (types.AccountID, error)
 	QuaryAuthorizedAccount(puk []byte) (string, error)
+
+	// CheckSpaceUsageAuthorization checks if the puk is authorized to itself
 	CheckSpaceUsageAuthorization(puk []byte) (bool, error)
 
 	// QueryBucketInfo queries the information of the "bucketname" bucket of the puk.
 	QueryBucketInfo(puk []byte, bucketname string) (pattern.BucketInfo, error)
 
 	// QueryBucketList queries all buckets of the puk.
-	// QueryAllBucketName
+	// QueryAllBucketName queries all bucket names as strings.
 	QueryBucketList(puk []byte) ([]types.Bytes, error)
 	QueryAllBucketName(puk []byte) ([]string, error)
 
-	// QueryFileMetaInfo queries the metadata of the roothash file.
+	// QueryFileMetadata queries the metadata of the roothash file.
 	QueryFileMetadata(roothash string) (pattern.FileMetadata, error)
 
 	// QueryStorageMiner queries storage node information.
@@ -67,7 +70,9 @@ type SDK interface {
 	// QueryChallengeSnapshot query challenge information snapshot.
 	QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error)
 	QueryChallengeSt() (pattern.ChallengeSnapshot, error)
-	QueryChallenge(pubkey []byte) (pattern.ChallengeInfo, error)
+
+	// QueryChallenge queries puk's challenge information.
+	QueryChallenge(puk []byte) (pattern.ChallengeInfo, error)
 
 	// QueryTeePodr2Puk queries the public key of the TEE.
 	QueryTeePodr2Puk() ([]byte, error)
@@ -79,25 +84,22 @@ type SDK interface {
 	QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error)
 	QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error)
 
-	//
+	// QueryAssignedProof queries all assigned proof information.
 	QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error)
 
-	//
+	// ProofAssignmentInfo queries the proof information assigned to puk.
 	QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error)
 
-	//
-	QueryMinerRewards(puk []byte) (pattern.MinerReward, error)
-	QuaryRewards(puk []byte) (pattern.RewardsType, error)
+	// QueryStorageNodeReward queries reward information for puk account.
+	QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error)
+	QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error)
 
-	// Register is used to register OSS or BUCKET roles.
+	// Register is used to register oss or bucket roles.
 	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
 
-	// UpdateAddress updates the address of oss or sminer.
-	UpdateAddress(role, multiaddr string) (string, error)
-
-	// UpdateIncomeAcc update income account.
-	UpdateIncomeAcc(puk []byte) (string, error)
-	UpdateIncomeAccount(income string) (string, error)
+	// UpdateEarningsAcc update earnings account.
+	UpdateEarningsAcc(puk []byte) (string, error)
+	UpdateEarningsAccount(earnings string) (string, error)
 
 	// CreateBucket creates a bucket for puk.
 	CreateBucket(puk []byte, bucketname string) (string, error)
@@ -111,6 +113,12 @@ type SDK interface {
 	// UploadDeclaration creates a storage order.
 	UploadDeclaration(roothash string, dealinfo []pattern.SegmentList, user pattern.UserBrief) (string, error)
 
+	// GenerateStorageOrder for generating storage orders
+	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string) (string, error)
+
+	// ProcessingData is used to process the uploaded data.
+	ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error)
+
 	// SubmitIdleMetadata Submit idle file metadata.
 	SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error)
 	SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error)
@@ -123,65 +131,64 @@ type SDK interface {
 	ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error)
 	ReplaceFile(roothash []string) (string, []string, error)
 
-	// IncreaseStakes increase stakes.
-	IncreaseStakes(tokens *big.Int) (string, error)
-	IncreaseSminerStakes(token string) (string, error)
+	// IncreaseStakingAmount increase staking amount.
+	IncreaseStakingAmount(tokens *big.Int) (string, error)
+	IncreaseStorageNodeStakingAmount(token string) (string, error)
 
 	// Exit exit the cess network.
 	Exit(role string) (string, error)
 
-	// ClaimRewards is used to claim rewards
+	// ClaimRewards is used to claim rewards.
 	ClaimRewards() (string, error)
 
-	// Withdraw is used to withdraw staking
+	// Withdraw is used to withdraw staking.
 	Withdraw() (string, error)
 
-	//
+	// ReportProof is used to report proof data.
 	ReportProof(idlesigma, servicesigma string) (string, error)
-
-	// ExtractAccountPuk extracts the public key of the account,
-	// and returns its own public key if the account is empty.
-	ExtractAccountPuk(account string) ([]byte, error)
 
 	// GetSignatureAcc returns the signature account.
 	GetSignatureAcc() string
 
-	// GetSubstrateAPI returns Substrate API
+	// GetSignatureAccPulickey returns the signature account public key.
+	GetSignatureAccPulickey() []byte
+
+	// GetSubstrateAPI returns Substrate API.
 	GetSubstrateAPI() *gsrpc.SubstrateAPI
 
-	// GetChainState returns chain node state
+	// GetChainState returns chain node state.
 	GetChainState() bool
 
-	//
+	// SetChainState sets the state of the chain node.
 	SetChainState(state bool)
 
-	//
+	// GetCharacterName returns the character name.
+	GetCharacterName() string
+
+	// Reconnect for reconnecting chains.
 	Reconnect() error
 
-	//
+	// GetMetadata returns the metadata of the chain.
 	GetMetadata() *types.Metadata
 
-	//
+	// GetKeyEvents returns the events storage key.
 	GetKeyEvents() types.StorageKey
 
-	//
+	// SysProperties returns the system properties.
 	SysProperties() (pattern.SysProperties, error)
 
-	//
+	// SyncState returns the system sync state.
 	SyncState() (pattern.SysSyncState, error)
 
-	//
+	// SysVersion returns the system version.
 	SysVersion() (string, error)
 
-	//
+	// NetListening returns whether the current node is listening.
 	NetListening() (bool, error)
 
-	//
+	// Sign returns the signature of the msg with the private key of the signing account.
 	Sign(msg []byte) ([]byte, error)
 
-	//
-	ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error)
-
-	//
-	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string) error
+	// Verify the signature of the msg with the public key of the signing account.
+	Verify(msg []byte, sig []byte) (bool, error)
 }

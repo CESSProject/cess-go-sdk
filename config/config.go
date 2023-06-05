@@ -8,6 +8,7 @@
 package config
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/CESSProject/sdk-go/chain"
@@ -25,17 +26,23 @@ type Config struct {
 // Option is a client config option that can be given to the client constructor
 type Option func(cfg *Config) error
 
-const DefaultName = "SDK"
+// SDK available character name
+const (
+	CharacterName_Client = "client"
+	CharacterName_Bucket = "bucket"
+	CharacterName_Deoss  = "deoss"
+)
 
 // NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
-func (cfg *Config) NewSDK(name string) (sdk.SDK, error) {
-	var serviceName = DefaultName
-	if name != "" {
-		serviceName = name
+func (cfg *Config) NewSDK(characterName string) (sdk.SDK, error) {
+	if characterName != CharacterName_Bucket &&
+		characterName != CharacterName_Deoss &&
+		characterName != CharacterName_Client {
+		return nil, fmt.Errorf("invalid character name")
 	}
-	return chain.NewChainSDK(cfg.Rpc, serviceName, cfg.Mnemonic, cfg.Timeout)
+	return chain.NewChainSDK(characterName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
 }
 
 // Apply applies the given options to the config, returning the first error

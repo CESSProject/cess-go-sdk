@@ -6,7 +6,7 @@
 
 </div>
 
-The go sdk implementation of the CESS network, which provides RPC calls, status queries, and access to the p2p storage network of the CESS chain.
+The go sdk implementation of the CESS network, which provides RPC calls, status queries, block transactions and other functions.
 
 ## Reporting a Vulnerability
 If you find out any vulnerability, Please send an email to frode@cess.one, we are happy to communicate with you.
@@ -16,69 +16,50 @@ To get the package use the standard:
 ```
 go get -u "github.com/CESSProject/sdk-go"
 ```
-Using Go modules is recommended.
 
 ## Documentation & Examples
 Please refer to https://pkg.go.dev/github.com/CESSProject/sdk-go
 
 ## Usage
-Usually, you only care about how to access your data in the CESS network, you need to build such a web service yourself, this sdk will help you quickly realize data access.
+Usually, you only care about how to access your data in the CESS network, you need to build such a web service yourself, this sdk will help you quickly realize data access.Note that the [p2p-go library](https://github.com/CESSProject/p2p-go) needs to be used to complete the data transmission.
+
 
 #### Create an sdk client instance
-The following is an example of creating an sdk client:
+To create an sdk client, you need to provide some configuration information: your rpc address (if not, use the rpc address disclosed by CESS), your wallet private key, and transaction timeout. Please refer to the following examples:
 ```
 cli, err := New(
-    config.DefaultName,
-    ConnectRpcAddrs([]string{""}),
-    ListenPort(15000),
-    Workspace("/"),
-    Mnemonic("xxx xxx ... xxx"),
-    TransactionTimeout(time.Duration(time.Second*10)),
+    config.CharacterName_Client,
+		ConnectRpcAddrs([]string{"wss://testnet-rpc0.cess.cloud/ws/", "wss://testnet-rpc1.cess.cloud/ws/"}),
+		Mnemonic("xxx xxx ... xxx"),
+		TransactionTimeout(time.Duration(time.Second*10)),
 )
 ```
-Creating a client requires you to configure some information, you can refer to the following configuration files:
+
+#### Register as a deoss role
+Call the Register method to register. Note that the first parameter specifies that the role you register is deoss, If there is no error, you can view the transaction details through the returned transaction hash.
 ```
-# The rpc endpoint of the chain node
-Rpc:
-  - "ws://127.0.0.1:9948/"
-  - "wss://testnet-rpc0.cess.cloud/ws/"
-  - "wss://testnet-rpc1.cess.cloud/ws/"
-# Account mnemonic
-Mnemonic: "xxx xxx xxx"
-# Service workspace
-Workspace: /
-# Service running address
-Address: "127.0.0.1"
-# P2P communication port
-P2P_Port: 8088
-# Service listening port
-HTTP_Port: 15000
+txhash, _, err := cli.Register(cli.GetCharacterName(), cli.GetSignatureAccPulickey(), "", 0)
 ```
 
-#### Register as an oss role
-Call the Register method to register. Note that the first parameter specifies that the role you register is oss, and its value can be any one of "oss","OSS","Deoss","DEOSS".
-```
-txhash, err := cli.Register("oss", "", 0)
-```
-
-#### Process your documents according to the specifications of CESS
+#### Process data according to the specifications of CESS
 Call the ProcessingData method to process your file. You need to specify the file path. The method returns a segment list and the unique identifier hash of the file in the CESS network.
 ```
 segmentInfo, roothash, err := cli.ProcessingData(filepath)
 ```
 
-#### Store your files
-Call the PutFile method to store your files. You need to specify a bucket to store the files. CESS will automatically create the bucket for you, provided that the name of the bucket is legal. You can call the CheckBucketName method in advance to check whether the name of the bucket meets the requirements.
-After the storage is successful, it will return `count`. The `count` indicates the number of times your file is stored. A file can only be stored up to 5 times. If your file is not stored successfully after 5 times, you need to upload your file again.
+#### Create storage order
+Before storing data, you also need to create a data storage order, and you need to fill in the roothash and segmentInfo obtained in the previous step, as well as the user account for uploading data, data name, and bucket name.
 ```
-count, err := cli.PutFile(publickey, segmentInfo, roothash, filename, buckname)
+err := cli.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)
 ```
 
-#### Download file
-Call the GetFile method to download the file you want, and this method will save the file you downloaded under the roothash name in the directory you specify.
-```
-filepath, err := n.Cli.GetFile(roothash, dir)
-```
+#### Store data to storage nodes
+After creating the storage order, wait for one block to find the storage node information allocated in the order. The next step is to store the data to the storage node through the `WriteFileAction` method in the [p2p-go library](https://github.com/CESSProject/p2p-go).
+
+After the storage node receives the data, it will automatically report this action. When all the storage nodes in the storage order have all reported, the data is considered to be stored successfully. As long as there is a storage node that does not report, it is regarded as a storage failure. After the timeout period in the order is exceeded, the storage nodes in the order will be reassigned randomly to start a new round of storage. You need to monitor this storage order, and re-give the data block to the newly allocated storage node until the data storage is successful. The `count` in the storage order indicates the number of times your data has been redistributed. An order can redistribute storage up to 5 times. If your data is still not successfully stored after 5 times, you need to re-upload your data.
+
+#### Fetch your data
+Call the `ReadFileAction` method in the [p2p-go library](https://github.com/CESSProject/p2p-go) to download all data blocks, and then restore the original data through the `ReedSolomon_Restore` method.
 
 ## License
 Licensed under [Apache 2.0](https://github.com/CESSProject/sdk-go/blob/main/LICENSE)

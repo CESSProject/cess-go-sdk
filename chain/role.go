@@ -95,7 +95,7 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 					if err != nil {
 						return txhash, acc, err
 					}
-					txhash, err = c.updateIncomeAcc(key, puk)
+					txhash, err = c.updateEarningsAcc(key, puk)
 					return txhash, earnings, err
 				}
 			}
@@ -190,117 +190,6 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 			return txhash, earnings, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
 			return txhash, earnings, pattern.ERR_RPC_TIMEOUT
-		}
-	}
-}
-
-func (c *ChainSDK) UpdateAddress(role, multiaddr string) (string, error) {
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var (
-		err         error
-		txhash      string
-		call        types.Call
-		accountInfo types.AccountInfo
-	)
-
-	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
-	}
-
-	switch role {
-	case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-		call, err = types.NewCall(c.metadata, pattern.TX_OSS_UPDATE, types.NewBytes([]byte(multiaddr)))
-		if err != nil {
-			return txhash, errors.Wrap(err, "[NewCall]")
-		}
-	case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-		call, err = types.NewCall(c.metadata, pattern.TX_SMINER_UPDATEPEERID, types.NewBytes([]byte(multiaddr)))
-		if err != nil {
-			return txhash, errors.Wrap(err, "[NewCall]")
-		}
-	default:
-		return "", fmt.Errorf("Invalid role name")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	ext := types.NewExtrinsic(call)
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.timeForBlockOut)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				events := event.EventRecords{}
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil {
-					return txhash, nil
-				}
-				switch role {
-				case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-					if len(events.Oss_OssUpdate) > 0 {
-						return txhash, nil
-					}
-				case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-					if len(events.Sminer_UpdataIp) > 0 {
-						return txhash, nil
-					}
-				default:
-					return txhash, errors.New(pattern.ERR_Failed)
-				}
-			}
-		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }

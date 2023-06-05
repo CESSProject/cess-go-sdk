@@ -21,7 +21,7 @@ import (
 func (c *ChainSDK) QueryDeoss(pubkey []byte) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Panicln(utils.RecoverError(err))
+			log.Println(utils.RecoverError(err))
 		}
 	}()
 	var data pattern.PeerId

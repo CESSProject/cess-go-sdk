@@ -16,8 +16,8 @@ import (
 
 func Example_newClient() {
 	_, err := New(
-		config.DefaultName,
-		ConnectRpcAddrs([]string{""}),
+		config.CharacterName_Client,
+		ConnectRpcAddrs([]string{"wss://testnet-rpc0.cess.cloud/ws/", "wss://testnet-rpc1.cess.cloud/ws/"}),
 		Mnemonic("xxx xxx ... xxx"),
 		TransactionTimeout(time.Duration(time.Second*10)),
 	)
@@ -26,36 +26,36 @@ func Example_newClient() {
 	}
 }
 
-func Example_registerOss() {
+func Example_RegisterDeoss() {
 	cli, err := New(
-		"oss",
-		ConnectRpcAddrs([]string{""}),
-		Mnemonic(""),
+		config.CharacterName_Deoss,
+		ConnectRpcAddrs([]string{"wss://testnet-rpc0.cess.cloud/ws/", "wss://testnet-rpc1.cess.cloud/ws/"}),
+		Mnemonic("xxx xxx ... xxx"),
 		TransactionTimeout(time.Duration(time.Second*10)),
 	)
 	if err != nil {
 		panic(err)
 	}
-	txhash, _, err := cli.Register("oss", nil, "", 0)
+	txhash, _, err := cli.Register(cli.GetCharacterName(), cli.GetSignatureAccPulickey(), "", 0)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("OSS registration successful, transaction hash is %s\n", txhash)
+	fmt.Printf("Deoss registration successful, transaction hash is %s\n", txhash)
 }
 
-func Example_registerMiner() {
+func Example_RegisterStorageNode() {
 	cli, err := New(
-		"bucket",
-		ConnectRpcAddrs([]string{""}),
-		Mnemonic(""),
+		config.CharacterName_Bucket,
+		ConnectRpcAddrs([]string{"wss://testnet-rpc0.cess.cloud/ws/", "wss://testnet-rpc1.cess.cloud/ws/"}),
+		Mnemonic("xxx xxx ... xxx"),
 		TransactionTimeout(time.Duration(time.Second*10)),
 	)
 	if err != nil {
 		panic(err)
 	}
-	txhash, _, err := cli.Register("bucket", nil, "cXxxx...xxx", 100000)
+	txhash, _, err := cli.Register(cli.GetCharacterName(), cli.GetSignatureAccPulickey(), "cXxxx...xxx", 100000)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Miner registration successful, transaction hash is %s\n", txhash)
+	fmt.Printf("Storage node registration successful, transaction hash is %s\n", txhash)
 }

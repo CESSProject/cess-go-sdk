@@ -37,7 +37,7 @@ func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, strin
 		return nil, "", err
 	}
 	if fstat.IsDir() {
-		return nil, "", errors.New("Not a file")
+		return nil, "", errors.New("not a file")
 	}
 
 	baseDir := filepath.Dir(path)
@@ -116,7 +116,7 @@ func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, strin
 	return segment, hex.EncodeToString(hTree.MerkleRoot()), err
 }
 
-func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string) error {
+func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string) (string, error) {
 	var err error
 	var segmentList = make([]pattern.SegmentList, len(segment))
 	var user pattern.UserBrief
@@ -135,13 +135,12 @@ func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.Segme
 	}
 	acc, err := types.NewAccountID(owner)
 	if err != nil {
-		return err
+		return "", err
 	}
 	user.User = *acc
 	user.BucketName = types.NewBytes([]byte(buckname))
 	user.FileName = types.NewBytes([]byte(filename))
-	_, err = c.UploadDeclaration(roothash, segmentList, user)
-	return err
+	return c.UploadDeclaration(roothash, segmentList, user)
 }
 
 func ExtractSegmenthash(segment []pattern.SegmentDataInfo) []string {

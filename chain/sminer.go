@@ -80,7 +80,7 @@ func (c *ChainSDK) QuerySminerList() ([]types.AccountID, error) {
 }
 
 // QueryMinerRewards
-func (c *ChainSDK) QueryMinerRewards(puk []byte) (pattern.MinerReward, error) {
+func (c *ChainSDK) QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -108,9 +108,9 @@ func (c *ChainSDK) QueryMinerRewards(puk []byte) (pattern.MinerReward, error) {
 	return data, nil
 }
 
-func (c *ChainSDK) QuaryRewards(puk []byte) (pattern.RewardsType, error) {
+func (c *ChainSDK) QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error) {
 	var reward pattern.RewardsType
-	rewards, err := c.QueryMinerRewards(puk)
+	rewards, err := c.QueryStorageNodeReward(puk)
 	if err != nil {
 		return reward, err
 	}
@@ -122,7 +122,7 @@ func (c *ChainSDK) QuaryRewards(puk []byte) (pattern.RewardsType, error) {
 	return reward, nil
 }
 
-func (c *ChainSDK) UpdateIncomeAcc(puk []byte) (string, error) {
+func (c *ChainSDK) UpdateEarningsAcc(puk []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -215,7 +215,7 @@ func (c *ChainSDK) UpdateIncomeAcc(puk []byte) (string, error) {
 	}
 }
 
-func (c *ChainSDK) updateIncomeAcc(key types.StorageKey, puk []byte) (string, error) {
+func (c *ChainSDK) updateEarningsAcc(key types.StorageKey, puk []byte) (string, error) {
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
@@ -291,16 +291,16 @@ func (c *ChainSDK) updateIncomeAcc(key types.StorageKey, puk []byte) (string, er
 	}
 }
 
-func (c *ChainSDK) UpdateIncomeAccount(income string) (string, error) {
-	puk, err := utils.ParsingPublickey(income)
+func (c *ChainSDK) UpdateEarningsAccount(earnings string) (string, error) {
+	puk, err := utils.ParsingPublickey(earnings)
 	if err != nil {
 		return "", err
 	}
-	return c.UpdateIncomeAcc(puk)
+	return c.UpdateEarningsAcc(puk)
 }
 
 // Storage miners increase deposit function
-func (c *ChainSDK) IncreaseStakes(tokens *big.Int) (string, error) {
+func (c *ChainSDK) IncreaseStakingAmount(tokens *big.Int) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -388,12 +388,12 @@ func (c *ChainSDK) IncreaseStakes(tokens *big.Int) (string, error) {
 	}
 }
 
-func (c *ChainSDK) IncreaseSminerStakes(token string) (string, error) {
+func (c *ChainSDK) IncreaseStorageNodeStakingAmount(token string) (string, error) {
 	tokens, ok := new(big.Int).SetString(token+pattern.TokenPrecision_CESS, 10)
 	if !ok {
 		return "", fmt.Errorf("Invalid tokens: %s", token)
 	}
-	return c.IncreaseStakes(tokens)
+	return c.IncreaseStakingAmount(tokens)
 }
 
 // ClaimRewards
