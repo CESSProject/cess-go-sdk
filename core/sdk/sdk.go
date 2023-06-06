@@ -162,8 +162,11 @@ type SDK interface {
 	// SetChainState sets the state of the chain node.
 	SetChainState(state bool)
 
-	// GetCharacterName returns the character name.
-	GetCharacterName() string
+	// GetRoleName returns the role name.
+	GetRoleName() string
+
+	// GetTokenSymbol returns the token symbol
+	GetTokenSymbol() string
 
 	// Reconnect for reconnecting chains.
 	Reconnect() error

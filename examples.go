@@ -36,7 +36,7 @@ func Example_RegisterDeoss() {
 	if err != nil {
 		panic(err)
 	}
-	txhash, _, err := cli.Register(cli.GetCharacterName(), cli.GetSignatureAccPulickey(), "", 0)
+	txhash, _, err := cli.Register(cli.GetRoleName(), cli.GetSignatureAccPulickey(), "", 0)
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +53,7 @@ func Example_RegisterStorageNode() {
 	if err != nil {
 		panic(err)
 	}
-	txhash, _, err := cli.Register(cli.GetCharacterName(), cli.GetSignatureAccPulickey(), "cXxxx...xxx", 100000)
+	txhash, _, err := cli.Register(cli.GetRoleName(), cli.GetSignatureAccPulickey(), "cXxxx...xxx", 100000)
 	if err != nil {
 		panic(err)
 	}
