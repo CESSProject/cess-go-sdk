@@ -152,7 +152,7 @@ func (c *ChainSDK) GetTokenSymbol() string {
 	return c.tokenSymbol
 }
 
-func (c *ChainSDK) GetCharacterName() string {
+func (c *ChainSDK) GetRoleName() string {
 	return c.name
 }
 

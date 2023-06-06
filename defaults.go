@@ -9,7 +9,7 @@ package sdkgo
 
 import "github.com/CESSProject/sdk-go/core/pattern"
 
-// DefaultRpcAddrs configures client to use default RPC address.
+// DefaultRpcAddrs configures the default rpc address
 var DefaultRpcAddrs = func(cfg *Config) error {
 	rpcAddrs := []string{
 		"wss://testnet-rpc0.cess.cloud/ws/",
@@ -18,15 +18,12 @@ var DefaultRpcAddrs = func(cfg *Config) error {
 	return cfg.Apply(ConnectRpcAddrs(rpcAddrs))
 }
 
-// DefaultListenPort configures client to use default listen port.
+// DefaultTimeout configures the default transaction waiting timeout
 var DefaultTimeout = func(cfg *Config) error {
 	return cfg.Apply(TransactionTimeout(pattern.BlockInterval))
 }
 
 // Complete list of default options and when to fallback on them.
-//
-// Please *DON'T* specify default options any other way. Putting this all here
-// makes tracking defaults *much* easier.
 var defaults = []struct {
 	fallback func(cfg *Config) bool
 	opt      Option

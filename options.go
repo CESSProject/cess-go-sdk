@@ -13,8 +13,7 @@ import (
 	"github.com/CESSProject/sdk-go/core/pattern"
 )
 
-// ConnectRpcAddrs configures client to connect to the given RPC
-// addresses.
+// ConnectRpcAddrs configuration rpc address
 func ConnectRpcAddrs(s []string) Option {
 	return func(cfg *Config) error {
 		cfg.Rpc = s
@@ -22,7 +21,7 @@ func ConnectRpcAddrs(s []string) Option {
 	}
 }
 
-// Workspace configures client to use the given workspace.
+// Mnemonic configures the mnemonic of the signature account
 func Mnemonic(mnemonic string) Option {
 	return func(cfg *Config) error {
 		cfg.Mnemonic = mnemonic
@@ -30,7 +29,7 @@ func Mnemonic(mnemonic string) Option {
 	}
 }
 
-// TransactionTimeout configures the transaction timeout period.
+// TransactionTimeout configures the waiting timeout for a transaction
 func TransactionTimeout(timeout time.Duration) Option {
 	return func(cfg *Config) error {
 		if timeout < pattern.BlockInterval {

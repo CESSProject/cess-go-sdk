@@ -36,13 +36,13 @@ const (
 // NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
-func (cfg *Config) NewSDK(characterName string) (sdk.SDK, error) {
-	if characterName != CharacterName_Bucket &&
-		characterName != CharacterName_Deoss &&
-		characterName != CharacterName_Client {
+func (cfg *Config) NewSDK(roleName string) (sdk.SDK, error) {
+	if roleName != CharacterName_Bucket &&
+		roleName != CharacterName_Deoss &&
+		roleName != CharacterName_Client {
 		return nil, fmt.Errorf("invalid character name")
 	}
-	return chain.NewChainSDK(characterName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
+	return chain.NewChainSDK(roleName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
 }
 
 // Apply applies the given options to the config, returning the first error
