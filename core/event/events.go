@@ -247,10 +247,25 @@ type Event_CalculateEnd struct {
 	Topics    []types.Hash
 }
 
-type Event_RestoralOrderComplete struct {
-	Phase         types.Phase
-	Fragment_hash pattern.FileHash
-	Topics        []types.Hash
+type Event_GenerateRestoralOrder struct {
+	Phase        types.Phase
+	Miner        types.AccountID
+	FragmentHash pattern.FileHash
+	Topics       []types.Hash
+}
+
+type Event_ClaimRestoralOrder struct {
+	Phase   types.Phase
+	Miner   types.AccountID
+	OrderId pattern.FileHash
+	Topics  []types.Hash
+}
+
+type Event_RecoveryCompleted struct {
+	Phase   types.Phase
+	Miner   types.AccountID
+	OrderId pattern.FileHash
+	Topics  []types.Hash
 }
 
 // ------------------------StorageHandler--------------------------------
@@ -390,7 +405,9 @@ type EventRecords struct {
 	FileBank_TransferReport        []Event_TransferReport
 	FileBank_ReplaceFiller         []Event_ReplaceFiller
 	FileBank_CalculateEnd          []Event_CalculateEnd
-	FileBank_RestoralOrderComplete []Event_RestoralOrderComplete
+	FileBank_GenerateRestoralOrder []Event_GenerateRestoralOrder
+	FileBank_ClaimRestoralOrder    []Event_ClaimRestoralOrder
+	FileBank_RecoveryCompleted     []Event_RecoveryCompleted
 
 	// StorageHandler
 	StorageHandler_BuySpace             []Event_BuySpace

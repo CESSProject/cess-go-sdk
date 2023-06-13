@@ -99,16 +99,18 @@ const (
 	TX_SMINER_CLAIMREWARD    = SMINER + DOT + "receive_reward"
 
 	// FILEBANK
-	TX_FILEBANK_PUTBUCKET       = FILEBANK + DOT + "create_bucket"
-	TX_FILEBANK_DELBUCKET       = FILEBANK + DOT + "delete_bucket"
-	TX_FILEBANK_DELFILE         = FILEBANK + DOT + "delete_file"
-	TX_FILEBANK_UPLOADDEC       = FILEBANK + DOT + "upload_declaration"
-	TX_FILEBANK_UPLOADFILLER    = FILEBANK + DOT + "upload_filler"
-	TX_FILEBANK_FILEREPORT      = FILEBANK + DOT + "transfer_report"
-	TX_FILEBANK_REPLACEFILE     = FILEBANK + DOT + "replace_file_report"
-	TX_FILEBANK_MINEREXITPREP   = FILEBANK + DOT + "miner_exit_prep"
-	TX_FILEBANK_WITHDRAW        = FILEBANK + DOT + "miner_withdraw"
-	TX_FILEBANK_GENRESTOREORDER = FILEBANK + DOT + "generate_restoral_order"
+	TX_FILEBANK_PUTBUCKET         = FILEBANK + DOT + "create_bucket"
+	TX_FILEBANK_DELBUCKET         = FILEBANK + DOT + "delete_bucket"
+	TX_FILEBANK_DELFILE           = FILEBANK + DOT + "delete_file"
+	TX_FILEBANK_UPLOADDEC         = FILEBANK + DOT + "upload_declaration"
+	TX_FILEBANK_UPLOADFILLER      = FILEBANK + DOT + "upload_filler"
+	TX_FILEBANK_FILEREPORT        = FILEBANK + DOT + "transfer_report"
+	TX_FILEBANK_REPLACEFILE       = FILEBANK + DOT + "replace_file_report"
+	TX_FILEBANK_MINEREXITPREP     = FILEBANK + DOT + "miner_exit_prep"
+	TX_FILEBANK_WITHDRAW          = FILEBANK + DOT + "miner_withdraw"
+	TX_FILEBANK_GENRESTOREORDER   = FILEBANK + DOT + "generate_restoral_order"
+	TX_FILEBANK_CLAIMRESTOREORDER = FILEBANK + DOT + "claim_restoral_order"
+	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"
 )
 
 // RPC Call

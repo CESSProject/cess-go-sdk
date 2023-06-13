@@ -144,6 +144,12 @@ type SDK interface {
 	// GenerateRestoralOrder generates data for restoration orders.
 	GenerateRestoralOrder(rootHash, fragmentHash string) (string, error)
 
+	// ClaimRestoralOrder is used to collect restoration orders.
+	ClaimRestoralOrder(fragmentHash string) (string, error)
+
+	// ClaimRestoralNoExistOrder is used to receive recovery orders from exiting miners.
+	ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragmentHash string) (string, error)
+
 	// Exit exit the cess network.
 	Exit(role string) (string, error)
 
