@@ -5,14 +5,16 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package sdkgo
+package sdkgo_test
 
 import (
+	"testing"
 	"context"
 	"log"
 	"time"
 
 	p2pgo "github.com/CESSProject/p2p-go"
+	cess "github.com/CESSProject/sdk-go"
 	"github.com/CESSProject/sdk-go/config"
 )
 
@@ -39,12 +41,12 @@ var P2pBootstrapNodes = []string{
 
 const P2pCommunicationPort = 4001
 
-func Example_newClient() {
-	cli, err := New(
+func TestNewClient(t *testing.T) {
+	cli, err := cess.New(
 		config.CharacterName_Client,
-		ConnectRpcAddrs(testnets),
-		Mnemonic(MNEMONIC),
-		TransactionTimeout(time.Duration(time.Second*15)),
+		cess.ConnectRpcAddrs(testnets),
+		cess.Mnemonic(MNEMONIC),
+		cess.TransactionTimeout(time.Duration(time.Second*15)),
 	)
 	if err != nil {
 		panic(err)
@@ -56,11 +58,11 @@ func Example_newClient() {
 }
 
 func Example_RegisterDeoss() {
-	cli, err := New(
+	cli, err := cess.New(
 		config.CharacterName_Deoss,
-		ConnectRpcAddrs(localNode),
-		Mnemonic(MNEMONIC),
-		TransactionTimeout(time.Duration(time.Second*15)),
+		cess.ConnectRpcAddrs(localNode),
+		cess.Mnemonic(MNEMONIC),
+		cess.TransactionTimeout(time.Duration(time.Second*15)),
 	)
 	if err != nil {
 		panic(err)
@@ -85,11 +87,11 @@ func Example_RegisterDeoss() {
 }
 
 func Example_RegisterStorageNode() {
-	cli, err := New(
+	cli, err := cess.New(
 		config.CharacterName_Bucket,
-		ConnectRpcAddrs(localNode),
-		Mnemonic(MNEMONIC),
-		TransactionTimeout(time.Duration(time.Second*10)),
+		cess.ConnectRpcAddrs(localNode),
+		cess.Mnemonic(MNEMONIC),
+		cess.TransactionTimeout(time.Duration(time.Second*10)),
 	)
 	if err != nil {
 		panic(err)
