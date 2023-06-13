@@ -67,6 +67,7 @@ const (
 	BUCKETLIST     = "UserBucketList"
 	DEALMAP        = "DealMap"
 	PENDINGREPLACE = "PendingReplacements"
+	RESTORALORDER  = "RestoralOrder"
 
 	// STORAGEHANDLER
 	USERSPACEINFO = "UserOwnedSpace"
@@ -321,6 +322,16 @@ type ProofAssignmentInfo struct {
 	SnapShot     MinerSnapShot
 	IdleProve    types.Bytes
 	ServiceProve types.Bytes
+}
+
+type RestoralOrderInfo struct {
+	Count        types.U32
+	Miner        types.AccountID
+	OriginMiner  types.AccountID
+	FragmentHash FileHash
+	FileHash     FileHash
+	GenBlock     types.U32
+	Deadline     types.U32
 }
 
 // --------------------customer-----------------

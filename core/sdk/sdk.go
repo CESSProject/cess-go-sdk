@@ -97,6 +97,9 @@ type SDK interface {
 	QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error)
 	QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error)
 
+	// QueryRestoralOrder queries a restore order info.
+	QueryRestoralOrder(roothash string) (pattern.RestoralOrderInfo, error)
+
 	// Register is used to register oss or bucket roles.
 	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
 
