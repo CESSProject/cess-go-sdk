@@ -62,12 +62,13 @@ const (
 	TEEPODR2Pk   = "TeePodr2Pk"
 
 	// FILEBANK
-	FILE           = "File"
-	BUCKET         = "Bucket"
-	BUCKETLIST     = "UserBucketList"
-	DEALMAP        = "DealMap"
-	PENDINGREPLACE = "PendingReplacements"
-	RESTORALORDER  = "RestoralOrder"
+	FILE               = "File"
+	BUCKET             = "Bucket"
+	BUCKETLIST         = "UserBucketList"
+	DEALMAP            = "DealMap"
+	PENDINGREPLACE     = "PendingReplacements"
+	RESTORALORDER      = "RestoralOrder"
+	RESTORALTARGETINFO = "RestoralTargetInfo"
 
 	// STORAGEHANDLER
 	USERSPACEINFO = "UserOwnedSpace"
@@ -334,6 +335,13 @@ type RestoralOrderInfo struct {
 	FileHash     FileHash
 	GenBlock     types.U32
 	Deadline     types.U32
+}
+
+type RestoralTargetInfo struct {
+	Miner         types.AccountID
+	ServiceSpace  types.U128
+	RestoredSpace types.U128
+	CoolingBlock  types.U32
 }
 
 // --------------------customer-----------------

@@ -100,6 +100,9 @@ type SDK interface {
 	// QueryRestoralOrder queries a restore order info.
 	QueryRestoralOrder(roothash string) (pattern.RestoralOrderInfo, error)
 
+	// QueryRestoralTargetList for recovery information on all exiting miners.
+	QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error)
+
 	// Register is used to register oss or bucket roles.
 	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
 

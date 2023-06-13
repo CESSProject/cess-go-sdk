@@ -1323,3 +1323,39 @@ func (c *ChainSDK) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragm
 		}
 	}
 }
+
+// QueryRestoralTargetList
+func (c *ChainSDK) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var result []pattern.RestoralTargetInfo
+
+	if !c.GetChainState() {
+		return nil, pattern.ERR_RPC_CONNECTION
+	}
+
+	key := createPrefixedKey(pattern.FILEBANK, pattern.RESTORALTARGETINFO)
+	keys, err := c.api.RPC.State.GetKeysLatest(key)
+	if err != nil {
+		return nil, errors.Wrap(err, "[GetKeysLatest]")
+	}
+
+	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
+	if err != nil {
+		return nil, errors.Wrap(err, "[QueryStorageAtLatest]")
+	}
+
+	for _, elem := range set {
+		for _, change := range elem.Changes {
+			var data pattern.RestoralTargetInfo
+			if err := codec.Decode(change.StorageData, &data); err != nil {
+				continue
+			}
+			result = append(result, data)
+		}
+	}
+	return result, nil
+}

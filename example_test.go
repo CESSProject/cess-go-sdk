@@ -27,6 +27,8 @@ var Test_Account_Mnemonic = "bottom drive obey lake curtain smoke basket hold ra
 
 var testnets = []string{
 	"wss://devnet-rpc.cess.cloud/ws/",
+	"wss://testnet-rpc0.cess.cloud/ws/",
+	"wss://testnet-rpc1.cess.cloud/ws/",
 }
 
 var localNode = []string{
@@ -38,7 +40,8 @@ var Test_BootstrapNodes = []string{
 }
 
 // Tmp files will be downloaded
-var Test_WorkspacePath = "/tmp"
+var Test_WorkspacePath_Deoss = "/tmp/deoss"
+var Test_WorkspacePath_Bucket = "/tmp/bucket"
 
 const Test_ListeningPort = 4001
 
@@ -77,7 +80,7 @@ func TestRegisterDeOSS(t *testing.T) {
 	p2p, err := p2pgo.New(
 		context.Background(),
 		p2pgo.ListenPort(Test_ListeningPort),
-		p2pgo.Workspace(Test_WorkspacePath),
+		p2pgo.Workspace(Test_WorkspacePath_Deoss),
 		p2pgo.BootPeers(bootnodes),
 	)
 	assert.NoError(t, err)
@@ -108,7 +111,7 @@ func TestRegisterStorageNode(t *testing.T) {
 	p2p, err := p2pgo.New(
 		context.Background(),
 		p2pgo.ListenPort(Test_ListeningPort),
-		p2pgo.Workspace(Test_Account_Mnemonic),
+		p2pgo.Workspace(Test_WorkspacePath_Bucket),
 		p2pgo.BootPeers(bootnodes),
 	)
 	assert.NoError(t, err)
