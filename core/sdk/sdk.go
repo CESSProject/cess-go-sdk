@@ -23,8 +23,11 @@ type SDK interface {
 	// QueryNodeSynchronizationSt returns the synchronization status of the current node.
 	QueryNodeSynchronizationSt() (bool, error)
 
-	// QueryDeoss queries deoss information.
-	QueryDeoss(pubkey []byte) ([]byte, error)
+	// QueryDeossPeerPublickey queries deoss peer public key.
+	QueryDeossPeerPublickey(pubkey []byte) ([]byte, error)
+
+	// QueryDeossPeerIdList queries peerid of all deoss.
+	QueryDeossPeerIdList() ([]string, error)
 
 	// QuaryAuthorizedAcc queries the account authorized by puk.
 	// QuaryAuthorizedAccount query account in string form.
@@ -94,6 +97,12 @@ type SDK interface {
 	QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error)
 	QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error)
 
+	// QueryRestoralOrder queries a restore order info.
+	QueryRestoralOrder(roothash string) (pattern.RestoralOrderInfo, error)
+
+	// QueryRestoralTargetList for recovery information on all exiting miners.
+	QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error)
+
 	// Register is used to register oss or bucket roles.
 	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
 
@@ -134,6 +143,15 @@ type SDK interface {
 	// IncreaseStakingAmount increase staking amount.
 	IncreaseStakingAmount(tokens *big.Int) (string, error)
 	IncreaseStorageNodeStakingAmount(token string) (string, error)
+
+	// GenerateRestoralOrder generates data for restoration orders.
+	GenerateRestoralOrder(rootHash, fragmentHash string) (string, error)
+
+	// ClaimRestoralOrder is used to collect restoration orders.
+	ClaimRestoralOrder(fragmentHash string) (string, error)
+
+	// ClaimRestoralNoExistOrder is used to receive recovery orders from exiting miners.
+	ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragmentHash string) (string, error)
 
 	// Exit exit the cess network.
 	Exit(role string) (string, error)
