@@ -247,6 +247,12 @@ type Event_CalculateEnd struct {
 	Topics    []types.Hash
 }
 
+type Event_RestoralOrderComplete struct {
+	Phase         types.Phase
+	Fragment_hash pattern.FileHash
+	Topics        []types.Hash
+}
+
 // ------------------------StorageHandler--------------------------------
 type Event_BuySpace struct {
 	Phase            types.Phase
@@ -367,23 +373,24 @@ type EventRecords struct {
 	Sminer_Withdraw           []Event_Withdraw
 
 	// FILEBANK
-	FileBank_DeleteFile        []Event_DeleteFile
-	FileBank_FileUpload        []Event_FileUpload
-	FileBank_FileUpdate        []Event_FileUpdate
-	FileBank_FileChangeState   []Event_FileChangeState
-	FileBank_BuyFile           []Event_BuyFile
-	FileBank_Purchased         []Event_Purchased
-	FileBank_InsertFileSlice   []Event_InsertFileSlice
-	FileBank_FillerUpload      []Event_FillerUpload
-	FileBank_ClearInvalidFile  []Event_ClearInvalidFile
-	FileBank_RecoverFile       []Event_RecoverFile
-	FileBank_ReceiveSpace      []Event_ReceiveSpace
-	FileBank_UploadDeclaration []Event_UploadDeclaration
-	FileBank_CreateBucket      []Event_CreateBucket
-	FileBank_DeleteBucket      []Event_DeleteBucket
-	FileBank_TransferReport    []Event_TransferReport
-	FileBank_ReplaceFiller     []Event_ReplaceFiller
-	FileBank_CalculateEnd      []Event_CalculateEnd
+	FileBank_DeleteFile            []Event_DeleteFile
+	FileBank_FileUpload            []Event_FileUpload
+	FileBank_FileUpdate            []Event_FileUpdate
+	FileBank_FileChangeState       []Event_FileChangeState
+	FileBank_BuyFile               []Event_BuyFile
+	FileBank_Purchased             []Event_Purchased
+	FileBank_InsertFileSlice       []Event_InsertFileSlice
+	FileBank_FillerUpload          []Event_FillerUpload
+	FileBank_ClearInvalidFile      []Event_ClearInvalidFile
+	FileBank_RecoverFile           []Event_RecoverFile
+	FileBank_ReceiveSpace          []Event_ReceiveSpace
+	FileBank_UploadDeclaration     []Event_UploadDeclaration
+	FileBank_CreateBucket          []Event_CreateBucket
+	FileBank_DeleteBucket          []Event_DeleteBucket
+	FileBank_TransferReport        []Event_TransferReport
+	FileBank_ReplaceFiller         []Event_ReplaceFiller
+	FileBank_CalculateEnd          []Event_CalculateEnd
+	FileBank_RestoralOrderComplete []Event_RestoralOrderComplete
 
 	// StorageHandler
 	StorageHandler_BuySpace             []Event_BuySpace

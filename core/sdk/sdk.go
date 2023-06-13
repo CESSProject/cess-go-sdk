@@ -138,6 +138,9 @@ type SDK interface {
 	IncreaseStakingAmount(tokens *big.Int) (string, error)
 	IncreaseStorageNodeStakingAmount(token string) (string, error)
 
+	// GenerateRestoralOrder generates data for restoration orders.
+	GenerateRestoralOrder(rootHash, fragmentHash string) (string, error)
+
 	// Exit exit the cess network.
 	Exit(role string) (string, error)
 
