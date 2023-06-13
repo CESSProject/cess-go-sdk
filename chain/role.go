@@ -60,7 +60,7 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 
 	switch role {
 	case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
-		id, err := c.QueryDeoss(c.keyring.PublicKey)
+		id, err := c.QueryDeossPeerPublickey(c.keyring.PublicKey)
 		if err != nil {
 			if err.Error() != pattern.ERR_Empty {
 				return txhash, earnings, err

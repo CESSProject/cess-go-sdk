@@ -23,8 +23,11 @@ type SDK interface {
 	// QueryNodeSynchronizationSt returns the synchronization status of the current node.
 	QueryNodeSynchronizationSt() (bool, error)
 
-	// QueryDeoss queries deoss information.
-	QueryDeoss(pubkey []byte) ([]byte, error)
+	// QueryDeossPeerPublickey queries deoss peer public key.
+	QueryDeossPeerPublickey(pubkey []byte) ([]byte, error)
+
+	// QueryDeossPeerIdList queries peerid of all deoss.
+	QueryDeossPeerIdList() ([]string, error)
 
 	// QuaryAuthorizedAcc queries the account authorized by puk.
 	// QuaryAuthorizedAccount query account in string form.
