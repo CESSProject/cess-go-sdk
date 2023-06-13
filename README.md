@@ -12,10 +12,23 @@ The go sdk implementation of the CESS network, which provides RPC calls, status 
 If you find out any vulnerability, Please send an email to frode@cess.one, we are happy to communicate with you.
 
 ## Installation
+
 To get the package use the standard:
-```
+
+```sh
 go get -u "github.com/CESSProject/sdk-go"
 ```
+
+## Testing
+
+To test,
+
+1. Run a [CESS node](https://github.com/CESSProject/cess) locally.
+2. Run the command
+
+	```sh
+	go test -v
+	```
 
 ## Documentation & Examples
 Please refer to https://pkg.go.dev/github.com/CESSProject/sdk-go
