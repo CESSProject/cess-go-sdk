@@ -32,7 +32,9 @@ var localNode = []string{
 }
 
 var P2pBootstrapNodes = []string{
-	"_dnsaddr.bootstrap-kldr.cess.cloud",
+	"/ip4/221.122.79.2/tcp/10010/p2p/12D3KooWHY6BRu2MtG9SempACgYCcGHRSEai2ZkWY3E4VKDYrqh9",
+	"/ip4/45.77.47.184/tcp/10010/p2p/12D3KooWBW5YSqJtABaaTmMZ1ByARcsTtCmmfB6na5HBEuUoKkLM",
+	"/ip4/221.122.79.3/tcp/10010/p2p/12D3KooWAdyc4qPWFHsxMtXvSrm7CXNFhUmKPQdoXuKQXki69qBo",
 }
 
 const P2pCommunicationPort = 4001
