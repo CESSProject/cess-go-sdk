@@ -5,14 +5,16 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package sdkgo
+package sdkgo_test
 
 import (
+	"testing"
 	"context"
 	"log"
 	"time"
 
 	p2pgo "github.com/CESSProject/p2p-go"
+	cess "github.com/CESSProject/sdk-go"
 	"github.com/CESSProject/sdk-go/config"
 )
 
@@ -37,77 +39,95 @@ var P2pBootstrapNodes = []string{
 	"/ip4/221.122.79.3/tcp/10010/p2p/12D3KooWAdyc4qPWFHsxMtXvSrm7CXNFhUmKPQdoXuKQXki69qBo",
 }
 
+// Tmp files will be downloaded
+var testWorkspacePath = "/tmp"
+
 const P2pCommunicationPort = 4001
 
-func Example_newClient() {
-	cli, err := New(
+// To run these examples, please run a [CESS node](https://github.com/cessProject/cess) locally
+//   as well.
+
+func TestNewClient(t *testing.T) {
+	cli, err := cess.New(
 		config.CharacterName_Client,
-		ConnectRpcAddrs(testnets),
-		Mnemonic(MNEMONIC),
-		TransactionTimeout(time.Duration(time.Second*15)),
+		cess.ConnectRpcAddrs(localNode),
+		cess.Mnemonic(MNEMONIC),
+		cess.TransactionTimeout(time.Duration(time.Second*15)),
 	)
+
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
+		t.FailNow()
 	}
 
 	blockhright, _ := cli.QueryBlockHeight("")
-
 	log.Printf("Successfully created SDK client, latest block height: %d\n", blockhright)
 }
 
-func Example_RegisterDeoss() {
-	cli, err := New(
+func TestRegisterDeOSS(t *testing.T) {
+	cli, err := cess.New(
 		config.CharacterName_Deoss,
-		ConnectRpcAddrs(localNode),
-		Mnemonic(MNEMONIC),
-		TransactionTimeout(time.Duration(time.Second*15)),
+		cess.ConnectRpcAddrs(localNode),
+		cess.Mnemonic(MNEMONIC),
+		cess.TransactionTimeout(time.Duration(time.Second*15)),
 	)
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
+		t.FailNow()
 	}
 
 	p2p, err := p2pgo.New(
 		context.Background(),
 		p2pgo.ListenPort(P2pCommunicationPort),
-		p2pgo.Workspace("/"),
+		p2pgo.Workspace(testWorkspacePath),
 		p2pgo.BootPeers(P2pBootstrapNodes),
 	)
+
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
+		t.FailNow()
 	}
 
 	txhash, _, err := cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), "", 0)
+
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
+		t.FailNow()
 	}
 
 	log.Printf("Deoss registration successful, transaction hash is %s\n", txhash)
 }
 
-func Example_RegisterStorageNode() {
-	cli, err := New(
+func TestRegisterStorageNode(t *testing.T) {
+	cli, err := cess.New(
 		config.CharacterName_Bucket,
-		ConnectRpcAddrs(localNode),
-		Mnemonic(MNEMONIC),
-		TransactionTimeout(time.Duration(time.Second*10)),
+		cess.ConnectRpcAddrs(localNode),
+		cess.Mnemonic(MNEMONIC),
+		cess.TransactionTimeout(time.Duration(time.Second*10)),
 	)
+
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
+		t.FailNow()
 	}
 
 	p2p, err := p2pgo.New(
 		context.Background(),
 		p2pgo.ListenPort(P2pCommunicationPort),
-		p2pgo.Workspace("/"),
+		p2pgo.Workspace(testWorkspacePath),
 		p2pgo.BootPeers(P2pBootstrapNodes),
 	)
+
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
+		t.FailNow()
 	}
 
 	txhash, _, err := cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), AliceAddr, 2000)
+
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
+		t.FailNow()
 	}
 
 	log.Printf("Storage node registration successful, transaction hash is %s\n", txhash)
