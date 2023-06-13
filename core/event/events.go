@@ -287,18 +287,11 @@ type Event_LeaseExpireIn24Hours struct {
 }
 
 // ------------------------TEE Worker--------------------
-type Event_RegistrationScheduler struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Ip     types.Bytes
+type Event_RegistrationTeeWorker struct {
+	Phase types.Phase
+	Acc   types.AccountID
+	//PeerId pattern.PeerId
 	Topics []types.Hash
-}
-
-type Event_UpdateScheduler struct {
-	Phase    types.Phase
-	Acc      types.AccountID
-	Endpoint types.Bytes
-	Topics   []types.Hash
 }
 
 // ------------------------Oss---------------------------
@@ -400,8 +393,7 @@ type EventRecords struct {
 	StorageHandler_LeaseExpireIn24Hours []Event_LeaseExpireIn24Hours
 
 	// TeeWorker
-	TeeWorker_RegistrationScheduler []Event_RegistrationScheduler
-	TeeWorker_UpdateScheduler       []Event_UpdateScheduler
+	TeeWorker_RegistrationTeeWorker []Event_RegistrationTeeWorker
 
 	// OSS
 	Oss_OssRegister []Event_OssRegister
