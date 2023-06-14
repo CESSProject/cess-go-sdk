@@ -9,6 +9,8 @@ package sdkgo_test
 
 import (
 	"context"
+	"errors"
+	"os"
 	"testing"
 	"time"
 
@@ -77,6 +79,8 @@ func TestRegisterDeOSS(t *testing.T) {
 		bootnodes = append(bootnodes, temp...)
 	}
 
+	checkNCreateDir(t, Test_WorkspacePath_Deoss);
+
 	p2p, err := p2pgo.New(
 		context.Background(),
 		p2pgo.ListenPort(Test_ListeningPort),
@@ -108,6 +112,8 @@ func TestRegisterStorageNode(t *testing.T) {
 		bootnodes = append(bootnodes, temp...)
 	}
 
+	checkNCreateDir(t, Test_WorkspacePath_Bucket);
+
 	p2p, err := p2pgo.New(
 		context.Background(),
 		p2pgo.ListenPort(Test_ListeningPort),
@@ -118,4 +124,11 @@ func TestRegisterStorageNode(t *testing.T) {
 
 	_, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), Test_Account, 0)
 	assert.NoError(t, err)
+}
+
+func checkNCreateDir(t *testing.T, path string) {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(path, os.ModePerm)
+		assert.NoError(t, err)
+	}
 }
