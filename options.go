@@ -10,7 +10,7 @@ package sdkgo
 import (
 	"time"
 
-	"github.com/CESSProject/sdk-go/core/pattern"
+	"github.com/CESSProject/cess-go-sdk/core/pattern"
 )
 
 // ConnectRpcAddrs configuration rpc address
