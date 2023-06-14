@@ -4,9 +4,9 @@
 
 [![GitHub license](https://img.shields.io/badge/license-Apache2-blue)](#LICENSE)
 <a href=""><img src="https://img.shields.io/badge/golang-%3E%3D1.19-blue.svg" /></a>
-[![Go Reference](https://pkg.go.dev/badge/github.com/CESSProject/sdk-go.svg)](https://pkg.go.dev/github.com/CESSProject/sdk-go)
-[![build](https://github.com/CESSProject/sdk-go/actions/workflows/build&test.yml/badge.svg)](https://github.com/CESSProject/sdk-go/actions/workflows/build&test.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/CESSProject/sdk-go)](https://goreportcard.com/report/github.com/CESSProject/sdk-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/CESSProject/cess-go-sdk.svg)](https://pkg.go.dev/github.com/CESSProject/cess-go-sdk)
+[![build](https://github.com/CESSProject/cess-go-sdk/actions/workflows/build&test.yml/badge.svg)](https://github.com/CESSProject/cess-go-sdk/actions/workflows/build&test.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/CESSProject/cess-go-sdk)](https://goreportcard.com/report/github.com/CESSProject/cess-go-sdk)
 
 </div>
 
@@ -17,7 +17,7 @@ The go sdk implementation of the CESS network, which provides RPC calls, status 
 To get the package use the standard:
 
 ```sh
-go get -u "github.com/CESSProject/sdk-go"
+go get -u "github.com/CESSProject/cess-go-sdk"
 ```
 
 ## Testing
@@ -33,7 +33,7 @@ To run test:
 
 ## Documentation & Examples
 
-Please refer to: https://pkg.go.dev/github.com/CESSProject/sdk-go
+Please refer to: https://pkg.go.dev/github.com/CESSProject/cess-go-sdk
 
 ## Usage
 
@@ -93,4 +93,4 @@ If you find out any vulnerability, Please send an email to frode@cess.one, we ar
 
 ## License
 
-Licensed under [Apache 2.0](https://github.com/CESSProject/sdk-go/blob/main/LICENSE)
+Licensed under [Apache 2.0](https://github.com/CESSProject/cess-go-sdk/blob/main/LICENSE)
