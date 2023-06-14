@@ -71,7 +71,7 @@ func TestRegisterDeOSS(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), "", 0)
+	_, _, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), "", 0)
 	assert.NoError(t, err)
 }
 
@@ -102,6 +102,6 @@ func TestRegisterStorageNode(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), os.Getenv("MY_ADDR"), 0)
+	_, _, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), os.Getenv("MY_ADDR"), 0)
 	assert.NoError(t, err)
 }

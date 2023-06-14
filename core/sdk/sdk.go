@@ -104,7 +104,7 @@ type SDK interface {
 	QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error)
 
 	// Register is used to register oss or bucket roles.
-	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
+	Register(role string, puk []byte, earnings string, pledge uint64) (string, bool, string, error)
 
 	// UpdateEarningsAcc update earnings account.
 	UpdateEarningsAcc(puk []byte) (string, error)
