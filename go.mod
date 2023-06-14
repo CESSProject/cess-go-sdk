@@ -7,6 +7,7 @@ require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/centrifuge/go-substrate-rpc-client/v4 v4.0.12
+	github.com/joho/godotenv v1.5.1
 	github.com/klauspost/reedsolomon v1.11.7
 	github.com/libp2p/go-libp2p v0.26.3
 	github.com/mr-tron/base58 v1.2.0
@@ -63,7 +64,6 @@ require (
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jbenet/go-temp-err-catcher v0.1.0 // indirect
 	github.com/jbenet/goprocess v0.1.4 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.15.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect
 	github.com/koron/go-ssdp v0.0.3 // indirect

@@ -74,7 +74,7 @@ func ReedSolomon(path string) ([]string, error) {
 	return shardspath, nil
 }
 
-func ReedSolomon_Restore(outpath string, shardspath []string) error {
+func ReedSolomonRestore(outpath string, shardspath []string) error {
 	_, err := os.Stat(outpath)
 	if err == nil {
 		return nil

@@ -128,6 +128,9 @@ type SDK interface {
 	// ProcessingData is used to process the uploaded data.
 	ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error)
 
+	// RedundancyRecovery recovers files from redundant lists.
+	RedundancyRecovery(outpath string, shardspath []string) error
+
 	// SubmitIdleMetadata Submit idle file metadata.
 	SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error)
 	SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error)
