@@ -46,10 +46,10 @@ To create an sdk client, you need to provide some configuration information: you
 
 ```go
 cli, err := New(
-    config.CharacterName_Client,
-		ConnectRpcAddrs([]string{"wss://testnet-rpc0.cess.cloud/ws/", "wss://testnet-rpc1.cess.cloud/ws/"}),
-		Mnemonic("xxx xxx ... xxx"),
-		TransactionTimeout(time.Duration(time.Second*10)),
+    config.CharacterName_Deoss,
+	ConnectRpcAddrs([]string{"wss://testnet-rpc0.cess.cloud/ws/", "wss://testnet-rpc1.cess.cloud/ws/"}),
+	Mnemonic("xxx xxx ... xxx"),
+	TransactionTimeout(time.Duration(time.Second*10)),
 )
 ```
 
@@ -77,13 +77,13 @@ Before storing data, you also need to create a data storage order, and you need 
 err := cli.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)
 ```
 
-#### Store Data to Storage Nodes
+### Store Data to Storage Nodes
 
 After creating the storage order, wait for one block to find the storage node information allocated in the order. The next step is to store the data to the storage node through the `WriteFileAction` method in the [p2p-go library](https://github.com/CESSProject/p2p-go).
 
 After the storage node receives the data, it will automatically report this action. When all the storage nodes in the storage order have all reported, the data is considered to be stored successfully. As long as there is a storage node that does not report, it is regarded as a storage failure. After the timeout period in the order is exceeded, the storage nodes in the order will be reassigned randomly to start a new round of storage. You need to monitor this storage order, and re-give the data block to the newly allocated storage node until the data storage is successful. The `count` in the storage order indicates the number of times your data has been redistributed. An order can redistribute storage up to 5 times. If your data is still not successfully stored after 5 times, you need to re-upload your data.
 
-#### Fetch Data
+### Fetch Data
 
 Call the `ReadFileAction` method in the [p2p-go library](https://github.com/CESSProject/p2p-go) to download all data blocks, and then restore the original data through the `ReedSolomon_Restore` method.
 
