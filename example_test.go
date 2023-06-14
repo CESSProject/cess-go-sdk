@@ -9,51 +9,41 @@ package sdkgo_test
 
 import (
 	"context"
+	"os"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/joho/godotenv"
+	"github.com/stretchr/testify/assert"
 
 	p2pgo "github.com/CESSProject/p2p-go"
 	cess "github.com/CESSProject/sdk-go"
 	"github.com/CESSProject/sdk-go/config"
 	"github.com/CESSProject/sdk-go/core/utils"
-	"github.com/stretchr/testify/assert"
 )
-
-// Substrate well-known mnemonic:
-//
-//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var Test_Account = "cXkdXokcMa32BAYkmsGjhRGA2CYmLUN2pq69U8k9taXsQPHGp"                              //Alice
-var Test_Account_Mnemonic = "bottom drive obey lake curtain smoke basket hold race lonely fit walk" //Alice
-
-var testnets = []string{
-	"wss://devnet-rpc.cess.cloud/ws/",
-	"wss://testnet-rpc0.cess.cloud/ws/",
-	"wss://testnet-rpc1.cess.cloud/ws/",
-}
-
-var localNode = []string{
-	"ws://localhost:9944",
-}
 
 var Test_BootstrapNodes = []string{
 	"_dnsaddr.bootstrap-kldr.cess.cloud",
 }
 
-// Tmp files will be downloaded
-var Test_WorkspacePath_Deoss = "/tmp/deoss"
-var Test_WorkspacePath_Bucket = "/tmp/bucket"
-
-const Test_ListeningPort = 4001
+const DEFAULT_WAIT_TIME = time.Second * 15
 
 // If you run these examples using localNode, please run a [CESS node](https://github.com/cessProject/cess) locally
 //  as well.
 
+func TestMain(m *testing.M) {
+	godotenv.Load(".env.testnet")
+	os.Exit(m.Run())
+}
+
 func TestNewClient(t *testing.T) {
 	_, err := cess.New(
 		config.CharacterName_Client,
-		cess.ConnectRpcAddrs(testnets),
-		cess.Mnemonic(Test_Account_Mnemonic),
-		cess.TransactionTimeout(time.Duration(time.Second*15)),
+		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
+		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
+		cess.TransactionTimeout(time.Duration(DEFAULT_WAIT_TIME)),
 	)
 	assert.NoError(t, err)
 }
@@ -61,15 +51,15 @@ func TestNewClient(t *testing.T) {
 func TestRegisterDeOSS(t *testing.T) {
 	cli, err := cess.New(
 		config.CharacterName_Deoss,
-		cess.ConnectRpcAddrs(testnets),
-		cess.Mnemonic(Test_Account_Mnemonic),
-		cess.TransactionTimeout(time.Duration(time.Second*15)),
+		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
+		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
+		cess.TransactionTimeout(time.Duration(DEFAULT_WAIT_TIME)),
 	)
 	assert.NoError(t, err)
 
 	var bootnodes = make([]string, 0)
 
-	for _, v := range Test_BootstrapNodes {
+	for _, v := range strings.Split(os.Getenv("BOOTSTRAP_NODES"), " ") {
 		temp, err := utils.ParseMultiaddrs(v)
 		if err != nil {
 			continue
@@ -77,11 +67,14 @@ func TestRegisterDeOSS(t *testing.T) {
 		bootnodes = append(bootnodes, temp...)
 	}
 
+	p2pPort, errConv := strconv.Atoi(os.Getenv("P2P_PORT"))
+	assert.NoError(t, errConv)
+
 	p2p, err := p2pgo.New(
 		context.Background(),
-		p2pgo.ListenPort(Test_ListeningPort),
-		p2pgo.Workspace(Test_WorkspacePath_Deoss),
-		p2pgo.BootPeers(bootnodes),
+		p2pgo.ListenPort(p2pPort),
+		p2pgo.Workspace(t.TempDir()),
+		p2pgo.BootPeers(strings.Split(os.Getenv("BOOTSTRAP_NODES"), " ")),
 	)
 	assert.NoError(t, err)
 
@@ -92,15 +85,15 @@ func TestRegisterDeOSS(t *testing.T) {
 func TestRegisterStorageNode(t *testing.T) {
 	cli, err := cess.New(
 		config.CharacterName_Bucket,
-		cess.ConnectRpcAddrs(testnets),
-		cess.Mnemonic(Test_Account_Mnemonic),
-		cess.TransactionTimeout(time.Duration(time.Second*10)),
+		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
+		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
+		cess.TransactionTimeout(time.Duration(DEFAULT_WAIT_TIME)),
 	)
 	assert.NoError(t, err)
 
 	var bootnodes = make([]string, 0)
 
-	for _, v := range Test_BootstrapNodes {
+	for _, v := range strings.Split(os.Getenv("BOOTSTRAP_NODES"), " ") {
 		temp, err := utils.ParseMultiaddrs(v)
 		if err != nil {
 			continue
@@ -108,14 +101,17 @@ func TestRegisterStorageNode(t *testing.T) {
 		bootnodes = append(bootnodes, temp...)
 	}
 
+	p2pPort, errConv := strconv.Atoi(os.Getenv("P2P_PORT"))
+	assert.NoError(t, errConv)
+
 	p2p, err := p2pgo.New(
 		context.Background(),
-		p2pgo.ListenPort(Test_ListeningPort),
-		p2pgo.Workspace(Test_WorkspacePath_Bucket),
-		p2pgo.BootPeers(bootnodes),
+		p2pgo.ListenPort(p2pPort),
+		p2pgo.Workspace(t.TempDir()),
+		p2pgo.BootPeers(strings.Split(os.Getenv("BOOTSTRAP_NODES"), " ")),
 	)
 	assert.NoError(t, err)
 
-	_, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), Test_Account, 0)
+	_, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), os.Getenv("MY_ADDR"), 0)
 	assert.NoError(t, err)
 }
