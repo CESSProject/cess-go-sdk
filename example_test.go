@@ -10,7 +10,6 @@ package sdkgo_test
 import (
 	"context"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -24,16 +23,13 @@ import (
 	"github.com/CESSProject/sdk-go/core/utils"
 )
 
-var Test_BootstrapNodes = []string{
-	"_dnsaddr.bootstrap-kldr.cess.cloud",
-}
-
 const DEFAULT_WAIT_TIME = time.Second * 15
-
-// If you run these examples using localNode, please run a [CESS node](https://github.com/cessProject/cess) locally
-//  as well.
+const P2P_PORT = 4001
 
 func TestMain(m *testing.M) {
+	// Change the following `.env.testnet` to `.env.local` to run test against a local node.
+	// If you run these examples using localNode, please run a
+	//   [CESS node](https://github.com/cessProject/cess) locally as well.
 	godotenv.Load(".env.testnet")
 	os.Exit(m.Run())
 }
@@ -67,12 +63,9 @@ func TestRegisterDeOSS(t *testing.T) {
 		bootnodes = append(bootnodes, temp...)
 	}
 
-	p2pPort, errConv := strconv.Atoi(os.Getenv("P2P_PORT"))
-	assert.NoError(t, errConv)
-
 	p2p, err := p2pgo.New(
 		context.Background(),
-		p2pgo.ListenPort(p2pPort),
+		p2pgo.ListenPort(P2P_PORT),
 		p2pgo.Workspace(t.TempDir()),
 		p2pgo.BootPeers(strings.Split(os.Getenv("BOOTSTRAP_NODES"), " ")),
 	)
@@ -101,12 +94,9 @@ func TestRegisterStorageNode(t *testing.T) {
 		bootnodes = append(bootnodes, temp...)
 	}
 
-	p2pPort, errConv := strconv.Atoi(os.Getenv("P2P_PORT"))
-	assert.NoError(t, errConv)
-
 	p2p, err := p2pgo.New(
 		context.Background(),
-		p2pgo.ListenPort(p2pPort),
+		p2pgo.ListenPort(P2P_PORT),
 		p2pgo.Workspace(t.TempDir()),
 		p2pgo.BootPeers(strings.Split(os.Getenv("BOOTSTRAP_NODES"), " ")),
 	)
