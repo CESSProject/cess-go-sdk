@@ -40,7 +40,7 @@ func (cfg *Config) NewSDK(roleName string) (sdk.SDK, error) {
 	if roleName != CharacterName_Bucket &&
 		roleName != CharacterName_Deoss &&
 		roleName != CharacterName_Client {
-		return nil, fmt.Errorf("invalid character name")
+		return nil, fmt.Errorf("invalid role name")
 	}
 	return chain.NewChainSDK(roleName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
 }
