@@ -8,7 +8,7 @@
 package event
 
 import (
-	"github.com/CESSProject/sdk-go/core/pattern"
+	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 

@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/CESSProject/sdk-go/chain"
-	"github.com/CESSProject/sdk-go/core/sdk"
+	"github.com/CESSProject/cess-go-sdk/chain"
+	"github.com/CESSProject/cess-go-sdk/core/sdk"
 )
 
 // Config describes a set of settings for a client

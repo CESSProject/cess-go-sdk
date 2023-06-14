@@ -15,10 +15,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/CESSProject/sdk-go/core/erasure"
-	"github.com/CESSProject/sdk-go/core/hashtree"
-	"github.com/CESSProject/sdk-go/core/pattern"
-	"github.com/CESSProject/sdk-go/core/utils"
+	"github.com/CESSProject/cess-go-sdk/core/erasure"
+	"github.com/CESSProject/cess-go-sdk/core/hashtree"
+	"github.com/CESSProject/cess-go-sdk/core/pattern"
+	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
 )
