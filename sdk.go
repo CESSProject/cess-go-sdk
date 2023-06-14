@@ -8,8 +8,8 @@
 package sdkgo
 
 import (
-	"github.com/CESSProject/sdk-go/config"
-	"github.com/CESSProject/sdk-go/core/sdk"
+	"github.com/CESSProject/cess-go-sdk/config"
+	"github.com/CESSProject/cess-go-sdk/core/sdk"
 )
 
 // Config describes a set of settings for the sdk.

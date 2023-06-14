@@ -17,10 +17,10 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 
+	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/config"
+	"github.com/CESSProject/cess-go-sdk/core/utils"
 	p2pgo "github.com/CESSProject/p2p-go"
-	cess "github.com/CESSProject/sdk-go"
-	"github.com/CESSProject/sdk-go/config"
-	"github.com/CESSProject/sdk-go/core/utils"
 )
 
 const DEFAULT_WAIT_TIME = time.Second * 15

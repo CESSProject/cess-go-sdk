@@ -7,7 +7,7 @@
 
 package sdkgo
 
-import "github.com/CESSProject/sdk-go/core/pattern"
+import "github.com/CESSProject/cess-go-sdk/core/pattern"
 
 // DefaultRpcAddrs configures the default rpc address
 var DefaultRpcAddrs = func(cfg *Config) error {
