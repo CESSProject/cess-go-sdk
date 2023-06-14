@@ -109,11 +109,10 @@ func (c *ChainSDK) Reconnect() error {
 		c.api.Client.Close()
 	}
 	c.api = nil
-	c.api, err = reconnectChainSDK(c.rpcAddr)
-	if err != nil {
-		return err
-	}
-	c.metadata, err = c.api.RPC.State.GetMetadataLatest()
+	c.metadata = nil
+	c.runtimeVersion = nil
+	c.keyEvents = nil
+	c.api, c.metadata, c.runtimeVersion, c.keyEvents, c.genesisHash, err = reconnectChainSDK(c.rpcAddr)
 	if err != nil {
 		return err
 	}
@@ -164,18 +163,51 @@ func (c *ChainSDK) Verify(msg []byte, sig []byte) (bool, error) {
 	return signature.Verify(msg, sig, c.keyring.URI)
 }
 
-func reconnectChainSDK(rpcAddr []string) (*gsrpc.SubstrateAPI, error) {
+func reconnectChainSDK(rpcs []string) (
+	*gsrpc.SubstrateAPI,
+	*types.Metadata,
+	*types.RuntimeVersion,
+	types.StorageKey,
+	types.Hash,
+	error,
+) {
 	var err error
 	var api *gsrpc.SubstrateAPI
+
 	defer log.SetOutput(os.Stdout)
 	log.SetOutput(io.Discard)
-	for i := 0; i < len(rpcAddr); i++ {
-		api, err = gsrpc.NewSubstrateAPI(rpcAddr[i])
-		if err == nil {
-			return api, nil
+	for i := 0; i < len(rpcs); i++ {
+		api, err = gsrpc.NewSubstrateAPI(rpcs[i])
+		if err != nil {
+			continue
 		}
 	}
-	return api, err
+	if api == nil {
+		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+	}
+	var metadata *types.Metadata
+	var runtimeVer *types.RuntimeVersion
+	var keyEvents types.StorageKey
+	var genesisHash types.Hash
+
+	metadata, err = api.RPC.State.GetMetadataLatest()
+	if err != nil {
+		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+	}
+	genesisHash, err = api.RPC.Chain.GetBlockHash(0)
+	if err != nil {
+		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+	}
+	runtimeVer, err = api.RPC.State.GetRuntimeVersionLatest()
+	if err != nil {
+		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+	}
+	keyEvents, err = types.CreateStorageKey(metadata, pattern.SYSTEM, pattern.EVENTS, nil)
+	if err != nil {
+		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+	}
+
+	return api, metadata, runtimeVer, keyEvents, genesisHash, err
 }
 
 func createPrefixedKey(pallet, method string) []byte {

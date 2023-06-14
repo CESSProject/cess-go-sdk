@@ -932,7 +932,7 @@ func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []patt
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
 				if err != nil || len(events.FileBank_ReplaceFiller) > 0 {
-					return txhash, events.FileBank_ReplaceFiller[0].Filler_list, nil
+					return txhash, nil, nil
 				}
 				return txhash, nil, errors.New(pattern.ERR_Failed)
 			}
