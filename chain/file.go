@@ -150,3 +150,7 @@ func ExtractSegmenthash(segment []pattern.SegmentDataInfo) []string {
 	}
 	return segmenthash
 }
+
+func (n *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error {
+	return erasure.ReedSolomonRestore(outpath, shardspath)
+}

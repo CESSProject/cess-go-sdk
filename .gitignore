@@ -1,1 +1,22 @@
 .env
+.private
+.git
+
+## Binaries
+main
+sdk
+
+## nohup print and log files
+*.out
+*.log
+*.tmp
+*.backup
+*.bkp
+*.yaml
+*.toml
+
+## Data and cache files
+/log
+/db
+/test
+/cache
