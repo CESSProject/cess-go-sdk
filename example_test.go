@@ -67,7 +67,7 @@ func TestRegisterDeOSS(t *testing.T) {
 		context.Background(),
 		p2pgo.ListenPort(P2P_PORT),
 		p2pgo.Workspace(t.TempDir()),
-		p2pgo.BootPeers(strings.Split(os.Getenv("BOOTSTRAP_NODES"), " ")),
+		p2pgo.BootPeers(bootnodes),
 	)
 	assert.NoError(t, err)
 
@@ -98,7 +98,7 @@ func TestRegisterStorageNode(t *testing.T) {
 		context.Background(),
 		p2pgo.ListenPort(P2P_PORT),
 		p2pgo.Workspace(t.TempDir()),
-		p2pgo.BootPeers(strings.Split(os.Getenv("BOOTSTRAP_NODES"), " ")),
+		p2pgo.BootPeers(bootnodes),
 	)
 	assert.NoError(t, err)
 
