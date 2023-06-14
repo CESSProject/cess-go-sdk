@@ -66,6 +66,7 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 			if err.Error() != pattern.ERR_Empty {
 				return txhash, registed, earnings, err
 			}
+			registed = true
 		} else {
 			if !utils.CompareSlice(id, puk) {
 				txhash, err = c.updateAddress(key, role, peerid)
@@ -84,6 +85,7 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 			if err.Error() != pattern.ERR_Empty {
 				return txhash, registed, earnings, err
 			}
+			registed = true
 		} else {
 			if !utils.CompareSlice([]byte(string(minerinfo.PeerId[:])), puk) {
 				txhash, err = c.updateAddress(key, role, peerid)
