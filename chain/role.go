@@ -22,7 +22,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uint64) (string, bool, string, error) {
+func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -33,7 +33,6 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 
 	var (
 		err         error
-		registed    bool
 		txhash      string
 		pubkey      []byte
 		minerinfo   pattern.MinerInfo
@@ -43,12 +42,12 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 	)
 
 	if !c.GetChainState() {
-		return txhash, registed, earnings, pattern.ERR_RPC_CONNECTION
+		return txhash, earnings, pattern.ERR_RPC_CONNECTION
 	}
 
 	var peerid pattern.PeerId
 	if len(peerid) != len(puk) {
-		return txhash, registed, earnings, fmt.Errorf("invalid peerid: %v", puk)
+		return txhash, earnings, fmt.Errorf("invalid peerid: %v", puk)
 	}
 	for i := 0; i < len(peerid); i++ {
 		peerid[i] = types.U8(puk[i])
@@ -56,7 +55,7 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, registed, earnings, errors.Wrap(err, "[CreateStorageKey]")
+		return txhash, earnings, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	switch role {
@@ -64,74 +63,71 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 		id, err := c.QueryDeossPeerPublickey(c.keyring.PublicKey)
 		if err != nil {
 			if err.Error() != pattern.ERR_Empty {
-				return txhash, registed, earnings, err
+				return txhash, earnings, err
 			}
-			registed = true
 		} else {
 			if !utils.CompareSlice(id, puk) {
 				txhash, err = c.updateAddress(key, role, peerid)
-				return txhash, registed, earnings, err
+				return txhash, earnings, err
 			}
-			return "", registed, earnings, nil
+			return "", earnings, nil
 		}
-
 		call, err = types.NewCall(c.metadata, pattern.TX_OSS_REGISTER, peerid)
 		if err != nil {
-			return txhash, registed, earnings, errors.Wrap(err, "[NewCall]")
+			return txhash, earnings, errors.Wrap(err, "[NewCall]")
 		}
 	case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 		minerinfo, err = c.QueryStorageMiner(c.keyring.PublicKey)
 		if err != nil {
 			if err.Error() != pattern.ERR_Empty {
-				return txhash, registed, earnings, err
+				return txhash, earnings, err
 			}
-			registed = true
 		} else {
 			if !utils.CompareSlice([]byte(string(minerinfo.PeerId[:])), puk) {
 				txhash, err = c.updateAddress(key, role, peerid)
-				return txhash, registed, earnings, err
+				return txhash, earnings, err
 			}
 			acc, _ := utils.EncodePublicKeyAsCessAccount(minerinfo.BeneficiaryAcc[:])
 			if earnings != "" {
 				if acc != earnings {
 					puk, err := utils.ParsingPublickey(earnings)
 					if err != nil {
-						return txhash, registed, acc, err
+						return txhash, acc, err
 					}
 					txhash, err = c.updateEarningsAcc(key, puk)
-					return txhash, registed, earnings, err
+					return txhash, earnings, err
 				}
 			}
-			return "", registed, acc, nil
+			return "", acc, nil
 		}
 
 		pubkey, err = utils.ParsingPublickey(earnings)
 		if err != nil {
-			return txhash, registed, earnings, errors.Wrap(err, "[DecodeToPub]")
+			return txhash, earnings, errors.Wrap(err, "[DecodeToPub]")
 		}
 		acc, err = types.NewAccountID(pubkey)
 		if err != nil {
-			return txhash, registed, earnings, errors.Wrap(err, "[NewAccountID]")
+			return txhash, earnings, errors.Wrap(err, "[NewAccountID]")
 		}
 		realTokens, ok := new(big.Int).SetString(strconv.FormatUint(pledge, 10)+pattern.TokenPrecision_CESS, 10)
 		if !ok {
-			return txhash, registed, earnings, errors.New("[big.Int.SetString]")
+			return txhash, earnings, errors.New("[big.Int.SetString]")
 		}
 		call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTER, *acc, peerid, types.NewU128(*realTokens))
 		if err != nil {
-			return txhash, registed, earnings, errors.Wrap(err, "[NewCall]")
+			return txhash, earnings, errors.Wrap(err, "[NewCall]")
 		}
 	default:
-		return "", registed, earnings, fmt.Errorf("invalid role name")
+		return "", earnings, fmt.Errorf("invalid role name")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, registed, earnings, errors.Wrap(err, "[GetStorageLatest]")
+		return txhash, earnings, errors.Wrap(err, "[GetStorageLatest]")
 	}
 
 	if !ok {
-		return txhash, registed, earnings, pattern.ERR_RPC_EMPTY_VALUE
+		return txhash, earnings, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -149,13 +145,14 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, registed, earnings, errors.Wrap(err, "[Sign]")
+		return txhash, earnings, errors.Wrap(err, "[Sign]")
 	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		return txhash, registed, earnings, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		c.SetChainState(false)
+		return txhash, earnings, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
 
@@ -170,31 +167,29 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
 				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
 				if err != nil {
-					return txhash, registed, earnings, errors.Wrap(err, "[GetStorageRaw]")
+					return txhash, earnings, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
 				if err != nil {
-					return txhash, registed, earnings, nil
+					return txhash, earnings, nil
 				}
 				switch role {
 				case pattern.Role_OSS, pattern.Role_DEOSS, "deoss", "oss", "Deoss", "DeOSS":
 					if len(events.Oss_OssRegister) > 0 {
-						registed = true
-						return txhash, registed, earnings, nil
+						return txhash, earnings, nil
 					}
 				case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
 					if len(events.Sminer_Registered) > 0 {
-						registed = true
-						return txhash, registed, earnings, nil
+						return txhash, earnings, nil
 					}
 				default:
-					return txhash, registed, earnings, errors.New(pattern.ERR_Failed)
+					return txhash, earnings, errors.New(pattern.ERR_Failed)
 				}
 			}
 		case err = <-sub.Err():
-			return txhash, registed, earnings, errors.Wrap(err, "[sub]")
+			return txhash, earnings, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, registed, earnings, pattern.ERR_RPC_TIMEOUT
+			return txhash, earnings, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
@@ -252,6 +247,7 @@ func (c *ChainSDK) updateAddress(key types.StorageKey, name string, peerid patte
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -363,6 +359,7 @@ func (c *ChainSDK) Exit(role string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()

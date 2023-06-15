@@ -184,6 +184,7 @@ func (c *ChainSDK) UpdateEarningsAcc(puk []byte) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -260,6 +261,7 @@ func (c *ChainSDK) updateEarningsAcc(key types.StorageKey, puk []byte) (string, 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -357,6 +359,7 @@ func (c *ChainSDK) IncreaseStakingAmount(tokens *big.Int) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -454,6 +457,7 @@ func (c *ChainSDK) ClaimRewards() (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -543,6 +547,7 @@ func (c *ChainSDK) Withdraw() (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()

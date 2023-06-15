@@ -136,6 +136,7 @@ func (c *ChainSDK) ReportProof(idlesigma, servicesigma string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()

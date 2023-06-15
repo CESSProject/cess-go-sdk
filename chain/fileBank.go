@@ -303,6 +303,7 @@ func (c *ChainSDK) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMet
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -428,6 +429,7 @@ func (c *ChainSDK) CreateBucket(owner_pkey []byte, name string) (string, error) 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -523,6 +525,7 @@ func (c *ChainSDK) DeleteBucket(owner_pkey []byte, name string) (string, error) 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -621,6 +624,7 @@ func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.Segment
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -724,6 +728,7 @@ func (c *ChainSDK) DeleteFile(puk []byte, filehash []string) (string, []pattern.
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, hashs, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -810,6 +815,7 @@ func (c *ChainSDK) SubmitFileReport(roothash []pattern.FileHash) (string, []patt
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -913,6 +919,7 @@ func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []patt
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -1081,6 +1088,7 @@ func (c *ChainSDK) GenerateRestoralOrder(rootHash, fragmentHash string) (string,
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -1180,6 +1188,7 @@ func (c *ChainSDK) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
@@ -1293,6 +1302,7 @@ func (c *ChainSDK) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragm
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
+		c.SetChainState(false)
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
