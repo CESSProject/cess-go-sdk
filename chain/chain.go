@@ -117,6 +117,7 @@ func (c *ChainSDK) Reconnect() error {
 	if err != nil {
 		return err
 	}
+	c.SetChainState(true)
 	return nil
 }
 
