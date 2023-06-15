@@ -105,13 +105,14 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration) (
 
 func (c *ChainSDK) Reconnect() error {
 	var err error
-	if c.api.Client != nil {
-		c.api.Client.Close()
+	if c.api != nil {
+		if c.api.Client != nil {
+			c.api.Client.Close()
+			c.api.Client = nil
+		}
+		c.api = nil
 	}
-	c.api = nil
-	c.metadata = nil
-	c.runtimeVersion = nil
-	c.keyEvents = nil
+
 	c.api, c.metadata, c.runtimeVersion, c.keyEvents, c.genesisHash, err = reconnectChainSDK(c.rpcAddr)
 	if err != nil {
 		return err
