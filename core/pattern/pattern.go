@@ -186,7 +186,7 @@ type TeePodr2Pk [270]types.U8
 type PeerId [38]types.U8
 
 type SysProperties struct {
-	Ss58Format    types.U8
+	Ss58Format    types.Bytes
 	TokenDecimals types.U8
 	TokenSymbol   types.Text
 	SS58Prefix    types.U32
