@@ -14,13 +14,10 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 )
 
+var re = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+
 func CheckBucketName(name string) bool {
 	if len(name) < pattern.MinBucketNameLength || len(name) > pattern.MaxBucketNameLength {
-		return false
-	}
-
-	re, err := regexp.Compile(`^[a-z0-9.-]{3,63}$`)
-	if err != nil {
 		return false
 	}
 
@@ -34,10 +31,20 @@ func CheckBucketName(name string) bool {
 
 	if byte(name[0]) == byte('.') ||
 		byte(name[0]) == byte('-') ||
+		byte(name[0]) == byte('_') ||
 		byte(name[len(name)-1]) == byte('.') ||
-		byte(name[len(name)-1]) == byte('-') {
+		byte(name[len(name)-1]) == byte('-') ||
+		byte(name[len(name)-1]) == byte('_') {
 		return false
 	}
 
-	return !IsIPv4(name)
+	if IsIPv4(name) {
+		return false
+	}
+
+	if IsIPv6(name) {
+		return false
+	}
+
+	return true
 }
