@@ -9,6 +9,7 @@ package chain
 
 import (
 	"log"
+	"math/big"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/event"
@@ -604,7 +605,7 @@ func (c *ChainSDK) DeleteBucket(owner_pkey []byte, name string) (string, error) 
 	}
 }
 
-func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief) (string, error) {
+func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -618,19 +619,20 @@ func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.Segment
 		hash        pattern.FileHash
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
-	}
-
 	if len(filehash) != len(hash) {
 		return txhash, errors.New("invalid filehash")
+	}
+	if filesize <= 0 {
+		return txhash, errors.New("invalid filesize")
+	}
+	if !c.GetChainState() {
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 	for i := 0; i < len(hash); i++ {
 		hash[i] = types.U8(filehash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADDEC, hash, dealinfo, user)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADDEC, hash, dealinfo, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}

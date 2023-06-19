@@ -116,7 +116,7 @@ func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, strin
 	return segment, hex.EncodeToString(hTree.MerkleRoot()), err
 }
 
-func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string) (string, error) {
+func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error) {
 	var err error
 	var segmentList = make([]pattern.SegmentList, len(segment))
 	var user pattern.UserBrief
@@ -140,7 +140,7 @@ func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.Segme
 	user.User = *acc
 	user.BucketName = types.NewBytes([]byte(buckname))
 	user.FileName = types.NewBytes([]byte(filename))
-	return c.UploadDeclaration(roothash, segmentList, user)
+	return c.UploadDeclaration(roothash, segmentList, user, filesize)
 }
 
 func ExtractSegmenthash(segment []pattern.SegmentDataInfo) []string {
