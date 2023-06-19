@@ -189,7 +189,7 @@ func (c *ChainSDK) QueryFillerMap(filehash string) (pattern.IdleMetadata, error)
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.FILLERMAP, b)
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.FILLERMAP, c.keyring.PublicKey, b)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
