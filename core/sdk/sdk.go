@@ -119,6 +119,9 @@ type SDK interface {
 	// DeleteFile deletes files for puk.
 	DeleteFile(puk []byte, roothash []string) (string, []pattern.FileHash, error)
 
+	// DeleteFiller deletes an idle file.
+	DeleteFiller(filehash string) (string, error)
+
 	// UploadDeclaration creates a storage order.
 	UploadDeclaration(roothash string, dealinfo []pattern.SegmentList, user pattern.UserBrief) (string, error)
 
