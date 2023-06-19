@@ -66,9 +66,10 @@ const (
 	BUCKET             = "Bucket"
 	BUCKETLIST         = "UserBucketList"
 	DEALMAP            = "DealMap"
+	FILLERMAP          = "FillerMap"
 	PENDINGREPLACE     = "PendingReplacements"
 	RESTORALORDER      = "RestoralOrder"
-	RESTORALTARGETINFO = "RestoralTargetInfo"
+	RESTORALTARGETINFO = "RestoralTarget"
 
 	// STORAGEHANDLER
 	USERSPACEINFO = "UserOwnedSpace"

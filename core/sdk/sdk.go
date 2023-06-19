@@ -48,6 +48,9 @@ type SDK interface {
 	// QueryFileMetadata queries the metadata of the roothash file.
 	QueryFileMetadata(roothash string) (pattern.FileMetadata, error)
 
+	// QueryFillerMap queries filler information.
+	QueryFillerMap(filehash string) (pattern.IdleMetadata, error)
+
 	// QueryStorageMiner queries storage node information.
 	QueryStorageMiner(puk []byte) (pattern.MinerInfo, error)
 
@@ -99,8 +102,10 @@ type SDK interface {
 
 	// QueryRestoralOrder queries a restore order info.
 	QueryRestoralOrder(roothash string) (pattern.RestoralOrderInfo, error)
+	QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error)
 
 	// QueryRestoralTargetList for recovery information on all exiting miners.
+	QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, error)
 	QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error)
 
 	// Register is used to register oss or bucket roles.

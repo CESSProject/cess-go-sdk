@@ -159,6 +159,51 @@ func (c *ChainSDK) QueryFileMetadata(roothash string) (pattern.FileMetadata, err
 	return data, nil
 }
 
+// QueryFillerMap
+func (c *ChainSDK) QueryFillerMap(filehash string) (pattern.IdleMetadata, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		data pattern.IdleMetadata
+		hash pattern.FileHash
+	)
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	if len(hash) != len(filehash) {
+		return data, errors.New("invalid filehash")
+	}
+
+	for i := 0; i < len(hash); i++ {
+		hash[i] = types.U8(filehash[i])
+	}
+
+	b, err := codec.Encode(hash)
+	if err != nil {
+		return data, errors.Wrap(err, "[Encode]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.FILLERMAP, b)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 func (c *ChainSDK) QueryStorageOrder(roothash string) (pattern.StorageOrder, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -1107,6 +1152,45 @@ func (c *ChainSDK) QueryRestoralOrder(fragmentHash string) (pattern.RestoralOrde
 	return data, nil
 }
 
+// QueryRestoralOrder
+func (c *ChainSDK) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data pattern.RestoralTargetInfo
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	acc, err := types.NewAccountID(puk)
+	if err != nil {
+		return data, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return data, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.RESTORALTARGETINFO, owner)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 // GenerateRestoralOrder
 func (c *ChainSDK) GenerateRestoralOrder(rootHash, fragmentHash string) (string, error) {
 	c.lock.Lock()
@@ -1428,6 +1512,42 @@ func (c *ChainSDK) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragm
 			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
+}
+
+// QueryRestoralOrder
+func (c *ChainSDK) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var result []pattern.RestoralOrderInfo
+
+	if !c.GetChainState() {
+		return nil, pattern.ERR_RPC_CONNECTION
+	}
+
+	key := createPrefixedKey(pattern.FILEBANK, pattern.RESTORALORDER)
+	keys, err := c.api.RPC.State.GetKeysLatest(key)
+	if err != nil {
+		return nil, errors.Wrap(err, "[GetKeysLatest]")
+	}
+
+	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
+	if err != nil {
+		return nil, errors.Wrap(err, "[QueryStorageAtLatest]")
+	}
+
+	for _, elem := range set {
+		for _, change := range elem.Changes {
+			var data pattern.RestoralOrderInfo
+			if err := codec.Decode(change.StorageData, &data); err != nil {
+				continue
+			}
+			result = append(result, data)
+		}
+	}
+	return result, nil
 }
 
 // QueryRestoralTargetList
