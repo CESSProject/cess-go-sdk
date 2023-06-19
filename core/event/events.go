@@ -135,6 +135,13 @@ type Event_DeleteFile struct {
 	Topics   []types.Hash
 }
 
+type Event_FillerDelete struct {
+	Phase      types.Phase
+	Acc        types.AccountID
+	FillerHash pattern.FileHash
+	Topics     []types.Hash
+}
+
 type Event_FileUpload struct {
 	Phase  types.Phase
 	Acc    types.AccountID
@@ -389,6 +396,7 @@ type EventRecords struct {
 
 	// FILEBANK
 	FileBank_DeleteFile            []Event_DeleteFile
+	FileBank_FillerDelete          []Event_FillerDelete
 	FileBank_FileUpload            []Event_FileUpload
 	FileBank_FileUpdate            []Event_FileUpdate
 	FileBank_FileChangeState       []Event_FileChangeState

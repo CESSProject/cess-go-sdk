@@ -66,9 +66,10 @@ const (
 	BUCKET             = "Bucket"
 	BUCKETLIST         = "UserBucketList"
 	DEALMAP            = "DealMap"
+	FILLERMAP          = "FillerMap"
 	PENDINGREPLACE     = "PendingReplacements"
 	RESTORALORDER      = "RestoralOrder"
-	RESTORALTARGETINFO = "RestoralTargetInfo"
+	RESTORALTARGETINFO = "RestoralTarget"
 
 	// STORAGEHANDLER
 	USERSPACEINFO = "UserOwnedSpace"
@@ -103,6 +104,7 @@ const (
 	TX_FILEBANK_PUTBUCKET         = FILEBANK + DOT + "create_bucket"
 	TX_FILEBANK_DELBUCKET         = FILEBANK + DOT + "delete_bucket"
 	TX_FILEBANK_DELFILE           = FILEBANK + DOT + "delete_file"
+	TX_FILEBANK_DELFILLER         = FILEBANK + DOT + "delete_filler"
 	TX_FILEBANK_UPLOADDEC         = FILEBANK + DOT + "upload_declaration"
 	TX_FILEBANK_UPLOADFILLER      = FILEBANK + DOT + "upload_filler"
 	TX_FILEBANK_FILEREPORT        = FILEBANK + DOT + "transfer_report"
