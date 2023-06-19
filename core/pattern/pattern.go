@@ -114,6 +114,7 @@ const (
 	TX_FILEBANK_GENRESTOREORDER   = FILEBANK + DOT + "generate_restoral_order"
 	TX_FILEBANK_CLAIMRESTOREORDER = FILEBANK + DOT + "claim_restoral_order"
 	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"
+	TX_FILEBANK_RESTORALCOMPLETE  = FILEBANK + DOT + "restoral_order_complete"
 )
 
 // RPC Call

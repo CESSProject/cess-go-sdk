@@ -133,6 +133,9 @@ type SDK interface {
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
 
+	// RestoralComplete reports order recovery completion.
+	RestoralComplete(restoralFragmentHash string) (string, error)
+
 	// ProcessingData is used to process the uploaded data.
 	ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error)
 
