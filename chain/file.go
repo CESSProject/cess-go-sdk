@@ -23,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ProcessingData
 func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error) {
 	var (
 		err          error

@@ -20,6 +20,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// QueryBucketInfo
 func (c *ChainSDK) QueryBucketInfo(puk []byte, bucketname string) (pattern.BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
