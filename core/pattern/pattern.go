@@ -227,11 +227,11 @@ type MinerReward struct {
 }
 
 type FileMetadata struct {
-	SegmentList []SegmentInfo
-	Owner       []UserBrief
-	FileSize    types.U128
 	Completion  types.U32
 	State       types.U8
+	SegmentList []SegmentInfo
+	Owner       []UserBrief
+	//FileSize    types.U128
 }
 
 type BucketInfo struct {
@@ -267,9 +267,9 @@ type FragmentList struct {
 }
 
 type StorageOrder struct {
-	Stage         types.U8
-	Count         types.U8
-	FileSize      types.U128
+	Stage types.U8
+	Count types.U8
+	//FileSize      types.U128
 	SegmentList   []SegmentList
 	NeededList    []SegmentList
 	User          UserBrief
