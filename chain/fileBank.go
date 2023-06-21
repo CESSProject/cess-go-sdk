@@ -362,19 +362,17 @@ func (c *ChainSDK) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMet
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				//events := EventRecords{}
+				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				// h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				// if err != nil {
-				// 	return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				// }
-
-				// types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-
-				// if len(events.FileBank_DeleteFile) > 0 {
-				// 	return txhash, events.FileBank_DeleteFile[0].FailedList
-				// }
-				return txhash, nil
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				}
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.FileBank_FillerUpload) > 0 {
+					return txhash, nil
+				}
+				return txhash, errors.New(pattern.ERR_Failed)
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")

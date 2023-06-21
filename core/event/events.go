@@ -120,9 +120,9 @@ type Event_Receive struct {
 	Topics []types.Hash
 }
 
-type Event_Withdraw struct {
+type Event_MinerExitPrep struct {
 	Phase  types.Phase
-	Acc    types.AccountID
+	Miner  types.AccountID
 	Topics []types.Hash
 }
 
@@ -142,72 +142,11 @@ type Event_FillerDelete struct {
 	Topics     []types.Hash
 }
 
-type Event_FileUpload struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Topics []types.Hash
-}
-
-type Event_FileUpdate struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Fileid types.Bytes
-	Topics []types.Hash
-}
-
-type Event_FileChangeState struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Fileid types.Bytes
-	Topics []types.Hash
-}
-
-type Event_BuyFile struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Money  types.U128
-	Fileid types.Bytes
-	Topics []types.Hash
-}
-
-type Event_Purchased struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Fileid types.Bytes
-	Topics []types.Hash
-}
-
-type Event_InsertFileSlice struct {
-	Phase  types.Phase
-	Fileid types.Bytes
-	Topics []types.Hash
-}
-
 type Event_FillerUpload struct {
 	Phase    types.Phase
 	Acc      types.AccountID
 	Filesize types.U64
 	Topics   []types.Hash
-}
-
-type Event_ClearInvalidFile struct {
-	Phase     types.Phase
-	Acc       types.AccountID
-	File_hash [64]types.U8
-	Topics    []types.Hash
-}
-
-type Event_RecoverFile struct {
-	Phase     types.Phase
-	Acc       types.AccountID
-	File_hash [68]types.U8
-	Topics    []types.Hash
-}
-
-type Event_ReceiveSpace struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Topics []types.Hash
 }
 
 type Event_UploadDeclaration struct {
@@ -275,6 +214,18 @@ type Event_RecoveryCompleted struct {
 	Topics  []types.Hash
 }
 
+type Event_StorageCompleted struct {
+	Phase    types.Phase
+	FileHash pattern.FileHash
+	Topics   []types.Hash
+}
+
+type Event_Withdraw struct {
+	Phase  types.Phase
+	Acc    types.AccountID
+	Topics []types.Hash
+}
+
 // ------------------------StorageHandler--------------------------------
 type Event_BuySpace struct {
 	Phase            types.Phase
@@ -316,9 +267,21 @@ type Event_LeaseExpireIn24Hours struct {
 
 // ------------------------TEE Worker--------------------
 type Event_RegistrationTeeWorker struct {
-	Phase types.Phase
-	Acc   types.AccountID
-	//PeerId pattern.PeerId
+	Phase  types.Phase
+	Acc    types.AccountID
+	PeerId pattern.PeerId
+	Topics []types.Hash
+}
+
+type Event_UpdatePeerId struct {
+	Phase  types.Phase
+	Acc    types.AccountID
+	Topics []types.Hash
+}
+
+type Event_Exit struct {
+	Phase  types.Phase
+	Acc    types.AccountID
 	Topics []types.Hash
 }
 
@@ -338,6 +301,19 @@ type Event_OssUpdate struct {
 }
 
 type Event_OssDestroy struct {
+	Phase  types.Phase
+	Acc    types.AccountID
+	Topics []types.Hash
+}
+
+type Event_Authorize struct {
+	Phase    types.Phase
+	Acc      types.AccountID
+	Operator types.AccountID
+	Topics   []types.Hash
+}
+
+type Event_CancelAuthorize struct {
 	Phase  types.Phase
 	Acc    types.AccountID
 	Topics []types.Hash
@@ -379,34 +355,12 @@ type EventRecords struct {
 	Audit_SubmitProof       []Event_SubmitProof
 	Audit_GenerateChallenge []Event_GenerateChallenge
 
-	// SMINER
-	Sminer_Registered         []Event_Registered
-	Sminer_DrawFaucetMoney    []Event_DrawFaucetMoney
-	Sminer_FaucetTopUpMoney   []Event_FaucetTopUpMoney
-	Sminer_LessThan24Hours    []Event_LessThan24Hours
-	Sminer_AlreadyFrozen      []Event_AlreadyFrozen
-	Sminer_MinerExit          []Event_MinerExit
-	Sminer_MinerClaim         []Event_MinerClaim
-	Sminer_IncreaseCollateral []Event_IncreaseCollateral
-	Sminer_Deposit            []Event_Deposit
-	Sminer_UpdataBeneficiary  []Event_UpdataBeneficiary
-	Sminer_UpdataIp           []Event_UpdataIp
-	Sminer_Receive            []Event_Receive
-	Sminer_Withdraw           []Event_Withdraw
+	// Cacher
 
 	// FILEBANK
 	FileBank_DeleteFile            []Event_DeleteFile
 	FileBank_FillerDelete          []Event_FillerDelete
-	FileBank_FileUpload            []Event_FileUpload
-	FileBank_FileUpdate            []Event_FileUpdate
-	FileBank_FileChangeState       []Event_FileChangeState
-	FileBank_BuyFile               []Event_BuyFile
-	FileBank_Purchased             []Event_Purchased
-	FileBank_InsertFileSlice       []Event_InsertFileSlice
 	FileBank_FillerUpload          []Event_FillerUpload
-	FileBank_ClearInvalidFile      []Event_ClearInvalidFile
-	FileBank_RecoverFile           []Event_RecoverFile
-	FileBank_ReceiveSpace          []Event_ReceiveSpace
 	FileBank_UploadDeclaration     []Event_UploadDeclaration
 	FileBank_CreateBucket          []Event_CreateBucket
 	FileBank_DeleteBucket          []Event_DeleteBucket
@@ -416,6 +370,30 @@ type EventRecords struct {
 	FileBank_GenerateRestoralOrder []Event_GenerateRestoralOrder
 	FileBank_ClaimRestoralOrder    []Event_ClaimRestoralOrder
 	FileBank_RecoveryCompleted     []Event_RecoveryCompleted
+	FileBank_StorageCompleted      []Event_StorageCompleted
+	FileBank_Withdraw              []Event_Withdraw
+
+	// OSS
+	Oss_Authorize       []Event_Authorize
+	Oss_CancelAuthorize []Event_CancelAuthorize
+	Oss_OssRegister     []Event_OssRegister
+	Oss_OssUpdate       []Event_OssUpdate
+	Oss_OssDestroy      []Event_OssDestroy
+
+	// SMINER
+	Sminer_Registered       []Event_Registered
+	Sminer_DrawFaucetMoney  []Event_DrawFaucetMoney
+	Sminer_FaucetTopUpMoney []Event_FaucetTopUpMoney
+	Sminer_LessThan24Hours  []Event_LessThan24Hours
+	Sminer_AlreadyFrozen    []Event_AlreadyFrozen
+	//Sminer_MinerExit          []Event_MinerExit
+	//Sminer_MinerClaim         []Event_MinerClaim
+	Sminer_IncreaseCollateral []Event_IncreaseCollateral
+	Sminer_Deposit            []Event_Deposit
+	Sminer_UpdataBeneficiary  []Event_UpdataBeneficiary
+	Sminer_UpdataIp           []Event_UpdataIp
+	Sminer_Receive            []Event_Receive
+	Sminer_MinerExitPrep      []Event_MinerExitPrep
 
 	// StorageHandler
 	StorageHandler_BuySpace             []Event_BuySpace
@@ -426,11 +404,8 @@ type EventRecords struct {
 
 	// TeeWorker
 	TeeWorker_RegistrationTeeWorker []Event_RegistrationTeeWorker
-
-	// OSS
-	Oss_OssRegister []Event_OssRegister
-	Oss_OssUpdate   []Event_OssUpdate
-	Oss_OssDestroy  []Event_OssDestroy
+	TeeWorker_UpdatePeerId          []Event_UpdatePeerId
+	TeeWorker_Exit                  []Event_Exit
 
 	// System
 	types.EventRecords

@@ -387,7 +387,7 @@ func (c *ChainSDK) Exit(role string) (string, error) {
 						return txhash, nil
 					}
 				case pattern.Role_BUCKET, "SMINER", "bucket", "Bucket", "Sminer", "sminer":
-					if len(events.Sminer_MinerExit) > 0 {
+					if len(events.Sminer_MinerExitPrep) > 0 {
 						return txhash, nil
 					}
 				default:
