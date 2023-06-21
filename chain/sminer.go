@@ -566,7 +566,7 @@ func (c *ChainSDK) Withdraw() (string, error) {
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_Withdraw) > 0 {
+				if err != nil || len(events.FileBank_Withdraw) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(pattern.ERR_Failed)
