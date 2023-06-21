@@ -312,24 +312,28 @@ type Event_CancelAuthorize struct {
 	Topics []types.Hash
 }
 
-// ------------------------System------------------------
-type Event_UnsignedPhaseStarted struct {
-	Phase  types.Phase
-	Round  types.U32
-	Topics []types.Hash
+// ------------------------system------------------------
+type Event_ElectionFinalized struct {
+	Phase   types.Phase
+	Compute types.U8
+	Score   ElectionScore
+	Topics  []types.Hash
 }
 
-type Event_SignedPhaseStarted struct {
-	Phase  types.Phase
-	Round  types.U32
-	Topics []types.Hash
-}
-
-type Event_Balances_Withdraw struct {
-	Phase  types.Phase
-	Who    types.AccountID
-	Amount types.U128
-	Topics []types.Hash
+// *******************************************************
+type ElectionScore struct {
+	/// The minimal winner, in terms of total backing stake.
+	///
+	/// This parameter should be maximized.
+	Minimal_stake types.U128
+	/// The sum of the total backing of all winners.
+	///
+	/// This parameter should maximized
+	Sum_stake types.U128
+	/// The sum squared of the total backing of all winners, aka. the variance.
+	///
+	/// Ths parameter should be minimized.
+	Sum_stake_squared types.U128
 }
 
 //*******************************************************
@@ -391,6 +395,9 @@ type EventRecords struct {
 	TeeWorker_UpdatePeerId          []Event_UpdatePeerId
 	TeeWorker_Exit                  []Event_Exit
 
-	// System
+	// system
+	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
+
+	// system-gsrpc
 	types.EventRecords
 }
