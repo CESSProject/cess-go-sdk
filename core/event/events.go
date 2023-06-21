@@ -17,13 +17,6 @@ import (
 // ******************************************************
 
 // ------------------------Audit-------------------
-type Event_ChallengeProof struct {
-	Phase  types.Phase
-	Miner  types.AccountID
-	Fileid types.Bytes
-	Topics []types.Hash
-}
-
 type Event_VerifyProof struct {
 	Phase     types.Phase
 	TeeWorker types.AccountID
@@ -108,8 +101,8 @@ type Event_UpdataBeneficiary struct {
 type Event_UpdataIp struct {
 	Phase  types.Phase
 	Acc    types.AccountID
-	Old    types.Bytes
-	New    types.Bytes
+	Old    pattern.PeerId
+	New    pattern.PeerId
 	Topics []types.Hash
 }
 
@@ -158,19 +151,19 @@ type Event_UploadDeclaration struct {
 }
 
 type Event_CreateBucket struct {
-	Phase       types.Phase
-	Acc         types.AccountID
-	Owner       types.AccountID
-	Bucket_name types.Bytes
-	Topics      []types.Hash
+	Phase      types.Phase
+	Acc        types.AccountID
+	Owner      types.AccountID
+	BucketName types.Bytes
+	Topics     []types.Hash
 }
 
 type Event_DeleteBucket struct {
-	Phase       types.Phase
-	Acc         types.AccountID
-	Owner       types.AccountID
-	Bucket_name types.Bytes
-	Topics      []types.Hash
+	Phase      types.Phase
+	Acc        types.AccountID
+	Owner      types.AccountID
+	BucketName types.Bytes
+	Topics     []types.Hash
 }
 
 type Event_TransferReport struct {
@@ -289,15 +282,15 @@ type Event_Exit struct {
 type Event_OssRegister struct {
 	Phase    types.Phase
 	Acc      types.AccountID
-	Endpoint types.Bytes
+	Endpoint pattern.PeerId
 	Topics   []types.Hash
 }
 
 type Event_OssUpdate struct {
-	Phase        types.Phase
-	Acc          types.AccountID
-	New_endpoint types.Bytes
-	Topics       []types.Hash
+	Phase       types.Phase
+	Acc         types.AccountID
+	NewEndpoint pattern.PeerId
+	Topics      []types.Hash
 }
 
 type Event_OssDestroy struct {
@@ -330,13 +323,6 @@ type Event_SignedPhaseStarted struct {
 	Phase  types.Phase
 	Round  types.U32
 	Topics []types.Hash
-}
-
-type Event_SolutionStored struct {
-	Phase            types.Phase
-	Election_compute types.ElectionCompute
-	Prev_ejected     types.Bool
-	Topics           []types.Hash
 }
 
 type Event_Balances_Withdraw struct {
@@ -381,13 +367,11 @@ type EventRecords struct {
 	Oss_OssDestroy      []Event_OssDestroy
 
 	// SMINER
-	Sminer_Registered       []Event_Registered
-	Sminer_DrawFaucetMoney  []Event_DrawFaucetMoney
-	Sminer_FaucetTopUpMoney []Event_FaucetTopUpMoney
-	Sminer_LessThan24Hours  []Event_LessThan24Hours
-	Sminer_AlreadyFrozen    []Event_AlreadyFrozen
-	//Sminer_MinerExit          []Event_MinerExit
-	//Sminer_MinerClaim         []Event_MinerClaim
+	Sminer_Registered         []Event_Registered
+	Sminer_DrawFaucetMoney    []Event_DrawFaucetMoney
+	Sminer_FaucetTopUpMoney   []Event_FaucetTopUpMoney
+	Sminer_LessThan24Hours    []Event_LessThan24Hours
+	Sminer_AlreadyFrozen      []Event_AlreadyFrozen
 	Sminer_IncreaseCollateral []Event_IncreaseCollateral
 	Sminer_Deposit            []Event_Deposit
 	Sminer_UpdataBeneficiary  []Event_UpdataBeneficiary
