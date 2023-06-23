@@ -127,7 +127,7 @@ func (c *ChainSDK) Register(role string, puk []byte, earnings string, pledge uin
 	}
 
 	if !ok {
-		return txhash, earnings, fmt.Errorf("chain rpc.state.GetStorageLatest(): %v", pattern.ERR_RPC_EMPTY_VALUE)
+		return txhash, earnings, fmt.Errorf("chain rpc.state.GetStorageLatest(%v): %v", key, pattern.ERR_RPC_EMPTY_VALUE)
 	}
 
 	o := types.SignatureOptions{
