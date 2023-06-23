@@ -626,7 +626,7 @@ func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.Segment
 		return txhash, errors.New("invalid filesize")
 	}
 	if !c.GetChainState() {
-		return txhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetChainState(): ", pattern.ERR_RPC_CONNECTION)
+		return txhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetChainState(): %v", pattern.ERR_RPC_CONNECTION)
 	}
 	for i := 0; i < len(hash); i++ {
 		hash[i] = types.U8(filehash[i])
