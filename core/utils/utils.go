@@ -29,7 +29,15 @@ func CompareSlice(s1, s2 []byte) bool {
 	return true
 }
 
-// TODO: write the function docs
+// NumsToByteStr utility function takes an array of unsigned integers and output the corresponding byte string representing it.
+// For example: `[18, 15]` to `120F`.
+//
+// For `opts` in second parameter it is a map expecting:
+//   - `space` bool: whether to add a space between each byte, default to `false`
+//   - `prefix` bool: whether to add `0x` as the prefix, default to `false`
+//   - `uppercase` bool: whether to display hexadecimal in upper case, default to `true`
+//
+// If there is an integer larger than 255 in the array, an error is returned.
 func NumsToByteStr[T constraints.Unsigned](nums []T, opts map[string]bool) (string, error) {
 	// default value for opts
 	var _opts = map[string]bool{}
