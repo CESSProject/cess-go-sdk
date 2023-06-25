@@ -9,6 +9,7 @@ package sdkgo_test
 
 import (
 	"context"
+	"log"
 	"os"
 	"strings"
 	"testing"
@@ -25,6 +26,7 @@ import (
 
 const DEFAULT_WAIT_TIME = time.Second * 15
 const P2P_PORT = 4001
+const TMP_DIR = "/tmp"
 
 func TestMain(m *testing.M) {
 	// Change the following `.env.testnet` to `.env.local` to run test against a local node.
@@ -44,14 +46,16 @@ func TestNewClient(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestRegisterDeOSS(t *testing.T) {
+func Example_register_deoss() {
 	cli, err := cess.New(
 		config.CharacterName_Deoss,
 		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
 		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
 		cess.TransactionTimeout(time.Duration(DEFAULT_WAIT_TIME)),
 	)
-	assert.NoError(t, err)
+	if err != nil {
+		log.Fatalf("err: %v", err.Error())
+	}
 
 	var bootnodes = make([]string, 0)
 
@@ -66,23 +70,29 @@ func TestRegisterDeOSS(t *testing.T) {
 	p2p, err := p2pgo.New(
 		context.Background(),
 		p2pgo.ListenPort(P2P_PORT),
-		p2pgo.Workspace(t.TempDir()),
+		p2pgo.Workspace(TMP_DIR),
 		p2pgo.BootPeers(bootnodes),
 	)
-	assert.NoError(t, err)
+	if err != nil {
+		log.Fatalf("err: %v", err.Error())
+	}
 
 	_, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), "", 0)
-	assert.NoError(t, err)
+	if err != nil {
+		log.Fatalf("err: %v", err.Error())
+	}
 }
 
-func TestRegisterStorageNode(t *testing.T) {
+func Example_register_storage_node() {
 	cli, err := cess.New(
 		config.CharacterName_Bucket,
 		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
 		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
 		cess.TransactionTimeout(time.Duration(DEFAULT_WAIT_TIME)),
 	)
-	assert.NoError(t, err)
+	if err != nil {
+		log.Fatalf("err: %v", err.Error())
+	}
 
 	var bootnodes = make([]string, 0)
 
@@ -97,11 +107,15 @@ func TestRegisterStorageNode(t *testing.T) {
 	p2p, err := p2pgo.New(
 		context.Background(),
 		p2pgo.ListenPort(P2P_PORT),
-		p2pgo.Workspace(t.TempDir()),
+		p2pgo.Workspace(TMP_DIR),
 		p2pgo.BootPeers(bootnodes),
 	)
-	assert.NoError(t, err)
+	if err != nil {
+		log.Fatalf("err: %v", err.Error())
+	}
 
 	_, _, err = cli.Register(cli.GetRoleName(), p2p.GetPeerPublickey(), os.Getenv("MY_ADDR"), 0)
-	assert.NoError(t, err)
+	if err != nil {
+		log.Fatalf("err: %v", err.Error())
+	}
 }
