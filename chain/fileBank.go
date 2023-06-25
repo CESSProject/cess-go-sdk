@@ -647,7 +647,12 @@ func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.Segment
 		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, fmt.Errorf("chain rpc.state.GetStorageLatest(%v): %v", key, pattern.ERR_RPC_EMPTY_VALUE)
+		keyStr, _ := utils.NumsToByteStr(key, map[string]bool{})
+		return txhash, fmt.Errorf(
+			"chain rpc.state.GetStorageLatest[%v]: %v",
+			keyStr,
+			pattern.ERR_RPC_EMPTY_VALUE,
+		)
 	}
 
 	o := types.SignatureOptions{
