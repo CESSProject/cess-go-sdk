@@ -8,9 +8,11 @@
 package chain
 
 import (
+	"context"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -18,6 +20,7 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/sdk"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
+	p2pgo "github.com/CESSProject/p2p-go"
 	"github.com/CESSProject/p2p-go/core"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
@@ -40,11 +43,12 @@ type ChainSDK struct {
 	tokenSymbol     string
 	signatureAcc    string
 	name            string
+	enabledP2P      bool
 }
 
 var _ sdk.SDK = (*ChainSDK)(nil)
 
-func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration) (*ChainSDK, error) {
+func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration, workspace string, p2pPort int, bootnodes []string) (*ChainSDK, error) {
 	var (
 		err      error
 		chainSDK = &ChainSDK{}
@@ -52,6 +56,8 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration) (
 
 	defer log.SetOutput(os.Stdout)
 	log.SetOutput(io.Discard)
+
+	ctx := context.Background()
 
 	for i := 0; i < len(rpcs); i++ {
 		chainSDK.api, err = gsrpc.NewSubstrateAPI(rpcs[i])
@@ -101,6 +107,18 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration) (
 	chainSDK.rpcAddr = rpcs
 	chainSDK.SetChainState(true)
 	chainSDK.name = name
+
+	if p2pPort > 0 && len(bootnodes) > 0 {
+		chainSDK.P2P, err = p2pgo.New(
+			ctx,
+			p2pgo.ListenPort(p2pPort),
+			p2pgo.Workspace(filepath.Join(workspace, chainSDK.GetSignatureAcc(), chainSDK.GetRoleName())),
+			p2pgo.BootPeers(bootnodes),
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return chainSDK, nil
 }
@@ -165,6 +183,10 @@ func (c *ChainSDK) Sign(msg []byte) ([]byte, error) {
 
 func (c *ChainSDK) Verify(msg []byte, sig []byte) (bool, error) {
 	return signature.Verify(msg, sig, c.keyring.URI)
+}
+
+func (c *ChainSDK) EnabledP2P() bool {
+	return c.enabledP2P
 }
 
 func reconnectChainSDK(rpcs []string) (

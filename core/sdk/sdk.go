@@ -232,4 +232,7 @@ type SDK interface {
 
 	//
 	RetrieveFile(roothash, savepath string) error
+
+	//
+	EnabledP2P() bool
 }
