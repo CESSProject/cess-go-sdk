@@ -157,6 +157,10 @@ func (c *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error
 }
 
 func (c *ChainSDK) StoreFile(roothash string, segmentInfo []pattern.SegmentDataInfo, user pattern.UserInfo) error {
+	if !c.enabledP2P {
+		return errors.New("P2P network not enabled")
+	}
+
 	var err error
 	var storageOrder pattern.StorageOrder
 
@@ -189,6 +193,10 @@ func (c *ChainSDK) StoreFile(roothash string, segmentInfo []pattern.SegmentDataI
 }
 
 func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
+	if !c.enabledP2P {
+		return errors.New("P2P network not enabled")
+	}
+
 	var (
 		segmentspath = make([]string, 0)
 	)
@@ -283,6 +291,10 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 }
 
 func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
+	if !c.enabledP2P {
+		return errors.New("P2P network not enabled")
+	}
+
 	var err error
 
 	// query all assigned miner multiaddr

@@ -118,6 +118,7 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration, w
 		if err != nil {
 			return nil, err
 		}
+		chainSDK.enabledP2P = true
 	}
 
 	return chainSDK, nil
