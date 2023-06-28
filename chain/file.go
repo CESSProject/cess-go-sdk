@@ -20,6 +20,7 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
 )
 
@@ -151,6 +152,166 @@ func ExtractSegmenthash(segment []pattern.SegmentDataInfo) []string {
 	return segmenthash
 }
 
-func (n *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error {
+func (c *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error {
 	return erasure.ReedSolomonRestore(outpath, shardspath)
+}
+
+func (c *ChainSDK) StoreFile(roothash string, segmentInfo []pattern.SegmentDataInfo, user pattern.UserInfo) error {
+	var err error
+	var storageOrder pattern.StorageOrder
+
+	_, err = c.QueryFileMetadata(roothash)
+	if err == nil {
+		return nil
+	}
+
+	pubkey, err := utils.ParsingPublickey(user.UserAccount)
+	if err != nil {
+		return errors.Wrapf(err, "[ParsingPublickey]")
+	}
+
+	storageOrder, err = c.QueryStorageOrder(roothash)
+	if err != nil {
+		if err.Error() == pattern.ERR_Empty {
+			_, err = c.GenerateStorageOrder(roothash, segmentInfo, pubkey, user.FileName, user.BucketName, user.FileSize)
+			if err != nil {
+				return errors.Wrapf(err, "[GenerateStorageOrder]")
+			}
+		}
+	}
+
+	// store data to storage node
+	err = c.StorageData(roothash, segmentInfo, storageOrder.AssignedMiner)
+	if err != nil {
+		return errors.Wrapf(err, "[StorageData]")
+	}
+	return nil
+}
+
+func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
+	var (
+		segmentspath = make([]string, 0)
+	)
+
+	var userfile = savepath
+	var f *os.File
+	fstat, err := os.Stat(savepath)
+	if err != nil {
+		f, err = os.Create(savepath)
+		if err != nil {
+			return errors.Wrapf(err, "[os.Create]")
+		}
+	} else {
+		if fstat.IsDir() {
+			userfile = filepath.Join(savepath, roothash)
+		}
+		f, err = os.Create(userfile)
+		if err != nil {
+			return errors.Wrapf(err, "[os.Create]")
+		}
+	}
+	defer f.Close()
+
+	fmeta, err := c.QueryFileMetadata(roothash)
+	if err != nil {
+		return errors.Wrapf(err, "[QueryFileMetadata]")
+	}
+
+	var baseDir = filepath.Dir(userfile)
+
+	defer func(basedir string) {
+		for _, segment := range fmeta.SegmentList {
+			os.Remove(filepath.Join(basedir, string(segment.Hash[:])))
+			for _, fragment := range segment.FragmentList {
+				os.Remove(filepath.Join(basedir, string(fragment.Hash[:])))
+			}
+		}
+	}(baseDir)
+
+	for _, segment := range fmeta.SegmentList {
+		fragmentpaths := make([]string, 0)
+		for _, fragment := range segment.FragmentList {
+			miner, err := c.QueryStorageMiner(fragment.Miner[:])
+			if err != nil {
+				return errors.Wrapf(err, "[QueryStorageMiner]")
+			}
+			peerid, _ := peer.Decode(string(miner.PeerId[:]))
+			fragmentpath := filepath.Join(baseDir, string(fragment.Hash[:]))
+			err = c.ReadFileAction(peerid, roothash, string(fragment.Hash[:]), fragmentpath, pattern.FragmentSize)
+			if err != nil {
+				continue
+			}
+
+			fragmentpaths = append(fragmentpaths, fragmentpath)
+			segmentpath := filepath.Join(baseDir, string(segment.Hash[:]))
+			if len(fragmentpaths) >= pattern.DataShards {
+				err = c.RedundancyRecovery(segmentpath, fragmentpaths)
+				if err != nil {
+					return errors.Wrapf(err, "[RedundancyRecovery]")
+				}
+				segmentspath = append(segmentspath, segmentpath)
+				break
+			}
+		}
+	}
+
+	if len(segmentspath) != len(fmeta.SegmentList) {
+		return errors.New("retrieve failed")
+	}
+	var writecount = 0
+	for i := 0; i < len(fmeta.SegmentList); i++ {
+		for j := 0; j < len(segmentspath); j++ {
+			if string(fmeta.SegmentList[i].Hash[:]) == filepath.Base(segmentspath[j]) {
+				buf, err := os.ReadFile(segmentspath[j])
+				if err != nil {
+					return errors.Wrapf(err, "[ReadFile]")
+				}
+				if (writecount + 1) >= len(fmeta.SegmentList) {
+					f.Write(buf[:(fmeta.FileSize.Uint64() - uint64(writecount*pattern.SegmentSize))])
+				} else {
+					f.Write(buf)
+				}
+				writecount++
+				break
+			}
+		}
+	}
+	if writecount != len(fmeta.SegmentList) {
+		return errors.New("retrieve failed")
+	}
+	return nil
+}
+
+func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
+	var err error
+
+	// query all assigned miner multiaddr
+	peerids, err := c.QueryAssignedMinerPeerId(minerTaskList)
+	if err != nil {
+		return errors.Wrapf(err, "[QueryAssignedMinerPeerId]")
+	}
+
+	basedir := filepath.Dir(segment[0].FragmentHash[0])
+	for i := 0; i < len(peerids); i++ {
+		for j := 0; j < len(minerTaskList[i].Hash); j++ {
+			err = c.WriteFileAction(peerids[j], roothash, filepath.Join(basedir, string(minerTaskList[i].Hash[j][:])))
+			if err != nil {
+				return errors.Wrapf(err, "[WriteFileAction]")
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c *ChainSDK) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
+	var peerids = make([]peer.ID, len(minerTaskList))
+	for i := 0; i < len(minerTaskList); i++ {
+		minerInfo, err := c.QueryStorageMiner(minerTaskList[i].Account[:])
+		if err != nil {
+			return peerids, err
+		}
+		peerids[i], _ = peer.Decode(string(minerInfo.PeerId[:]))
+	}
+	return peerids, nil
 }

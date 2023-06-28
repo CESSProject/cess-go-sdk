@@ -410,3 +410,10 @@ type SegmentDataInfo struct {
 	SegmentHash  string
 	FragmentHash []string
 }
+
+type UserInfo struct {
+	UserAccount string
+	FileName    string
+	BucketName  string
+	FileSize    uint64
+}

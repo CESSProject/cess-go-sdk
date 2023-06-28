@@ -226,4 +226,10 @@ type SDK interface {
 
 	// Verify the signature of the msg with the public key of the signing account.
 	Verify(msg []byte, sig []byte) (bool, error)
+
+	//
+	StoreFile(roothash string, segmentInfo []pattern.SegmentDataInfo, user pattern.UserInfo) error
+
+	//
+	RetrieveFile(roothash, savepath string) error
 }

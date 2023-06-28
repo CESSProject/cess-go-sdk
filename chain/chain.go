@@ -18,6 +18,7 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/sdk"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/CESSProject/p2p-go/core"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -25,6 +26,7 @@ import (
 )
 
 type ChainSDK struct {
+	core.P2P
 	lock            *sync.Mutex
 	api             *gsrpc.SubstrateAPI
 	chainState      *atomic.Bool
