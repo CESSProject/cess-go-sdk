@@ -17,10 +17,13 @@ import (
 
 // Config describes a set of settings for a client
 type Config struct {
-	Rpc      []string
-	Mnemonic string
-	Name     string
-	Timeout  time.Duration
+	Rpc       []string
+	Bootnodes []string
+	Mnemonic  string
+	Name      string
+	Workspace string
+	P2pPort   int
+	Timeout   time.Duration
 }
 
 // Option is a client config option that can be given to the client constructor
@@ -42,7 +45,7 @@ func (cfg *Config) NewSDK(roleName string) (sdk.SDK, error) {
 		roleName != CharacterName_Client {
 		return nil, fmt.Errorf("invalid role name")
 	}
-	return chain.NewChainSDK(roleName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
+	return chain.NewChainSDK(roleName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout, cfg.Workspace, cfg.P2pPort, cfg.Bootnodes)
 }
 
 // Apply applies the given options to the config, returning the first error
