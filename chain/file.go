@@ -70,8 +70,7 @@ func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, strin
 			if i+1 != segmentCount {
 				return segment, "", fmt.Errorf("Error reading %s", path)
 			}
-			remainbuf := make([]byte, pattern.SegmentSize-num)
-			copy(buf[num:], remainbuf)
+			copy(buf[num:], []byte(utils.RandStr(pattern.SegmentSize-num)))
 		}
 
 		hash, err := utils.CalcSHA256(buf)
