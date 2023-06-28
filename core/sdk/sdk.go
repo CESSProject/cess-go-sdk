@@ -11,11 +11,13 @@ import (
 	"math/big"
 
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
+	"github.com/CESSProject/p2p-go/core"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 type SDK interface {
+	core.P2P
 	// QueryBlockHeight queries the block height corresponding to the block hash,
 	// If the blockhash is empty, query the latest block height.
 	QueryBlockHeight(blockhash string) (uint32, error)
@@ -226,4 +228,13 @@ type SDK interface {
 
 	// Verify the signature of the msg with the public key of the signing account.
 	Verify(msg []byte, sig []byte) (bool, error)
+
+	//
+	StoreFile(roothash string, segmentInfo []pattern.SegmentDataInfo, user pattern.UserInfo) error
+
+	//
+	RetrieveFile(roothash, savepath string) error
+
+	//
+	EnabledP2P() bool
 }
