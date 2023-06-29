@@ -230,7 +230,7 @@ type SDK interface {
 	Verify(msg []byte, sig []byte) (bool, error)
 
 	//
-	StoreFile(roothash string, segmentInfo []pattern.SegmentDataInfo, user pattern.UserInfo) error
+	StoreFile(owner []byte, file string, bucket string) (string, error)
 
 	//
 	RetrieveFile(roothash, savepath string) error
