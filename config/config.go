@@ -29,7 +29,7 @@ type Config struct {
 // Option is a client config option that can be given to the client constructor
 type Option func(cfg *Config) error
 
-// SDK available character name
+// default service name
 const (
 	CharacterName_Client = "client"
 	CharacterName_Bucket = "bucket"
@@ -39,13 +39,11 @@ const (
 // NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
-func (cfg *Config) NewSDK(roleName string) (sdk.SDK, error) {
-	if roleName != CharacterName_Bucket &&
-		roleName != CharacterName_Deoss &&
-		roleName != CharacterName_Client {
-		return nil, fmt.Errorf("invalid role name")
+func (cfg *Config) NewSDK(serviceName string) (sdk.SDK, error) {
+	if serviceName == "" {
+		return nil, fmt.Errorf("empty service name")
 	}
-	return chain.NewChainSDK(roleName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout, cfg.Workspace, cfg.P2pPort, cfg.Bootnodes)
+	return chain.NewChainSDK(serviceName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout, cfg.Workspace, cfg.P2pPort, cfg.Bootnodes)
 }
 
 // Apply applies the given options to the config, returning the first error
