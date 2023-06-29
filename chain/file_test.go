@@ -17,7 +17,7 @@ import (
 
 func TestProcessingData(t *testing.T) {
 	var c = &ChainSDK{}
-	var processFile = "/go/pkg/cess-go-sdk/chain/file.go"
+	var processFile = "./file_test.go"
 	segmentData, roothash, err := c.ProcessingData(processFile)
 	assert.NoError(t, err)
 	fmt.Println(roothash)
