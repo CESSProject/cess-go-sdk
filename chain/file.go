@@ -47,7 +47,7 @@ func (c *ChainSDK) ProcessingData(file string) ([]pattern.SegmentDataInfo, strin
 
 	// calculate merkle root hash
 	var hash string
-	if len(segmentDataInfo) == 1 {
+	if len(segmentPath) == 1 {
 		hash, err = hashtree.BuildSimpleMerkelRootHash(filepath.Base(segmentPath[0]))
 		if err != nil {
 			return nil, "", err
