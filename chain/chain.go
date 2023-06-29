@@ -108,7 +108,7 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration, w
 	chainSDK.SetChainState(true)
 	chainSDK.name = name
 
-	if p2pPort > 0 && len(bootnodes) > 0 {
+	if workspace != "" && p2pPort > 0 {
 		chainSDK.P2P, err = p2pgo.New(
 			ctx,
 			p2pgo.ListenPort(p2pPort),

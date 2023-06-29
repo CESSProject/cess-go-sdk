@@ -27,9 +27,14 @@ type Option = config.Option
 // - If no transaction timeout is provided, the sdk client uses the default
 // timeout: time.Duration(time.Second * 6)
 //
-// - The characterName available in the sdk are: client, bucket, deoss
-func New(characterName string, opts ...Option) (sdk.SDK, error) {
-	return NewWithoutDefaults(characterName, append(opts, FallbackDefaults)...)
+// - The serviceName is used to specify the name of your service
+// Warning:
+//
+//	cess-bucket (cess storage service) must be set to bucket
+//	DeOSS (cess decentralized object storage service) must be set to deoss
+//	cess-cli (cess client) must be set to client
+func New(serviceName string, opts ...Option) (sdk.SDK, error) {
+	return NewWithoutDefaults(serviceName, append(opts, FallbackDefaults)...)
 }
 
 // NewWithoutDefaults constructs a new client with the given options but
@@ -38,10 +43,10 @@ func New(characterName string, opts ...Option) (sdk.SDK, error) {
 // Warning: This function should not be considered a stable interface. We may
 // choose to add required services at any time and, by using this function, you
 // opt-out of any defaults we may provide.
-func NewWithoutDefaults(name string, opts ...Option) (sdk.SDK, error) {
+func NewWithoutDefaults(serviceName string, opts ...Option) (sdk.SDK, error) {
 	var cfg Config
 	if err := cfg.Apply(opts...); err != nil {
 		return nil, err
 	}
-	return cfg.NewSDK(name)
+	return cfg.NewSDK(serviceName)
 }

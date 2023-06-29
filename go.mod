@@ -7,6 +7,7 @@ require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/centrifuge/go-substrate-rpc-client/v4 v4.0.13
+	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/klauspost/reedsolomon v1.11.7
 	github.com/libp2p/go-libp2p v0.26.3
@@ -14,6 +15,7 @@ require (
 	github.com/multiformats/go-multiaddr v0.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.36.0
+	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/crypto v0.7.0
 	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
@@ -21,6 +23,7 @@ require (
 
 require (
 	github.com/ChainSafe/go-schnorrkel v1.0.0 // indirect
+	github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -40,6 +43,7 @@ require (
 	github.com/francoispqt/gojay v1.2.13 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-ole/go-ole v1.2.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
@@ -48,7 +52,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
 	github.com/google/pprof v0.0.0-20221203041831-ce31453925ec // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect

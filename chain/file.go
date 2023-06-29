@@ -8,12 +8,10 @@
 package chain
 
 import (
-	"encoding/hex"
-	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
 	"github.com/CESSProject/cess-go-sdk/core/hashtree"
@@ -25,96 +23,96 @@ import (
 )
 
 // ProcessingData
-func (c *ChainSDK) ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error) {
-	var (
-		err          error
-		f            *os.File
-		fstat        fs.FileInfo
-		segmentCount int64
-		num          int
-	)
-
-	fstat, err = os.Stat(path)
+func (c *ChainSDK) ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error) {
+	segmentPath, err := cutfile(file)
 	if err != nil {
-		return nil, "", err
+		if segmentPath != nil {
+			for _, v := range segmentPath {
+				os.Remove(v)
+			}
+		}
+		return nil, "", errors.Wrapf(err, "[cutfile]")
+	}
+
+	var segmentDataInfo = make([]pattern.SegmentDataInfo, len(segmentPath))
+
+	for i := 0; i < len(segmentPath); i++ {
+		segmentDataInfo[i].SegmentHash = segmentPath[i]
+		segmentDataInfo[i].FragmentHash, err = erasure.ReedSolomon(segmentPath[i])
+		if err != nil {
+			return segmentDataInfo, "", errors.Wrapf(err, "[ReedSolomon]")
+		}
+		os.Remove(segmentPath[i])
+	}
+
+	// calculate merkle root hash
+	var hash string
+	if len(segmentPath) == 1 {
+		hash, err = hashtree.BuildSimpleMerkelRootHash(filepath.Base(segmentPath[0]))
+		if err != nil {
+			return nil, "", err
+		}
+	} else {
+		hash, err = hashtree.BuildMerkelRootHash(ExtractSegmenthash(segmentPath))
+		if err != nil {
+			return nil, "", err
+		}
+	}
+
+	return segmentDataInfo, hash, nil
+}
+
+func cutfile(file string) ([]string, error) {
+	fstat, err := os.Stat(file)
+	if err != nil {
+		return nil, err
 	}
 	if fstat.IsDir() {
-		return nil, "", errors.New("not a file")
+		return nil, errors.New("not a file")
 	}
-
-	baseDir := filepath.Dir(path)
-	segmentCount = fstat.Size() / pattern.SegmentSize
+	baseDir := filepath.Dir(file)
+	segmentCount := fstat.Size() / pattern.SegmentSize
 	if fstat.Size()%int64(pattern.SegmentSize) != 0 {
 		segmentCount++
 	}
 
-	segment := make([]pattern.SegmentDataInfo, segmentCount)
-
+	segment := make([]string, segmentCount)
 	buf := make([]byte, pattern.SegmentSize)
-
-	f, err = os.Open(path)
+	f, err := os.Open(file)
 	if err != nil {
-		return segment, "", err
+		return segment, err
 	}
 	defer f.Close()
 
+	var num int
 	for i := int64(0); i < segmentCount; i++ {
 		f.Seek(pattern.SegmentSize*i, 0)
 		num, err = f.Read(buf)
 		if err != nil && err != io.EOF {
-			return segment, "", err
+			return segment, err
 		}
 		if num == 0 {
-			break
+			return segment, errors.New("read file is empty")
 		}
 		if num < pattern.SegmentSize {
 			if i+1 != segmentCount {
-				return segment, "", fmt.Errorf("Error reading %s", path)
+				return segment, errors.New("read file err")
 			}
 			copy(buf[num:], []byte(utils.RandStr(pattern.SegmentSize-num)))
 		}
 
 		hash, err := utils.CalcSHA256(buf)
 		if err != nil {
-			return segment, "", err
+			return segment, err
 		}
 
-		segmentPath := filepath.Join(baseDir, hash)
-		_, err = os.Stat(segmentPath)
+		err = utils.WriteBufToFile(buf, filepath.Join(baseDir, hash))
 		if err != nil {
-			fsegment, err := os.Create(segmentPath)
-			if err != nil {
-				return segment, "", err
-			}
-			_, err = fsegment.Write(buf)
-			if err != nil {
-				fsegment.Close()
-				return segment, "", err
-			}
-			err = fsegment.Sync()
-			if err != nil {
-				fsegment.Close()
-				return segment, "", err
-			}
-			fsegment.Close()
+			return segment, errors.Wrapf(err, "[WriteBufToFile]")
 		}
-
-		segment[i].SegmentHash = segmentPath
-		segment[i].FragmentHash, err = erasure.ReedSolomon(segmentPath)
-		if err != nil {
-			return segment, "", err
-		}
+		segment[i] = filepath.Join(baseDir, hash)
 	}
-
-	segmenthash := ExtractSegmenthash(segment)
-
-	// Calculate merkle hash tree
-	hTree, err := hashtree.NewHashTree(segmenthash)
-	if err != nil {
-		return segment, "", err
-	}
-
-	return segment, hex.EncodeToString(hTree.MerkleRoot()), err
+	return segment, nil
 }
 
 func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error) {
@@ -144,10 +142,10 @@ func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.Segme
 	return c.UploadDeclaration(roothash, segmentList, user, filesize)
 }
 
-func ExtractSegmenthash(segment []pattern.SegmentDataInfo) []string {
+func ExtractSegmenthash(segment []string) []string {
 	var segmenthash = make([]string, len(segment))
 	for i := 0; i < len(segment); i++ {
-		segmenthash[i] = segment[i].SegmentHash
+		segmenthash[i] = filepath.Base(segment[i])
 	}
 	return segmenthash
 }
@@ -156,40 +154,83 @@ func (c *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error
 	return erasure.ReedSolomonRestore(outpath, shardspath)
 }
 
-func (c *ChainSDK) StoreFile(roothash string, segmentInfo []pattern.SegmentDataInfo, user pattern.UserInfo) error {
+func (c *ChainSDK) StoreFile(owner []byte, file string, bucket string) (string, error) {
 	if !c.enabledP2P {
-		return errors.New("P2P network not enabled")
+		return "", errors.New("P2P network not enabled")
 	}
 
-	var err error
+	fstat, err := os.Stat(file)
+	if err != nil {
+		return "", err
+	}
+
+	if fstat.IsDir() {
+		return "", errors.New("not a file")
+	}
+
+	// verify mem availability
+	mem, err := utils.GetSysMemAvailable()
+	if err == nil {
+		if fstat.Size() > int64(mem*80/100) {
+			return "", errors.New("unsupported file size")
+		}
+	}
+
+	if !utils.CompareSlice(owner, c.GetSignatureAccPulickey()) {
+		return "", errors.New("account error")
+	}
+
+	if !utils.CheckBucketName(bucket) {
+		return "", errors.New("invalid bucket name")
+	}
+
+	userInfo, err := c.QueryUserSpaceSt(owner)
+	if err != nil {
+		if err.Error() == pattern.ERR_Empty {
+			return "", errors.New("no space in the account")
+		}
+		return "", errors.Wrapf(err, "[QueryUserSpaceSt]")
+	}
+
+	blockheight, err := c.QueryBlockHeight("")
+	if err != nil {
+		return "", errors.Wrapf(err, "[QueryBlockHeight]")
+	}
+
+	if userInfo.Deadline < (blockheight + 30) {
+		return "", errors.Wrapf(err, "account space expires soon")
+	}
+
+	segmentDataInfo, roothash, err := c.ProcessingData(file)
+	if err != nil {
+		return "", errors.Wrapf(err, "[ProcessingData]")
+	}
+
 	var storageOrder pattern.StorageOrder
 
 	_, err = c.QueryFileMetadata(roothash)
 	if err == nil {
-		return nil
-	}
-
-	pubkey, err := utils.ParsingPublickey(user.UserAccount)
-	if err != nil {
-		return errors.Wrapf(err, "[ParsingPublickey]")
+		return roothash, nil
 	}
 
 	storageOrder, err = c.QueryStorageOrder(roothash)
 	if err != nil {
-		if err.Error() == pattern.ERR_Empty {
-			_, err = c.GenerateStorageOrder(roothash, segmentInfo, pubkey, user.FileName, user.BucketName, user.FileSize)
-			if err != nil {
-				return errors.Wrapf(err, "[GenerateStorageOrder]")
-			}
+		if err.Error() != pattern.ERR_Empty {
+			return roothash, errors.Wrapf(err, "[QueryStorageOrder]")
 		}
+		_, err = c.GenerateStorageOrder(roothash, segmentDataInfo, owner, fstat.Name(), bucket, uint64(fstat.Size()))
+		if err != nil {
+			return roothash, errors.Wrapf(err, "[GenerateStorageOrder]")
+		}
+		time.Sleep(pattern.BlockInterval)
 	}
 
 	// store data to storage node
-	err = c.StorageData(roothash, segmentInfo, storageOrder.AssignedMiner)
+	err = c.StorageData(roothash, segmentDataInfo, storageOrder.AssignedMiner)
 	if err != nil {
-		return errors.Wrapf(err, "[StorageData]")
+		return roothash, errors.Wrapf(err, "[StorageData]")
 	}
-	return nil
+	return roothash, nil
 }
 
 func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
@@ -197,21 +238,25 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 		return errors.New("P2P network not enabled")
 	}
 
-	var (
-		segmentspath = make([]string, 0)
-	)
+	fmeta, err := c.QueryFileMetadata(roothash)
+	if err != nil {
+		return errors.Wrapf(err, "[QueryFileMetadata]")
+	}
 
 	var userfile = savepath
 	var f *os.File
-	fstat, err := os.Stat(savepath)
+	fstat, err := os.Stat(userfile)
 	if err != nil {
-		f, err = os.Create(savepath)
+		f, err = os.Create(userfile)
 		if err != nil {
 			return errors.Wrapf(err, "[os.Create]")
 		}
 	} else {
 		if fstat.IsDir() {
 			userfile = filepath.Join(savepath, roothash)
+		}
+		if fstat.Size() == fmeta.FileSize.Int64() {
+			return nil
 		}
 		f, err = os.Create(userfile)
 		if err != nil {
@@ -220,13 +265,7 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 	}
 	defer f.Close()
 
-	fmeta, err := c.QueryFileMetadata(roothash)
-	if err != nil {
-		return errors.Wrapf(err, "[QueryFileMetadata]")
-	}
-
 	var baseDir = filepath.Dir(userfile)
-
 	defer func(basedir string) {
 		for _, segment := range fmeta.SegmentList {
 			os.Remove(filepath.Join(basedir, string(segment.Hash[:])))
@@ -236,6 +275,7 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 		}
 	}(baseDir)
 
+	var segmentspath = make([]string, 0)
 	for _, segment := range fmeta.SegmentList {
 		fragmentpaths := make([]string, 0)
 		for _, fragment := range segment.FragmentList {
