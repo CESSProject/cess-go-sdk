@@ -8,7 +8,6 @@
 package chain
 
 import (
-	"encoding/hex"
 	"io"
 	"os"
 	"path/filepath"
@@ -46,13 +45,21 @@ func (c *ChainSDK) ProcessingData(file string) ([]pattern.SegmentDataInfo, strin
 		os.Remove(segmentPath[i])
 	}
 
-	// Calculate merkle hash tree
-	hTree, err := hashtree.NewHashTree(ExtractSegmenthash(segmentDataInfo))
-	if err != nil {
-		return segmentDataInfo, "", err
+	// calculate merkle root hash
+	var hash string
+	if len(segmentDataInfo) == 1 {
+		hash, err = hashtree.BuildSimpleMerkelRootHash(filepath.Base(segmentPath[0]))
+		if err != nil {
+			return nil, "", err
+		}
+	} else {
+		hash, err = hashtree.BuildMerkelRootHash(ExtractSegmenthash(segmentPath))
+		if err != nil {
+			return nil, "", err
+		}
 	}
 
-	return segmentDataInfo, hex.EncodeToString(hTree.MerkleRoot()), nil
+	return segmentDataInfo, hash, nil
 }
 
 func cutfile(file string) ([]string, error) {
@@ -135,10 +142,10 @@ func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.Segme
 	return c.UploadDeclaration(roothash, segmentList, user, filesize)
 }
 
-func ExtractSegmenthash(segment []pattern.SegmentDataInfo) []string {
+func ExtractSegmenthash(segment []string) []string {
 	var segmenthash = make([]string, len(segment))
 	for i := 0; i < len(segment); i++ {
-		segmenthash[i] = segment[i].SegmentHash
+		segmenthash[i] = filepath.Base(segment[i])
 	}
 	return segmenthash
 }

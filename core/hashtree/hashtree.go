@@ -9,10 +9,12 @@ package hashtree
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"io"
 	"os"
 
+	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/cbergoon/merkletree"
 )
 
@@ -58,4 +60,54 @@ func NewHashTree(chunkPath []string) (*merkletree.MerkleTree, error) {
 
 	//Create a new Merkle Tree from the list of Content
 	return merkletree.NewTree(list)
+}
+
+// BuildMerkelRootHash
+func BuildMerkelRootHash(segmentHash []string) (string, error) {
+	if len(segmentHash) == 0 {
+		return "", errors.New("empty segment hash")
+	}
+
+	if len(segmentHash) == 1 {
+		return segmentHash[0], nil
+	}
+
+	var hashlist = make([]string, 0)
+	for i := 0; i < len(segmentHash); i = i + 2 {
+		if (i + 1) >= len(segmentHash) {
+			b, err := hex.DecodeString(segmentHash[i])
+			if err != nil {
+				return "", err
+			}
+			hash, err := utils.CalcSHA256(append(b, b...))
+			if err != nil {
+				return "", err
+			}
+			hashlist = append(hashlist, hash)
+		} else {
+			b1, err := hex.DecodeString(segmentHash[i])
+			if err != nil {
+				return "", err
+			}
+			b2, err := hex.DecodeString(segmentHash[i+1])
+			if err != nil {
+				return "", err
+			}
+			hash, err := utils.CalcSHA256(append(b1, b2...))
+			if err != nil {
+				return "", err
+			}
+			hashlist = append(hashlist, hash)
+		}
+	}
+	return BuildMerkelRootHash(hashlist)
+}
+
+// BuildSimpleMerkelRootHash
+func BuildSimpleMerkelRootHash(segmentHash string) (string, error) {
+	b, err := hex.DecodeString(segmentHash)
+	if err != nil {
+		return "", err
+	}
+	return utils.CalcSHA256(append(b, b...))
 }
