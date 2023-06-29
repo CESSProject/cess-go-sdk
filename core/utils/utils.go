@@ -59,3 +59,7 @@ func NumsToByteStr[T constraints.Unsigned](nums []T, opts map[string]bool) (stri
 	prefix := lo.Ternary((_opts)["prefix"], "0x", "")
 	return prefix + strings.Join(byteStr, lo.Ternary((_opts)["space"], " ", "")), nil
 }
+
+func NumsToByteStrDefault[T constraints.Unsigned](nums []T) (string, error) {
+	return NumsToByteStr(nums, map[string]bool{})
+}
