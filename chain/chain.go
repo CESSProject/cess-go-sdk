@@ -9,6 +9,7 @@ package chain
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -29,7 +30,7 @@ import (
 )
 
 type ChainSDK struct {
-	core.P2P
+	*core.Node
 	lock            *sync.Mutex
 	api             *gsrpc.SubstrateAPI
 	chainState      *atomic.Bool
@@ -50,6 +51,7 @@ var _ sdk.SDK = (*ChainSDK)(nil)
 
 func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration, workspace string, p2pPort int, bootnodes []string) (*ChainSDK, error) {
 	var (
+		ok       bool
 		err      error
 		chainSDK = &ChainSDK{}
 	)
@@ -109,7 +111,7 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration, w
 	chainSDK.name = name
 
 	if workspace != "" && p2pPort > 0 {
-		chainSDK.P2P, err = p2pgo.New(
+		p2p, err := p2pgo.New(
 			ctx,
 			p2pgo.ListenPort(p2pPort),
 			p2pgo.Workspace(filepath.Join(workspace, chainSDK.GetSignatureAcc(), chainSDK.GetRoleName())),
@@ -117,6 +119,10 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration, w
 		)
 		if err != nil {
 			return nil, err
+		}
+		chainSDK.Node, ok = p2p.(*core.Node)
+		if !ok {
+			return nil, errors.New("invalid p2p type")
 		}
 		chainSDK.enabledP2P = true
 	}
