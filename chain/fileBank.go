@@ -797,7 +797,13 @@ func (c *ChainSDK) DeleteFile(puk []byte, filehash []string) (string, []pattern.
 					return txhash, hashs, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_DeleteFile) > 0 {
+				if err != nil {
+					if len(events.FileBank_DeleteFile) > 0 {
+						return txhash, events.FileBank_DeleteFile[0].Filehash, nil
+					}
+					return txhash, nil, nil
+				}
+				if len(events.FileBank_DeleteFile) > 0 {
 					return txhash, events.FileBank_DeleteFile[0].Filehash, nil
 				}
 				return txhash, hashs, errors.New(pattern.ERR_Failed)
@@ -982,7 +988,14 @@ func (c *ChainSDK) SubmitFileReport(roothash []pattern.FileHash) (string, []patt
 					return txhash, nil, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_TransferReport) > 0 {
+				if err != nil {
+					if len(events.FileBank_TransferReport) > 0 {
+						return txhash, events.FileBank_TransferReport[0].Failed_list, nil
+					} else {
+						return txhash, nil, nil
+					}
+				}
+				if len(events.FileBank_TransferReport) > 0 {
 					return txhash, events.FileBank_TransferReport[0].Failed_list, nil
 				}
 				return txhash, nil, errors.New(pattern.ERR_Failed)
@@ -1086,8 +1099,14 @@ func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []patt
 					return txhash, nil, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_ReplaceFiller) > 0 {
+				if err != nil {
+					if len(events.FileBank_ReplaceFiller) > 0 {
+						return txhash, events.FileBank_ReplaceFiller[0].Filler_list, nil
+					}
 					return txhash, nil, nil
+				}
+				if len(events.FileBank_ReplaceFiller) > 0 {
+					return txhash, events.FileBank_ReplaceFiller[0].Filler_list, nil
 				}
 				return txhash, nil, errors.New(pattern.ERR_Failed)
 			}
