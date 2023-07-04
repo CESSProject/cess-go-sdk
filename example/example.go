@@ -30,6 +30,10 @@ const File = "/home/test_download"
 const BucketName = "myBucket"
 const FileHash = "c158d7008e94d3af61033b6861aa4f35a4c2b829c7e97224fcbb54618de55945"
 
+func main() {
+	RetrieveFile()
+}
+
 func RetrieveFile() {
 	sdk, err := cess.New(
 		config.CharacterName_Client,
