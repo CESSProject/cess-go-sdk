@@ -64,3 +64,11 @@ func Bootnodes(bootnodes []string) Option {
 		return nil
 	}
 }
+
+// P2pPort configuration boot node list
+func ProtocolPrefix(protocolPrefix string) Option {
+	return func(cfg *Config) error {
+		cfg.ProtocolPrefix = protocolPrefix
+		return nil
+	}
+}

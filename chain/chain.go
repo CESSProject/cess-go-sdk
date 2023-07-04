@@ -49,7 +49,16 @@ type ChainSDK struct {
 
 var _ sdk.SDK = (*ChainSDK)(nil)
 
-func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration, workspace string, p2pPort int, bootnodes []string) (*ChainSDK, error) {
+func NewChainSDK(
+	name string,
+	rpcs []string,
+	mnemonic string,
+	t time.Duration,
+	workspace string,
+	p2pPort int,
+	bootnodes []string,
+	protocolPrefix string,
+) (*ChainSDK, error) {
 	var (
 		ok       bool
 		err      error
@@ -116,6 +125,7 @@ func NewChainSDK(name string, rpcs []string, mnemonic string, t time.Duration, w
 			p2pgo.ListenPort(p2pPort),
 			p2pgo.Workspace(filepath.Join(workspace, chainSDK.GetSignatureAcc(), chainSDK.GetRoleName())),
 			p2pgo.BootPeers(bootnodes),
+			p2pgo.ProtocolPrefix(protocolPrefix),
 		)
 		if err != nil {
 			return nil, err
