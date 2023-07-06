@@ -71,7 +71,7 @@ const (
 	RESTORALORDER      = "RestoralOrder"
 	RESTORALTARGETINFO = "RestoralTarget"
 
-	// STORAGEHANDLER
+	// STORAGE_HANDLER
 	USERSPACEINFO = "UserOwnedSpace"
 	UNITPRICE     = "UnitPrice"
 
@@ -115,6 +115,11 @@ const (
 	TX_FILEBANK_CLAIMRESTOREORDER = FILEBANK + DOT + "claim_restoral_order"
 	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"
 	TX_FILEBANK_RESTORALCOMPLETE  = FILEBANK + DOT + "restoral_order_complete"
+
+	// STORAGE_HANDLER
+	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
+	TX_STORAGE_EXPANSIONSPACE = STORAGEHANDLER + DOT + "expansion_space"
+	TX_STORAGE_RENEWALSPACE   = STORAGEHANDLER + DOT + "renewal_space"
 )
 
 // RPC Call

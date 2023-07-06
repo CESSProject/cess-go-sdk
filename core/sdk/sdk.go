@@ -237,4 +237,13 @@ type SDK interface {
 
 	//
 	EnabledP2P() bool
+
+	//
+	BuySpace(count uint32) (string, error)
+
+	//
+	ExpansionSpace(count uint32) (string, error)
+
+	//
+	RenewalSpace(days uint32) (string, error)
 }
