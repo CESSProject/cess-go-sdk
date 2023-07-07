@@ -8,8 +8,8 @@ dmitri.shuralyov.com/service/change v0.0.0-20181023043359-a85b471d5412/go.mod h1
 dmitri.shuralyov.com/state v0.0.0-20180228185332-28bcc343414c/go.mod h1:0PRwlb0D6DFvNNtx+9ybjezNCa8XF0xaYcETyp6rHWU=
 git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/CESSProject/p2p-go v0.1.1 h1:qpiSAN1vAPLZD6X1FkWZf5uvhBRXNPpj09PlUgP3wB8=
-github.com/CESSProject/p2p-go v0.1.1/go.mod h1:MmuZ2UfXnEJMZMhOCC4Ec5QQUJCT7j2yg3Xk/oZ16yw=
+github.com/CESSProject/p2p-go v0.1.2 h1:/Aa78ZhkEzOUvrEVAN7SArRQsD12P8nFlSneknQtZHA=
+github.com/CESSProject/p2p-go v0.1.2/go.mod h1:JSePQ8HZVxC/t8VpkvD/Gfu9XOqXkeHYXQZBRiGZNqo=
 github.com/ChainSafe/go-schnorrkel v1.0.0 h1:3aDA67lAykLaG1y3AOjs88dMxC88PgUuHRrLeDnvGIM=
 github.com/ChainSafe/go-schnorrkel v1.0.0/go.mod h1:dpzHYVxLZcp8pjlV+O+UR8K0Hp/z7vcchBSbMBEhCw4=
 github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 h1:fLjPD/aNc3UIOA6tDi6QXUemppXK3P9BI7mr2hd6gx8=
