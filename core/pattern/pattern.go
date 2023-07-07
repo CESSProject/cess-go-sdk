@@ -46,7 +46,8 @@ const (
 // Chain state
 const (
 	//AUDIT
-	UNVERIFYPROOF = "UnverifyProof"
+	UNVERIFYPROOF     = "UnverifyProof"
+	CHALLENGEDURATION = "ChallengeDuration"
 
 	// OSS
 	// OSS
