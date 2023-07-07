@@ -79,6 +79,33 @@ func (c *ChainSDK) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentI
 	return data, nil
 }
 
+func (c *ChainSDK) QueryChallengeExpiration() (uint32, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.U32
+
+	if !c.GetChainState() {
+		return 0, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.CHALLENGEDURATION)
+	if err != nil {
+		return 0, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return 0, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return 0, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return uint32(data), nil
+}
+
 func (c *ChainSDK) ReportProof(idlesigma, servicesigma string) (string, error) {
 	c.lock.Lock()
 	defer func() {
