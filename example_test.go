@@ -38,6 +38,7 @@ func TestMain(m *testing.M) {
 
 func TestNewClient(t *testing.T) {
 	_, err := cess.New(
+		context.Background(),
 		config.CharacterName_Client,
 		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
 		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
@@ -48,6 +49,7 @@ func TestNewClient(t *testing.T) {
 
 func Example_register_deoss() {
 	cli, err := cess.New(
+		context.Background(),
 		config.CharacterName_Deoss,
 		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
 		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
@@ -85,6 +87,7 @@ func Example_register_deoss() {
 
 func Example_register_storage_node() {
 	cli, err := cess.New(
+		context.Background(),
 		config.CharacterName_Bucket,
 		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
 		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),

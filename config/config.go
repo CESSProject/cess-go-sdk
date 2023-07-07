@@ -8,6 +8,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -47,11 +48,11 @@ const (
 // NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
-func (cfg *Config) NewSDK(serviceName string) (sdk.SDK, error) {
+func (cfg *Config) NewSDK(ctx context.Context, serviceName string) (sdk.SDK, error) {
 	if serviceName == "" {
 		return nil, fmt.Errorf("empty service name")
 	}
-	return chain.NewChainSDK(serviceName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout, cfg.Workspace, cfg.P2pPort, cfg.Bootnodes, cfg.ProtocolPrefix)
+	return chain.NewChainSDK(ctx, serviceName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout, cfg.Workspace, cfg.P2pPort, cfg.Bootnodes, cfg.ProtocolPrefix)
 }
 
 // Apply applies the given options to the config, returning the first error
