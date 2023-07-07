@@ -63,7 +63,13 @@ func NewChainSDK(
 	var (
 		ok       bool
 		err      error
-		chainSDK = &ChainSDK{}
+		chainSDK = &ChainSDK{
+			lock:            new(sync.Mutex),
+			chainState:      new(atomic.Bool),
+			rpcAddr:         rpcs,
+			name:            name,
+			timeForBlockOut: t,
+		}
 	)
 
 	log.SetOutput(io.Discard)
@@ -77,6 +83,8 @@ func NewChainSDK(
 	if err != nil || chainSDK.api == nil {
 		return nil, err
 	}
+
+	chainSDK.SetChainState(true)
 
 	chainSDK.metadata, err = chainSDK.api.RPC.State.GetMetadataLatest()
 	if err != nil {
@@ -109,12 +117,6 @@ func NewChainSDK(
 		return nil, err
 	}
 	chainSDK.tokenSymbol = string(properties.TokenSymbol)
-	chainSDK.lock = new(sync.Mutex)
-	chainSDK.chainState = &atomic.Bool{}
-	chainSDK.timeForBlockOut = t
-	chainSDK.rpcAddr = rpcs
-	chainSDK.SetChainState(true)
-	chainSDK.name = name
 
 	if workspace != "" && p2pPort > 0 {
 		p2p, err := p2pgo.New(
