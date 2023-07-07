@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -36,6 +37,7 @@ func main() {
 
 func RetrieveFile() {
 	sdk, err := cess.New(
+		context.Background(),
 		config.CharacterName_Client,
 		cess.ConnectRpcAddrs(RPC_ADDRS),
 		cess.Mnemonic(MY_MNEMONIC),
@@ -53,6 +55,7 @@ func RetrieveFile() {
 
 func StoreFile() {
 	sdk, err := cess.New(
+		context.Background(),
 		config.CharacterName_Client,
 		cess.ConnectRpcAddrs(RPC_ADDRS),
 		cess.Mnemonic(MY_MNEMONIC),
@@ -76,6 +79,7 @@ func StoreFile() {
 
 func CreateBucket() {
 	sdk, err := cess.New(
+		context.Background(),
 		config.CharacterName_Client,
 		cess.ConnectRpcAddrs(RPC_ADDRS),
 		cess.Mnemonic(MY_MNEMONIC),

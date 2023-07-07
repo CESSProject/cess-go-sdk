@@ -50,6 +50,7 @@ type ChainSDK struct {
 var _ sdk.SDK = (*ChainSDK)(nil)
 
 func NewChainSDK(
+	ctx context.Context,
 	name string,
 	rpcs []string,
 	mnemonic string,
@@ -65,18 +66,14 @@ func NewChainSDK(
 		chainSDK = &ChainSDK{}
 	)
 
-	defer log.SetOutput(os.Stdout)
 	log.SetOutput(io.Discard)
-
-	ctx := context.Background()
-
 	for i := 0; i < len(rpcs); i++ {
 		chainSDK.api, err = gsrpc.NewSubstrateAPI(rpcs[i])
 		if err == nil {
 			break
 		}
 	}
-
+	log.SetOutput(os.Stdout)
 	if err != nil || chainSDK.api == nil {
 		return nil, err
 	}

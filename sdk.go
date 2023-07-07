@@ -8,6 +8,8 @@
 package sdkgo
 
 import (
+	"context"
+
 	"github.com/CESSProject/cess-go-sdk/config"
 	"github.com/CESSProject/cess-go-sdk/core/sdk"
 )
@@ -33,8 +35,8 @@ type Option = config.Option
 //	cess-bucket (cess storage service) must be set to bucket
 //	DeOSS (cess decentralized object storage service) must be set to deoss
 //	cess-cli (cess client) must be set to client
-func New(serviceName string, opts ...Option) (sdk.SDK, error) {
-	return NewWithoutDefaults(serviceName, append(opts, FallbackDefaults)...)
+func New(ctx context.Context, serviceName string, opts ...Option) (sdk.SDK, error) {
+	return NewWithoutDefaults(ctx, serviceName, append(opts, FallbackDefaults)...)
 }
 
 // NewWithoutDefaults constructs a new client with the given options but
@@ -43,10 +45,10 @@ func New(serviceName string, opts ...Option) (sdk.SDK, error) {
 // Warning: This function should not be considered a stable interface. We may
 // choose to add required services at any time and, by using this function, you
 // opt-out of any defaults we may provide.
-func NewWithoutDefaults(serviceName string, opts ...Option) (sdk.SDK, error) {
+func NewWithoutDefaults(ctx context.Context, serviceName string, opts ...Option) (sdk.SDK, error) {
 	var cfg Config
 	if err := cfg.Apply(opts...); err != nil {
 		return nil, err
 	}
-	return cfg.NewSDK(serviceName)
+	return cfg.NewSDK(ctx, serviceName)
 }
