@@ -70,6 +70,9 @@ func cutfile(file string) ([]string, error) {
 	if fstat.IsDir() {
 		return nil, errors.New("not a file")
 	}
+	if fstat.Size() == 0 {
+		return nil, errors.New("empty file")
+	}
 	baseDir := filepath.Dir(file)
 	segmentCount := fstat.Size() / pattern.SegmentSize
 	if fstat.Size()%int64(pattern.SegmentSize) != 0 {
