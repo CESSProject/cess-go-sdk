@@ -12,6 +12,10 @@
 
 The go sdk implementation of the CESS network, which provides RPC calls, status queries, block transactions and other functions.
 
+## Reporting Vulnerability
+
+If you find out any system bugs or you have a better suggestions, please send an email to frode@cess.one or join CESS discord to communicate with us.
+
 ## Installation
 
 To get the package use the standard:
@@ -40,56 +44,245 @@ Please refer to: https://pkg.go.dev/github.com/CESSProject/cess-go-sdk
 Usually, you only care about how to access your data in the CESS network, you need to build such a web service yourself, this sdk will help you quickly realize data access. Note that [p2p-go](https://github.com/CESSProject/p2p-go) library needs to be used to enable the data transmission.
 
 
-### Create an SDK Client Instance
+### Create an sdk client
 
 To create an sdk client, you need to provide some configuration information: your rpc address (if not, use the rpc address disclosed by CESS), your wallet private key, and transaction timeout. Please refer to the following examples:
 
 ```go
-cli, err := New(
-    config.CharacterName_Deoss,
-	ConnectRpcAddrs([]string{"wss://testnet-rpc0.cess.cloud/ws/", "wss://testnet-rpc1.cess.cloud/ws/"}),
-	Mnemonic("xxx xxx ... xxx"),
-	TransactionTimeout(time.Duration(time.Second*10)),
+package main
+
+import (
+	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/config"
 )
+
+// Substrate well-known mnemonic:
+//   https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
+var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
+
+var RPC_ADDRS = []string{
+	"wss://testnet-rpc0.cess.cloud/ws/",
+	"wss://testnet-rpc1.cess.cloud/ws/",
+	"wss://testnet-rpc2.cess.cloud/ws/",
+}
+
+
+func main() {
+	//Build client
+	sdk, err := cess.New(
+		config.CharacterName_Client,
+		cess.ConnectRpcAddrs(RPC_ADDRS),
+		cess.Mnemonic(MY_MNEMONIC),
+		cess.TransactionTimeout(time.Second * 10),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 ```
 
-### Register as a DeOSS Role
+### Create an sdk client with p2p functionality
 
-Call the Register method to register. Note that the first parameter specifies that the role you register is deoss, If there is no error, you can view the transaction details through the returned transaction hash.
+When you need to store data or download data you need to initialize an sdk with p2p network, refer to the following code:
+```
+package main
 
-```go
-txhash, _, err := cli.Register(cli.GetCharacterName(), cli.GetSignatureAccPulickey(), "", 0)
+import (
+	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/config"
+)
+
+// Substrate well-known mnemonic:
+//   https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
+var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
+
+var RPC_ADDRS = []string{
+	"wss://testnet-rpc0.cess.cloud/ws/",
+	"wss://testnet-rpc1.cess.cloud/ws/",
+}
+
+var Workspace = "/cess"
+var Port = 4001
+var Bootstrap = []string{
+	"_dnsaddr.sjc-1.bootstrap-kldr.cess.cloud",
+}
+
+func main() {
+	//Build client
+	sdk, err := cess.New(
+		config.CharacterName_Client,
+		cess.ConnectRpcAddrs(RPC_ADDRS),
+		cess.Mnemonic(MY_MNEMONIC),
+		cess.TransactionTimeout(time.Second * 10),
+		cess.Workspace(Workspace),
+		cess.P2pPort(Port),
+		cess.Bootnodes(Bootstrap),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
 ```
 
-### Process Data According to the Specifications of CESS
+### Create storage data bucket
+cess as an object storage service, the data are stored in buckets, which can be created automatically when uploading data, or separately, refer to the following code:
+```
+package main
 
-Call the ProcessingData method to process your file. You need to specify the file path. The method returns a segment list and the unique identifier hash of the file in the CESS network.
+import (
+	"fmt"
+	"time"
 
-```go
-segmentInfo, roothash, err := cli.ProcessingData(filepath)
+	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/config"
+	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+)
+
+// Substrate well-known mnemonic:
+//
+//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
+var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
+
+var RPC_ADDRS = []string{
+	"wss://testnet-rpc0.cess.cloud/ws/",
+	"wss://testnet-rpc1.cess.cloud/ws/",
+}
+
+const BucketName = "myBucket"
+
+func main() {
+	sdk, err := cess.New(
+		config.CharacterName_Client,
+		cess.ConnectRpcAddrs(RPC_ADDRS),
+		cess.Mnemonic(MY_MNEMONIC),
+		cess.TransactionTimeout(time.Second*10),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	keyringPair, err := signature.KeyringPairFromSecret(MY_MNEMONIC, 0)
+
+	if !utils.CheckBucketName(BucketName) {
+		panic("invalid bucket name")
+	}
+
+	fmt.Println(sdk.CreateBucket(keyringPair.PublicKey, BucketName))
+}
 ```
 
-### Create Storage Order
+### Store data
+You need to purchase space with your account before uploading files, please refer to [Buy Space](https://github.com/CESSProject/W3F-illustration/blob/4995c1584006823990806b9d30fa7d554630ec14/deoss/buySpace.png).
+The following is an example of uploading a file:
+```
+package main
 
-Before storing data, you also need to create a data storage order, and you need to fill in the roothash and segmentInfo obtained in the previous step, as well as the user account for uploading data, data name, and bucket name.
+import (
+	"fmt"
+	"time"
 
-```go
-err := cli.GenerateStorageOrder(roothash, segmentInfo, owner, filename, bucketname)
+	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/config"
+	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+)
+
+// Substrate well-known mnemonic:
+//
+//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
+var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
+
+var RPC_ADDRS = []string{
+	"wss://testnet-rpc0.cess.cloud/ws/",
+	"wss://testnet-rpc1.cess.cloud/ws/",
+}
+
+const BucketName = "myBucket"
+const File = "/home/test"
+
+var Workspace = "/cess"
+var Port = 4001
+var Bootstrap = []string{
+	"_dnsaddr.sjc-1.bootstrap-kldr.cess.cloud",
+}
+
+func main() {
+	sdk, err := cess.New(
+		config.CharacterName_Client,
+		cess.ConnectRpcAddrs(RPC_ADDRS),
+		cess.Mnemonic(MY_MNEMONIC),
+		cess.TransactionTimeout(time.Second*10),
+		cess.Workspace(Workspace),
+		cess.P2pPort(Port),
+		cess.Bootnodes(Bootstrap),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	keyringPair, err := signature.KeyringPairFromSecret(MY_MNEMONIC, 0)
+
+	if !utils.CheckBucketName(BucketName) {
+		panic("invalid bucket name")
+	}
+
+	fmt.Println(sdk.StoreFile(keyringPair.PublicKey, File, BucketName))
+}
 ```
 
-### Store Data to Storage Nodes
+### Retrieve data
+To retrieve the data, you need to provide the unique hash of the data, which will be returned to you when the data is uploaded successfully, here is the sample code to retrieve the data:
+```
+package main
 
-After creating the storage order, wait for one block to find the storage node information allocated in the order. The next step is to store the data to the storage node through the `WriteFileAction` method in the [p2p-go library](https://github.com/CESSProject/p2p-go).
+import (
+	"fmt"
+	"time"
 
-After the storage node receives the data, it will automatically report this action. When all the storage nodes in the storage order have all reported, the data is considered to be stored successfully. As long as there is a storage node that does not report, it is regarded as a storage failure. After the timeout period in the order is exceeded, the storage nodes in the order will be reassigned randomly to start a new round of storage. You need to monitor this storage order, and re-give the data block to the newly allocated storage node until the data storage is successful. The `count` in the storage order indicates the number of times your data has been redistributed. An order can redistribute storage up to 5 times. If your data is still not successfully stored after 5 times, you need to re-upload your data.
+	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/config"
+	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+)
 
-### Fetch Data
+// Substrate well-known mnemonic:
+//
+//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
+var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
 
-Call the `ReadFileAction` method in the [p2p-go library](https://github.com/CESSProject/p2p-go) to download all data blocks, and then restore the original data through the `ReedSolomon_Restore` method.
+var RPC_ADDRS = []string{
+	"wss://testnet-rpc0.cess.cloud/ws/",
+	"wss://testnet-rpc1.cess.cloud/ws/",
+}
 
-## Reporting Vulnerability
+const File = "/home/test_download"
 
-If you find out any vulnerability, Please send an email to frode@cess.one, we are happy to communicate with you.
+var Workspace = "/cess"
+var Port = 4001
+var Bootstrap = []string{
+	"_dnsaddr.sjc-1.bootstrap-kldr.cess.cloud",
+}
+
+const FileHash = "c158d7008e94d3af61033b6861aa4f35a4c2b829c7e97224fcbb54618de55945"
+
+func main() {
+	sdk, err := cess.New(
+		config.CharacterName_Client,
+		cess.ConnectRpcAddrs(RPC_ADDRS),
+		cess.Mnemonic(MY_MNEMONIC),
+		cess.TransactionTimeout(time.Second*10),
+		cess.Workspace(Workspace),
+		cess.P2pPort(Port),
+		cess.Bootnodes(Bootstrap),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(sdk.RetrieveFile(FileHash, File))
+}
+```
 
 ## License
 
