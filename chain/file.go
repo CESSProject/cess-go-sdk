@@ -163,19 +163,27 @@ func (c *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error
 }
 
 // StoreFile
-func (c *ChainSDK) StoreFile(owner, file, bucket string) (string, error) {
-	// upload to deoss
-	return c.UploadtoDeoss(pattern.PublicDeoss, string(owner), file, bucket)
+func (c *ChainSDK) StoreFile(file, bucket string) (string, error) {
+	c.AuthorizeSpace(pattern.PublicDeossAccount)
+	return c.UploadtoGateway(pattern.PublicDeoss, c.GetSignatureAcc(), file, bucket)
 }
 
 func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
+	err := c.DownloadFromGateway(pattern.PublicDeoss, roothash, savepath)
+	if err == nil {
+		return nil
+	}
+
 	if !c.enabledP2P {
 		return errors.New("P2P network not enabled")
 	}
 
 	fmeta, err := c.QueryFileMetadata(roothash)
 	if err != nil {
-		return errors.Wrapf(err, "[QueryFileMetadata]")
+		if err.Error() != pattern.ERR_Empty {
+			return errors.Wrapf(err, "[QueryFileMetadata]")
+		}
+		return errors.New("Not Found")
 	}
 
 	var userfile = savepath
@@ -218,9 +226,19 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 			if err != nil {
 				return errors.Wrapf(err, "[QueryStorageMiner]")
 			}
-			peerid, _ := peer.Decode(string(miner.PeerId[:]))
+
+			addr, err := c.DHTFindPeer(base58.Encode([]byte(string(miner.PeerId[:]))))
+			if err != nil {
+				return errors.Wrapf(err, "[DHTFindPeer]")
+			}
+
+			err = c.Connect(c.GetCtxQueryFromCtxCancel(), addr)
+			if err != nil {
+				return errors.Wrapf(err, "[Connect]")
+			}
+
 			fragmentpath := filepath.Join(baseDir, string(fragment.Hash[:]))
-			err = c.ReadFileAction(peerid, roothash, string(fragment.Hash[:]), fragmentpath, pattern.FragmentSize)
+			err = c.ReadFileAction(addr.ID, roothash, string(fragment.Hash[:]), fragmentpath, pattern.FragmentSize)
 			if err != nil {
 				continue
 			}
@@ -265,7 +283,7 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 	return nil
 }
 
-func (c *ChainSDK) UploadtoDeoss(ossUrl, account, uploadfile, bucketName string) (string, error) {
+func (c *ChainSDK) UploadtoGateway(url, account, uploadfile, bucketName string) (string, error) {
 	fstat, err := os.Stat(uploadfile)
 	if err != nil {
 		return "", err
@@ -310,7 +328,7 @@ func (c *ChainSDK) UploadtoDeoss(ossUrl, account, uploadfile, bucketName string)
 		return "", err
 	}
 
-	req, err := http.NewRequest(http.MethodPut, ossUrl, body)
+	req, err := http.NewRequest(http.MethodPut, url, body)
 	if err != nil {
 		return "", err
 	}
@@ -341,6 +359,45 @@ func (c *ChainSDK) UploadtoDeoss(ossUrl, account, uploadfile, bucketName string)
 	}
 
 	return string(respbody), nil
+}
+
+func (c *ChainSDK) DownloadFromGateway(url, roothash, savepath string) error {
+	_, err := os.Stat(savepath)
+	if err == nil {
+		return nil
+	}
+
+	f, err := os.Create(savepath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	req, err := http.NewRequest(http.MethodGet, filepath.Join(url, roothash), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Operation", "download")
+
+	client := &http.Client{}
+	client.Transport = globalTransport
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("failed")
+	}
+
+	_, err = io.Copy(f, req.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {

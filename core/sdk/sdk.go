@@ -227,11 +227,13 @@ type SDK interface {
 	// and the deoss service will store the file to the cess network,
 	// so the success of this method does not mean that your file has been stored successfully.
 	// You can check the result of storing the file through the CheckFile method.
-	StoreFile(owner, file, bucket string) (string, error)
+	StoreFile(file, bucket string) (string, error)
 	// RetrieveFile retrieves your files from the cess network.
 	RetrieveFile(roothash, savepath string) error
-	// UploadtoDeoss uploads files to deoss.
-	UploadtoDeoss(ossUrl, account, uploadfile, bucketName string) (string, error)
+	// UploadtoGateway uploads files to deoss gateway.
+	UploadtoGateway(url, account, uploadfile, bucketName string) (string, error)
+	//
+	DownloadFromGateway(url, roothash, savepath string) error
 	// EnabledP2P returns the p2p enable status
 	EnabledP2P() bool
 	// CheckFile returns the storage progress of the file.

@@ -45,6 +45,7 @@ func RetrieveFile() {
 		cess.Workspace(Workspace),
 		cess.P2pPort(Port),
 		cess.Bootnodes(Bootstrap),
+		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
 	)
 	if err != nil {
 		panic(err)
@@ -63,18 +64,13 @@ func StoreFile() {
 		cess.Workspace(Workspace),
 		cess.P2pPort(Port),
 		cess.Bootnodes(Bootstrap),
+		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	keyringPair, err := signature.KeyringPairFromSecret(MY_MNEMONIC, 0)
-
-	if !utils.CheckBucketName(BucketName) {
-		panic("invalid bucket name")
-	}
-
-	fmt.Println(sdk.StoreFile(keyringPair.Address, File, BucketName))
+	fmt.Println(sdk.StoreFile(File, BucketName))
 }
 
 func CreateBucket() {
@@ -84,6 +80,7 @@ func CreateBucket() {
 		cess.ConnectRpcAddrs(RPC_ADDRS),
 		cess.Mnemonic(MY_MNEMONIC),
 		cess.TransactionTimeout(time.Second*10),
+		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
 	)
 	if err != nil {
 		panic(err)
