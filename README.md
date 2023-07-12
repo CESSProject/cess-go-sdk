@@ -16,6 +16,23 @@ The go sdk implementation of the CESS network, which provides RPC calls, status 
 
 If you find out any system bugs or you have a better suggestions, please send an email to frode@cess.one or join CESS discord to communicate with us.
 
+## 📢 Announcement
+**CESS test network rpc endpoints**
+```
+wss://testnet-rpc0.cess.cloud/ws/
+wss://testnet-rpc1.cess.cloud/ws/
+wss://testnet-rpc2.cess.cloud/ws/
+```
+**CESS test network bootstrap node**
+```
+_dnsaddr.boot-kldr-testnet.cess.cloud
+```
+
+## 🚰 CESS test network faucet
+```
+https://testnet-faucet.cess.cloud/
+```
+
 ## Installation
 
 To get the package use the standard:
@@ -264,7 +281,7 @@ var Bootstrap = []string{
 	"_dnsaddr.boot-kldr-testnet.cess.cloud",
 }
 
-const FileHash = "c158d7008e94d3af61033b6861aa4f35a4c2b829c7e97224fcbb54618de55945"
+const FileHash = "your filehash"
 
 func main() {
 	sdk, err := cess.New(
