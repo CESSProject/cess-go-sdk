@@ -84,7 +84,7 @@ func main() {
 ### Create an sdk client with p2p functionality
 
 When you need to store data or download data you need to initialize an sdk with p2p network, refer to the following code:
-```
+```go
 package main
 
 import (
@@ -99,12 +99,13 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 var RPC_ADDRS = []string{
 	"wss://testnet-rpc0.cess.cloud/ws/",
 	"wss://testnet-rpc1.cess.cloud/ws/",
+	"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
 var Workspace = "/cess"
 var Port = 4001
 var Bootstrap = []string{
-	"_dnsaddr.sjc-1.bootstrap-kldr.cess.cloud",
+	"_dnsaddr.boot-kldr-testnet.cess.cloud",
 }
 
 func main() {
@@ -117,6 +118,7 @@ func main() {
 		cess.Workspace(Workspace),
 		cess.P2pPort(Port),
 		cess.Bootnodes(Bootstrap),
+		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
 	)
 	if err != nil {
 		panic(err)
@@ -126,7 +128,7 @@ func main() {
 
 ### Create storage data bucket
 cess as an object storage service, the data are stored in buckets, which can be created automatically when uploading data, or separately, refer to the following code:
-```
+```go
 package main
 
 import (
@@ -147,6 +149,7 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 var RPC_ADDRS = []string{
 	"wss://testnet-rpc0.cess.cloud/ws/",
 	"wss://testnet-rpc1.cess.cloud/ws/",
+	"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
 const BucketName = "myBucket"
@@ -175,7 +178,7 @@ func main() {
 ### Store data
 You need to purchase space with your account before uploading files, please refer to [Buy Space](https://github.com/CESSProject/W3F-illustration/blob/4995c1584006823990806b9d30fa7d554630ec14/deoss/buySpace.png).
 The following is an example of uploading a file:
-```
+```go
 package main
 
 import (
@@ -196,6 +199,7 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 var RPC_ADDRS = []string{
 	"wss://testnet-rpc0.cess.cloud/ws/",
 	"wss://testnet-rpc1.cess.cloud/ws/",
+	"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
 const BucketName = "myBucket"
@@ -204,7 +208,7 @@ const File = "/home/test"
 var Workspace = "/cess"
 var Port = 4001
 var Bootstrap = []string{
-	"_dnsaddr.sjc-1.bootstrap-kldr.cess.cloud",
+	"_dnsaddr.boot-kldr-testnet.cess.cloud",
 }
 
 func main() {
@@ -216,24 +220,19 @@ func main() {
 		cess.Workspace(Workspace),
 		cess.P2pPort(Port),
 		cess.Bootnodes(Bootstrap),
+		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	keyringPair, err := signature.KeyringPairFromSecret(MY_MNEMONIC, 0)
-
-	if !utils.CheckBucketName(BucketName) {
-		panic("invalid bucket name")
-	}
-
-	fmt.Println(sdk.StoreFile(keyringPair.PublicKey, File, BucketName))
+	fmt.Println(sdk.StoreFile(File, BucketName))
 }
 ```
 
 ### Retrieve data
 To retrieve the data, you need to provide the unique hash of the data, which will be returned to you when the data is uploaded successfully, here is the sample code to retrieve the data:
-```
+```go
 package main
 
 import (
@@ -254,6 +253,7 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 var RPC_ADDRS = []string{
 	"wss://testnet-rpc0.cess.cloud/ws/",
 	"wss://testnet-rpc1.cess.cloud/ws/",
+	"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
 const File = "/home/test_download"
@@ -261,7 +261,7 @@ const File = "/home/test_download"
 var Workspace = "/cess"
 var Port = 4001
 var Bootstrap = []string{
-	"_dnsaddr.sjc-1.bootstrap-kldr.cess.cloud",
+	"_dnsaddr.boot-kldr-testnet.cess.cloud",
 }
 
 const FileHash = "c158d7008e94d3af61033b6861aa4f35a4c2b829c7e97224fcbb54618de55945"
@@ -275,6 +275,7 @@ func main() {
 		cess.Workspace(Workspace),
 		cess.P2pPort(Port),
 		cess.Bootnodes(Bootstrap),
+		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
 	)
 	if err != nil {
 		panic(err)
