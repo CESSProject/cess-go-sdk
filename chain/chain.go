@@ -12,6 +12,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -48,6 +49,10 @@ type ChainSDK struct {
 }
 
 var _ sdk.SDK = (*ChainSDK)(nil)
+
+var globalTransport = &http.Transport{
+	DisableKeepAlives: true,
+}
 
 func NewChainSDK(
 	ctx context.Context,

@@ -74,7 +74,7 @@ func StoreFile() {
 		panic("invalid bucket name")
 	}
 
-	fmt.Println(sdk.StoreFile(keyringPair.PublicKey, File, BucketName))
+	fmt.Println(sdk.StoreFile(keyringPair.Address, File, BucketName))
 }
 
 func CreateBucket() {

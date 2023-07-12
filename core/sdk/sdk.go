@@ -109,6 +109,11 @@ type SDK interface {
 	// CheckSpaceUsageAuthorization checks if the puk is authorized to itself
 	CheckSpaceUsageAuthorization(puk []byte) (bool, error)
 
+	// Oss-Extrinsics
+
+	// AuthorizeSpace authorizes space to oss
+	AuthorizeSpace(ossAccount string) (string, error)
+
 	// Sminer-State
 
 	// QueryStorageMiner queries storage node information.
@@ -220,11 +225,13 @@ type SDK interface {
 	// and the deoss service will store the file to the cess network,
 	// so the success of this method does not mean that your file has been stored successfully.
 	// You can check the result of storing the file through the CheckFile method.
-	StoreFile(owner []byte, file string, bucket string) (string, error)
+	StoreFile(owner, file, bucket string) (string, error)
 	// RetrieveFile retrieves your files from the cess network.
 	RetrieveFile(roothash, savepath string) error
-	// CheckFile returns the storage progress of the file.
-	CheckFile(roothash string)
+	// UploadtoDeoss uploads files to deoss.
+	UploadtoDeoss(ossUrl, account, uploadfile, bucketName string) (string, error)
 	// EnabledP2P returns the p2p enable status
 	EnabledP2P() bool
+	// CheckFile returns the storage progress of the file.
+	// CheckFile(roothash string)
 }

@@ -163,55 +163,9 @@ func (c *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error
 }
 
 // StoreFile
-func (c *ChainSDK) StoreFile(owner []byte, file string, bucket string) (string, error) {
-	if !c.enabledP2P {
-		return "", errors.New("P2P network not enabled")
-	}
-
-	fstat, err := os.Stat(file)
-	if err != nil {
-		return "", err
-	}
-
-	if fstat.IsDir() {
-		return "", errors.New("not a file")
-	}
-
-	if fstat.Size() == 0 {
-		return "", errors.New("empty file")
-	}
-
-	if !utils.CompareSlice(owner, c.GetSignatureAccPulickey()) {
-		return "", errors.New("account error")
-	}
-
-	if !utils.CheckBucketName(bucket) {
-		return "", errors.New("invalid bucket name")
-	}
-
-	userInfo, err := c.QueryUserSpaceSt(owner)
-	if err != nil {
-		if err.Error() == pattern.ERR_Empty {
-			return "", errors.New("no space in the account")
-		}
-		return "", errors.Wrapf(err, "[QueryUserSpaceSt]")
-	}
-
-	blockheight, err := c.QueryBlockHeight("")
-	if err != nil {
-		return "", errors.Wrapf(err, "[QueryBlockHeight]")
-	}
-
-	if userInfo.Deadline < (blockheight + 30) {
-		return "", errors.Wrapf(err, "account space expires soon")
-	}
-
+func (c *ChainSDK) StoreFile(owner, file, bucket string) (string, error) {
 	// upload to deoss
-	return c.UploadtoDeoss(string(owner), bucket, file)
-}
-
-func (c *ChainSDK) CheckFile(roothash string) {
-
+	return c.UploadtoDeoss(pattern.PublicDeoss, string(owner), file, bucket)
 }
 
 func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
@@ -311,7 +265,28 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 	return nil
 }
 
-func (c *ChainSDK) UploadtoDeoss(account, bucketName, uploadfile string) (string, error) {
+func (c *ChainSDK) UploadtoDeoss(ossUrl, account, uploadfile, bucketName string) (string, error) {
+	fstat, err := os.Stat(uploadfile)
+	if err != nil {
+		return "", err
+	}
+
+	if fstat.IsDir() {
+		return "", errors.New("not a file")
+	}
+
+	if fstat.Size() == 0 {
+		return "", errors.New("empty file")
+	}
+
+	if account != c.GetSignatureAcc() {
+		return "", errors.New("account error")
+	}
+
+	if !utils.CheckBucketName(bucketName) {
+		return "", errors.New("invalid bucket name")
+	}
+
 	kr, _ := keyring.FromURI(c.GetURI(), keyring.NetSubstrate{})
 
 	// sign message
@@ -321,7 +296,7 @@ func (c *ChainSDK) UploadtoDeoss(account, bucketName, uploadfile string) (string
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 	//
-	formFile, err := writer.CreateFormFile("file", filepath.Base(uploadfile))
+	formFile, err := writer.CreateFormFile("file", fstat.Name())
 	if err != nil {
 		return "", err
 	}
@@ -335,25 +310,34 @@ func (c *ChainSDK) UploadtoDeoss(account, bucketName, uploadfile string) (string
 		return "", err
 	}
 
-	req, err := http.NewRequest(http.MethodPut, pattern.PublicDeoss, body)
+	req, err := http.NewRequest(http.MethodPut, ossUrl, body)
 	if err != nil {
 		return "", err
 	}
 
-	req.Header.Add("Account", account)
-	req.Header.Add("Message", message)
-	req.Header.Add("Signature", base58.Encode(sig[:]))
+	req.Header.Set("Account", account)
+	req.Header.Set("Message", message)
+	req.Header.Set("Signature", base58.Encode(sig[:]))
 	req.Header.Set("Content-Type", "multipart/form-data; boundary=<calculated when request is sent>")
 
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{}
+	client.Transport = globalTransport
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
-
 	defer resp.Body.Close()
+
 	respbody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		if len(respbody) > 0 {
+			return "", errors.New(string(respbody))
+		}
+		return "", errors.New("Deoss service failure, please retry or contact administrator.")
 	}
 
 	return string(respbody), nil
