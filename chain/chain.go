@@ -193,6 +193,10 @@ func (c *ChainSDK) GetRoleName() string {
 	return c.name
 }
 
+func (c *ChainSDK) GetURI() string {
+	return c.keyring.URI
+}
+
 func (c *ChainSDK) Sign(msg []byte) ([]byte, error) {
 	return signature.Sign(msg, c.keyring.URI)
 }

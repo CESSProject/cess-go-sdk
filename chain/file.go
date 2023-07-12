@@ -8,15 +8,20 @@
 package chain
 
 import (
+	"bytes"
 	"io"
+	"io/ioutil"
+	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
 	"github.com/CESSProject/cess-go-sdk/core/hashtree"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
+	keyring "github.com/CESSProject/go-keyring"
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
@@ -157,6 +162,7 @@ func (c *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error
 	return erasure.ReedSolomonRestore(outpath, shardspath)
 }
 
+// StoreFile
 func (c *ChainSDK) StoreFile(owner []byte, file string, bucket string) (string, error) {
 	if !c.enabledP2P {
 		return "", errors.New("P2P network not enabled")
@@ -171,12 +177,8 @@ func (c *ChainSDK) StoreFile(owner []byte, file string, bucket string) (string, 
 		return "", errors.New("not a file")
 	}
 
-	// verify mem availability
-	mem, err := utils.GetSysMemAvailable()
-	if err == nil {
-		if fstat.Size() > int64(mem*80/100) {
-			return "", errors.New("unsupported file size")
-		}
+	if fstat.Size() == 0 {
+		return "", errors.New("empty file")
 	}
 
 	if !utils.CompareSlice(owner, c.GetSignatureAccPulickey()) {
@@ -204,36 +206,12 @@ func (c *ChainSDK) StoreFile(owner []byte, file string, bucket string) (string, 
 		return "", errors.Wrapf(err, "account space expires soon")
 	}
 
-	segmentDataInfo, roothash, err := c.ProcessingData(file)
-	if err != nil {
-		return "", errors.Wrapf(err, "[ProcessingData]")
-	}
+	// upload to deoss
+	return c.UploadtoDeoss(string(owner), bucket, file)
+}
 
-	var storageOrder pattern.StorageOrder
+func (c *ChainSDK) CheckFile(roothash string) {
 
-	_, err = c.QueryFileMetadata(roothash)
-	if err == nil {
-		return roothash, nil
-	}
-
-	storageOrder, err = c.QueryStorageOrder(roothash)
-	if err != nil {
-		if err.Error() != pattern.ERR_Empty {
-			return roothash, errors.Wrapf(err, "[QueryStorageOrder]")
-		}
-		_, err = c.GenerateStorageOrder(roothash, segmentDataInfo, owner, fstat.Name(), bucket, uint64(fstat.Size()))
-		if err != nil {
-			return roothash, errors.Wrapf(err, "[GenerateStorageOrder]")
-		}
-		time.Sleep(pattern.BlockInterval)
-	}
-
-	// store data to storage node
-	err = c.StorageData(roothash, segmentDataInfo, storageOrder.AssignedMiner)
-	if err != nil {
-		return roothash, errors.Wrapf(err, "[StorageData]")
-	}
-	return roothash, nil
 }
 
 func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
@@ -331,6 +309,54 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 		return errors.New("retrieve failed")
 	}
 	return nil
+}
+
+func (c *ChainSDK) UploadtoDeoss(account, bucketName, uploadfile string) (string, error) {
+	kr, _ := keyring.FromURI(c.GetURI(), keyring.NetSubstrate{})
+
+	// sign message
+	message := utils.GetRandomcode(16)
+	sig, _ := kr.Sign(kr.SigningContext([]byte(message)))
+
+	body := new(bytes.Buffer)
+	writer := multipart.NewWriter(body)
+	//
+	formFile, err := writer.CreateFormFile("file", filepath.Base(uploadfile))
+	if err != nil {
+		return "", err
+	}
+
+	file, err := os.Open(uploadfile)
+	if err != nil {
+		return "", err
+	}
+	_, err = io.Copy(formFile, file)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, pattern.PublicDeoss, body)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Add("Account", account)
+	req.Header.Add("Message", message)
+	req.Header.Add("Signature", base58.Encode(sig[:]))
+	req.Header.Set("Content-Type", "multipart/form-data; boundary=<calculated when request is sent>")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+	respbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(respbody), nil
 }
 
 func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {

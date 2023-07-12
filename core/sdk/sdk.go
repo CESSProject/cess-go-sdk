@@ -208,14 +208,23 @@ type SDK interface {
 	GetMetadata() *types.Metadata
 	// GetKeyEvents returns the events storage key.
 	GetKeyEvents() types.StorageKey
+	// GetURI returns URI.
+	GetURI() string
 	// Sign returns the signature of the msg with the private key of the signing account.
 	Sign(msg []byte) ([]byte, error)
 	// Verify the signature of the msg with the public key of the signing account.
 	Verify(msg []byte, sig []byte) (bool, error)
-	// StoreFile is used to store files to the cess network
+	// StoreFile stores files to the cess network.
+	// - You will need to purchase space before you can complete the storage.
+	// - This method will upload the file to the deoss service provided by cess,
+	// and the deoss service will store the file to the cess network,
+	// so the success of this method does not mean that your file has been stored successfully.
+	// You can check the result of storing the file through the CheckFile method.
 	StoreFile(owner []byte, file string, bucket string) (string, error)
-	// RetrieveFile is used to retrieve files from the cess network
+	// RetrieveFile retrieves your files from the cess network.
 	RetrieveFile(roothash, savepath string) error
+	// CheckFile returns the storage progress of the file.
+	CheckFile(roothash string)
 	// EnabledP2P returns the p2p enable status
 	EnabledP2P() bool
 }
