@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
 	"github.com/CESSProject/cess-go-sdk/core/hashtree"
@@ -218,7 +219,10 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 		}
 	}(baseDir)
 
+	findPeers := c.FindPeers()
+
 	var segmentspath = make([]string, 0)
+	var peerid string
 	for _, segment := range fmeta.SegmentList {
 		fragmentpaths := make([]string, 0)
 		for _, fragment := range segment.FragmentList {
@@ -226,10 +230,13 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 			if err != nil {
 				return errors.Wrapf(err, "[QueryStorageMiner]")
 			}
-
-			addr, err := c.DHTFindPeer(base58.Encode([]byte(string(miner.PeerId[:]))))
-			if err != nil {
-				return errors.Wrapf(err, "[DHTFindPeer]")
+			peerid = base58.Encode([]byte(string(miner.PeerId[:])))
+			addr, ok := findPeers[peerid]
+			if !ok {
+				addr, err = c.DHTFindPeer(peerid)
+				if err != nil {
+					return errors.Wrapf(err, "[DHTFindPeer]")
+				}
 			}
 
 			err = c.Connect(c.GetCtxQueryFromCtxCancel(), addr)
@@ -424,6 +431,31 @@ func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInf
 	}
 
 	return nil
+}
+
+func (c *ChainSDK) FindPeers() map[string]peer.AddrInfo {
+	var peerMap = make(map[string]peer.AddrInfo, 10)
+	timeout := time.NewTicker(time.Second * 3)
+	defer timeout.Stop()
+	c.RouteTableFindPeers(0)
+	for {
+		select {
+		case peer, ok := <-c.GetDiscoveredPeers():
+			if !ok {
+				return peerMap
+			}
+			if len(peer.Responses) == 0 {
+				break
+			}
+			for _, v := range peer.Responses {
+				var temp = v
+				peerMap[temp.ID.Pretty()] = *temp
+			}
+			timeout.Reset(time.Second * 3)
+		case <-timeout.C:
+			return peerMap
+		}
+	}
 }
 
 func (c *ChainSDK) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
