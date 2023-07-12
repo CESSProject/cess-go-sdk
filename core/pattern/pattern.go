@@ -92,10 +92,11 @@ const (
 	TX_AUDIT_SUBMITPROOF = AUDIT + DOT + "submit_proof"
 
 	// OSS
-	TX_OSS_REGISTER  = OSS + DOT + "register"
-	TX_OSS_UPDATE    = OSS + DOT + "update"
-	TX_OSS_DESTORY   = OSS + DOT + "destroy"
-	TX_OSS_AUTHORIZE = OSS + DOT + "authorize"
+	TX_OSS_REGISTER    = OSS + DOT + "register"
+	TX_OSS_UPDATE      = OSS + DOT + "update"
+	TX_OSS_DESTORY     = OSS + DOT + "destroy"
+	TX_OSS_AUTHORIZE   = OSS + DOT + "authorize"
+	TX_OSS_UNAUTHORIZE = OSS + DOT + "cancel_authorize"
 
 	// SMINER
 	TX_SMINER_REGISTER       = SMINER + DOT + "regnstk"
