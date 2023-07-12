@@ -12,6 +12,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -48,6 +49,10 @@ type ChainSDK struct {
 }
 
 var _ sdk.SDK = (*ChainSDK)(nil)
+
+var globalTransport = &http.Transport{
+	DisableKeepAlives: true,
+}
 
 func NewChainSDK(
 	ctx context.Context,
@@ -191,6 +196,10 @@ func (c *ChainSDK) GetTokenSymbol() string {
 
 func (c *ChainSDK) GetRoleName() string {
 	return c.name
+}
+
+func (c *ChainSDK) GetURI() string {
+	return c.keyring.URI
 }
 
 func (c *ChainSDK) Sign(msg []byte) ([]byte, error) {

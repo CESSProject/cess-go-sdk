@@ -25,6 +25,9 @@ const BlockInterval = time.Second * time.Duration(6)
 
 const MaxSubmitedIdleFileMeta = 30
 
+const PublicDeoss = "https://deoss-pub-gateway.cess.cloud/"
+const PublicDeossAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
+
 // Pallets
 const (
 	//
@@ -90,9 +93,11 @@ const (
 	TX_AUDIT_SUBMITPROOF = AUDIT + DOT + "submit_proof"
 
 	// OSS
-	TX_OSS_REGISTER = OSS + DOT + "register"
-	TX_OSS_UPDATE   = OSS + DOT + "update"
-	TX_OSS_DESTORY  = OSS + DOT + "destroy"
+	TX_OSS_REGISTER    = OSS + DOT + "register"
+	TX_OSS_UPDATE      = OSS + DOT + "update"
+	TX_OSS_DESTORY     = OSS + DOT + "destroy"
+	TX_OSS_AUTHORIZE   = OSS + DOT + "authorize"
+	TX_OSS_UNAUTHORIZE = OSS + DOT + "cancel_authorize"
 
 	// SMINER
 	TX_SMINER_REGISTER       = SMINER + DOT + "regnstk"

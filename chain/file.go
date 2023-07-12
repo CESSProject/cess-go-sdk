@@ -8,7 +8,11 @@
 package chain
 
 import (
+	"bytes"
 	"io"
+	"io/ioutil"
+	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -17,6 +21,8 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/hashtree"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
+	keyring "github.com/CESSProject/go-keyring"
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
@@ -157,93 +163,28 @@ func (c *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error
 	return erasure.ReedSolomonRestore(outpath, shardspath)
 }
 
-func (c *ChainSDK) StoreFile(owner []byte, file string, bucket string) (string, error) {
-	if !c.enabledP2P {
-		return "", errors.New("P2P network not enabled")
-	}
-
-	fstat, err := os.Stat(file)
-	if err != nil {
-		return "", err
-	}
-
-	if fstat.IsDir() {
-		return "", errors.New("not a file")
-	}
-
-	// verify mem availability
-	mem, err := utils.GetSysMemAvailable()
-	if err == nil {
-		if fstat.Size() > int64(mem*80/100) {
-			return "", errors.New("unsupported file size")
-		}
-	}
-
-	if !utils.CompareSlice(owner, c.GetSignatureAccPulickey()) {
-		return "", errors.New("account error")
-	}
-
-	if !utils.CheckBucketName(bucket) {
-		return "", errors.New("invalid bucket name")
-	}
-
-	userInfo, err := c.QueryUserSpaceSt(owner)
-	if err != nil {
-		if err.Error() == pattern.ERR_Empty {
-			return "", errors.New("no space in the account")
-		}
-		return "", errors.Wrapf(err, "[QueryUserSpaceSt]")
-	}
-
-	blockheight, err := c.QueryBlockHeight("")
-	if err != nil {
-		return "", errors.Wrapf(err, "[QueryBlockHeight]")
-	}
-
-	if userInfo.Deadline < (blockheight + 30) {
-		return "", errors.Wrapf(err, "account space expires soon")
-	}
-
-	segmentDataInfo, roothash, err := c.ProcessingData(file)
-	if err != nil {
-		return "", errors.Wrapf(err, "[ProcessingData]")
-	}
-
-	var storageOrder pattern.StorageOrder
-
-	_, err = c.QueryFileMetadata(roothash)
-	if err == nil {
-		return roothash, nil
-	}
-
-	storageOrder, err = c.QueryStorageOrder(roothash)
-	if err != nil {
-		if err.Error() != pattern.ERR_Empty {
-			return roothash, errors.Wrapf(err, "[QueryStorageOrder]")
-		}
-		_, err = c.GenerateStorageOrder(roothash, segmentDataInfo, owner, fstat.Name(), bucket, uint64(fstat.Size()))
-		if err != nil {
-			return roothash, errors.Wrapf(err, "[GenerateStorageOrder]")
-		}
-		time.Sleep(pattern.BlockInterval)
-	}
-
-	// store data to storage node
-	err = c.StorageData(roothash, segmentDataInfo, storageOrder.AssignedMiner)
-	if err != nil {
-		return roothash, errors.Wrapf(err, "[StorageData]")
-	}
-	return roothash, nil
+// StoreFile
+func (c *ChainSDK) StoreFile(file, bucket string) (string, error) {
+	c.AuthorizeSpace(pattern.PublicDeossAccount)
+	return c.UploadtoGateway(pattern.PublicDeoss, c.GetSignatureAcc(), file, bucket)
 }
 
 func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
+	err := c.DownloadFromGateway(pattern.PublicDeoss, roothash, savepath)
+	if err == nil {
+		return nil
+	}
+
 	if !c.enabledP2P {
 		return errors.New("P2P network not enabled")
 	}
 
 	fmeta, err := c.QueryFileMetadata(roothash)
 	if err != nil {
-		return errors.Wrapf(err, "[QueryFileMetadata]")
+		if err.Error() != pattern.ERR_Empty {
+			return errors.Wrapf(err, "[QueryFileMetadata]")
+		}
+		return errors.New("Not Found")
 	}
 
 	var userfile = savepath
@@ -278,7 +219,10 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 		}
 	}(baseDir)
 
+	findPeers := c.FindPeers()
+
 	var segmentspath = make([]string, 0)
+	var peerid string
 	for _, segment := range fmeta.SegmentList {
 		fragmentpaths := make([]string, 0)
 		for _, fragment := range segment.FragmentList {
@@ -286,9 +230,22 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 			if err != nil {
 				return errors.Wrapf(err, "[QueryStorageMiner]")
 			}
-			peerid, _ := peer.Decode(string(miner.PeerId[:]))
+			peerid = base58.Encode([]byte(string(miner.PeerId[:])))
+			addr, ok := findPeers[peerid]
+			if !ok {
+				addr, err = c.DHTFindPeer(peerid)
+				if err != nil {
+					return errors.Wrapf(err, "[DHTFindPeer]")
+				}
+			}
+
+			err = c.Connect(c.GetCtxQueryFromCtxCancel(), addr)
+			if err != nil {
+				return errors.Wrapf(err, "[Connect]")
+			}
+
 			fragmentpath := filepath.Join(baseDir, string(fragment.Hash[:]))
-			err = c.ReadFileAction(peerid, roothash, string(fragment.Hash[:]), fragmentpath, pattern.FragmentSize)
+			err = c.ReadFileAction(addr.ID, roothash, string(fragment.Hash[:]), fragmentpath, pattern.FragmentSize)
 			if err != nil {
 				continue
 			}
@@ -333,6 +290,123 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 	return nil
 }
 
+func (c *ChainSDK) UploadtoGateway(url, account, uploadfile, bucketName string) (string, error) {
+	fstat, err := os.Stat(uploadfile)
+	if err != nil {
+		return "", err
+	}
+
+	if fstat.IsDir() {
+		return "", errors.New("not a file")
+	}
+
+	if fstat.Size() == 0 {
+		return "", errors.New("empty file")
+	}
+
+	if account != c.GetSignatureAcc() {
+		return "", errors.New("account error")
+	}
+
+	if !utils.CheckBucketName(bucketName) {
+		return "", errors.New("invalid bucket name")
+	}
+
+	kr, _ := keyring.FromURI(c.GetURI(), keyring.NetSubstrate{})
+
+	// sign message
+	message := utils.GetRandomcode(16)
+	sig, _ := kr.Sign(kr.SigningContext([]byte(message)))
+
+	body := new(bytes.Buffer)
+	writer := multipart.NewWriter(body)
+	//
+	formFile, err := writer.CreateFormFile("file", fstat.Name())
+	if err != nil {
+		return "", err
+	}
+
+	file, err := os.Open(uploadfile)
+	if err != nil {
+		return "", err
+	}
+	_, err = io.Copy(formFile, file)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, url, body)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Account", account)
+	req.Header.Set("Message", message)
+	req.Header.Set("Signature", base58.Encode(sig[:]))
+	req.Header.Set("Content-Type", "multipart/form-data; boundary=<calculated when request is sent>")
+
+	client := &http.Client{}
+	client.Transport = globalTransport
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	respbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		if len(respbody) > 0 {
+			return "", errors.New(string(respbody))
+		}
+		return "", errors.New("Deoss service failure, please retry or contact administrator.")
+	}
+
+	return string(respbody), nil
+}
+
+func (c *ChainSDK) DownloadFromGateway(url, roothash, savepath string) error {
+	_, err := os.Stat(savepath)
+	if err == nil {
+		return nil
+	}
+
+	f, err := os.Create(savepath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	req, err := http.NewRequest(http.MethodGet, filepath.Join(url, roothash), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Operation", "download")
+
+	client := &http.Client{}
+	client.Transport = globalTransport
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("failed")
+	}
+
+	_, err = io.Copy(f, req.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
 	if !c.enabledP2P {
 		return errors.New("P2P network not enabled")
@@ -357,6 +431,31 @@ func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInf
 	}
 
 	return nil
+}
+
+func (c *ChainSDK) FindPeers() map[string]peer.AddrInfo {
+	var peerMap = make(map[string]peer.AddrInfo, 10)
+	timeout := time.NewTicker(time.Second * 3)
+	defer timeout.Stop()
+	c.RouteTableFindPeers(0)
+	for {
+		select {
+		case peer, ok := <-c.GetDiscoveredPeers():
+			if !ok {
+				return peerMap
+			}
+			if len(peer.Responses) == 0 {
+				break
+			}
+			for _, v := range peer.Responses {
+				var temp = v
+				peerMap[temp.ID.Pretty()] = *temp
+			}
+			timeout.Reset(time.Second * 3)
+		case <-timeout.C:
+			return peerMap
+		}
+	}
 }
 
 func (c *ChainSDK) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
