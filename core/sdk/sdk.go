@@ -232,7 +232,7 @@ type SDK interface {
 	RetrieveFile(roothash, savepath string) error
 	// UploadtoGateway uploads files to deoss gateway.
 	UploadtoGateway(url, account, uploadfile, bucketName string) (string, error)
-	//
+	// DownloadFromGateway downloads files from deoss gateway.
 	DownloadFromGateway(url, roothash, savepath string) error
 	// EnabledP2P returns the p2p enable status
 	EnabledP2P() bool
