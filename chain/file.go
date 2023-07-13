@@ -340,6 +340,7 @@ func (c *ChainSDK) UploadtoGateway(url, account, uploadfile, bucketName string) 
 		return "", err
 	}
 
+	req.Header.Set("BucketName", bucketName)
 	req.Header.Set("Account", account)
 	req.Header.Set("Message", message)
 	req.Header.Set("Signature", base58.Encode(sig[:]))
@@ -380,7 +381,7 @@ func (c *ChainSDK) DownloadFromGateway(url, roothash, savepath string) error {
 	}
 	defer f.Close()
 
-	req, err := http.NewRequest(http.MethodGet, filepath.Join(url, roothash), nil)
+	req, err := http.NewRequest(http.MethodGet, url+roothash, nil)
 	if err != nil {
 		return err
 	}
@@ -399,7 +400,7 @@ func (c *ChainSDK) DownloadFromGateway(url, roothash, savepath string) error {
 		return errors.New("failed")
 	}
 
-	_, err = io.Copy(f, req.Body)
+	_, err = io.Copy(f, resp.Body)
 	if err != nil {
 		return err
 	}

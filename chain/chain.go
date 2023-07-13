@@ -10,6 +10,7 @@ package chain
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -77,6 +78,10 @@ func NewChainSDK(
 		}
 	)
 
+	if !core.FreeLocalPort(uint32(p2pPort)) {
+		return nil, fmt.Errorf("port [%d] is in use", p2pPort)
+	}
+
 	log.SetOutput(io.Discard)
 	for i := 0; i < len(rpcs); i++ {
 		chainSDK.api, err = gsrpc.NewSubstrateAPI(rpcs[i])
@@ -85,8 +90,12 @@ func NewChainSDK(
 		}
 	}
 	log.SetOutput(os.Stdout)
-	if err != nil || chainSDK.api == nil {
+	if err != nil {
 		return nil, err
+	}
+
+	if chainSDK.api == nil {
+		return nil, pattern.ERR_RPC_CONNECTION
 	}
 
 	chainSDK.SetChainState(true)
