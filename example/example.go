@@ -19,19 +19,22 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 var RPC_ADDRS = []string{
 	"wss://testnet-rpc0.cess.cloud/ws/",
 	"wss://testnet-rpc1.cess.cloud/ws/",
+	"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
 var Workspace = "/cess"
 var Port = 4001
 var Bootstrap = []string{
-	"_dnsaddr.sjc-1.bootstrap-kldr.cess.cloud",
+	"_dnsaddr.boot-kldr-testnet.cess.cloud",
 }
 
-const File = "/home/test_download"
+const UploadFile = "example.go"
+const DownloadFile = "download_file"
 const BucketName = "myBucket"
-const FileHash = "c158d7008e94d3af61033b6861aa4f35a4c2b829c7e97224fcbb54618de55945"
+const FileHash = "3ea772e68cf615260916dc94f501c43da78f6fdc15dc20e722e5284aca612a92"
 
 func main() {
+	StoreFile()
 	RetrieveFile()
 }
 
@@ -51,7 +54,7 @@ func RetrieveFile() {
 		panic(err)
 	}
 
-	fmt.Println(sdk.RetrieveFile(FileHash, File))
+	fmt.Println(sdk.RetrieveFile(FileHash, DownloadFile))
 }
 
 func StoreFile() {
@@ -70,7 +73,7 @@ func StoreFile() {
 		panic(err)
 	}
 
-	fmt.Println(sdk.StoreFile(File, BucketName))
+	fmt.Println(sdk.StoreFile(UploadFile, BucketName))
 }
 
 func CreateBucket() {
