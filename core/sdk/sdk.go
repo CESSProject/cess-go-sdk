@@ -182,6 +182,8 @@ type SDK interface {
 	QueryAccountInfo(puk []byte) (types.AccountInfo, error)
 	// GetTokenSymbol returns the token symbol
 	GetTokenSymbol() string
+	// GetNetworkEnv returns the network environment
+	GetNetworkEnv() string
 	// SysProperties returns the system properties.
 	SysProperties() (pattern.SysProperties, error)
 	// SyncState returns the system sync state.
