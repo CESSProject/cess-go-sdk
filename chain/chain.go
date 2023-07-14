@@ -44,6 +44,7 @@ type ChainSDK struct {
 	rpcAddr         []string
 	timeForBlockOut time.Duration
 	tokenSymbol     string
+	networkEnv      string
 	signatureAcc    string
 	name            string
 	enabledP2P      bool
@@ -132,6 +133,11 @@ func NewChainSDK(
 	}
 	chainSDK.tokenSymbol = string(properties.TokenSymbol)
 
+	chainSDK.networkEnv, err = chainSDK.SysChain()
+	if err != nil {
+		return nil, err
+	}
+
 	if workspace != "" && p2pPort > 0 {
 		p2p, err := p2pgo.New(
 			ctx,
@@ -201,6 +207,10 @@ func (c *ChainSDK) GetMetadata() *types.Metadata {
 
 func (c *ChainSDK) GetTokenSymbol() string {
 	return c.tokenSymbol
+}
+
+func (c *ChainSDK) GetNetworkEnv() string {
+	return c.networkEnv
 }
 
 func (c *ChainSDK) GetRoleName() string {

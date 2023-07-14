@@ -115,6 +115,20 @@ func (c *ChainSDK) SysProperties() (pattern.SysProperties, error) {
 	return data, err
 }
 
+func (c *ChainSDK) SysChain() (string, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.Text
+	if !c.GetChainState() {
+		return "", pattern.ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, pattern.RPC_SYS_Chain)
+	return string(data), err
+}
+
 func (c *ChainSDK) SyncState() (pattern.SysSyncState, error) {
 	defer func() {
 		if err := recover(); err != nil {

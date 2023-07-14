@@ -134,6 +134,7 @@ const (
 	RPC_SYS_Properties = "system_properties"
 	RPC_SYS_SyncState  = "system_syncState"
 	RPC_SYS_Version    = "system_version"
+	RPC_SYS_Chain      = "system_chain"
 
 	//Net
 	RPC_NET_Listening = "net_listening"
