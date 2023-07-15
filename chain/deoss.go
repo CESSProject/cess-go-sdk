@@ -8,6 +8,7 @@
 package chain
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -21,7 +22,7 @@ import (
 )
 
 // QueryDeossPeerPublickey
-func (c *ChainSDK) QueryDeossPeerPublickey(pubkey []byte) ([]byte, error) {
+func (c *Sdk) QueryDeossPeerPublickey(pubkey []byte) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -49,7 +50,7 @@ func (c *ChainSDK) QueryDeossPeerPublickey(pubkey []byte) ([]byte, error) {
 }
 
 // QueryDeossPeerPublickey
-func (c *ChainSDK) QueryDeossPeerIdList() ([]string, error) {
+func (c *Sdk) QueryDeossPeerIdList() ([]string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -84,7 +85,7 @@ func (c *ChainSDK) QueryDeossPeerIdList() ([]string, error) {
 	return result, nil
 }
 
-func (c *ChainSDK) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
+func (c *Sdk) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -121,7 +122,7 @@ func (c *ChainSDK) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	return data, nil
 }
 
-func (c *ChainSDK) QuaryAuthorizedAccount(puk []byte) (string, error) {
+func (c *Sdk) QuaryAuthorizedAccount(puk []byte) (string, error) {
 	acc, err := c.QuaryAuthorizedAcc(puk)
 	if err != nil {
 		return "", err
@@ -129,7 +130,7 @@ func (c *ChainSDK) QuaryAuthorizedAccount(puk []byte) (string, error) {
 	return utils.EncodePublicKeyAsCessAccount(acc[:])
 }
 
-func (c *ChainSDK) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
+func (c *Sdk) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
 	grantor, err := c.QuaryAuthorizedAcc(puk)
 	if err != nil {
 		if err.Error() == pattern.ERR_Empty {
@@ -143,7 +144,289 @@ func (c *ChainSDK) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
 	return account_chain == account_local, nil
 }
 
-func (c *ChainSDK) AuthorizeSpace(ossAccount string) (string, error) {
+func (c *Sdk) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		err         error
+		txhash      string
+		call        types.Call
+		accountInfo types.AccountInfo
+	)
+
+	if !c.GetChainState() {
+		return txhash, pattern.ERR_RPC_CONNECTION
+	}
+
+	var peerid pattern.PeerId
+	if len(peerid) != len(peerId) {
+		return txhash, errors.New("register deoss: invalid peerid")
+	}
+	for i := 0; i < len(peerid); i++ {
+		peerid[i] = types.U8(peerId[i])
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	id, err := c.QueryDeossPeerPublickey(c.keyring.PublicKey)
+	if err != nil {
+		if err.Error() != pattern.ERR_Empty {
+			return txhash, err
+		}
+	} else {
+		if !utils.CompareSlice(id, peerId) {
+			txhash, err = c.updateDeossPeerId(key, peerid)
+			return txhash, err
+		}
+		return "", nil
+	}
+	call, err = types.NewCall(c.metadata, pattern.TX_OSS_REGISTER, peerid)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewCall]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+	}
+
+	if !ok {
+		keyStr, _ := utils.NumsToByteStr(key, map[string]bool{})
+		return txhash, fmt.Errorf(
+			"chain rpc.state.GetStorageLatest[%v]: %v",
+			keyStr,
+			pattern.ERR_RPC_EMPTY_VALUE,
+		)
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		c.SetChainState(false)
+		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+
+	timeout := time.NewTimer(c.packingTime)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := event.EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				}
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.Oss_OssRegister) > 0 {
+					return txhash, nil
+				}
+				return txhash, errors.New(pattern.ERR_Failed)
+			}
+		case err = <-sub.Err():
+			return txhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, pattern.ERR_RPC_TIMEOUT
+		}
+	}
+}
+
+func (c *Sdk) updateDeossPeerId(key types.StorageKey, peerid pattern.PeerId) (string, error) {
+	var (
+		err         error
+		txhash      string
+		call        types.Call
+		accountInfo types.AccountInfo
+	)
+
+	call, err = types.NewCall(c.metadata, pattern.TX_OSS_UPDATE, peerid)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewCall]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		c.SetChainState(false)
+		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+	timeout := time.NewTimer(c.packingTime)
+	defer timeout.Stop()
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := event.EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				}
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.Oss_OssUpdate) > 0 {
+					return txhash, nil
+				}
+
+				return txhash, errors.New(pattern.ERR_Failed)
+			}
+		case err = <-sub.Err():
+			return txhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, pattern.ERR_RPC_TIMEOUT
+		}
+	}
+}
+
+func (c *Sdk) ExitDeoss() (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		err         error
+		txhash      string
+		call        types.Call
+		accountInfo types.AccountInfo
+	)
+
+	if !c.GetChainState() {
+		return txhash, pattern.ERR_RPC_CONNECTION
+	}
+
+	call, err = types.NewCall(c.metadata, pattern.TX_OSS_DESTORY)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewCall]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+	}
+
+	if !ok {
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		c.SetChainState(false)
+		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+
+	timeout := time.NewTimer(c.packingTime)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := event.EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, errors.Wrap(err, "[GetStorageRaw]")
+				}
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil || len(events.Oss_OssDestroy) > 0 {
+					return txhash, nil
+				}
+				return txhash, errors.New(pattern.ERR_Failed)
+			}
+		case err = <-sub.Err():
+			return txhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, pattern.ERR_RPC_TIMEOUT
+		}
+	}
+}
+
+func (c *Sdk) AuthorizeSpace(ossAccount string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -215,7 +498,7 @@ func (c *ChainSDK) AuthorizeSpace(ossAccount string) (string, error) {
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -244,7 +527,7 @@ func (c *ChainSDK) AuthorizeSpace(ossAccount string) (string, error) {
 	}
 }
 
-func (c *ChainSDK) UnAuthorizeSpace() (string, error) {
+func (c *Sdk) UnAuthorizeSpace() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -306,7 +589,7 @@ func (c *ChainSDK) UnAuthorizeSpace() (string, error) {
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {

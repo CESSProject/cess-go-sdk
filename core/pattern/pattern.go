@@ -141,9 +141,9 @@ const (
 )
 
 const (
-	Role_OSS    = "OSS"
-	Role_DEOSS  = "DEOSS"
-	Role_BUCKET = "BUCKET"
+	Name_Deoss  = "deoss"
+	Name_Sminer = "bucket"
+	Name_SDK    = "client"
 )
 
 const DirMode = 0644

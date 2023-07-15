@@ -22,7 +22,7 @@ import (
 )
 
 // QueryBucketInfo
-func (c *ChainSDK) QueryBucketInfo(puk []byte, bucketname string) (pattern.BucketInfo, error) {
+func (c *Sdk) QueryBucketInfo(puk []byte, bucketname string) (pattern.BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -65,7 +65,7 @@ func (c *ChainSDK) QueryBucketInfo(puk []byte, bucketname string) (pattern.Bucke
 	return data, nil
 }
 
-func (c *ChainSDK) QueryBucketList(puk []byte) ([]types.Bytes, error) {
+func (c *Sdk) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -103,7 +103,7 @@ func (c *ChainSDK) QueryBucketList(puk []byte) ([]types.Bytes, error) {
 	return data, nil
 }
 
-func (c *ChainSDK) QueryAllBucketName(owner []byte) ([]string, error) {
+func (c *Sdk) QueryAllBucketName(owner []byte) ([]string, error) {
 	bucketlist, err := c.QueryBucketList(owner)
 	if err != nil {
 		if err.Error() != pattern.ERR_Empty {
@@ -118,7 +118,7 @@ func (c *ChainSDK) QueryAllBucketName(owner []byte) ([]string, error) {
 }
 
 // QueryFileMetaData
-func (c *ChainSDK) QueryFileMetadata(roothash string) (pattern.FileMetadata, error) {
+func (c *Sdk) QueryFileMetadata(roothash string) (pattern.FileMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -163,7 +163,7 @@ func (c *ChainSDK) QueryFileMetadata(roothash string) (pattern.FileMetadata, err
 }
 
 // QueryFillerMap
-func (c *ChainSDK) QueryFillerMap(filehash string) (pattern.IdleMetadata, error) {
+func (c *Sdk) QueryFillerMap(filehash string) (pattern.IdleMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -207,7 +207,7 @@ func (c *ChainSDK) QueryFillerMap(filehash string) (pattern.IdleMetadata, error)
 	return data, nil
 }
 
-func (c *ChainSDK) QueryStorageOrder(roothash string) (pattern.StorageOrder, error) {
+func (c *Sdk) QueryStorageOrder(roothash string) (pattern.StorageOrder, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -251,7 +251,7 @@ func (c *ChainSDK) QueryStorageOrder(roothash string) (pattern.StorageOrder, err
 	return data, nil
 }
 
-func (c *ChainSDK) QueryPendingReplacements(puk []byte) (uint32, error) {
+func (c *Sdk) QueryPendingReplacements(puk []byte) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -289,7 +289,7 @@ func (c *ChainSDK) QueryPendingReplacements(puk []byte) (uint32, error) {
 	return uint32(data), nil
 }
 
-func (c *ChainSDK) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error) {
+func (c *Sdk) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -356,7 +356,7 @@ func (c *ChainSDK) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMet
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -383,7 +383,7 @@ func (c *ChainSDK) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMet
 	}
 }
 
-func (c *ChainSDK) SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error) {
+func (c *Sdk) SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error) {
 	var submit = make([]pattern.IdleMetadata, 0)
 	for i := 0; i < len(idlefiles); i++ {
 		var filehash pattern.FileHash
@@ -413,7 +413,7 @@ func (c *ChainSDK) SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMet
 	return c.SubmitIdleMetadata(teeAcc, submit)
 }
 
-func (c *ChainSDK) CreateBucket(owner_pkey []byte, name string) (string, error) {
+func (c *Sdk) CreateBucket(owner_pkey []byte, name string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -480,7 +480,7 @@ func (c *ChainSDK) CreateBucket(owner_pkey []byte, name string) (string, error) 
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -509,7 +509,7 @@ func (c *ChainSDK) CreateBucket(owner_pkey []byte, name string) (string, error) 
 	}
 }
 
-func (c *ChainSDK) DeleteBucket(owner_pkey []byte, name string) (string, error) {
+func (c *Sdk) DeleteBucket(owner_pkey []byte, name string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -576,7 +576,7 @@ func (c *ChainSDK) DeleteBucket(owner_pkey []byte, name string) (string, error) 
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -605,7 +605,7 @@ func (c *ChainSDK) DeleteBucket(owner_pkey []byte, name string) (string, error) 
 	}
 }
 
-func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error) {
+func (c *Sdk) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -681,7 +681,7 @@ func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.Segment
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -708,7 +708,7 @@ func (c *ChainSDK) UploadDeclaration(filehash string, dealinfo []pattern.Segment
 	}
 }
 
-func (c *ChainSDK) DeleteFile(puk []byte, filehash []string) (string, []pattern.FileHash, error) {
+func (c *Sdk) DeleteFile(puk []byte, filehash []string) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -784,7 +784,7 @@ func (c *ChainSDK) DeleteFile(puk []byte, filehash []string) (string, []pattern.
 		return txhash, hashs, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 	for {
 		select {
@@ -816,7 +816,7 @@ func (c *ChainSDK) DeleteFile(puk []byte, filehash []string) (string, []pattern.
 	}
 }
 
-func (c *ChainSDK) DeleteFiller(filehash string) (string, error) {
+func (c *Sdk) DeleteFiller(filehash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -886,7 +886,7 @@ func (c *ChainSDK) DeleteFiller(filehash string) (string, error) {
 		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 	}
 	defer sub.Unsubscribe()
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 	for {
 		select {
@@ -912,7 +912,7 @@ func (c *ChainSDK) DeleteFiller(filehash string) (string, error) {
 	}
 }
 
-func (c *ChainSDK) SubmitFileReport(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
+func (c *Sdk) SubmitFileReport(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -974,7 +974,7 @@ func (c *ChainSDK) SubmitFileReport(roothash []pattern.FileHash) (string, []patt
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -1008,7 +1008,7 @@ func (c *ChainSDK) SubmitFileReport(roothash []pattern.FileHash) (string, []patt
 	}
 }
 
-func (c *ChainSDK) ReportFiles(roothash []string) (string, []string, error) {
+func (c *Sdk) ReportFiles(roothash []string) (string, []string, error) {
 	var hashs = make([]pattern.FileHash, len(roothash))
 	for i := 0; i < len(roothash); i++ {
 		for j := 0; j < len(roothash[i]); j++ {
@@ -1023,7 +1023,7 @@ func (c *ChainSDK) ReportFiles(roothash []string) (string, []string, error) {
 	return txhash, failedfiles, err
 }
 
-func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
+func (c *Sdk) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1085,7 +1085,7 @@ func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []patt
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -1118,7 +1118,7 @@ func (c *ChainSDK) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []patt
 	}
 }
 
-func (c *ChainSDK) ReplaceFile(roothash []string) (string, []string, error) {
+func (c *Sdk) ReplaceFile(roothash []string) (string, []string, error) {
 	var hashs = make([]pattern.FileHash, len(roothash))
 	for i := 0; i < len(roothash); i++ {
 		for j := 0; j < len(roothash[i]); j++ {
@@ -1134,7 +1134,7 @@ func (c *ChainSDK) ReplaceFile(roothash []string) (string, []string, error) {
 }
 
 // QueryRestoralOrder
-func (c *ChainSDK) QueryRestoralOrder(fragmentHash string) (pattern.RestoralOrderInfo, error) {
+func (c *Sdk) QueryRestoralOrder(fragmentHash string) (pattern.RestoralOrderInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -1179,7 +1179,7 @@ func (c *ChainSDK) QueryRestoralOrder(fragmentHash string) (pattern.RestoralOrde
 }
 
 // QueryRestoralOrder
-func (c *ChainSDK) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, error) {
+func (c *Sdk) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -1218,7 +1218,7 @@ func (c *ChainSDK) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, 
 }
 
 // GenerateRestoralOrder
-func (c *ChainSDK) GenerateRestoralOrder(rootHash, fragmentHash string) (string, error) {
+func (c *Sdk) GenerateRestoralOrder(rootHash, fragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1299,7 +1299,7 @@ func (c *ChainSDK) GenerateRestoralOrder(rootHash, fragmentHash string) (string,
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -1327,7 +1327,7 @@ func (c *ChainSDK) GenerateRestoralOrder(rootHash, fragmentHash string) (string,
 }
 
 // ClaimRestoralOrder
-func (c *ChainSDK) ClaimRestoralOrder(fragmentHash string) (string, error) {
+func (c *Sdk) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1399,7 +1399,7 @@ func (c *ChainSDK) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -1427,7 +1427,7 @@ func (c *ChainSDK) ClaimRestoralOrder(fragmentHash string) (string, error) {
 }
 
 // ClaimRestoralNoExistOrder
-func (c *ChainSDK) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragmentHash string) (string, error) {
+func (c *Sdk) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1513,7 +1513,7 @@ func (c *ChainSDK) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragm
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -1541,7 +1541,7 @@ func (c *ChainSDK) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragm
 }
 
 // QueryRestoralOrder
-func (c *ChainSDK) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error) {
+func (c *Sdk) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -1577,7 +1577,7 @@ func (c *ChainSDK) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error)
 }
 
 // QueryRestoralTargetList
-func (c *ChainSDK) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error) {
+func (c *Sdk) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -1613,7 +1613,7 @@ func (c *ChainSDK) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, erro
 }
 
 // ClaimRestoralNoExistOrder
-func (c *ChainSDK) RestoralComplete(restoralFragmentHash string) (string, error) {
+func (c *Sdk) RestoralComplete(restoralFragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1685,7 +1685,7 @@ func (c *ChainSDK) RestoralComplete(restoralFragmentHash string) (string, error)
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
