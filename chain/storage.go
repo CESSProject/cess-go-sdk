@@ -20,7 +20,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *ChainSDK) QuerySpacePricePerGib() (string, error) {
+func (c *Sdk) QuerySpacePricePerGib() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -49,7 +49,7 @@ func (c *ChainSDK) QuerySpacePricePerGib() (string, error) {
 	return fmt.Sprintf("%v", data), nil
 }
 
-func (c *ChainSDK) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error) {
+func (c *Sdk) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -87,7 +87,7 @@ func (c *ChainSDK) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error)
 	return data, nil
 }
 
-func (c *ChainSDK) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
+func (c *Sdk) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
 	var userSpaceSt pattern.UserSpaceSt
 	spaceinfo, err := c.QueryUserSpaceInfo(puk)
 	if err != nil {
@@ -103,7 +103,7 @@ func (c *ChainSDK) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
 	return userSpaceSt, nil
 }
 
-func (c *ChainSDK) BuySpace(count uint32) (string, error) {
+func (c *Sdk) BuySpace(count uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -169,7 +169,7 @@ func (c *ChainSDK) BuySpace(count uint32) (string, error) {
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -196,7 +196,7 @@ func (c *ChainSDK) BuySpace(count uint32) (string, error) {
 	}
 }
 
-func (c *ChainSDK) ExpansionSpace(count uint32) (string, error) {
+func (c *Sdk) ExpansionSpace(count uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -262,7 +262,7 @@ func (c *ChainSDK) ExpansionSpace(count uint32) (string, error) {
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {
@@ -289,7 +289,7 @@ func (c *ChainSDK) ExpansionSpace(count uint32) (string, error) {
 	}
 }
 
-func (c *ChainSDK) RenewalSpace(days uint32) (string, error) {
+func (c *Sdk) RenewalSpace(days uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -355,7 +355,7 @@ func (c *ChainSDK) RenewalSpace(days uint32) (string, error) {
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {

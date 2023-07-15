@@ -111,6 +111,10 @@ type SDK interface {
 
 	// Oss-Extrinsics
 
+	//
+	RegisterDeoss(peerId []byte) (string, error)
+	//
+	ExitDeoss() (string, error)
 	// AuthorizeSpace authorizes space to oss
 	AuthorizeSpace(ossAccount string) (string, error)
 	// UnAuthorizeSpace cancels space authorization
@@ -128,9 +132,15 @@ type SDK interface {
 
 	// Sminer-Extrinsics
 
+	// RegisterOrUpdateSminer register or update sminer information
+	RegisterOrUpdateSminer(peerId []byte, earnings string, pledge uint64) (string, string, error)
+	//
+	ExitSminer() (string, error)
 	// UpdateEarningsAcc update earnings account.
 	UpdateEarningsAcc(puk []byte) (string, error)
 	UpdateEarningsAccount(earnings string) (string, error)
+	// UpdateSminerPeerId update miner peerid
+	UpdateSminerPeerId(peerid pattern.PeerId) (string, error)
 	// IncreaseStakingAmount increase staking amount.
 	IncreaseStakingAmount(tokens *big.Int) (string, error)
 	IncreaseStorageNodeStakingAmount(token string) (string, error)
@@ -163,13 +173,6 @@ type SDK interface {
 	// QueryTeeInfoList queries the information of all tee workers.
 	QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error)
 	QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error)
-
-	// Role
-
-	// Register is used to register oss or bucket roles.
-	Register(role string, puk []byte, earnings string, pledge uint64) (string, string, error)
-	// Exit exit the cess network.
-	Exit(role string) (string, error)
 
 	// System
 
@@ -209,8 +212,10 @@ type SDK interface {
 	GetChainState() bool
 	// SetChainState sets the state of the chain node.
 	SetChainState(state bool)
-	// GetRoleName returns the role name.
-	GetRoleName() string
+	//
+	GetSdkName() string
+	//
+	SetSdkName(name string)
 	// Reconnect for reconnecting chains.
 	Reconnect() error
 	// GetMetadata returns the metadata of the chain.

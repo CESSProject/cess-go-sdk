@@ -19,7 +19,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *ChainSDK) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error) {
+func (c *Sdk) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -52,7 +52,7 @@ func (c *ChainSDK) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error)
 	return list, nil
 }
 
-func (c *ChainSDK) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error) {
+func (c *Sdk) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -79,7 +79,7 @@ func (c *ChainSDK) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentI
 	return data, nil
 }
 
-func (c *ChainSDK) QueryChallengeExpiration() (uint32, error) {
+func (c *Sdk) QueryChallengeExpiration() (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -106,7 +106,7 @@ func (c *ChainSDK) QueryChallengeExpiration() (uint32, error) {
 	return uint32(data), nil
 }
 
-func (c *ChainSDK) ReportProof(idlesigma, servicesigma string) (string, error) {
+func (c *Sdk) ReportProof(idlesigma, servicesigma string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -168,7 +168,7 @@ func (c *ChainSDK) ReportProof(idlesigma, servicesigma string) (string, error) {
 	}
 	defer sub.Unsubscribe()
 
-	timeout := time.NewTimer(c.timeForBlockOut)
+	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
 
 	for {

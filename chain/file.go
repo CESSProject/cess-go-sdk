@@ -29,7 +29,7 @@ import (
 )
 
 // ProcessingData
-func (c *ChainSDK) ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error) {
+func (c *Sdk) ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error) {
 	segmentPath, err := cutfile(file)
 	if err != nil {
 		if segmentPath != nil {
@@ -124,7 +124,7 @@ func cutfile(file string) ([]string, error) {
 	return segment, nil
 }
 
-func (c *ChainSDK) GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error) {
+func (c *Sdk) GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error) {
 	var err error
 	var segmentList = make([]pattern.SegmentList, len(segment))
 	var user pattern.UserBrief
@@ -159,17 +159,17 @@ func ExtractSegmenthash(segment []string) []string {
 	return segmenthash
 }
 
-func (c *ChainSDK) RedundancyRecovery(outpath string, shardspath []string) error {
+func (c *Sdk) RedundancyRecovery(outpath string, shardspath []string) error {
 	return erasure.ReedSolomonRestore(outpath, shardspath)
 }
 
 // StoreFile
-func (c *ChainSDK) StoreFile(file, bucket string) (string, error) {
+func (c *Sdk) StoreFile(file, bucket string) (string, error) {
 	c.AuthorizeSpace(pattern.PublicDeossAccount)
 	return c.UploadtoGateway(pattern.PublicDeoss, c.GetSignatureAcc(), file, bucket)
 }
 
-func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
+func (c *Sdk) RetrieveFile(roothash, savepath string) error {
 	err := c.DownloadFromGateway(pattern.PublicDeoss, roothash, savepath)
 	if err == nil {
 		return nil
@@ -290,7 +290,7 @@ func (c *ChainSDK) RetrieveFile(roothash, savepath string) error {
 	return nil
 }
 
-func (c *ChainSDK) UploadtoGateway(url, account, uploadfile, bucketName string) (string, error) {
+func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (string, error) {
 	fstat, err := os.Stat(uploadfile)
 	if err != nil {
 		return "", err
@@ -369,7 +369,7 @@ func (c *ChainSDK) UploadtoGateway(url, account, uploadfile, bucketName string) 
 	return string(respbody), nil
 }
 
-func (c *ChainSDK) DownloadFromGateway(url, roothash, savepath string) error {
+func (c *Sdk) DownloadFromGateway(url, roothash, savepath string) error {
 	_, err := os.Stat(savepath)
 	if err == nil {
 		return nil
@@ -408,7 +408,7 @@ func (c *ChainSDK) DownloadFromGateway(url, roothash, savepath string) error {
 	return nil
 }
 
-func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
+func (c *Sdk) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
 	if !c.enabledP2P {
 		return errors.New("P2P network not enabled")
 	}
@@ -434,7 +434,7 @@ func (c *ChainSDK) StorageData(roothash string, segment []pattern.SegmentDataInf
 	return nil
 }
 
-func (c *ChainSDK) FindPeers() map[string]peer.AddrInfo {
+func (c *Sdk) FindPeers() map[string]peer.AddrInfo {
 	var peerMap = make(map[string]peer.AddrInfo, 10)
 	timeout := time.NewTicker(time.Second * 3)
 	defer timeout.Stop()
@@ -459,7 +459,7 @@ func (c *ChainSDK) FindPeers() map[string]peer.AddrInfo {
 	}
 }
 
-func (c *ChainSDK) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
+func (c *Sdk) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
 	var peerids = make([]peer.ID, len(minerTaskList))
 	for i := 0; i < len(minerTaskList); i++ {
 		minerInfo, err := c.QueryStorageMiner(minerTaskList[i].Account[:])
