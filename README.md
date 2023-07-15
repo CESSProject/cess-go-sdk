@@ -52,11 +52,11 @@ To run test:
 	go test -v
 	```
 
-## Documentation & Examples
+## 📖 Documentation & Examples
 
 Please refer to: https://pkg.go.dev/github.com/CESSProject/cess-go-sdk
 
-## Usage
+## 💡 Usage
 
 Usually, you only care about how to access your data in the CESS network, you need to build such a web service yourself, this sdk will help you quickly realize data access. Note that [p2p-go](https://github.com/CESSProject/p2p-go) library needs to be used to enable the data transmission.
 
@@ -66,81 +66,28 @@ Usually, you only care about how to access your data in the CESS network, you ne
 To create an sdk client, you need to provide some configuration information: your rpc address (if not, use the rpc address disclosed by CESS), your wallet private key, and transaction timeout. Please refer to the following examples:
 
 ```go
-package main
-
-import (
-	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/config"
+sdk, err := cess.New(
+	config.CharacterName_Client,
+	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
+	cess.Mnemonic("<your account mnmonic>"),
+	cess.TransactionTimeout(time.Second * 10),
 )
-
-// Substrate well-known mnemonic:
-//   https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
-
-var RPC_ADDRS = []string{
-	"wss://testnet-rpc0.cess.cloud/ws/",
-	"wss://testnet-rpc1.cess.cloud/ws/",
-	"wss://testnet-rpc2.cess.cloud/ws/",
-}
-
-
-func main() {
-	//Build client
-	sdk, err := cess.New(
-		config.CharacterName_Client,
-		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
-		cess.TransactionTimeout(time.Second * 10),
-	)
-	if err != nil {
-		panic(err)
-	}
-}
 ```
 
 ### Create an sdk client with p2p functionality
 
 When you need to store data or download data you need to initialize an sdk with p2p network, refer to the following code:
 ```go
-package main
-
-import (
-	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/config"
+sdk, err := cess.New(
+	config.CharacterName_Client,
+	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
+	cess.Mnemonic("<your account mnmonic>"),
+	cess.TransactionTimeout(time.Second * 10),
+	cess.Workspace("<work space>"),
+	cess.P2pPort(<port>),
+	cess.Bootnodes([]string{"<bootstrap node>"}),
+	cess.ProtocolPrefix("<protocol prefix>"),
 )
-
-// Substrate well-known mnemonic:
-//   https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
-
-var RPC_ADDRS = []string{
-	"wss://testnet-rpc0.cess.cloud/ws/",
-	"wss://testnet-rpc1.cess.cloud/ws/",
-	"wss://testnet-rpc2.cess.cloud/ws/",
-}
-
-var Workspace = "/cess"
-var Port = 4001
-var Bootstrap = []string{
-	"_dnsaddr.boot-kldr-testnet.cess.cloud",
-}
-
-func main() {
-	//Build client
-	sdk, err := cess.New(
-		config.CharacterName_Client,
-		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
-		cess.TransactionTimeout(time.Second * 10),
-		cess.Workspace(Workspace),
-		cess.P2pPort(Port),
-		cess.Bootnodes(Bootstrap),
-		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
-	)
-	if err != nil {
-		panic(err)
-	}
-}
 ```
 
 ### Create storage data bucket
