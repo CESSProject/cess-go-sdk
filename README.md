@@ -33,7 +33,7 @@ _dnsaddr.boot-kldr-testnet.cess.cloud
 https://testnet-faucet.cess.cloud/
 ```
 
-## Installation
+## 🏗 Usage
 
 To get the package use the standard:
 
@@ -41,7 +41,7 @@ To get the package use the standard:
 go get -u "github.com/CESSProject/cess-go-sdk"
 ```
 
-## Testing
+## ✅ Testing
 
 To run test:
 
@@ -56,7 +56,7 @@ To run test:
 
 Please refer to: https://pkg.go.dev/github.com/CESSProject/cess-go-sdk
 
-## 💡 Usage
+## 💡 Example
 
 Usually, you only care about how to access your data in the CESS network, you need to build such a web service yourself, this sdk will help you quickly realize data access. Note that [p2p-go](https://github.com/CESSProject/p2p-go) library needs to be used to enable the data transmission.
 
