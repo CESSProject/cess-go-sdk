@@ -144,7 +144,7 @@ func (c *Sdk) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
 	return account_chain == account_local, nil
 }
 
-func (c *Sdk) RegisterDeoss(peerId []byte) (string, error) {
+func (c *Sdk) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

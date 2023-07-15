@@ -56,7 +56,7 @@ var globalTransport = &http.Transport{
 	DisableKeepAlives: true,
 }
 
-func NewChainSDK(
+func NewSDK(
 	ctx context.Context,
 	serviceName string,
 	rpcs []string,

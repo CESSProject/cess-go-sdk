@@ -111,9 +111,9 @@ type SDK interface {
 
 	// Oss-Extrinsics
 
-	//
-	RegisterDeoss(peerId []byte) (string, error)
-	//
+	// RegisterOrUpdateDeoss register or update deoss information
+	RegisterOrUpdateDeoss(peerId []byte) (string, error)
+	// ExitDeoss exit deoss
 	ExitDeoss() (string, error)
 	// AuthorizeSpace authorizes space to oss
 	AuthorizeSpace(ossAccount string) (string, error)
@@ -134,7 +134,7 @@ type SDK interface {
 
 	// RegisterOrUpdateSminer register or update sminer information
 	RegisterOrUpdateSminer(peerId []byte, earnings string, pledge uint64) (string, string, error)
-	//
+	// ExitSminer exit mining
 	ExitSminer() (string, error)
 	// UpdateEarningsAcc update earnings account.
 	UpdateEarningsAcc(puk []byte) (string, error)
@@ -212,9 +212,9 @@ type SDK interface {
 	GetChainState() bool
 	// SetChainState sets the state of the chain node.
 	SetChainState(state bool)
-	//
+	// GetSdkName return sdk name
 	GetSdkName() string
-	//
+	// SetSdkName set sdk name
 	SetSdkName(name string)
 	// Reconnect for reconnecting chains.
 	Reconnect() error

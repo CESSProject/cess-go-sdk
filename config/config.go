@@ -52,7 +52,7 @@ func (cfg *Config) NewSDK(ctx context.Context, serviceName string) (sdk.SDK, err
 	if serviceName == "" {
 		return nil, fmt.Errorf("empty service name")
 	}
-	return chain.NewChainSDK(ctx, serviceName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout, cfg.Workspace, cfg.P2pPort, cfg.Bootnodes, cfg.ProtocolPrefix)
+	return chain.NewSDK(ctx, serviceName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout, cfg.Workspace, cfg.P2pPort, cfg.Bootnodes, cfg.ProtocolPrefix)
 }
 
 // Apply applies the given options to the config, returning the first error
