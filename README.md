@@ -93,50 +93,21 @@ sdk, err := cess.New(
 ### Create storage data bucket
 cess as an object storage service, the data are stored in buckets, which can be created automatically when uploading data, or separately, refer to the following code:
 ```go
-package main
-
-import (
-	"fmt"
-	"time"
-
-	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/config"
-	"github.com/CESSProject/cess-go-sdk/core/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+sdk, err := cess.New(
+	config.CharacterName_Client,
+	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
+	cess.Mnemonic("<your account mnmonic>"),
+	cess.TransactionTimeout(time.Second*10),
 )
-
-// Substrate well-known mnemonic:
-//
-//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
-
-var RPC_ADDRS = []string{
-	"wss://testnet-rpc0.cess.cloud/ws/",
-	"wss://testnet-rpc1.cess.cloud/ws/",
-	"wss://testnet-rpc2.cess.cloud/ws/",
+if err != nil {
+	panic(err)
 }
 
-const BucketName = "myBucket"
-
-func main() {
-	sdk, err := cess.New(
-		config.CharacterName_Client,
-		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
-		cess.TransactionTimeout(time.Second*10),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	keyringPair, err := signature.KeyringPairFromSecret(MY_MNEMONIC, 0)
-
-	if !utils.CheckBucketName(BucketName) {
-		panic("invalid bucket name")
-	}
-
-	fmt.Println(sdk.CreateBucket(keyringPair.PublicKey, BucketName))
+if !utils.CheckBucketName(BucketName) {
+	panic("invalid bucket name")
 }
+
+fmt.Println(sdk.CreateBucket(sdk.GetSignatureAccPulickey(), BucketName))
 ```
 
 ### Store data
