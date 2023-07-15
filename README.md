@@ -12,7 +12,7 @@
 
 The go sdk implementation of the CESS network, which provides RPC calls, status queries, block transactions and other functions.
 
-## Reporting Vulnerability
+## 📝 Reporting Vulnerability
 
 If you find out any system bugs or you have a better suggestions, please send an email to frode@cess.one or join [CESS discord](https://discord.gg/mYHTMfBwNS) to communicate with us.
 
