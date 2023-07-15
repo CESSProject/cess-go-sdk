@@ -102,122 +102,46 @@ sdk, err := cess.New(
 if err != nil {
 	panic(err)
 }
-
-if !utils.CheckBucketName(BucketName) {
-	panic("invalid bucket name")
-}
-
-fmt.Println(sdk.CreateBucket(sdk.GetSignatureAccPulickey(), BucketName))
+fmt.Println(sdk.CreateBucket(sdk.GetSignatureAccPulickey(), "<your bucket name>"))
 ```
 
 ### Store data
 You need to purchase space with your account before uploading files, please refer to [Buy Space](https://github.com/CESSProject/W3F-illustration/blob/4995c1584006823990806b9d30fa7d554630ec14/deoss/buySpace.png).
 The following is an example of uploading a file:
 ```go
-package main
-
-import (
-	"fmt"
-	"time"
-
-	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/config"
-	"github.com/CESSProject/cess-go-sdk/core/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+sdk, err := cess.New(
+	config.CharacterName_Client,
+	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
+	cess.Mnemonic("<your account mnmonic>"),
+	cess.TransactionTimeout(time.Second * 10),
+	cess.Workspace("<work space>"),
+	cess.P2pPort(<port>),
+	cess.Bootnodes([]string{"<bootstrap node>"}),
+	cess.ProtocolPrefix("<protocol prefix>"),
 )
-
-// Substrate well-known mnemonic:
-//
-//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
-
-var RPC_ADDRS = []string{
-	"wss://testnet-rpc0.cess.cloud/ws/",
-	"wss://testnet-rpc1.cess.cloud/ws/",
-	"wss://testnet-rpc2.cess.cloud/ws/",
+if err != nil {
+	panic(err)
 }
-
-const BucketName = "myBucket"
-const File = "/home/test"
-
-var Workspace = "/cess"
-var Port = 4001
-var Bootstrap = []string{
-	"_dnsaddr.boot-kldr-testnet.cess.cloud",
-}
-
-func main() {
-	sdk, err := cess.New(
-		config.CharacterName_Client,
-		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
-		cess.TransactionTimeout(time.Second*10),
-		cess.Workspace(Workspace),
-		cess.P2pPort(Port),
-		cess.Bootnodes(Bootstrap),
-		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(sdk.StoreFile(File, BucketName))
-}
+fmt.Println(sdk.StoreFile("<your file>", "<your bucket name>"))
 ```
 
 ### Retrieve data
 To retrieve the data, you need to provide the unique hash of the data, which will be returned to you when the data is uploaded successfully, here is the sample code to retrieve the data:
 ```go
-package main
-
-import (
-	"fmt"
-	"time"
-
-	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/config"
-	"github.com/CESSProject/cess-go-sdk/core/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+sdk, err := cess.New(
+	config.CharacterName_Client,
+	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
+	cess.Mnemonic("<your account mnmonic>"),
+	cess.TransactionTimeout(time.Second * 10),
+	cess.Workspace("<work space>"),
+	cess.P2pPort(<port>),
+	cess.Bootnodes([]string{"<bootstrap node>"}),
+	cess.ProtocolPrefix("<protocol prefix>"),
 )
-
-// Substrate well-known mnemonic:
-//
-//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
-
-var RPC_ADDRS = []string{
-	"wss://testnet-rpc0.cess.cloud/ws/",
-	"wss://testnet-rpc1.cess.cloud/ws/",
-	"wss://testnet-rpc2.cess.cloud/ws/",
+if err != nil {
+	panic(err)
 }
-
-const File = "/home/test_download"
-
-var Workspace = "/cess"
-var Port = 4001
-var Bootstrap = []string{
-	"_dnsaddr.boot-kldr-testnet.cess.cloud",
-}
-
-const FileHash = "your filehash"
-
-func main() {
-	sdk, err := cess.New(
-		config.CharacterName_Client,
-		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
-		cess.TransactionTimeout(time.Second*10),
-		cess.Workspace(Workspace),
-		cess.P2pPort(Port),
-		cess.Bootnodes(Bootstrap),
-		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(sdk.RetrieveFile(FileHash, File))
-}
+fmt.Println(sdk.RetrieveFile("<file hash>", "<save path>"))
 ```
 
 ## License
