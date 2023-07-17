@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
@@ -366,7 +367,7 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 		return "", errors.New("Deoss service failure, please retry or contact administrator.")
 	}
 
-	return string(respbody), nil
+	return strings.TrimLeft(strings.TrimSuffix(string(respbody), "\""), "\""), nil
 }
 
 func (c *Sdk) DownloadFromGateway(url, roothash, savepath string) error {
