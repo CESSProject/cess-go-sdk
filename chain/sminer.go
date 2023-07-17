@@ -982,3 +982,31 @@ func (c *Sdk) Withdraw() (string, error) {
 		}
 	}
 }
+
+func (s *Sdk) Expenders() (pattern.ExpendersInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data pattern.ExpendersInfo
+
+	if !s.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(s.metadata, pattern.SMINER, pattern.EXPENDERS)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := s.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}

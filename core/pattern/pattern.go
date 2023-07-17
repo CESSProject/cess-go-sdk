@@ -60,6 +60,7 @@ const (
 	ALLMINER   = "AllMiner"
 	MINERITEMS = "MinerItems"
 	REWARDMAP  = "RewardMap"
+	EXPENDERS  = "Expenders"
 
 	// TEEWORKER
 	TEEWORKERMAP = "TeeWorkerMap"
@@ -359,6 +360,12 @@ type RestoralTargetInfo struct {
 	ServiceSpace  types.U128
 	RestoredSpace types.U128
 	CoolingBlock  types.U32
+}
+
+type ExpendersInfo struct {
+	K types.U64
+	N types.U64
+	D types.U64
 }
 
 // --------------------customer-----------------

@@ -130,6 +130,9 @@ type SDK interface {
 	QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error)
 	QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error)
 
+	//
+	Expenders() (pattern.ExpendersInfo, error)
+
 	// Sminer-Extrinsics
 
 	// RegisterOrUpdateSminer register or update sminer information
