@@ -67,6 +67,7 @@ To create an sdk client, you need to provide some configuration information: you
 
 ```go
 sdk, err := cess.New(
+	context.Background(),
 	config.CharacterName_Client,
 	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
 	cess.Mnemonic("<your account mnmonic>"),
@@ -79,6 +80,7 @@ sdk, err := cess.New(
 When you need to store data or download data you need to initialize an sdk with p2p network, refer to the following code:
 ```go
 sdk, err := cess.New(
+	context.Background(),
 	config.CharacterName_Client,
 	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
 	cess.Mnemonic("<your account mnmonic>"),
@@ -94,6 +96,7 @@ sdk, err := cess.New(
 cess as an object storage service, the data are stored in buckets, which can be created automatically when uploading data, or separately, refer to the following code:
 ```go
 sdk, err := cess.New(
+	context.Background(),
 	config.CharacterName_Client,
 	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
 	cess.Mnemonic("<your account mnmonic>"),
@@ -110,6 +113,7 @@ You need to purchase space with your account before uploading files, please refe
 The following is an example of uploading a file:
 ```go
 sdk, err := cess.New(
+	context.Background(),
 	config.CharacterName_Client,
 	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
 	cess.Mnemonic("<your account mnmonic>"),
@@ -129,6 +133,7 @@ fmt.Println(sdk.StoreFile("<your file>", "<your bucket name>"))
 To retrieve the data, you need to provide the unique hash of the data, which will be returned to you when the data is uploaded successfully, here is the sample code to retrieve the data:
 ```go
 sdk, err := cess.New(
+	context.Background(),
 	config.CharacterName_Client,
 	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
 	cess.Mnemonic("<your account mnmonic>"),
