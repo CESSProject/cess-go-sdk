@@ -27,7 +27,7 @@ var Bootstrap = []string{
 	"_dnsaddr.boot-kldr-testnet.cess.cloud",
 }
 
-const UploadFile = "test.log"
+const UploadFile = "example.go"
 const DownloadFile = "download_file"
 const BucketName = "myBucket"
 
