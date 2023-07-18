@@ -35,7 +35,7 @@ const FileHash = "3ea772e68cf615260916dc94f501c43da78f6fdc15dc20e722e5284aca612a
 
 func main() {
 	StoreFile()
-	RetrieveFile()
+	//RetrieveFile()
 }
 
 func RetrieveFile() {
