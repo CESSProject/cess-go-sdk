@@ -92,7 +92,8 @@ const (
 // Extrinsics
 const (
 	//AUDIT
-	TX_AUDIT_SUBMITPROOF = AUDIT + DOT + "submit_proof"
+	TX_AUDIT_SUBMITPROOF     = AUDIT + DOT + "submit_proof"
+	TX_AUDIT_SUBMITIDLEPROOF = AUDIT + DOT + "submit_idle_proof"
 
 	// OSS
 	TX_OSS_REGISTER    = OSS + DOT + "register"
