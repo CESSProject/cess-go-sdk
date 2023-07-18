@@ -92,8 +92,9 @@ const (
 // Extrinsics
 const (
 	//AUDIT
-	TX_AUDIT_SUBMITPROOF     = AUDIT + DOT + "submit_proof"
-	TX_AUDIT_SUBMITIDLEPROOF = AUDIT + DOT + "submit_idle_proof"
+	TX_AUDIT_SUBMITPROOF        = AUDIT + DOT + "submit_proof"
+	TX_AUDIT_SUBMITIDLEPROOF    = AUDIT + DOT + "submit_idle_proof"
+	TX_AUDIT_SUBMITSERVICEPROOF = AUDIT + DOT + "submit_service_proof"
 
 	// OSS
 	TX_OSS_REGISTER    = OSS + DOT + "register"
@@ -209,6 +210,10 @@ type PoISKey_N [256]types.U8
 type TeeSignature [256]types.U8
 type Accumulator [256]types.U8
 type SpaceChallengeParam [22]types.U64
+
+// to be determined
+type SigmaMax [256]types.U8
+type BloomFilter [1024]types.U8
 
 type SysProperties struct {
 	Ss58Format    types.Bytes

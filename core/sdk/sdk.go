@@ -42,6 +42,8 @@ type SDK interface {
 	ReportProof(idlesigma, servicesigma string) (string, error)
 	//
 	SubmitIdleProof(idleProve pattern.FileHash) (string, error)
+	//
+	SubmitServiceProof(serviceProof pattern.SigmaMax) (string, error)
 
 	// Filebank-State
 
