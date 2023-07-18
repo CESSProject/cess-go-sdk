@@ -33,6 +33,8 @@ type SDK interface {
 	QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error)
 	// ProofAssignmentInfo queries the proof information assigned to puk.
 	QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error)
+	//
+	QueryChallenge_V2() (pattern.ChallengeInfo_V2, error)
 
 	// Audit-Extrinsics
 

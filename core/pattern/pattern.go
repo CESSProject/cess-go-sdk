@@ -51,6 +51,7 @@ const (
 	//AUDIT
 	UNVERIFYPROOF     = "UnverifyProof"
 	CHALLENGEDURATION = "ChallengeDuration"
+	ChALLENGESNAPSHOT = "ChallengeSnapShot"
 
 	// OSS
 	// OSS
@@ -206,6 +207,7 @@ type PoISKey_G [256]types.U8
 type PoISKey_N [256]types.U8
 type TeeSignature [256]types.U8
 type Accumulator [256]types.U8
+type SpaceChallengeParam [22]types.U64
 
 type SysProperties struct {
 	Ss58Format    types.Bytes
@@ -328,10 +330,37 @@ type NetSnapShot struct {
 	Random            []Random
 }
 
+type NetSnapShot_V2 struct {
+	Start               types.U32
+	Life                types.U32
+	TotalReward         types.U128
+	TotalIdleSpace      types.U128
+	TotalServiceSpace   types.U128
+	RandomIndexList     []types.U32
+	RandomList          []Random
+	SpaceChallengeParam SpaceChallengeParam
+}
+
 type MinerSnapShot struct {
 	Miner        types.AccountID
 	IdleSpace    types.U128
 	ServiceSpace types.U128
+}
+
+type MinerSnapShot_V2 struct {
+	Miner              types.AccountID
+	IdleLife           types.U32
+	ServiceLife        types.U32
+	IdleSpace          types.U128
+	ServiceSpace       types.U128
+	IdleSubmitted      types.Bool
+	ServiceSubmitted   types.Bool
+	ServiceBloomFilter BloomFilter
+}
+
+type ChallengeInfo_V2 struct {
+	NetSnapShot       NetSnapShot_V2
+	MinerSnapshotList []MinerSnapShot_V2
 }
 
 type NodePublickey struct {
