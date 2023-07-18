@@ -122,6 +122,7 @@ const (
 	TX_FILEBANK_CLAIMRESTOREORDER = FILEBANK + DOT + "claim_restoral_order"
 	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"
 	TX_FILEBANK_RESTORALCOMPLETE  = FILEBANK + DOT + "restoral_order_complete"
+	TX_FILEBANK_CERTIDLESPACE     = FILEBANK + DOT + "cert_idle_space"
 
 	// STORAGE_HANDLER
 	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
@@ -203,6 +204,7 @@ type PeerId [38]types.U8
 type PoISKey_G [256]types.U8
 type PoISKey_N [256]types.U8
 type TeeSignature [256]types.U8
+type Accumulator [256]types.U8
 
 type SysProperties struct {
 	Ss58Format    types.Bytes
@@ -374,6 +376,13 @@ type ExpendersInfo struct {
 type PoISKeyInfo struct {
 	G PoISKey_G
 	N PoISKey_N
+}
+
+type IdleSignInfo struct {
+	Miner              types.AccountID
+	Count              types.U64
+	Accumulator        Accumulator
+	LastOperationBlock types.U32
 }
 
 // --------------------customer-----------------
