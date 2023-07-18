@@ -51,6 +51,7 @@ const (
 	//AUDIT
 	UNVERIFYPROOF     = "UnverifyProof"
 	CHALLENGEDURATION = "ChallengeDuration"
+	ChALLENGESNAPSHOT = "ChallengeSnapShot"
 
 	// OSS
 	// OSS
@@ -60,6 +61,7 @@ const (
 	ALLMINER   = "AllMiner"
 	MINERITEMS = "MinerItems"
 	REWARDMAP  = "RewardMap"
+	EXPENDERS  = "Expenders"
 
 	// TEEWORKER
 	TEEWORKERMAP = "TeeWorkerMap"
@@ -90,7 +92,9 @@ const (
 // Extrinsics
 const (
 	//AUDIT
-	TX_AUDIT_SUBMITPROOF = AUDIT + DOT + "submit_proof"
+	TX_AUDIT_SUBMITPROOF        = AUDIT + DOT + "submit_proof"
+	TX_AUDIT_SUBMITIDLEPROOF    = AUDIT + DOT + "submit_idle_proof"
+	TX_AUDIT_SUBMITSERVICEPROOF = AUDIT + DOT + "submit_service_proof"
 
 	// OSS
 	TX_OSS_REGISTER    = OSS + DOT + "register"
@@ -121,6 +125,8 @@ const (
 	TX_FILEBANK_CLAIMRESTOREORDER = FILEBANK + DOT + "claim_restoral_order"
 	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"
 	TX_FILEBANK_RESTORALCOMPLETE  = FILEBANK + DOT + "restoral_order_complete"
+	TX_FILEBANK_CERTIDLESPACE     = FILEBANK + DOT + "cert_idle_space"
+	TX_FILEBANK_REPLACEIDLESPACE  = FILEBANK + DOT + "replace_idle_space"
 
 	// STORAGE_HANDLER
 	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
@@ -199,6 +205,12 @@ type FileHash [64]types.U8
 type Random [20]types.U8
 type TeePodr2Pk [270]types.U8
 type PeerId [38]types.U8
+type PoISKey_G [256]types.U8
+type PoISKey_N [256]types.U8
+type TeeSignature [256]types.U8
+type Accumulator [256]types.U8
+type SpaceChallengeParam [22]types.U64
+type BloomFilter [256]types.U64
 
 type SysProperties struct {
 	Ss58Format    types.Bytes
@@ -321,10 +333,37 @@ type NetSnapShot struct {
 	Random            []Random
 }
 
+type NetSnapShot_V2 struct {
+	Start               types.U32
+	Life                types.U32
+	TotalReward         types.U128
+	TotalIdleSpace      types.U128
+	TotalServiceSpace   types.U128
+	RandomIndexList     []types.U32
+	RandomList          []Random
+	SpaceChallengeParam SpaceChallengeParam
+}
+
 type MinerSnapShot struct {
 	Miner        types.AccountID
 	IdleSpace    types.U128
 	ServiceSpace types.U128
+}
+
+type MinerSnapShot_V2 struct {
+	Miner              types.AccountID
+	IdleLife           types.U32
+	ServiceLife        types.U32
+	IdleSpace          types.U128
+	ServiceSpace       types.U128
+	IdleSubmitted      types.Bool
+	ServiceSubmitted   types.Bool
+	ServiceBloomFilter BloomFilter
+}
+
+type ChallengeInfo_V2 struct {
+	NetSnapShot       NetSnapShot_V2
+	MinerSnapshotList []MinerSnapShot_V2
 }
 
 type NodePublickey struct {
@@ -359,6 +398,24 @@ type RestoralTargetInfo struct {
 	ServiceSpace  types.U128
 	RestoredSpace types.U128
 	CoolingBlock  types.U32
+}
+
+type ExpendersInfo struct {
+	K types.U64
+	N types.U64
+	D types.U64
+}
+
+type PoISKeyInfo struct {
+	G PoISKey_G
+	N PoISKey_N
+}
+
+type IdleSignInfo struct {
+	Miner              types.AccountID
+	Count              types.U64
+	Accumulator        Accumulator
+	LastOperationBlock types.U32
 }
 
 // --------------------customer-----------------

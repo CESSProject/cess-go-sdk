@@ -33,11 +33,17 @@ type SDK interface {
 	QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error)
 	// ProofAssignmentInfo queries the proof information assigned to puk.
 	QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error)
+	//
+	QueryChallenge_V2() (pattern.ChallengeInfo_V2, error)
 
 	// Audit-Extrinsics
 
 	// ReportProof is used to report proof data.
 	ReportProof(idlesigma, servicesigma string) (string, error)
+	//
+	SubmitIdleProof(idleProve pattern.FileHash) (string, error)
+	//
+	SubmitServiceProof(serviceProof []types.U8) (string, error)
 
 	// Filebank-State
 
@@ -95,6 +101,10 @@ type SDK interface {
 	// SubmitIdleMetadata Submit idle file metadata.
 	SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error)
 	SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error)
+	//
+	CertIdleSpace(idleSignInfo pattern.IdleSignInfo, sign pattern.TeeSignature) (string, error)
+	//
+	ReplaceIdleSpace(idleSignInfo pattern.IdleSignInfo, sign pattern.TeeSignature) (string, error)
 
 	// Oss-State
 
@@ -130,10 +140,15 @@ type SDK interface {
 	QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error)
 	QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error)
 
+	//
+	Expenders() (pattern.ExpendersInfo, error)
+
 	// Sminer-Extrinsics
 
 	// RegisterOrUpdateSminer register or update sminer information
 	RegisterOrUpdateSminer(peerId []byte, earnings string, pledge uint64) (string, string, error)
+	//
+	RegisterOrUpdateSminer_V2(peerId []byte, earnings string, pledge uint64, poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, string, error)
 	// ExitSminer exit mining
 	ExitSminer() (string, error)
 	// UpdateEarningsAcc update earnings account.
@@ -228,14 +243,10 @@ type SDK interface {
 	Sign(msg []byte) ([]byte, error)
 	// Verify the signature of the msg with the public key of the signing account.
 	Verify(msg []byte, sig []byte) (bool, error)
-	// StoreFile stores files to the cess network.
-	// - You will need to purchase space before you can complete the storage.
-	// - This method will upload the file to the deoss service provided by cess,
-	// and the deoss service will store the file to the cess network,
-	// so the success of this method does not mean that your file has been stored successfully.
-	// You can check the result of storing the file through the CheckFile method.
+	// StoreFile uploads the file to the public gateway of CESS.
+	// You will need to purchase space before you can complete the storage.
 	StoreFile(file, bucket string) (string, error)
-	// RetrieveFile retrieves your files from the cess network.
+	// RetrieveFile downloads files from the public gateway of CESS.
 	RetrieveFile(roothash, savepath string) error
 	// UploadtoGateway uploads files to deoss gateway.
 	UploadtoGateway(url, account, uploadfile, bucketName string) (string, error)
@@ -243,6 +254,4 @@ type SDK interface {
 	DownloadFromGateway(url, roothash, savepath string) error
 	// EnabledP2P returns the p2p enable status
 	EnabledP2P() bool
-	// CheckFile returns the storage progress of the file.
-	// CheckFile(roothash string)
 }

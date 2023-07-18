@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
@@ -170,124 +171,7 @@ func (c *Sdk) StoreFile(file, bucket string) (string, error) {
 }
 
 func (c *Sdk) RetrieveFile(roothash, savepath string) error {
-	err := c.DownloadFromGateway(pattern.PublicDeoss, roothash, savepath)
-	if err == nil {
-		return nil
-	}
-
-	if !c.enabledP2P {
-		return errors.New("P2P network not enabled")
-	}
-
-	fmeta, err := c.QueryFileMetadata(roothash)
-	if err != nil {
-		if err.Error() != pattern.ERR_Empty {
-			return errors.Wrapf(err, "[QueryFileMetadata]")
-		}
-		return errors.New("Not Found")
-	}
-
-	var userfile = savepath
-	var f *os.File
-	fstat, err := os.Stat(userfile)
-	if err != nil {
-		f, err = os.Create(userfile)
-		if err != nil {
-			return errors.Wrapf(err, "[os.Create]")
-		}
-	} else {
-		if fstat.IsDir() {
-			userfile = filepath.Join(savepath, roothash)
-		}
-		if fstat.Size() == fmeta.FileSize.Int64() {
-			return nil
-		}
-		f, err = os.Create(userfile)
-		if err != nil {
-			return errors.Wrapf(err, "[os.Create]")
-		}
-	}
-	defer f.Close()
-
-	var baseDir = filepath.Dir(userfile)
-	defer func(basedir string) {
-		for _, segment := range fmeta.SegmentList {
-			os.Remove(filepath.Join(basedir, string(segment.Hash[:])))
-			for _, fragment := range segment.FragmentList {
-				os.Remove(filepath.Join(basedir, string(fragment.Hash[:])))
-			}
-		}
-	}(baseDir)
-
-	findPeers := c.FindPeers()
-
-	var segmentspath = make([]string, 0)
-	var peerid string
-	for _, segment := range fmeta.SegmentList {
-		fragmentpaths := make([]string, 0)
-		for _, fragment := range segment.FragmentList {
-			miner, err := c.QueryStorageMiner(fragment.Miner[:])
-			if err != nil {
-				return errors.Wrapf(err, "[QueryStorageMiner]")
-			}
-			peerid = base58.Encode([]byte(string(miner.PeerId[:])))
-			addr, ok := findPeers[peerid]
-			if !ok {
-				addr, err = c.DHTFindPeer(peerid)
-				if err != nil {
-					return errors.Wrapf(err, "[DHTFindPeer]")
-				}
-			}
-
-			err = c.Connect(c.GetCtxQueryFromCtxCancel(), addr)
-			if err != nil {
-				return errors.Wrapf(err, "[Connect]")
-			}
-
-			fragmentpath := filepath.Join(baseDir, string(fragment.Hash[:]))
-			err = c.ReadFileAction(addr.ID, roothash, string(fragment.Hash[:]), fragmentpath, pattern.FragmentSize)
-			if err != nil {
-				continue
-			}
-
-			fragmentpaths = append(fragmentpaths, fragmentpath)
-			segmentpath := filepath.Join(baseDir, string(segment.Hash[:]))
-			if len(fragmentpaths) >= pattern.DataShards {
-				err = c.RedundancyRecovery(segmentpath, fragmentpaths)
-				if err != nil {
-					return errors.Wrapf(err, "[RedundancyRecovery]")
-				}
-				segmentspath = append(segmentspath, segmentpath)
-				break
-			}
-		}
-	}
-
-	if len(segmentspath) != len(fmeta.SegmentList) {
-		return errors.New("retrieve failed")
-	}
-	var writecount = 0
-	for i := 0; i < len(fmeta.SegmentList); i++ {
-		for j := 0; j < len(segmentspath); j++ {
-			if string(fmeta.SegmentList[i].Hash[:]) == filepath.Base(segmentspath[j]) {
-				buf, err := os.ReadFile(segmentspath[j])
-				if err != nil {
-					return errors.Wrapf(err, "[ReadFile]")
-				}
-				if (writecount + 1) >= len(fmeta.SegmentList) {
-					f.Write(buf[:(fmeta.FileSize.Uint64() - uint64(writecount*pattern.SegmentSize))])
-				} else {
-					f.Write(buf)
-				}
-				writecount++
-				break
-			}
-		}
-	}
-	if writecount != len(fmeta.SegmentList) {
-		return errors.New("retrieve failed")
-	}
-	return nil
+	return c.DownloadFromGateway(pattern.PublicDeoss, roothash, savepath)
 }
 
 func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (string, error) {
@@ -330,7 +214,13 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 	if err != nil {
 		return "", err
 	}
+	defer file.Close()
+
 	_, err = io.Copy(formFile, file)
+	if err != nil {
+		return "", err
+	}
+	err = writer.Close()
 	if err != nil {
 		return "", err
 	}
@@ -344,7 +234,7 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 	req.Header.Set("Account", account)
 	req.Header.Set("Message", message)
 	req.Header.Set("Signature", base58.Encode(sig[:]))
-	req.Header.Set("Content-Type", "multipart/form-data; boundary=<calculated when request is sent>")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	client := &http.Client{}
 	client.Transport = globalTransport
@@ -366,13 +256,26 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 		return "", errors.New("Deoss service failure, please retry or contact administrator.")
 	}
 
-	return string(respbody), nil
+	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
 }
 
 func (c *Sdk) DownloadFromGateway(url, roothash, savepath string) error {
-	_, err := os.Stat(savepath)
+	fstat, err := os.Stat(savepath)
 	if err == nil {
-		return nil
+		if fstat.IsDir() {
+			savepath = filepath.Join(savepath, roothash)
+		}
+		if fstat.Size() > 0 {
+			return nil
+		}
+	}
+
+	if url == "" {
+		return errors.New("empty url")
+	}
+
+	if url[len(url)-1] != byte(47) {
+		url += "/"
 	}
 
 	f, err := os.Create(savepath)
@@ -435,9 +338,9 @@ func (c *Sdk) StorageData(roothash string, segment []pattern.SegmentDataInfo, mi
 }
 
 func (c *Sdk) FindPeers() map[string]peer.AddrInfo {
-	var peerMap = make(map[string]peer.AddrInfo, 10)
-	timeout := time.NewTicker(time.Second * 3)
-	defer timeout.Stop()
+	var peerMap = make(map[string]peer.AddrInfo, 100)
+	timeOut := time.NewTicker(time.Second * 10)
+	defer timeOut.Stop()
 	c.RouteTableFindPeers(0)
 	for {
 		select {
@@ -449,11 +352,9 @@ func (c *Sdk) FindPeers() map[string]peer.AddrInfo {
 				break
 			}
 			for _, v := range peer.Responses {
-				var temp = v
-				peerMap[temp.ID.Pretty()] = *temp
+				peerMap[v.ID.Pretty()] = *v
 			}
-			timeout.Reset(time.Second * 3)
-		case <-timeout.C:
+		case <-timeOut.C:
 			return peerMap
 		}
 	}

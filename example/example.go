@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
 	"github.com/CESSProject/cess-go-sdk/config"
-	"github.com/CESSProject/cess-go-sdk/core/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
+	"github.com/CESSProject/cess-go-sdk/core/sdk"
 )
 
 // Substrate well-known mnemonic:
@@ -31,15 +30,25 @@ var Bootstrap = []string{
 const UploadFile = "example.go"
 const DownloadFile = "download_file"
 const BucketName = "myBucket"
-const FileHash = "3ea772e68cf615260916dc94f501c43da78f6fdc15dc20e722e5284aca612a92"
 
 func main() {
-	StoreFile()
-	RetrieveFile()
+	sdk, err := NewSDK()
+	if err != nil {
+		panic(err)
+	}
+	fid, err := StoreFile(sdk, UploadFile, BucketName)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("fid:", fid)
+	err = RetrieveFile(sdk, fid, DownloadFile)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func RetrieveFile() {
-	sdk, err := cess.New(
+func NewSDK() (sdk.SDK, error) {
+	return cess.New(
 		context.Background(),
 		config.CharacterName_Client,
 		cess.ConnectRpcAddrs(RPC_ADDRS),
@@ -50,50 +59,12 @@ func RetrieveFile() {
 		cess.Bootnodes(Bootstrap),
 		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
 	)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(sdk.RetrieveFile(FileHash, DownloadFile))
 }
 
-func StoreFile() {
-	sdk, err := cess.New(
-		context.Background(),
-		config.CharacterName_Client,
-		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
-		cess.TransactionTimeout(time.Second*10),
-		cess.Workspace(Workspace),
-		cess.P2pPort(Port),
-		cess.Bootnodes(Bootstrap),
-		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(sdk.StoreFile(UploadFile, BucketName))
+func StoreFile(sdk sdk.SDK, uploadFile, bucketName string) (string, error) {
+	return sdk.StoreFile(uploadFile, bucketName)
 }
 
-func CreateBucket() {
-	sdk, err := cess.New(
-		context.Background(),
-		config.CharacterName_Client,
-		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
-		cess.TransactionTimeout(time.Second*10),
-		cess.ProtocolPrefix(config.TestnetProtocolPrefix),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	keyringPair, err := signature.KeyringPairFromSecret(MY_MNEMONIC, 0)
-
-	if !utils.CheckBucketName(BucketName) {
-		panic("invalid bucket name")
-	}
-
-	fmt.Println(sdk.CreateBucket(keyringPair.PublicKey, BucketName))
+func RetrieveFile(sdk sdk.SDK, fid, DownloadFile string) error {
+	return sdk.RetrieveFile(fid, DownloadFile)
 }
