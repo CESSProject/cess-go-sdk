@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
@@ -330,7 +331,13 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 	if err != nil {
 		return "", err
 	}
+	defer file.Close()
+
 	_, err = io.Copy(formFile, file)
+	if err != nil {
+		return "", err
+	}
+	err = writer.Close()
 	if err != nil {
 		return "", err
 	}
@@ -344,7 +351,7 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 	req.Header.Set("Account", account)
 	req.Header.Set("Message", message)
 	req.Header.Set("Signature", base58.Encode(sig[:]))
-	req.Header.Set("Content-Type", "multipart/form-data; boundary=<calculated when request is sent>")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	client := &http.Client{}
 	client.Transport = globalTransport
@@ -366,7 +373,7 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 		return "", errors.New("Deoss service failure, please retry or contact administrator.")
 	}
 
-	return string(respbody), nil
+	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
 }
 
 func (c *Sdk) DownloadFromGateway(url, roothash, savepath string) error {
