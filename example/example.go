@@ -61,10 +61,10 @@ func NewSDK() (sdk.SDK, error) {
 	)
 }
 
-func RetrieveFile(sdk sdk.SDK, fid, DownloadFile string) error {
-	return sdk.RetrieveFile(fid, DownloadFile)
-}
-
 func StoreFile(sdk sdk.SDK, uploadFile, bucketName string) (string, error) {
 	return sdk.StoreFile(uploadFile, bucketName)
+}
+
+func RetrieveFile(sdk sdk.SDK, fid, DownloadFile string) error {
+	return sdk.RetrieveFile(fid, DownloadFile)
 }
