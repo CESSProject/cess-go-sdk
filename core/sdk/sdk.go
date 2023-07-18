@@ -43,7 +43,7 @@ type SDK interface {
 	//
 	SubmitIdleProof(idleProve pattern.FileHash) (string, error)
 	//
-	SubmitServiceProof(serviceProof pattern.SigmaMax) (string, error)
+	SubmitServiceProof(serviceProof []types.U8) (string, error)
 
 	// Filebank-State
 

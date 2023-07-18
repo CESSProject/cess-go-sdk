@@ -311,7 +311,7 @@ func (c *Sdk) SubmitIdleProof(idleProve pattern.FileHash) (string, error) {
 	}
 }
 
-func (c *Sdk) SubmitServiceProof(serviceProof pattern.SigmaMax) (string, error) {
+func (c *Sdk) SubmitServiceProof(serviceProof []types.U8) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

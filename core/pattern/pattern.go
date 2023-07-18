@@ -210,10 +210,7 @@ type PoISKey_N [256]types.U8
 type TeeSignature [256]types.U8
 type Accumulator [256]types.U8
 type SpaceChallengeParam [22]types.U64
-
-// to be determined
-type SigmaMax [256]types.U8
-type BloomFilter [1024]types.U8
+type BloomFilter [256]types.U64
 
 type SysProperties struct {
 	Ss58Format    types.Bytes
