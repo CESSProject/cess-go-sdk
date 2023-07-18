@@ -1010,3 +1010,155 @@ func (s *Sdk) Expenders() (pattern.ExpendersInfo, error) {
 	}
 	return data, nil
 }
+
+func (c *Sdk) RegisterOrUpdateSminer_V2(peerId []byte, earnings string, pledge uint64, poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		err         error
+		txhash      string
+		pubkey      []byte
+		minerinfo   pattern.MinerInfo
+		acc         *types.AccountID
+		call        types.Call
+		accountInfo types.AccountInfo
+	)
+
+	if !c.GetChainState() {
+		return txhash, earnings, pattern.ERR_RPC_CONNECTION
+	}
+
+	c.SetSdkName(pattern.Name_Sminer)
+
+	var peerid pattern.PeerId
+	if len(peerid) != len(peerId) {
+		return txhash, earnings, fmt.Errorf("invalid peerid: %v", peerId)
+	}
+
+	for i := 0; i < len(peerid); i++ {
+		peerid[i] = types.U8(peerId[i])
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		return txhash, earnings, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	minerinfo, err = c.QueryStorageMiner(c.keyring.PublicKey)
+	if err != nil {
+		if err.Error() != pattern.ERR_Empty {
+			return txhash, earnings, err
+		}
+	} else {
+		if !utils.CompareSlice([]byte(string(minerinfo.PeerId[:])), peerId) {
+			txhash, err = c.updateSminerPeerId(key, peerid)
+			if err != nil {
+				return txhash, earnings, err
+			}
+		}
+		acc, _ := utils.EncodePublicKeyAsCessAccount(minerinfo.BeneficiaryAcc[:])
+		if earnings != "" {
+			if acc != earnings {
+				puk, err := utils.ParsingPublickey(earnings)
+				if err != nil {
+					return txhash, acc, err
+				}
+				txhash, err = c.updateEarningsAcc(key, puk)
+				return txhash, earnings, err
+			}
+		}
+		return "", acc, nil
+	}
+
+	pubkey, err = utils.ParsingPublickey(earnings)
+	if err != nil {
+		return txhash, earnings, errors.Wrap(err, "[DecodeToPub]")
+	}
+	acc, err = types.NewAccountID(pubkey)
+	if err != nil {
+		return txhash, earnings, errors.Wrap(err, "[NewAccountID]")
+	}
+	realTokens, ok := new(big.Int).SetString(strconv.FormatUint(pledge, 10)+pattern.TokenPrecision_CESS, 10)
+	if !ok {
+		return txhash, earnings, errors.New("[big.Int.SetString]")
+	}
+	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTER, *acc, peerid, types.NewU128(*realTokens), poisKey, sign)
+	if err != nil {
+		return txhash, earnings, errors.Wrap(err, "[NewCall]")
+	}
+
+	ok, err = c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		return txhash, earnings, errors.Wrap(err, "[GetStorageLatest]")
+	}
+
+	if !ok {
+		keyStr, _ := utils.NumsToByteStr(key, map[string]bool{})
+		return txhash, earnings, fmt.Errorf(
+			"chain rpc.state.GetStorageLatest[%v]: %v",
+			keyStr,
+			pattern.ERR_RPC_EMPTY_VALUE,
+		)
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return txhash, earnings, errors.Wrap(err, "[Sign]")
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		c.SetChainState(false)
+		return txhash, earnings, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+	}
+	defer sub.Unsubscribe()
+
+	timeout := time.NewTimer(c.packingTime)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				events := event.EventRecords{}
+				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
+				if err != nil {
+					return txhash, earnings, errors.Wrap(err, "[GetStorageRaw]")
+				}
+				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
+				if err != nil {
+					return txhash, earnings, nil
+				}
+
+				if len(events.Sminer_Registered) > 0 {
+					return txhash, earnings, nil
+				}
+			}
+		case err = <-sub.Err():
+			return txhash, earnings, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, earnings, pattern.ERR_RPC_TIMEOUT
+		}
+	}
+}

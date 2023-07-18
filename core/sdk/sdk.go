@@ -137,6 +137,8 @@ type SDK interface {
 
 	// RegisterOrUpdateSminer register or update sminer information
 	RegisterOrUpdateSminer(peerId []byte, earnings string, pledge uint64) (string, string, error)
+	//
+	RegisterOrUpdateSminer_V2(peerId []byte, earnings string, pledge uint64, poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, string, error)
 	// ExitSminer exit mining
 	ExitSminer() (string, error)
 	// UpdateEarningsAcc update earnings account.

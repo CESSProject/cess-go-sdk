@@ -200,6 +200,9 @@ type FileHash [64]types.U8
 type Random [20]types.U8
 type TeePodr2Pk [270]types.U8
 type PeerId [38]types.U8
+type PoISKey_G [256]types.U8
+type PoISKey_N [256]types.U8
+type TeeSignature [256]types.U8
 
 type SysProperties struct {
 	Ss58Format    types.Bytes
@@ -366,6 +369,11 @@ type ExpendersInfo struct {
 	K types.U64
 	N types.U64
 	D types.U64
+}
+
+type PoISKeyInfo struct {
+	G PoISKey_G
+	N PoISKey_N
 }
 
 // --------------------customer-----------------
