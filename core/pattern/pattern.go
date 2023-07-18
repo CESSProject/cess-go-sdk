@@ -123,6 +123,7 @@ const (
 	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"
 	TX_FILEBANK_RESTORALCOMPLETE  = FILEBANK + DOT + "restoral_order_complete"
 	TX_FILEBANK_CERTIDLESPACE     = FILEBANK + DOT + "cert_idle_space"
+	TX_FILEBANK_REPLACEIDLESPACE  = FILEBANK + DOT + "replace_idle_space"
 
 	// STORAGE_HANDLER
 	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
