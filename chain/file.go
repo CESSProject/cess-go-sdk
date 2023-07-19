@@ -167,14 +167,14 @@ func (c *Sdk) RedundancyRecovery(outpath string, shardspath []string) error {
 // StoreFile
 func (c *Sdk) StoreFile(file, bucket string) (string, error) {
 	c.AuthorizeSpace(pattern.PublicDeossAccount)
-	return c.UploadtoGateway(pattern.PublicDeoss, c.GetSignatureAcc(), file, bucket)
+	return c.UploadtoGateway(pattern.PublicDeoss, file, bucket)
 }
 
 func (c *Sdk) RetrieveFile(roothash, savepath string) error {
 	return c.DownloadFromGateway(pattern.PublicDeoss, roothash, savepath)
 }
 
-func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (string, error) {
+func (c *Sdk) UploadtoGateway(url, uploadfile, bucketName string) (string, error) {
 	fstat, err := os.Stat(uploadfile)
 	if err != nil {
 		return "", err
@@ -186,10 +186,6 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 
 	if fstat.Size() == 0 {
 		return "", errors.New("empty file")
-	}
-
-	if account != c.GetSignatureAcc() {
-		return "", errors.New("account error")
 	}
 
 	if !utils.CheckBucketName(bucketName) {
@@ -231,7 +227,7 @@ func (c *Sdk) UploadtoGateway(url, account, uploadfile, bucketName string) (stri
 	}
 
 	req.Header.Set("BucketName", bucketName)
-	req.Header.Set("Account", account)
+	req.Header.Set("Account", c.GetSignatureAcc())
 	req.Header.Set("Message", message)
 	req.Header.Set("Signature", base58.Encode(sig[:]))
 	req.Header.Set("Content-Type", writer.FormDataContentType())
