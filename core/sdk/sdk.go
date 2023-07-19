@@ -16,14 +16,16 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
+// CESS Go SDK Interface Description
 type SDK interface {
-	// p2p
+	// It references libp2p: https://github.com/libp2p/go-libp2p
 	core.P2P
 
 	// Audit-State
 
-	// QueryChallengeExpiration returns the expired block height of the challenge
+	// Query Challenge Expired Block Height Interface
 	QueryChallengeExpiration() (uint32, error)
+
 	// QueryChallengeSnapshot query challenge information snapshot.
 	QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error)
 	QueryChallengeSt() (pattern.ChallengeSnapshot, error)
@@ -243,15 +245,57 @@ type SDK interface {
 	Sign(msg []byte) ([]byte, error)
 	// Verify the signature of the msg with the public key of the signing account.
 	Verify(msg []byte, sig []byte) (bool, error)
-	// StoreFile uploads the file to the public gateway of CESS.
-	// You will need to purchase space before you can complete the storage.
-	StoreFile(file, bucket string) (string, error)
-	// RetrieveFile downloads files from the public gateway of CESS.
-	RetrieveFile(roothash, savepath string) error
-	// UploadtoGateway uploads files to deoss gateway.
-	UploadtoGateway(url, account, uploadfile, bucketName string) (string, error)
-	// DownloadFromGateway downloads files from deoss gateway.
-	DownloadFromGateway(url, roothash, savepath string) error
 	// EnabledP2P returns the p2p enable status
 	EnabledP2P() bool
+
+	// Upload files to the CESS public gateway.
+	// Receive parameter description:
+	//   - file: uploaded file.
+	//   - bucket: the bucket for storing files, it will be created automatically.
+	// Return parameter description:
+	//   - string: [fid] unique identifier for the file.
+	//   - error: error message.
+	// Preconditions:
+	//    1. Account requires purchasing space, refer to [BuySpace] interface.
+	//    2. Authorize the space usage rights of the account to the public gateway account,
+	//    refer to the [AuthorizeSpace] interface.
+	//    3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
+	// Explanation:
+	//    - Account refers to the account where you configured mnemonic when creating an SDK.
+	//    - CESS public gateway address: [https://deoss-pub-gateway.cess.cloud/]
+	//    - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
+	StoreFile(file, bucket string) (string, error)
+
+	// Download file from CESS public gateway.
+	// Receive parameter description:
+	//   - fid: unique identifier for the file.
+	//   - savepath: file save location.
+	// Return parameter description:
+	//   - error: error message.
+	RetrieveFile(fid, savepath string) error
+
+	// Upload files to the gateway.
+	// Receive parameter description:
+	//   - url: the address of the gateway.
+	//   - file: uploaded file.
+	//   - bucket: the bucket for storing files, it will be created automatically.
+	// Return parameter description:
+	//   - string: [fid] unique identifier for the file.
+	//   - error: error message.
+	// Preconditions:
+	//    1. Account requires purchasing space, refer to [BuySpace] interface.
+	//    2. Authorize the space usage rights of the account to the public gateway account,
+	//    refer to the [AuthorizeSpace] interface.
+	//    3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
+	// Explanation:
+	//    - Account refers to the account where you configured mnemonic when creating an SDK.
+	UploadtoGateway(url, file, bucket string) (string, error)
+
+	// Download file from the gateway.
+	// Receive parameter description:
+	//   - fid: unique identifier for the file.
+	//   - savepath: file save location.
+	// Return parameter description:
+	//   - error: error message.
+	DownloadFromGateway(url, roothash, savepath string) error
 }
