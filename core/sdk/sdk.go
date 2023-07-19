@@ -18,7 +18,7 @@ import (
 
 // CESS Go SDK Interface Description
 type SDK interface {
-	// It references libp2p: https://github.com/libp2p/go-libp2p
+	// References libp2p: https://github.com/libp2p/go-libp2p
 	core.P2P
 
 	// Audit-State
@@ -215,8 +215,6 @@ type SDK interface {
 
 	// Other
 
-	// ProcessingData is used to process the uploaded data.
-	ProcessingData(path string) ([]pattern.SegmentDataInfo, string, error)
 	// RedundancyRecovery recovers files from redundant lists.
 	RedundancyRecovery(outpath string, shardspath []string) error
 	// GetSignatureAcc returns the signature account.
@@ -248,11 +246,22 @@ type SDK interface {
 	// EnabledP2P returns the p2p enable status
 	EnabledP2P() bool
 
+	// Process the file according to CESS specifications.
+	//
+	// Receive parameter:
+	//   - file: the file to be processed.
+	// Return parameter:
+	//   - segmentDataInfo: segment and fragment information of the file.
+	//   - string: [fid] unique identifier for the file.
+	//   - error: error message.
+	ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error)
+
 	// Upload files to the CESS public gateway.
-	// Receive parameter description:
+	//
+	// Receive parameter:
 	//   - file: uploaded file.
 	//   - bucket: the bucket for storing files, it will be created automatically.
-	// Return parameter description:
+	// Return parameter:
 	//   - string: [fid] unique identifier for the file.
 	//   - error: error message.
 	// Preconditions:
@@ -267,19 +276,21 @@ type SDK interface {
 	StoreFile(file, bucket string) (string, error)
 
 	// Download file from CESS public gateway.
-	// Receive parameter description:
+	//
+	// Receive parameter:
 	//   - fid: unique identifier for the file.
 	//   - savepath: file save location.
-	// Return parameter description:
+	// Return parameter:
 	//   - error: error message.
 	RetrieveFile(fid, savepath string) error
 
 	// Upload files to the gateway.
-	// Receive parameter description:
+	//
+	// Receive parameter:
 	//   - url: the address of the gateway.
 	//   - file: uploaded file.
 	//   - bucket: the bucket for storing files, it will be created automatically.
-	// Return parameter description:
+	// Return parameter:
 	//   - string: [fid] unique identifier for the file.
 	//   - error: error message.
 	// Preconditions:
@@ -292,10 +303,11 @@ type SDK interface {
 	UploadtoGateway(url, file, bucket string) (string, error)
 
 	// Download file from the gateway.
-	// Receive parameter description:
+	//
+	// Receive parameter:
 	//   - fid: unique identifier for the file.
 	//   - savepath: file save location.
-	// Return parameter description:
+	// Return parameter:
 	//   - error: error message.
 	DownloadFromGateway(url, roothash, savepath string) error
 }
