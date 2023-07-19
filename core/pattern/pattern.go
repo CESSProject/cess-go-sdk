@@ -236,6 +236,24 @@ type MinerInfo struct {
 	LockSpace      types.U128
 }
 
+type MinerInfo_V2 struct {
+	BeneficiaryAcc     types.AccountID
+	PeerId             PeerId
+	Collaterals        types.U128
+	Debt               types.U128
+	State              []types.U8
+	IdleSpace          types.U128
+	ServiceSpace       types.U128
+	LockSpace          types.U128
+	PoisKey            PoISKeyInfo
+	Accumulator        Accumulator
+	LastOperationBlock types.U32
+	Front              types.U64
+	Rear               types.U64
+	ServiceBloomFilter BloomFilter
+	TeeSignature       TeeSignature
+}
+
 type RewardOrder struct {
 	OrderReward types.U128
 	EachShare   types.U128
@@ -359,6 +377,7 @@ type MinerSnapShot_V2 struct {
 	IdleSubmitted      types.Bool
 	ServiceSubmitted   types.Bool
 	ServiceBloomFilter BloomFilter
+	Accumulator        Accumulator
 }
 
 type ChallengeInfo_V2 struct {
@@ -413,9 +432,11 @@ type PoISKeyInfo struct {
 
 type IdleSignInfo struct {
 	Miner              types.AccountID
-	Count              types.U64
+	Rear               types.U64
+	Front              types.U64
 	Accumulator        Accumulator
 	LastOperationBlock types.U32
+	PoisKey            PoISKeyInfo
 }
 
 // --------------------customer-----------------
