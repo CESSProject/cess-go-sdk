@@ -77,7 +77,7 @@ sdk, err := cess.New(
 
 ### Create an sdk client with p2p functionality
 
-When you need to store data or download data you need to initialize an sdk with p2p network, refer to the following code:
+When you need to use all the functions of the sdk, you need to initialize an sdk with a p2p network. For example, the storage nodes of cess and deoss both use the sdk with a p2p network. Refer to the following code:
 ```go
 sdk, err := cess.New(
 	context.Background(),
