@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Sdk) QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error) {
+func (c *chainClient) QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -45,7 +45,7 @@ func (c *Sdk) QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error) {
 	return data, nil
 }
 
-func (c *Sdk) QueryChallengeSt() (pattern.ChallengeSnapshot, error) {
+func (c *chainClient) QueryChallengeSt() (pattern.ChallengeSnapshot, error) {
 	var challengeSnapshot pattern.ChallengeSnapshot
 	chall, err := c.QueryChallengeSnapshot()
 	if err != nil {
@@ -75,7 +75,7 @@ func (c *Sdk) QueryChallengeSt() (pattern.ChallengeSnapshot, error) {
 	return challengeSnapshot, nil
 }
 
-func (c *Sdk) QueryChallenge(pubkey []byte) (pattern.ChallengeInfo, error) {
+func (c *chainClient) QueryChallenge(pubkey []byte) (pattern.ChallengeInfo, error) {
 	var chal pattern.ChallengeInfo
 	acc, err := types.NewAccountID(pubkey)
 	if err != nil {

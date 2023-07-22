@@ -18,7 +18,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Sdk) QueryTeePodr2Puk() ([]byte, error) {
+func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -47,7 +47,7 @@ func (c *Sdk) QueryTeePodr2Puk() ([]byte, error) {
 	return []byte(string(data[:])), nil
 }
 
-func (c *Sdk) QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error) {
+func (c *chainClient) QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -84,7 +84,7 @@ func (c *Sdk) QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error) {
 	return list, nil
 }
 
-func (c *Sdk) QueryTeePeerID(puk []byte) ([]byte, error) {
+func (c *chainClient) QueryTeePeerID(puk []byte) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -123,7 +123,7 @@ func (c *Sdk) QueryTeePeerID(puk []byte) ([]byte, error) {
 	return []byte(string(data.PeerId[:])), nil
 }
 
-func (c *Sdk) QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error) {
+func (c *chainClient) QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error) {
 	teelist, err := c.QueryTeeInfoList()
 	if err != nil {
 		return nil, err

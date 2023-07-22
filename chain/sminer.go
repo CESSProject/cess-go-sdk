@@ -23,7 +23,7 @@ import (
 )
 
 // QueryStorageMiner
-func (c *Sdk) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
+func (c *chainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -52,7 +52,7 @@ func (c *Sdk) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 }
 
 // QuerySminerList
-func (c *Sdk) QuerySminerList() ([]types.AccountID, error) {
+func (c *chainClient) QuerySminerList() ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -81,7 +81,7 @@ func (c *Sdk) QuerySminerList() ([]types.AccountID, error) {
 }
 
 // QueryMinerRewards
-func (c *Sdk) QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error) {
+func (c *chainClient) QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -109,7 +109,7 @@ func (c *Sdk) QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error) {
 	return data, nil
 }
 
-func (c *Sdk) QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error) {
+func (c *chainClient) QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error) {
 	var reward pattern.RewardsType
 	rewards, err := c.QueryStorageNodeReward(puk)
 	if err != nil {
@@ -123,7 +123,7 @@ func (c *Sdk) QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error
 	return reward, nil
 }
 
-func (c *Sdk) RegisterOrUpdateSminer(peerId []byte, earnings string, pledge uint64) (string, string, error) {
+func (c *chainClient) RegisterOrUpdateSminer(peerId []byte, earnings string, pledge uint64) (string, string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -275,7 +275,7 @@ func (c *Sdk) RegisterOrUpdateSminer(peerId []byte, earnings string, pledge uint
 	}
 }
 
-func (c *Sdk) updateSminerPeerId(key types.StorageKey, peerid pattern.PeerId) (string, error) {
+func (c *chainClient) updateSminerPeerId(key types.StorageKey, peerid pattern.PeerId) (string, error) {
 	var (
 		err         error
 		txhash      string
@@ -347,7 +347,7 @@ func (c *Sdk) updateSminerPeerId(key types.StorageKey, peerid pattern.PeerId) (s
 	}
 }
 
-func (c *Sdk) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) {
+func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -434,7 +434,7 @@ func (c *Sdk) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) {
 	}
 }
 
-func (c *Sdk) ExitSminer() (string, error) {
+func (c *chainClient) ExitSminer() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -526,7 +526,7 @@ func (c *Sdk) ExitSminer() (string, error) {
 	}
 }
 
-func (c *Sdk) UpdateEarningsAcc(puk []byte) (string, error) {
+func (c *chainClient) UpdateEarningsAcc(puk []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -620,7 +620,7 @@ func (c *Sdk) UpdateEarningsAcc(puk []byte) (string, error) {
 	}
 }
 
-func (c *Sdk) updateEarningsAcc(key types.StorageKey, puk []byte) (string, error) {
+func (c *chainClient) updateEarningsAcc(key types.StorageKey, puk []byte) (string, error) {
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
@@ -697,7 +697,7 @@ func (c *Sdk) updateEarningsAcc(key types.StorageKey, puk []byte) (string, error
 	}
 }
 
-func (c *Sdk) UpdateEarningsAccount(earnings string) (string, error) {
+func (c *chainClient) UpdateEarningsAccount(earnings string) (string, error) {
 	puk, err := utils.ParsingPublickey(earnings)
 	if err != nil {
 		return "", err
@@ -706,7 +706,7 @@ func (c *Sdk) UpdateEarningsAccount(earnings string) (string, error) {
 }
 
 // Storage miners increase deposit function
-func (c *Sdk) IncreaseStakingAmount(tokens *big.Int) (string, error) {
+func (c *chainClient) IncreaseStakingAmount(tokens *big.Int) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -795,7 +795,7 @@ func (c *Sdk) IncreaseStakingAmount(tokens *big.Int) (string, error) {
 	}
 }
 
-func (c *Sdk) IncreaseStorageNodeStakingAmount(token string) (string, error) {
+func (c *chainClient) IncreaseStorageNodeStakingAmount(token string) (string, error) {
 	tokens, ok := new(big.Int).SetString(token+pattern.TokenPrecision_CESS, 10)
 	if !ok {
 		return "", fmt.Errorf("Invalid tokens: %s", token)
@@ -804,7 +804,7 @@ func (c *Sdk) IncreaseStorageNodeStakingAmount(token string) (string, error) {
 }
 
 // ClaimRewards
-func (c *Sdk) ClaimRewards() (string, error) {
+func (c *chainClient) ClaimRewards() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -894,7 +894,7 @@ func (c *Sdk) ClaimRewards() (string, error) {
 }
 
 // Withdraw
-func (c *Sdk) Withdraw() (string, error) {
+func (c *chainClient) Withdraw() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -983,7 +983,7 @@ func (c *Sdk) Withdraw() (string, error) {
 	}
 }
 
-func (s *Sdk) Expenders() (pattern.ExpendersInfo, error) {
+func (s *chainClient) Expenders() (pattern.ExpendersInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -1011,7 +1011,7 @@ func (s *Sdk) Expenders() (pattern.ExpendersInfo, error) {
 	return data, nil
 }
 
-func (c *Sdk) RegisterOrUpdateSminer_V2(peerId []byte, earnings string, pledge uint64, poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, string, error) {
+func (c *chainClient) RegisterOrUpdateSminer_V2(peerId []byte, earnings string, pledge uint64, poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

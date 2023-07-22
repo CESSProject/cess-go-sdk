@@ -22,7 +22,7 @@ import (
 )
 
 // QueryDeossPeerPublickey
-func (c *Sdk) QueryDeossPeerPublickey(pubkey []byte) ([]byte, error) {
+func (c *chainClient) QueryDeossPeerPublickey(pubkey []byte) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -50,7 +50,7 @@ func (c *Sdk) QueryDeossPeerPublickey(pubkey []byte) ([]byte, error) {
 }
 
 // QueryDeossPeerPublickey
-func (c *Sdk) QueryDeossPeerIdList() ([]string, error) {
+func (c *chainClient) QueryDeossPeerIdList() ([]string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -85,7 +85,7 @@ func (c *Sdk) QueryDeossPeerIdList() ([]string, error) {
 	return result, nil
 }
 
-func (c *Sdk) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
+func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -122,7 +122,7 @@ func (c *Sdk) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	return data, nil
 }
 
-func (c *Sdk) QuaryAuthorizedAccount(puk []byte) (string, error) {
+func (c *chainClient) QuaryAuthorizedAccount(puk []byte) (string, error) {
 	acc, err := c.QuaryAuthorizedAcc(puk)
 	if err != nil {
 		return "", err
@@ -130,7 +130,7 @@ func (c *Sdk) QuaryAuthorizedAccount(puk []byte) (string, error) {
 	return utils.EncodePublicKeyAsCessAccount(acc[:])
 }
 
-func (c *Sdk) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
+func (c *chainClient) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
 	grantor, err := c.QuaryAuthorizedAcc(puk)
 	if err != nil {
 		if err.Error() == pattern.ERR_Empty {
@@ -144,7 +144,7 @@ func (c *Sdk) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
 	return account_chain == account_local, nil
 }
 
-func (c *Sdk) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
+func (c *chainClient) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -261,7 +261,7 @@ func (c *Sdk) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
 	}
 }
 
-func (c *Sdk) updateDeossPeerId(key types.StorageKey, peerid pattern.PeerId) (string, error) {
+func (c *chainClient) updateDeossPeerId(key types.StorageKey, peerid pattern.PeerId) (string, error) {
 	var (
 		err         error
 		txhash      string
@@ -334,7 +334,7 @@ func (c *Sdk) updateDeossPeerId(key types.StorageKey, peerid pattern.PeerId) (st
 	}
 }
 
-func (c *Sdk) ExitDeoss() (string, error) {
+func (c *chainClient) ExitDeoss() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -426,7 +426,7 @@ func (c *Sdk) ExitDeoss() (string, error) {
 	}
 }
 
-func (c *Sdk) AuthorizeSpace(ossAccount string) (string, error) {
+func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -527,7 +527,7 @@ func (c *Sdk) AuthorizeSpace(ossAccount string) (string, error) {
 	}
 }
 
-func (c *Sdk) UnAuthorizeSpace() (string, error) {
+func (c *chainClient) UnAuthorizeSpace() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
