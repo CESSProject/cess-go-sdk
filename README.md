@@ -95,58 +95,20 @@ sdk, err := cess.New(
 ### Create storage data bucket
 cess as an object storage service, the data are stored in buckets, which can be created automatically when uploading data, or separately, refer to the following code:
 ```go
-sdk, err := cess.New(
-	context.Background(),
-	config.CharacterName_Client,
-	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
-	cess.Mnemonic("<your account mnmonic>"),
-	cess.TransactionTimeout(time.Second*10),
-)
-if err != nil {
-	panic(err)
-}
-fmt.Println(sdk.CreateBucket(sdk.GetSignatureAccPulickey(), "<your bucket name>"))
+sdk.CreateBucket(sdk.GetSignatureAccPulickey(), "<your bucket name>")
 ```
 
 ### Store data
 You need to purchase space with your account before uploading files, please refer to [Buy Space](https://github.com/CESSProject/W3F-illustration/blob/4995c1584006823990806b9d30fa7d554630ec14/deoss/buySpace.png).
 The following is an example of uploading a file:
 ```go
-sdk, err := cess.New(
-	context.Background(),
-	config.CharacterName_Client,
-	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
-	cess.Mnemonic("<your account mnmonic>"),
-	cess.TransactionTimeout(time.Second * 10),
-	cess.Workspace("<work space>"),
-	cess.P2pPort(<port>),
-	cess.Bootnodes([]string{"<bootstrap node>"}),
-	cess.ProtocolPrefix("<protocol prefix>"),
-)
-if err != nil {
-	panic(err)
-}
-fmt.Println(sdk.StoreFile("<your file>", "<your bucket name>"))
+sdk.StoreFile("<your file>", "<your bucket name>")
 ```
 
 ### Retrieve data
 To retrieve the data, you need to provide the unique hash of the data, which will be returned to you when the data is uploaded successfully, here is the sample code to retrieve the data:
 ```go
-sdk, err := cess.New(
-	context.Background(),
-	config.CharacterName_Client,
-	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
-	cess.Mnemonic("<your account mnmonic>"),
-	cess.TransactionTimeout(time.Second * 10),
-	cess.Workspace("<work space>"),
-	cess.P2pPort(<port>),
-	cess.Bootnodes([]string{"<bootstrap node>"}),
-	cess.ProtocolPrefix("<protocol prefix>"),
-)
-if err != nil {
-	panic(err)
-}
-fmt.Println(sdk.RetrieveFile("<file hash>", "<save path>"))
+sdk.RetrieveFile("<file hash>", "<save path>")
 ```
 
 ## License
