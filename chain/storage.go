@@ -20,7 +20,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Sdk) QuerySpacePricePerGib() (string, error) {
+func (c *chainClient) QuerySpacePricePerGib() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -49,7 +49,7 @@ func (c *Sdk) QuerySpacePricePerGib() (string, error) {
 	return fmt.Sprintf("%v", data), nil
 }
 
-func (c *Sdk) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error) {
+func (c *chainClient) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -87,7 +87,7 @@ func (c *Sdk) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error) {
 	return data, nil
 }
 
-func (c *Sdk) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
+func (c *chainClient) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
 	var userSpaceSt pattern.UserSpaceSt
 	spaceinfo, err := c.QueryUserSpaceInfo(puk)
 	if err != nil {
@@ -103,7 +103,7 @@ func (c *Sdk) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
 	return userSpaceSt, nil
 }
 
-func (c *Sdk) BuySpace(count uint32) (string, error) {
+func (c *chainClient) BuySpace(count uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -196,7 +196,7 @@ func (c *Sdk) BuySpace(count uint32) (string, error) {
 	}
 }
 
-func (c *Sdk) ExpansionSpace(count uint32) (string, error) {
+func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -289,7 +289,7 @@ func (c *Sdk) ExpansionSpace(count uint32) (string, error) {
 	}
 }
 
-func (c *Sdk) RenewalSpace(days uint32) (string, error) {
+func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

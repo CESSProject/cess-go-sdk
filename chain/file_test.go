@@ -16,7 +16,7 @@ import (
 )
 
 func TestProcessingData(t *testing.T) {
-	var c = &Sdk{}
+	var c = &chainClient{}
 	var processFile = "./file_test.go"
 	segmentData, roothash, err := c.ProcessingData(processFile)
 	assert.NoError(t, err)

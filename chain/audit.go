@@ -19,7 +19,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Sdk) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error) {
+func (c *chainClient) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -52,7 +52,7 @@ func (c *Sdk) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error) {
 	return list, nil
 }
 
-func (c *Sdk) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error) {
+func (c *chainClient) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -79,7 +79,7 @@ func (c *Sdk) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, 
 	return data, nil
 }
 
-func (c *Sdk) QueryChallengeExpiration() (uint32, error) {
+func (c *chainClient) QueryChallengeExpiration() (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -106,7 +106,7 @@ func (c *Sdk) QueryChallengeExpiration() (uint32, error) {
 	return uint32(data), nil
 }
 
-func (c *Sdk) ReportProof(idlesigma, servicesigma string) (string, error) {
+func (c *chainClient) ReportProof(idlesigma, servicesigma string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -195,7 +195,7 @@ func (c *Sdk) ReportProof(idlesigma, servicesigma string) (string, error) {
 	}
 }
 
-func (c *Sdk) QueryChallenge_V2() (pattern.ChallengeInfo_V2, error) {
+func (c *chainClient) QueryChallenge_V2() (pattern.ChallengeInfo_V2, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -222,7 +222,7 @@ func (c *Sdk) QueryChallenge_V2() (pattern.ChallengeInfo_V2, error) {
 	return data, nil
 }
 
-func (c *Sdk) SubmitIdleProof(idleProve pattern.FileHash) (string, error) {
+func (c *chainClient) SubmitIdleProof(idleProve pattern.FileHash) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -311,7 +311,7 @@ func (c *Sdk) SubmitIdleProof(idleProve pattern.FileHash) (string, error) {
 	}
 }
 
-func (c *Sdk) SubmitServiceProof(serviceProof []types.U8) (string, error) {
+func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

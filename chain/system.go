@@ -18,7 +18,7 @@ import (
 )
 
 // QueryNodeSynchronizationSt
-func (c *Sdk) QueryNodeSynchronizationSt() (bool, error) {
+func (c *chainClient) QueryNodeSynchronizationSt() (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -36,7 +36,7 @@ func (c *Sdk) QueryNodeSynchronizationSt() (bool, error) {
 }
 
 // QueryBlockHeight
-func (c *Sdk) QueryBlockHeight(hash string) (uint32, error) {
+func (c *chainClient) QueryBlockHeight(hash string) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -64,7 +64,7 @@ func (c *Sdk) QueryBlockHeight(hash string) (uint32, error) {
 }
 
 // QueryAccountInfo
-func (c *Sdk) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
+func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -101,7 +101,7 @@ func (c *Sdk) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 	return data, nil
 }
 
-func (c *Sdk) SysProperties() (pattern.SysProperties, error) {
+func (c *chainClient) SysProperties() (pattern.SysProperties, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -115,7 +115,7 @@ func (c *Sdk) SysProperties() (pattern.SysProperties, error) {
 	return data, err
 }
 
-func (c *Sdk) SysChain() (string, error) {
+func (c *chainClient) SysChain() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -129,7 +129,7 @@ func (c *Sdk) SysChain() (string, error) {
 	return string(data), err
 }
 
-func (c *Sdk) SyncState() (pattern.SysSyncState, error) {
+func (c *chainClient) SyncState() (pattern.SysSyncState, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -143,7 +143,7 @@ func (c *Sdk) SyncState() (pattern.SysSyncState, error) {
 	return data, err
 }
 
-func (c *Sdk) SysVersion() (string, error) {
+func (c *chainClient) SysVersion() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -157,7 +157,7 @@ func (c *Sdk) SysVersion() (string, error) {
 	return string(data), err
 }
 
-func (c *Sdk) NetListening() (bool, error) {
+func (c *chainClient) NetListening() (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))

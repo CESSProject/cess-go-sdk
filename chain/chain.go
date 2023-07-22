@@ -31,7 +31,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/xxhash"
 )
 
-type Sdk struct {
+type chainClient struct {
 	*core.Node
 	lock           *sync.Mutex
 	api            *gsrpc.SubstrateAPI
@@ -50,13 +50,13 @@ type Sdk struct {
 	enabledP2P     bool
 }
 
-var _ sdk.SDK = (*Sdk)(nil)
+var _ sdk.SDK = (*chainClient)(nil)
 
 var globalTransport = &http.Transport{
 	DisableKeepAlives: true,
 }
 
-func NewSDK(
+func NewChainClient(
 	ctx context.Context,
 	serviceName string,
 	rpcs []string,
@@ -66,11 +66,11 @@ func NewSDK(
 	p2pPort int,
 	bootnodes []string,
 	protocolPrefix string,
-) (*Sdk, error) {
+) (*chainClient, error) {
 	var (
-		ok  bool
-		err error
-		sdk = &Sdk{
+		ok          bool
+		err         error
+		chainClient = &chainClient{
 			lock:        new(sync.Mutex),
 			chainState:  new(atomic.Bool),
 			rpcAddr:     rpcs,
@@ -85,7 +85,7 @@ func NewSDK(
 
 	log.SetOutput(io.Discard)
 	for i := 0; i < len(rpcs); i++ {
-		sdk.api, err = gsrpc.NewSubstrateAPI(rpcs[i])
+		chainClient.api, err = gsrpc.NewSubstrateAPI(rpcs[i])
 		if err == nil {
 			break
 		}
@@ -95,45 +95,45 @@ func NewSDK(
 		return nil, err
 	}
 
-	if sdk.api == nil {
+	if chainClient.api == nil {
 		return nil, pattern.ERR_RPC_CONNECTION
 	}
 
-	sdk.SetChainState(true)
+	chainClient.SetChainState(true)
 
-	sdk.metadata, err = sdk.api.RPC.State.GetMetadataLatest()
+	chainClient.metadata, err = chainClient.api.RPC.State.GetMetadataLatest()
 	if err != nil {
 		return nil, err
 	}
-	sdk.genesisHash, err = sdk.api.RPC.Chain.GetBlockHash(0)
+	chainClient.genesisHash, err = chainClient.api.RPC.Chain.GetBlockHash(0)
 	if err != nil {
 		return nil, err
 	}
-	sdk.runtimeVersion, err = sdk.api.RPC.State.GetRuntimeVersionLatest()
+	chainClient.runtimeVersion, err = chainClient.api.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
 		return nil, err
 	}
-	sdk.keyEvents, err = types.CreateStorageKey(sdk.metadata, pattern.SYSTEM, pattern.EVENTS, nil)
+	chainClient.keyEvents, err = types.CreateStorageKey(chainClient.metadata, pattern.SYSTEM, pattern.EVENTS, nil)
 	if err != nil {
 		return nil, err
 	}
 	if mnemonic != "" {
-		sdk.keyring, err = signature.KeyringPairFromSecret(mnemonic, 0)
+		chainClient.keyring, err = signature.KeyringPairFromSecret(mnemonic, 0)
 		if err != nil {
 			return nil, err
 		}
-		sdk.signatureAcc, err = utils.EncodePublicKeyAsCessAccount(sdk.keyring.PublicKey)
+		chainClient.signatureAcc, err = utils.EncodePublicKeyAsCessAccount(chainClient.keyring.PublicKey)
 		if err != nil {
 			return nil, err
 		}
 	}
-	properties, err := sdk.SysProperties()
+	properties, err := chainClient.SysProperties()
 	if err != nil {
 		return nil, err
 	}
-	sdk.tokenSymbol = string(properties.TokenSymbol)
+	chainClient.tokenSymbol = string(properties.TokenSymbol)
 
-	sdk.networkEnv, err = sdk.SysChain()
+	chainClient.networkEnv, err = chainClient.SysChain()
 	if err != nil {
 		return nil, err
 	}
@@ -142,24 +142,24 @@ func NewSDK(
 		p2p, err := p2pgo.New(
 			ctx,
 			p2pgo.ListenPort(p2pPort),
-			p2pgo.Workspace(filepath.Join(workspace, sdk.GetSignatureAcc(), sdk.GetSdkName())),
+			p2pgo.Workspace(filepath.Join(workspace, chainClient.GetSignatureAcc(), chainClient.GetSdkName())),
 			p2pgo.BootPeers(bootnodes),
 			p2pgo.ProtocolPrefix(protocolPrefix),
 		)
 		if err != nil {
 			return nil, err
 		}
-		sdk.Node, ok = p2p.(*core.Node)
+		chainClient.Node, ok = p2p.(*core.Node)
 		if !ok {
 			return nil, errors.New("invalid p2p type")
 		}
-		sdk.enabledP2P = true
+		chainClient.enabledP2P = true
 	}
 
-	return sdk, nil
+	return chainClient, nil
 }
 
-func (c *Sdk) Reconnect() error {
+func (c *chainClient) Reconnect() error {
 	var err error
 	if c.api != nil {
 		if c.api.Client != nil {
@@ -177,63 +177,63 @@ func (c *Sdk) Reconnect() error {
 	return nil
 }
 
-func (c *Sdk) GetSdkName() string {
+func (c *chainClient) GetSdkName() string {
 	return c.name
 }
 
-func (c *Sdk) SetSdkName(name string) {
+func (c *chainClient) SetSdkName(name string) {
 	c.name = name
 }
 
-func (c *Sdk) SetChainState(state bool) {
+func (c *chainClient) SetChainState(state bool) {
 	c.chainState.Store(state)
 }
 
-func (c *Sdk) GetChainState() bool {
+func (c *chainClient) GetChainState() bool {
 	return c.chainState.Load()
 }
 
-func (c *Sdk) GetSignatureAcc() string {
+func (c *chainClient) GetSignatureAcc() string {
 	return c.signatureAcc
 }
 
-func (c *Sdk) GetKeyEvents() types.StorageKey {
+func (c *chainClient) GetKeyEvents() types.StorageKey {
 	return c.keyEvents
 }
 
-func (c *Sdk) GetSignatureAccPulickey() []byte {
+func (c *chainClient) GetSignatureAccPulickey() []byte {
 	return c.keyring.PublicKey
 }
 
-func (c *Sdk) GetSubstrateAPI() *gsrpc.SubstrateAPI {
+func (c *chainClient) GetSubstrateAPI() *gsrpc.SubstrateAPI {
 	return c.api
 }
 
-func (c *Sdk) GetMetadata() *types.Metadata {
+func (c *chainClient) GetMetadata() *types.Metadata {
 	return c.metadata
 }
 
-func (c *Sdk) GetTokenSymbol() string {
+func (c *chainClient) GetTokenSymbol() string {
 	return c.tokenSymbol
 }
 
-func (c *Sdk) GetNetworkEnv() string {
+func (c *chainClient) GetNetworkEnv() string {
 	return c.networkEnv
 }
 
-func (c *Sdk) GetURI() string {
+func (c *chainClient) GetURI() string {
 	return c.keyring.URI
 }
 
-func (c *Sdk) Sign(msg []byte) ([]byte, error) {
+func (c *chainClient) Sign(msg []byte) ([]byte, error) {
 	return signature.Sign(msg, c.keyring.URI)
 }
 
-func (c *Sdk) Verify(msg []byte, sig []byte) (bool, error) {
+func (c *chainClient) Verify(msg []byte, sig []byte) (bool, error) {
 	return signature.Verify(msg, sig, c.keyring.URI)
 }
 
-func (c *Sdk) EnabledP2P() bool {
+func (c *chainClient) EnabledP2P() bool {
 	return c.enabledP2P
 }
 
