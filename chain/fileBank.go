@@ -1712,7 +1712,7 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 	}
 }
 
-func (c *chainClient) CertIdleSpace(idleSignInfo pattern.IdleSignInfo, sign pattern.TeeSignature) (string, error) {
+func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1801,7 +1801,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.IdleSignInfo, sign patt
 	}
 }
 
-func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.IdleSignInfo, sign pattern.TeeSignature) (string, error) {
+func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

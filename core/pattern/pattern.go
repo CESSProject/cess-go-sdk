@@ -245,13 +245,18 @@ type MinerInfo_V2 struct {
 	IdleSpace          types.U128
 	ServiceSpace       types.U128
 	LockSpace          types.U128
-	PoisKey            PoISKeyInfo
-	Accumulator        Accumulator
-	LastOperationBlock types.U32
-	Front              types.U64
-	Rear               types.U64
+	SpaceProofInfo     SpaceProofInfo
 	ServiceBloomFilter BloomFilter
 	TeeSignature       TeeSignature
+}
+
+type SpaceProofInfo struct {
+	LastOperationBlock types.U32
+	Miner              types.AccountID
+	Front              types.U64
+	Rear               types.U64
+	PoisKey            PoISKeyInfo
+	Accumulator        Accumulator
 }
 
 type RewardOrder struct {

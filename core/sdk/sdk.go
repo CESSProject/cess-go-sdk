@@ -104,9 +104,9 @@ type SDK interface {
 	SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error)
 	SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error)
 	//
-	CertIdleSpace(idleSignInfo pattern.IdleSignInfo, sign pattern.TeeSignature) (string, error)
+	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature) (string, error)
 	//
-	ReplaceIdleSpace(idleSignInfo pattern.IdleSignInfo, sign pattern.TeeSignature) (string, error)
+	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature) (string, error)
 
 	// Oss-State
 
