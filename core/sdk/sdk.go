@@ -215,8 +215,6 @@ type SDK interface {
 
 	// Other
 
-	// RedundancyRecovery recovers files from redundant lists.
-	RedundancyRecovery(outpath string, shardspath []string) error
 	// GetSignatureAcc returns the signature account.
 	GetSignatureAcc() string
 	// GetSignatureAccPulickey returns the signature account public key.
@@ -305,9 +303,19 @@ type SDK interface {
 	// Download file from the gateway.
 	//
 	// Receive parameter:
+	//   - url: the address of the gateway.
 	//   - fid: unique identifier for the file.
 	//   - savepath: file save location.
 	// Return parameter:
 	//   - error: error message.
-	DownloadFromGateway(url, roothash, savepath string) error
+	DownloadFromGateway(url, fid, savepath string) error
+
+	// Restore files from shards and save to out.
+	//
+	// Receive parameter:
+	//   - out: file save location.
+	//   - shards: file fragments.
+	// Return parameter:
+	//   - error: error message.
+	RedundancyRecovery(out string, shards []string) error
 }
