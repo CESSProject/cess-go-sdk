@@ -166,7 +166,6 @@ func (c *Sdk) RedundancyRecovery(outpath string, shardspath []string) error {
 
 // StoreFile
 func (c *Sdk) StoreFile(file, bucket string) (string, error) {
-	c.AuthorizeSpace(pattern.PublicDeossAccount)
 	return c.UploadtoGateway(pattern.PublicDeoss, file, bucket)
 }
 
