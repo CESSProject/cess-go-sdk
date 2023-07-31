@@ -298,21 +298,22 @@ type SDK interface {
 	// Download file from CESS public gateway.
 	//
 	// Receive parameter:
-	//   - fid: unique identifier for the file.
-	//   - savepath: file save location.
-	// Return parameter:
-	//   - error: error message.
-	RetrieveFile(fid, savepath string) error
-
-	// Download file from the gateway.
-	//
-	// Receive parameter:
 	//   - url: the address of the gateway.
 	//   - fid: unique identifier for the file.
 	//   - savepath: file save location.
 	// Return parameter:
 	//   - error: error message.
-	DownloadFromGateway(url, fid, savepath string) error
+	RetrieveFile(url, fid, savepath string) error
+
+	// Download object from CESS gateway.
+	//
+	// Receive parameter:
+	//   - url: the address of the gateway.
+	//   - fid: unique identifier for the file.
+	// Return parameter:
+	//   - Reader: object stream.
+	//   - error: error message.
+	RetrieveObject(url, fid string) (io.ReadCloser, error)
 
 	// Restore files from shards and save to out.
 	//

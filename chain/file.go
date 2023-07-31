@@ -165,10 +165,6 @@ func (c *chainClient) RedundancyRecovery(outpath string, shardspath []string) er
 	return erasure.ReedSolomonRestore(outpath, shardspath)
 }
 
-func (c *chainClient) RetrieveFile(roothash, savepath string) error {
-	return c.DownloadFromGateway(pattern.PublicDeoss, roothash, savepath)
-}
-
 func (c *chainClient) StoreFile(url, file, bucket string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
@@ -295,11 +291,11 @@ func (c *chainClient) StoreObject(url string, reader io.Reader, bucket string) (
 	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
 }
 
-func (c *chainClient) DownloadFromGateway(url, roothash, savepath string) error {
+func (c *chainClient) RetrieveFile(url, fid, savepath string) error {
 	fstat, err := os.Stat(savepath)
 	if err == nil {
 		if fstat.IsDir() {
-			savepath = filepath.Join(savepath, roothash)
+			savepath = filepath.Join(savepath, fid)
 		}
 		if fstat.Size() > 0 {
 			return nil
@@ -320,7 +316,7 @@ func (c *chainClient) DownloadFromGateway(url, roothash, savepath string) error 
 	}
 	defer f.Close()
 
-	req, err := http.NewRequest(http.MethodGet, url+roothash, nil)
+	req, err := http.NewRequest(http.MethodGet, url+fid, nil)
 	if err != nil {
 		return err
 	}
@@ -345,6 +341,35 @@ func (c *chainClient) DownloadFromGateway(url, roothash, savepath string) error 
 	}
 
 	return nil
+}
+func (c *chainClient) RetrieveObject(url, fid string) (io.ReadCloser, error) {
+	if url == "" {
+		return nil, errors.New("empty url")
+	}
+
+	if url[len(url)-1] != byte(47) {
+		url += "/"
+	}
+
+	req, err := http.NewRequest(http.MethodGet, url+fid, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Operation", "download")
+
+	client := &http.Client{}
+	client.Transport = globalTransport
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("Retrieve failed, code: %d", resp.StatusCode))
+	}
+
+	return resp.Body, nil
 }
 
 func (c *chainClient) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {

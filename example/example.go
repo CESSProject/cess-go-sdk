@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"time"
 
@@ -42,7 +43,7 @@ func main() {
 	log.Println("fid:", fid)
 
 	// Retrieve file
-	err = sdk.RetrieveFile(fid, fmt.Sprintf("download_%d", time.Now().UnixNano()))
+	err = sdk.RetrieveFile(PublicGateway, fid, fmt.Sprintf("download_%d", time.Now().UnixNano()))
 	if err != nil {
 		panic(err)
 	}
@@ -55,10 +56,16 @@ func main() {
 	log.Println("fid:", fid)
 
 	// Retrieve file
-	err = sdk.RetrieveFile(fid, fmt.Sprintf("download_%d", time.Now().UnixNano()))
+	body, err := sdk.RetrieveObject(PublicGateway, fid)
 	if err != nil {
 		panic(err)
 	}
+	defer body.Close()
+	data, err := ioutil.ReadAll(body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(data))
 }
 
 func NewSDK() (sdk.SDK, error) {
