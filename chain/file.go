@@ -250,6 +250,51 @@ func (c *chainClient) StoreFile(url, file, bucket string) (string, error) {
 	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
 }
 
+func (c *chainClient) StoreObject(url string, reader io.Reader, bucket string) (string, error) {
+	if !utils.CheckBucketName(bucket) {
+		return "", errors.New("invalid bucket name")
+	}
+
+	kr, _ := keyring.FromURI(c.GetURI(), keyring.NetSubstrate{})
+
+	// sign message
+	message := utils.GetRandomcode(16)
+	sig, _ := kr.Sign(kr.SigningContext([]byte(message)))
+
+	req, err := http.NewRequest(http.MethodPut, url, reader)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("BucketName", bucket)
+	req.Header.Set("Account", c.GetSignatureAcc())
+	req.Header.Set("Message", message)
+	req.Header.Set("Signature", base58.Encode(sig[:]))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	client.Transport = globalTransport
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	respbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		if len(respbody) > 0 {
+			return "", errors.New(string(respbody))
+		}
+		return "", errors.New(fmt.Sprintf("upload failed, code: %d", resp.StatusCode))
+	}
+
+	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
+}
+
 func (c *chainClient) DownloadFromGateway(url, roothash, savepath string) error {
 	fstat, err := os.Stat(savepath)
 	if err == nil {
