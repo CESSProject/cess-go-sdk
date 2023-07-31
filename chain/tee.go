@@ -31,7 +31,7 @@ func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 		return nil, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEPODR2Pk)
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEPODR2PK)
 	if err != nil {
 		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}

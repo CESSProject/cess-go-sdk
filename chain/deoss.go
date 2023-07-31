@@ -354,7 +354,7 @@ func (c *chainClient) ExitDeoss() (string, error) {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err = types.NewCall(c.metadata, pattern.TX_OSS_DESTORY)
+	call, err = types.NewCall(c.metadata, pattern.TX_OSS_DESTROY)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
