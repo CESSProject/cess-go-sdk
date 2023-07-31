@@ -9,6 +9,7 @@ package chain
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -164,17 +165,12 @@ func (c *chainClient) RedundancyRecovery(outpath string, shardspath []string) er
 	return erasure.ReedSolomonRestore(outpath, shardspath)
 }
 
-// StoreFile
-func (c *chainClient) StoreFile(file, bucket string) (string, error) {
-	return c.UploadtoGateway(pattern.PublicDeoss, file, bucket)
-}
-
 func (c *chainClient) RetrieveFile(roothash, savepath string) error {
 	return c.DownloadFromGateway(pattern.PublicDeoss, roothash, savepath)
 }
 
-func (c *chainClient) UploadtoGateway(url, uploadfile, bucketName string) (string, error) {
-	fstat, err := os.Stat(uploadfile)
+func (c *chainClient) StoreFile(url, file, bucket string) (string, error) {
+	fstat, err := os.Stat(file)
 	if err != nil {
 		return "", err
 	}
@@ -187,7 +183,7 @@ func (c *chainClient) UploadtoGateway(url, uploadfile, bucketName string) (strin
 		return "", errors.New("empty file")
 	}
 
-	if !utils.CheckBucketName(bucketName) {
+	if !utils.CheckBucketName(bucket) {
 		return "", errors.New("invalid bucket name")
 	}
 
@@ -205,13 +201,13 @@ func (c *chainClient) UploadtoGateway(url, uploadfile, bucketName string) (strin
 		return "", err
 	}
 
-	file, err := os.Open(uploadfile)
+	f, err := os.Open(file)
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer f.Close()
 
-	_, err = io.Copy(formFile, file)
+	_, err = io.Copy(formFile, f)
 	if err != nil {
 		return "", err
 	}
@@ -225,7 +221,7 @@ func (c *chainClient) UploadtoGateway(url, uploadfile, bucketName string) (strin
 		return "", err
 	}
 
-	req.Header.Set("BucketName", bucketName)
+	req.Header.Set("BucketName", bucket)
 	req.Header.Set("Account", c.GetSignatureAcc())
 	req.Header.Set("Message", message)
 	req.Header.Set("Signature", base58.Encode(sig[:]))
@@ -248,7 +244,7 @@ func (c *chainClient) UploadtoGateway(url, uploadfile, bucketName string) (strin
 		if len(respbody) > 0 {
 			return "", errors.New(string(respbody))
 		}
-		return "", errors.New("Deoss service failure, please retry or contact administrator.")
+		return "", errors.New(fmt.Sprintf("upload failed, code: %d", resp.StatusCode))
 	}
 
 	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
