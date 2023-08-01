@@ -8,6 +8,7 @@
 package sdk
 
 import (
+	"io"
 	"math/big"
 
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
@@ -254,9 +255,10 @@ type SDK interface {
 	//   - error: error message.
 	ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error)
 
-	// Upload files to the CESS public gateway.
+	// Upload file to CESS gateway.
 	//
 	// Receive parameter:
+	//   - url: the address of the gateway.
 	//   - file: uploaded file.
 	//   - bucket: the bucket for storing files, it will be created automatically.
 	// Return parameter:
@@ -264,51 +266,54 @@ type SDK interface {
 	//   - error: error message.
 	// Preconditions:
 	//    1. Account requires purchasing space, refer to [BuySpace] interface.
-	//    2. Authorize the space usage rights of the account to the public gateway account,
+	//    2. Authorize the space usage rights of the account to the gateway account,
 	//    refer to the [AuthorizeSpace] interface.
 	//    3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
 	// Explanation:
 	//    - Account refers to the account where you configured mnemonic when creating an SDK.
-	//    - CESS public gateway address: [https://deoss-pub-gateway.cess.cloud/]
+	//    - CESS public gateway address: [http://deoss-pub-gateway.cess.cloud/]
 	//    - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
-	StoreFile(file, bucket string) (string, error)
+	StoreFile(url, file, bucket string) (string, error)
+
+	// Upload object to CESS gateway.
+	//
+	// Receive parameter:
+	//   - url: the address of the gateway.
+	//   - reader: strings, byte data, file streams, network streams, etc.
+	//   - bucket: the bucket for storing object, it will be created automatically.
+	// Return parameter:
+	//   - string: [fid] unique identifier for the file.
+	//   - error: error message.
+	// Preconditions:
+	//    1. Account requires purchasing space, refer to [BuySpace] interface.
+	//    2. Authorize the space usage rights of the account to the gateway account,
+	//    refer to the [AuthorizeSpace] interface.
+	//    3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
+	// Explanation:
+	//    - Account refers to the account where you configured mnemonic when creating an SDK.
+	//    - CESS public gateway address: [http://deoss-pub-gateway.cess.cloud/]
+	//    - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
+	StoreObject(url string, reader io.Reader, bucket string) (string, error)
 
 	// Download file from CESS public gateway.
 	//
 	// Receive parameter:
-	//   - fid: unique identifier for the file.
-	//   - savepath: file save location.
-	// Return parameter:
-	//   - error: error message.
-	RetrieveFile(fid, savepath string) error
-
-	// Upload files to the gateway.
-	//
-	// Receive parameter:
-	//   - url: the address of the gateway.
-	//   - file: uploaded file.
-	//   - bucket: the bucket for storing files, it will be created automatically.
-	// Return parameter:
-	//   - string: [fid] unique identifier for the file.
-	//   - error: error message.
-	// Preconditions:
-	//    1. Account requires purchasing space, refer to [BuySpace] interface.
-	//    2. Authorize the space usage rights of the account to the public gateway account,
-	//    refer to the [AuthorizeSpace] interface.
-	//    3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
-	// Explanation:
-	//    - Account refers to the account where you configured mnemonic when creating an SDK.
-	UploadtoGateway(url, file, bucket string) (string, error)
-
-	// Download file from the gateway.
-	//
-	// Receive parameter:
 	//   - url: the address of the gateway.
 	//   - fid: unique identifier for the file.
 	//   - savepath: file save location.
 	// Return parameter:
 	//   - error: error message.
-	DownloadFromGateway(url, fid, savepath string) error
+	RetrieveFile(url, fid, savepath string) error
+
+	// Download object from CESS gateway.
+	//
+	// Receive parameter:
+	//   - url: the address of the gateway.
+	//   - fid: unique identifier for the file.
+	// Return parameter:
+	//   - Reader: object stream.
+	//   - error: error message.
+	RetrieveObject(url, fid string) (io.ReadCloser, error)
 
 	// Restore files from shards and save to out.
 	//

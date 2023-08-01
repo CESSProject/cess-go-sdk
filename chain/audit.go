@@ -207,7 +207,7 @@ func (c *chainClient) QueryChallenge_V2() (pattern.ChallengeInfo_V2, error) {
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.ChALLENGESNAPSHOT)
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.CHALLENGESNAPSHOT)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}

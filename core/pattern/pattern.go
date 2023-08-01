@@ -25,7 +25,7 @@ const BlockInterval = time.Second * time.Duration(6)
 
 const MaxSubmitedIdleFileMeta = 30
 
-const PublicDeoss = "https://deoss-pub-gateway.cess.cloud/"
+const PublicDeoss = "http://deoss-pub-gateway.cess.cloud/"
 const PublicDeossAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 
 // Pallets
@@ -51,7 +51,7 @@ const (
 	//AUDIT
 	UNVERIFYPROOF     = "UnverifyProof"
 	CHALLENGEDURATION = "ChallengeDuration"
-	ChALLENGESNAPSHOT = "ChallengeSnapShot"
+	CHALLENGESNAPSHOT = "ChallengeSnapShot"
 
 	// OSS
 	// OSS
@@ -65,7 +65,7 @@ const (
 
 	// TEEWORKER
 	TEEWORKERMAP = "TeeWorkerMap"
-	TEEPODR2Pk   = "TeePodr2Pk"
+	TEEPODR2PK   = "TeePodr2Pk"
 
 	// FILEBANK
 	FILE               = "File"
@@ -80,9 +80,6 @@ const (
 	// STORAGE_HANDLER
 	USERSPACEINFO = "UserOwnedSpace"
 	UNITPRICE     = "UnitPrice"
-
-	// NETSNAPSHOT
-	CHALLENGESNAPSHOT = "ChallengeSnapShot"
 
 	// SYSTEM
 	ACCOUNT = "Account"
@@ -99,7 +96,7 @@ const (
 	// OSS
 	TX_OSS_REGISTER    = OSS + DOT + "register"
 	TX_OSS_UPDATE      = OSS + DOT + "update"
-	TX_OSS_DESTORY     = OSS + DOT + "destroy"
+	TX_OSS_DESTROY     = OSS + DOT + "destroy"
 	TX_OSS_AUTHORIZE   = OSS + DOT + "authorize"
 	TX_OSS_UNAUTHORIZE = OSS + DOT + "cancel_authorize"
 
