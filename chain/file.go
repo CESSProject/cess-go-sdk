@@ -11,7 +11,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -231,7 +230,7 @@ func (c *chainClient) StoreFile(url, file, bucket string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	respbody, err := ioutil.ReadAll(resp.Body)
+	respbody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -276,7 +275,7 @@ func (c *chainClient) StoreObject(url string, reader io.Reader, bucket string) (
 	}
 	defer resp.Body.Close()
 
-	respbody, err := ioutil.ReadAll(resp.Body)
+	respbody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}

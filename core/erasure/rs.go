@@ -9,7 +9,6 @@ package erasure
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -40,7 +39,7 @@ func ReedSolomon(path string) ([]string, error) {
 		return shardspath, err
 	}
 
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return shardspath, err
 	}
@@ -64,7 +63,7 @@ func ReedSolomon(path string) ([]string, error) {
 		newpath := filepath.Join(basedir, hash)
 		_, err = os.Stat(newpath)
 		if err != nil {
-			err = ioutil.WriteFile(newpath, shard, os.ModePerm)
+			err = os.WriteFile(newpath, shard, os.ModePerm)
 			if err != nil {
 				return shardspath, err
 			}
@@ -89,7 +88,7 @@ func ReedSolomonRestore(outpath string, shardspath []string) error {
 	shards := make([][]byte, datashards+parshards)
 	for k, v := range shardspath {
 		//infn := fmt.Sprintf("%s.00%d", outfn, i)
-		shards[k], err = ioutil.ReadFile(v)
+		shards[k], err = os.ReadFile(v)
 		if err != nil {
 			shards[k] = nil
 		}
