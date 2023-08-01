@@ -25,7 +25,7 @@ const BlockInterval = time.Second * time.Duration(6)
 
 const MaxSubmitedIdleFileMeta = 30
 
-const PublicDeoss = "https://deoss-pub-gateway.cess.cloud/"
+const PublicDeoss = "http://deoss-pub-gateway.cess.cloud/"
 const PublicDeossAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 
 // Pallets
