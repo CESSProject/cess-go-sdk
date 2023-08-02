@@ -206,7 +206,7 @@ type PoISKey_G [256]types.U8
 type PoISKey_N [256]types.U8
 type TeeSignature [256]types.U8
 type Accumulator [256]types.U8
-type SpaceChallengeParam [22]types.U64
+type SpaceChallengeParam [8]types.U64
 type BloomFilter [256]types.U64
 
 type SysProperties struct {
@@ -248,12 +248,11 @@ type MinerInfo_V2 struct {
 }
 
 type SpaceProofInfo struct {
-	LastOperationBlock types.U32
-	Miner              types.AccountID
-	Front              types.U64
-	Rear               types.U64
-	PoisKey            PoISKeyInfo
-	Accumulator        Accumulator
+	Miner       types.AccountID
+	Front       types.U64
+	Rear        types.U64
+	PoisKey     PoISKeyInfo
+	Accumulator Accumulator
 }
 
 type RewardOrder struct {
