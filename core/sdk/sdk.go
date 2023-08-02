@@ -44,9 +44,13 @@ type SDK interface {
 	// ReportProof is used to report proof data.
 	ReportProof(idlesigma, servicesigma string) (string, error)
 	//
-	SubmitIdleProof(idleProve pattern.FileHash) (string, error)
+	SubmitIdleProof(idleProve [][]types.U8) (string, error)
 	//
-	SubmitServiceProof(serviceProof []types.U8) (string, error)
+	SubmitServiceProof(serviceProof [][]types.U8) (string, error)
+	//
+	SubmitIdleProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
+	//
+	SubmitServiceProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
 
 	// Filebank-State
 

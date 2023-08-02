@@ -89,9 +89,11 @@ const (
 // Extrinsics
 const (
 	//AUDIT
-	TX_AUDIT_SUBMITPROOF        = AUDIT + DOT + "submit_proof"
-	TX_AUDIT_SUBMITIDLEPROOF    = AUDIT + DOT + "submit_idle_proof"
-	TX_AUDIT_SUBMITSERVICEPROOF = AUDIT + DOT + "submit_service_proof"
+	TX_AUDIT_SUBMITPROOF              = AUDIT + DOT + "submit_proof"
+	TX_AUDIT_SUBMITIDLEPROOF          = AUDIT + DOT + "submit_idle_proof"
+	TX_AUDIT_SUBMITSERVICEPROOF       = AUDIT + DOT + "submit_service_proof"
+	TX_AUDIT_SUBMITIDLEPROOFRESULT    = AUDIT + DOT + "submit_verify_idle_result"
+	TX_AUDIT_SUBMITSERVICEPROOFRESULT = AUDIT + DOT + "submit_verify_service_result"
 
 	// OSS
 	TX_OSS_REGISTER    = OSS + DOT + "register"
