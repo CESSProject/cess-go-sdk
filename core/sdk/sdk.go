@@ -38,15 +38,19 @@ type SDK interface {
 	QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error)
 	//
 	QueryChallenge_V2() (pattern.ChallengeInfo_V2, error)
+	//
+	QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error)
+	//
+	QueryUnverifiedServiceProof() (pattern.ServiceProofInfo, error)
 
 	// Audit-Extrinsics
 
 	// ReportProof is used to report proof data.
 	ReportProof(idlesigma, servicesigma string) (string, error)
 	//
-	SubmitIdleProof(idleProve [][]types.U8) (string, error)
+	SubmitIdleProof(idleProve []types.U8) (string, error)
 	//
-	SubmitServiceProof(serviceProof [][]types.U8) (string, error)
+	SubmitServiceProof(serviceProof []types.U8) (string, error)
 	//
 	SubmitIdleProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
 	//

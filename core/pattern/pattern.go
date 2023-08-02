@@ -49,9 +49,11 @@ const (
 // Chain state
 const (
 	//AUDIT
-	UNVERIFYPROOF     = "UnverifyProof"
-	CHALLENGEDURATION = "ChallengeDuration"
-	CHALLENGESNAPSHOT = "ChallengeSnapShot"
+	UNVERIFYPROOF        = "UnverifyProof"
+	CHALLENGEDURATION    = "ChallengeDuration"
+	CHALLENGESNAPSHOT    = "ChallengeSnapShot"
+	UNVERIFYIDLEPROOF    = "UnverifyIdleProof"
+	UNVERIFYSERVICEPROOF = "UnverifyServiceProof"
 
 	// OSS
 	// OSS
@@ -440,6 +442,16 @@ type IdleSignInfo struct {
 	Accumulator        Accumulator
 	LastOperationBlock types.U32
 	PoisKey            PoISKeyInfo
+}
+
+type IdleProofInfo struct {
+	MinerSnapShot MinerSnapShot_V2
+	IdleProofs    []types.U8
+}
+
+type ServiceProofInfo struct {
+	MinerSnapShot MinerSnapShot_V2
+	ServiceProofs []types.U8
 }
 
 // --------------------customer-----------------

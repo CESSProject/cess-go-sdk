@@ -222,7 +222,61 @@ func (c *chainClient) QueryChallenge_V2() (pattern.ChallengeInfo_V2, error) {
 	return data, nil
 }
 
-func (c *chainClient) SubmitIdleProof(idleProve [][]types.U8) (string, error) {
+func (c *chainClient) QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data pattern.IdleProofInfo
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYIDLEPROOF)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
+func (c *chainClient) QueryUnverifiedServiceProof() (pattern.ServiceProofInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data pattern.ServiceProofInfo
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYSERVICEPROOF)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
+func (c *chainClient) SubmitIdleProof(idleProve []types.U8) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -311,7 +365,7 @@ func (c *chainClient) SubmitIdleProof(idleProve [][]types.U8) (string, error) {
 	}
 }
 
-func (c *chainClient) SubmitServiceProof(serviceProof [][]types.U8) (string, error) {
+func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
