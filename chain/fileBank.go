@@ -1788,7 +1788,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pa
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_RecoveryCompleted) > 0 {
+				if err != nil || len(events.FileBank_IdleSpaceCert) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(pattern.ERR_Failed)
@@ -1877,7 +1877,7 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_RecoveryCompleted) > 0 {
+				if err != nil || len(events.FileBank_ReplaceIdleSpace) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(pattern.ERR_Failed)

@@ -352,7 +352,7 @@ func (c *chainClient) SubmitIdleProof(idleProve []types.U8) (string, error) {
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Audit_SubmitProof) > 0 {
+				if err != nil || len(events.Audit_SubmitIdleProof) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(pattern.ERR_Failed)
@@ -441,7 +441,7 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Audit_SubmitProof) > 0 {
+				if err != nil || len(events.Audit_SubmitServiceProof) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(pattern.ERR_Failed)
@@ -530,7 +530,7 @@ func (c *chainClient) SubmitIdleProofResult(puk []byte, result types.Bool, signa
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Audit_SubmitProof) > 0 {
+				if err != nil || len(events.Audit_SubmitIdleVerifyResult) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(pattern.ERR_Failed)
@@ -619,7 +619,7 @@ func (c *chainClient) SubmitServiceProofResult(puk []byte, result types.Bool, si
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Audit_SubmitProof) > 0 {
+				if err != nil || len(events.Audit_SubmitServiceVerifyResult) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(pattern.ERR_Failed)

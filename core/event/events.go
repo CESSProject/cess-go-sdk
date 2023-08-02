@@ -35,6 +35,34 @@ type Event_GenerateChallenge struct {
 	Topics []types.Hash
 }
 
+type Event_SubmitIdleProof struct {
+	Phase  types.Phase
+	Miner  types.AccountID
+	Topics []types.Hash
+}
+
+type Event_SubmitServiceProof struct {
+	Phase  types.Phase
+	Miner  types.AccountID
+	Topics []types.Hash
+}
+
+type Event_SubmitIdleVerifyResult struct {
+	Phase  types.Phase
+	Tee    types.AccountID
+	Miner  types.AccountID
+	Result types.Bool
+	Topics []types.Hash
+}
+
+type Event_SubmitServiceVerifyResult struct {
+	Phase  types.Phase
+	Tee    types.AccountID
+	Miner  types.AccountID
+	Result types.Bool
+	Topics []types.Hash
+}
+
 // ------------------------Sminer------------------------
 type Event_Registered struct {
 	Phase      types.Phase
@@ -219,6 +247,20 @@ type Event_Withdraw struct {
 	Topics []types.Hash
 }
 
+type Event_IdleSpaceCert struct {
+	Phase  types.Phase
+	Acc    types.AccountID
+	Space  types.U128
+	Topics []types.Hash
+}
+
+type Event_ReplaceIdleSpace struct {
+	Phase  types.Phase
+	Acc    types.AccountID
+	Space  types.U128
+	Topics []types.Hash
+}
+
 // ------------------------StorageHandler--------------------------------
 type Event_BuySpace struct {
 	Phase            types.Phase
@@ -341,9 +383,13 @@ type ElectionScore struct {
 // Events
 type EventRecords struct {
 	// AUDIT
-	Audit_VerifyProof       []Event_VerifyProof
-	Audit_SubmitProof       []Event_SubmitProof
-	Audit_GenerateChallenge []Event_GenerateChallenge
+	Audit_VerifyProof               []Event_VerifyProof
+	Audit_SubmitProof               []Event_SubmitProof
+	Audit_GenerateChallenge         []Event_GenerateChallenge
+	Audit_SubmitIdleProof           []Event_SubmitIdleProof
+	Audit_SubmitServiceProof        []Event_SubmitServiceProof
+	Audit_SubmitIdleVerifyResult    []Event_SubmitIdleVerifyResult
+	Audit_SubmitServiceVerifyResult []Event_SubmitServiceVerifyResult
 
 	// Cacher
 
@@ -362,6 +408,8 @@ type EventRecords struct {
 	FileBank_RecoveryCompleted     []Event_RecoveryCompleted
 	FileBank_StorageCompleted      []Event_StorageCompleted
 	FileBank_Withdraw              []Event_Withdraw
+	FileBank_IdleSpaceCert         []Event_IdleSpaceCert
+	FileBank_ReplaceIdleSpace      []Event_ReplaceIdleSpace
 
 	// OSS
 	Oss_Authorize       []Event_Authorize
