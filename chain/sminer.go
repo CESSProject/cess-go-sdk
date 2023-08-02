@@ -51,6 +51,34 @@ func (c *chainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 	return data, nil
 }
 
+func (c *chainClient) QueryStorageMiner_V2(puk []byte) (pattern.MinerInfo_V2, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data pattern.MinerInfo_V2
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.MINERITEMS, puk)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 // QuerySminerList
 func (c *chainClient) QuerySminerList() ([]types.AccountID, error) {
 	defer func() {
