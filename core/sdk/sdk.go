@@ -38,15 +38,23 @@ type SDK interface {
 	QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error)
 	//
 	QueryChallenge_V2() (pattern.ChallengeInfo_V2, error)
+	//
+	QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error)
+	//
+	QueryUnverifiedServiceProof() (pattern.ServiceProofInfo, error)
 
 	// Audit-Extrinsics
 
 	// ReportProof is used to report proof data.
 	ReportProof(idlesigma, servicesigma string) (string, error)
 	//
-	SubmitIdleProof(idleProve pattern.FileHash) (string, error)
+	SubmitIdleProof(idleProve []types.U8) (string, error)
 	//
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
+	//
+	SubmitIdleProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
+	//
+	SubmitServiceProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
 
 	// Filebank-State
 
@@ -137,6 +145,8 @@ type SDK interface {
 
 	// QueryStorageMiner queries storage node information.
 	QueryStorageMiner(puk []byte) (pattern.MinerInfo, error)
+	// QueryStorageMiner queries storage node information.
+	QueryStorageMiner_V2(puk []byte) (pattern.MinerInfo_V2, error)
 	// QuerySminerList queries the accounts of all storage miners.
 	QuerySminerList() ([]types.AccountID, error)
 	// QueryStorageNodeReward queries reward information for puk account.

@@ -49,9 +49,11 @@ const (
 // Chain state
 const (
 	//AUDIT
-	UNVERIFYPROOF     = "UnverifyProof"
-	CHALLENGEDURATION = "ChallengeDuration"
-	CHALLENGESNAPSHOT = "ChallengeSnapShot"
+	UNVERIFYPROOF        = "UnverifyProof"
+	CHALLENGEDURATION    = "ChallengeDuration"
+	CHALLENGESNAPSHOT    = "ChallengeSnapShot"
+	UNVERIFYIDLEPROOF    = "UnverifyIdleProof"
+	UNVERIFYSERVICEPROOF = "UnverifyServiceProof"
 
 	// OSS
 	// OSS
@@ -89,9 +91,11 @@ const (
 // Extrinsics
 const (
 	//AUDIT
-	TX_AUDIT_SUBMITPROOF        = AUDIT + DOT + "submit_proof"
-	TX_AUDIT_SUBMITIDLEPROOF    = AUDIT + DOT + "submit_idle_proof"
-	TX_AUDIT_SUBMITSERVICEPROOF = AUDIT + DOT + "submit_service_proof"
+	TX_AUDIT_SUBMITPROOF              = AUDIT + DOT + "submit_proof"
+	TX_AUDIT_SUBMITIDLEPROOF          = AUDIT + DOT + "submit_idle_proof"
+	TX_AUDIT_SUBMITSERVICEPROOF       = AUDIT + DOT + "submit_service_proof"
+	TX_AUDIT_SUBMITIDLEPROOFRESULT    = AUDIT + DOT + "submit_verify_idle_result"
+	TX_AUDIT_SUBMITSERVICEPROOFRESULT = AUDIT + DOT + "submit_verify_service_result"
 
 	// OSS
 	TX_OSS_REGISTER    = OSS + DOT + "register"
@@ -438,6 +442,16 @@ type IdleSignInfo struct {
 	Accumulator        Accumulator
 	LastOperationBlock types.U32
 	PoisKey            PoISKeyInfo
+}
+
+type IdleProofInfo struct {
+	MinerSnapShot MinerSnapShot_V2
+	IdleProofs    []types.U8
+}
+
+type ServiceProofInfo struct {
+	MinerSnapShot MinerSnapShot_V2
+	ServiceProofs []types.U8
 }
 
 // --------------------customer-----------------
