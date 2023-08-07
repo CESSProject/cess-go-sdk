@@ -382,7 +382,8 @@ type MinerSnapShot_V2 struct {
 	IdleSubmitted      types.Bool
 	ServiceSubmitted   types.Bool
 	ServiceBloomFilter BloomFilter
-	Accumulator        Accumulator
+	SpaceProofInfo     SpaceProofInfo
+	TeeSignature       TeeSignature
 }
 
 type ChallengeInfo_V2 struct {

@@ -289,6 +289,44 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 	return uint32(data), nil
 }
 
+func (c *chainClient) QueryPendingReplacements_V2(puk []byte) (types.U128, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U128
+
+	acc, err := types.NewAccountID(puk)
+	if err != nil {
+		return data, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return data, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.PENDINGREPLACE, owner)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error) {
 	c.lock.Lock()
 	defer func() {

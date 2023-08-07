@@ -68,6 +68,8 @@ type SDK interface {
 	QueryFillerMap(filehash string) (pattern.IdleMetadata, error)
 	// QueryPendingReplacements queries the amount of idle data that can be replaced.
 	QueryPendingReplacements(puk []byte) (uint32, error)
+	// QueryPendingReplacements queries the amount of idle data that can be replaced.
+	QueryPendingReplacements_V2(puk []byte) (types.U128, error)
 	// QueryRestoralOrder queries a restore order info.
 	QueryRestoralOrder(roothash string) (pattern.RestoralOrderInfo, error)
 	QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error)
