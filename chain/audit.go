@@ -222,13 +222,13 @@ func (c *chainClient) QueryChallenge_V2() (pattern.ChallengeInfo_V2, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryUnverifiedIdleProof(puk []byte) (pattern.IdleProofInfo, error) {
+func (c *chainClient) QueryUnverifiedIdleProof(puk []byte) ([]pattern.IdleProofInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data pattern.IdleProofInfo
+	var data []pattern.IdleProofInfo
 
 	if !c.GetChainState() {
 		return data, pattern.ERR_RPC_CONNECTION
@@ -249,13 +249,13 @@ func (c *chainClient) QueryUnverifiedIdleProof(puk []byte) (pattern.IdleProofInf
 	return data, nil
 }
 
-func (c *chainClient) QueryUnverifiedServiceProof(puk []byte) (pattern.ServiceProofInfo, error) {
+func (c *chainClient) QueryUnverifiedServiceProof(puk []byte) ([]pattern.ServiceProofInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data pattern.ServiceProofInfo
+	var data []pattern.ServiceProofInfo
 
 	if !c.GetChainState() {
 		return data, pattern.ERR_RPC_CONNECTION
