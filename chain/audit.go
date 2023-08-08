@@ -454,7 +454,7 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	}
 }
 
-func (c *chainClient) SubmitIdleProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error) {
+func (c *chainClient) SubmitIdleProofResult(idleproveHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -472,12 +472,12 @@ func (c *chainClient) SubmitIdleProofResult(puk []byte, result types.Bool, signa
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	acc, err := types.NewAccountID(puk)
+	teeacc, err := types.NewAccountID(tee_acc)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, *acc, result, signature)
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, idleproveHash, front, rear, accumulator, result, signature, *teeacc)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}

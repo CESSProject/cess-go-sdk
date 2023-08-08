@@ -52,7 +52,7 @@ type SDK interface {
 	//
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
 	//
-	SubmitIdleProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
+	SubmitIdleProofResult(idleproveHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error)
 	//
 	SubmitServiceProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
 
