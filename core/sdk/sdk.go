@@ -39,9 +39,9 @@ type SDK interface {
 	//
 	QueryChallenge_V2() (pattern.ChallengeInfo_V2, error)
 	//
-	QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error)
+	QueryUnverifiedIdleProof(puk []byte) (pattern.IdleProofInfo, error)
 	//
-	QueryUnverifiedServiceProof() (pattern.ServiceProofInfo, error)
+	QueryUnverifiedServiceProof(puk []byte) (pattern.ServiceProofInfo, error)
 
 	// Audit-Extrinsics
 

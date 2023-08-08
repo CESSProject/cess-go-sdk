@@ -222,7 +222,7 @@ func (c *chainClient) QueryChallenge_V2() (pattern.ChallengeInfo_V2, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error) {
+func (c *chainClient) QueryUnverifiedIdleProof(puk []byte) (pattern.IdleProofInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -234,7 +234,7 @@ func (c *chainClient) QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error) 
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYIDLEPROOF)
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYIDLEPROOF, puk)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -249,7 +249,7 @@ func (c *chainClient) QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error) 
 	return data, nil
 }
 
-func (c *chainClient) QueryUnverifiedServiceProof() (pattern.ServiceProofInfo, error) {
+func (c *chainClient) QueryUnverifiedServiceProof(puk []byte) (pattern.ServiceProofInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -261,7 +261,7 @@ func (c *chainClient) QueryUnverifiedServiceProof() (pattern.ServiceProofInfo, e
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYSERVICEPROOF)
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYSERVICEPROOF, puk)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
