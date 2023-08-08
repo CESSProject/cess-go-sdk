@@ -472,7 +472,12 @@ func (c *chainClient) SubmitIdleProofResult(puk []byte, result types.Bool, signa
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, puk, result, signature)
+	acc, err := types.NewAccountID(puk)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, *acc, result, signature)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
