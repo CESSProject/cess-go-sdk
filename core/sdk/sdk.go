@@ -54,7 +54,7 @@ type SDK interface {
 	//
 	SubmitIdleProofResult(idleproveHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error)
 	//
-	SubmitServiceProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
+	SubmitServiceProofResult(result types.Bool, signature pattern.TeeSignature, bloomFilter pattern.BloomFilter, tee_acc []byte) (string, error)
 
 	// Filebank-State
 
