@@ -39,9 +39,9 @@ type SDK interface {
 	//
 	QueryChallenge_V2() (pattern.ChallengeInfo_V2, error)
 	//
-	QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error)
+	QueryUnverifiedIdleProof(puk []byte) ([]pattern.IdleProofInfo, error)
 	//
-	QueryUnverifiedServiceProof() (pattern.ServiceProofInfo, error)
+	QueryUnverifiedServiceProof(puk []byte) ([]pattern.ServiceProofInfo, error)
 
 	// Audit-Extrinsics
 
@@ -52,9 +52,9 @@ type SDK interface {
 	//
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
 	//
-	SubmitIdleProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
+	SubmitIdleProofResult(idleproveHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error)
 	//
-	SubmitServiceProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error)
+	SubmitServiceProofResult(result types.Bool, signature pattern.TeeSignature, bloomFilter pattern.BloomFilter, tee_acc []byte) (string, error)
 
 	// Filebank-State
 
