@@ -222,19 +222,19 @@ func (c *chainClient) QueryChallenge_V2() (pattern.ChallengeInfo_V2, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error) {
+func (c *chainClient) QueryUnverifiedIdleProof(puk []byte) ([]pattern.IdleProofInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data pattern.IdleProofInfo
+	var data []pattern.IdleProofInfo
 
 	if !c.GetChainState() {
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYIDLEPROOF)
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYIDLEPROOF, puk)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -249,19 +249,19 @@ func (c *chainClient) QueryUnverifiedIdleProof() (pattern.IdleProofInfo, error) 
 	return data, nil
 }
 
-func (c *chainClient) QueryUnverifiedServiceProof() (pattern.ServiceProofInfo, error) {
+func (c *chainClient) QueryUnverifiedServiceProof(puk []byte) ([]pattern.ServiceProofInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data pattern.ServiceProofInfo
+	var data []pattern.ServiceProofInfo
 
 	if !c.GetChainState() {
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYSERVICEPROOF)
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYSERVICEPROOF, puk)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -454,7 +454,7 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	}
 }
 
-func (c *chainClient) SubmitIdleProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error) {
+func (c *chainClient) SubmitIdleProofResult(idleproveHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -472,7 +472,12 @@ func (c *chainClient) SubmitIdleProofResult(puk []byte, result types.Bool, signa
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, puk, result, signature)
+	teeacc, err := types.NewAccountID(tee_acc)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, idleproveHash, front, rear, accumulator, result, signature, *teeacc)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
@@ -543,7 +548,7 @@ func (c *chainClient) SubmitIdleProofResult(puk []byte, result types.Bool, signa
 	}
 }
 
-func (c *chainClient) SubmitServiceProofResult(puk []byte, result types.Bool, signature pattern.TeeSignature) (string, error) {
+func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature pattern.TeeSignature, bloomFilter pattern.BloomFilter, tee_acc []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -561,7 +566,12 @@ func (c *chainClient) SubmitServiceProofResult(puk []byte, result types.Bool, si
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, puk, result, signature)
+	teeacc, err := types.NewAccountID(tee_acc)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, result, signature, bloomFilter, *teeacc)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
