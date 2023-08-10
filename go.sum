@@ -42,8 +42,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/CESSProject/go-keyring v0.0.0-20220614131247-ee3a8da30fde h1:5MDRjjtg6PEhqyVjupwaapN96cOZiddOGAYwKQeaTu0=
 github.com/CESSProject/go-keyring v0.0.0-20220614131247-ee3a8da30fde/go.mod h1:RUXBd3ROP98MYepEEa0Y0l/T0vQlIKqFJxI/ocdnRLM=
-github.com/CESSProject/p2p-go v0.1.10 h1:ooAx+lS+jBvw11qhx37dZGuGAsdk9l5OYBHDZhgpAQQ=
-github.com/CESSProject/p2p-go v0.1.10/go.mod h1:8OWpngIEFRmUTr3HXDx+g/cNyWGPRSyCmeq/pT99zfc=
+github.com/CESSProject/p2p-go v0.1.11-0.20230810070545-fee28c13524e h1:ObomkvWnaotjZzF7b+mvE1wt9My7RAiXjvl0M8ogZvY=
+github.com/CESSProject/p2p-go v0.1.11-0.20230810070545-fee28c13524e/go.mod h1:8OWpngIEFRmUTr3HXDx+g/cNyWGPRSyCmeq/pT99zfc=
 github.com/ChainSafe/go-schnorrkel v1.0.0 h1:3aDA67lAykLaG1y3AOjs88dMxC88PgUuHRrLeDnvGIM=
 github.com/ChainSafe/go-schnorrkel v1.0.0/go.mod h1:dpzHYVxLZcp8pjlV+O+UR8K0Hp/z7vcchBSbMBEhCw4=
 github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 h1:fLjPD/aNc3UIOA6tDi6QXUemppXK3P9BI7mr2hd6gx8=
