@@ -407,7 +407,6 @@ type EventRecords struct {
 	FileBank_ClaimRestoralOrder    []Event_ClaimRestoralOrder
 	FileBank_RecoveryCompleted     []Event_RecoveryCompleted
 	FileBank_StorageCompleted      []Event_StorageCompleted
-	FileBank_Withdraw              []Event_Withdraw
 	FileBank_IdleSpaceCert         []Event_IdleSpaceCert
 	FileBank_ReplaceIdleSpace      []Event_ReplaceIdleSpace
 
@@ -430,6 +429,7 @@ type EventRecords struct {
 	Sminer_UpdataIp           []Event_UpdataIp
 	Sminer_Receive            []Event_Receive
 	Sminer_MinerExitPrep      []Event_MinerExitPrep
+	Sminer_Withdraw           []Event_Withdraw
 
 	// StorageHandler
 	StorageHandler_BuySpace             []Event_BuySpace

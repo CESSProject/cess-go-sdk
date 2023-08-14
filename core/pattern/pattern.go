@@ -60,24 +60,24 @@ const (
 	AUTHORITYLIST = "AuthorityList"
 
 	// SMINER
-	ALLMINER   = "AllMiner"
-	MINERITEMS = "MinerItems"
-	REWARDMAP  = "RewardMap"
-	EXPENDERS  = "Expenders"
+	ALLMINER           = "AllMiner"
+	MINERITEMS         = "MinerItems"
+	REWARDMAP          = "RewardMap"
+	EXPENDERS          = "Expenders"
+	RESTORALTARGETINFO = "RestoralTarget"
 
 	// TEEWORKER
 	TEEWORKERMAP = "TeeWorkerMap"
 	TEEPODR2PK   = "TeePodr2Pk"
 
 	// FILEBANK
-	FILE               = "File"
-	BUCKET             = "Bucket"
-	BUCKETLIST         = "UserBucketList"
-	DEALMAP            = "DealMap"
-	FILLERMAP          = "FillerMap"
-	PENDINGREPLACE     = "PendingReplacements"
-	RESTORALORDER      = "RestoralOrder"
-	RESTORALTARGETINFO = "RestoralTarget"
+	FILE           = "File"
+	BUCKET         = "Bucket"
+	BUCKETLIST     = "UserBucketList"
+	DEALMAP        = "DealMap"
+	FILLERMAP      = "FillerMap"
+	PENDINGREPLACE = "PendingReplacements"
+	RESTORALORDER  = "RestoralOrder"
 
 	// STORAGE_HANDLER
 	USERSPACEINFO = "UserOwnedSpace"
@@ -110,6 +110,8 @@ const (
 	TX_SMINER_UPDATEPEERID   = SMINER + DOT + "update_peer_id"
 	TX_SMINER_UPDATEINCOME   = SMINER + DOT + "update_beneficiary"
 	TX_SMINER_CLAIMREWARD    = SMINER + DOT + "receive_reward"
+	TX_SMINER_MINEREXITPREP  = SMINER + DOT + "miner_exit_prep"
+	TX_SMINER_WITHDRAW       = SMINER + DOT + "miner_withdraw"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET         = FILEBANK + DOT + "create_bucket"
@@ -120,8 +122,6 @@ const (
 	TX_FILEBANK_UPLOADFILLER      = FILEBANK + DOT + "upload_filler"
 	TX_FILEBANK_FILEREPORT        = FILEBANK + DOT + "transfer_report"
 	TX_FILEBANK_REPLACEFILE       = FILEBANK + DOT + "replace_file_report"
-	TX_FILEBANK_MINEREXITPREP     = FILEBANK + DOT + "miner_exit_prep"
-	TX_FILEBANK_WITHDRAW          = FILEBANK + DOT + "miner_withdraw"
 	TX_FILEBANK_GENRESTOREORDER   = FILEBANK + DOT + "generate_restoral_order"
 	TX_FILEBANK_CLAIMRESTOREORDER = FILEBANK + DOT + "claim_restoral_order"
 	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"

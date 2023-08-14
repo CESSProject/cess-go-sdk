@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/CESSProject/go-keyring v0.0.0-20220614131247-ee3a8da30fde
-	github.com/CESSProject/p2p-go v0.1.11-0.20230810070545-fee28c13524e
+	github.com/CESSProject/p2p-go v0.1.11-0.20230814055758-b3d8aaa4f924
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/centrifuge/go-substrate-rpc-client/v4 v4.0.13
@@ -38,6 +38,7 @@ require (
 	github.com/decred/dcrd/crypto/blake256 v1.0.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/drgomesp/go-libp2p-grpc v0.1.0 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
 	github.com/ethereum/go-ethereum v1.10.20 // indirect
 	github.com/flynn/noise v1.0.0 // indirect
@@ -77,6 +78,7 @@ require (
 	github.com/libp2p/go-cidranger v1.1.0 // indirect
 	github.com/libp2p/go-flow-metrics v0.1.0 // indirect
 	github.com/libp2p/go-libp2p-asn-util v0.2.0 // indirect
+	github.com/libp2p/go-libp2p-gostream v0.5.0 // indirect
 	github.com/libp2p/go-libp2p-kad-dht v0.23.0 // indirect
 	github.com/libp2p/go-libp2p-kbucket v0.5.0 // indirect
 	github.com/libp2p/go-libp2p-record v0.2.0 // indirect
