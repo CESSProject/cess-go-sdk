@@ -482,7 +482,7 @@ func (c *chainClient) ExitSminer() (string, error) {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err = types.NewCall(c.metadata, pattern.TX_FILEBANK_MINEREXITPREP)
+	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_MINEREXITPREP)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
@@ -940,7 +940,7 @@ func (c *chainClient) Withdraw() (string, error) {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_WITHDRAW)
+	call, err := types.NewCall(c.metadata, pattern.TX_SMINER_WITHDRAW)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
@@ -998,7 +998,7 @@ func (c *chainClient) Withdraw() (string, error) {
 					return txhash, errors.Wrap(err, "[GetStorageRaw]")
 				}
 				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_Withdraw) > 0 {
+				if err != nil || len(events.Sminer_Withdraw) > 0 {
 					return txhash, nil
 				}
 				return txhash, errors.New(pattern.ERR_Failed)

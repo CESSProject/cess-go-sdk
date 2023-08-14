@@ -121,10 +121,10 @@ type SDK interface {
 
 	// Oss-State
 
-	// QuaryAuthorizedAcc queries the account authorized by puk.
-	// QuaryAuthorizedAccount query account in string form.
-	QuaryAuthorizedAcc(puk []byte) (types.AccountID, error)
-	QuaryAuthorizedAccount(puk []byte) (string, error)
+	// QuaryAuthorizedAccountIDs queries accountIDs authorized by puk.
+	// QuaryAuthorizedAccounts query accounts in string form.
+	QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, error)
+	QuaryAuthorizedAccounts(puk []byte) ([]string, error)
 	// QueryDeossPeerPublickey queries deoss peer public key.
 	QueryDeossPeerPublickey(pubkey []byte) ([]byte, error)
 	// QueryDeossPeerIdList queries peerid of all deoss.

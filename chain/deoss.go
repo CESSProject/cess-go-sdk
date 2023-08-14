@@ -85,13 +85,13 @@ func (c *chainClient) QueryDeossPeerIdList() ([]string, error) {
 	return result, nil
 }
 
-func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
+func (c *chainClient) QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data types.AccountID
+	var data []types.AccountID
 
 	if !c.GetChainState() {
 		return data, pattern.ERR_RPC_CONNECTION
@@ -122,26 +122,31 @@ func (c *chainClient) QuaryAuthorizedAcc(puk []byte) (types.AccountID, error) {
 	return data, nil
 }
 
-func (c *chainClient) QuaryAuthorizedAccount(puk []byte) (string, error) {
-	acc, err := c.QuaryAuthorizedAcc(puk)
+func (c *chainClient) QuaryAuthorizedAccounts(puk []byte) ([]string, error) {
+	acc, err := c.QuaryAuthorizedAccountIDs(puk)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return utils.EncodePublicKeyAsCessAccount(acc[:])
+	var result = make([]string, len(acc))
+	for k, v := range acc {
+		result[k], _ = utils.EncodePublicKeyAsCessAccount(v[:])
+	}
+	return result, nil
 }
 
 func (c *chainClient) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
-	grantor, err := c.QuaryAuthorizedAcc(puk)
+	grantor, err := c.QuaryAuthorizedAccounts(puk)
 	if err != nil {
-		if err.Error() == pattern.ERR_Empty {
-			return false, nil
-		}
 		return false, err
 	}
-	account_chain, _ := utils.EncodePublicKeyAsCessAccount(grantor[:])
 	account_local := c.GetSignatureAcc()
 
-	return account_chain == account_local, nil
+	for _, v := range grantor {
+		if account_local == v {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (c *chainClient) RegisterOrUpdateDeoss(peerId []byte) (string, error) {

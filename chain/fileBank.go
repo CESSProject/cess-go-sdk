@@ -1240,7 +1240,7 @@ func (c *chainClient) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInf
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.RESTORALTARGETINFO, owner)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.RESTORALTARGETINFO, owner)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -1627,7 +1627,7 @@ func (c *chainClient) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, e
 		return nil, pattern.ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(pattern.FILEBANK, pattern.RESTORALTARGETINFO)
+	key := createPrefixedKey(pattern.SMINER, pattern.RESTORALTARGETINFO)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		return nil, errors.Wrap(err, "[GetKeysLatest]")
