@@ -48,6 +48,8 @@ github.com/CESSProject/p2p-go v0.1.11-0.20230814024118-3b9597ebb5a4 h1:DdPqX6fLN
 github.com/CESSProject/p2p-go v0.1.11-0.20230814024118-3b9597ebb5a4/go.mod h1:+hN9tEOCcS812sMgLLEANMOccUCk6wc0lGc/hytv06Q=
 github.com/CESSProject/p2p-go v0.1.11-0.20230814035941-421b893fed21 h1:uYbdeR13WVlUUbyUZyjp5AcnAYRFK2BsxZYLgpu2oto=
 github.com/CESSProject/p2p-go v0.1.11-0.20230814035941-421b893fed21/go.mod h1:+hN9tEOCcS812sMgLLEANMOccUCk6wc0lGc/hytv06Q=
+github.com/CESSProject/p2p-go v0.1.11-0.20230814055758-b3d8aaa4f924 h1:N58vGKzpmLufR9XwEMPQVTeIfXZ0fdtQ/c+yLLaCqKA=
+github.com/CESSProject/p2p-go v0.1.11-0.20230814055758-b3d8aaa4f924/go.mod h1:+hN9tEOCcS812sMgLLEANMOccUCk6wc0lGc/hytv06Q=
 github.com/ChainSafe/go-schnorrkel v1.0.0 h1:3aDA67lAykLaG1y3AOjs88dMxC88PgUuHRrLeDnvGIM=
 github.com/ChainSafe/go-schnorrkel v1.0.0/go.mod h1:dpzHYVxLZcp8pjlV+O+UR8K0Hp/z7vcchBSbMBEhCw4=
 github.com/StackExchange/wmi v0.0.0-20180116203802-5d049714c4a6 h1:fLjPD/aNc3UIOA6tDi6QXUemppXK3P9BI7mr2hd6gx8=
