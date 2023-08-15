@@ -226,6 +226,17 @@ type SDK interface {
 	// NetListening returns whether the current node is listening.
 	NetListening() (bool, error)
 
+	// TransferToken to dest.
+	//
+	// Receive parameter:
+	//   - dest: target account.
+	//   - amount: transfer amount.
+	// Return parameter:
+	//   - string: transaction hash.
+	//   - string: target account.
+	//   - error: error message.
+	TransferToken(dest string, amount uint64) (string, string, error)
+
 	// Other
 
 	// GetSignatureAcc returns the signature account.
