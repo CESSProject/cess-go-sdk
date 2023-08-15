@@ -133,6 +133,9 @@ const (
 	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
 	TX_STORAGE_EXPANSIONSPACE = STORAGEHANDLER + DOT + "expansion_space"
 	TX_STORAGE_RENEWALSPACE   = STORAGEHANDLER + DOT + "renewal_space"
+
+	// BALANCES
+	TX_BALANCES_FORCETRANSFER = "Balances" + DOT + "transfer"
 )
 
 // RPC Call
