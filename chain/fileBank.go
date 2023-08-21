@@ -162,6 +162,56 @@ func (c *chainClient) QueryFileMetadata(roothash string) (pattern.FileMetadata, 
 	return data, nil
 }
 
+// QueryFileMetadataByBlock
+func (c *chainClient) QueryFileMetadataByBlock(roothash string, block uint64) (pattern.FileMetadata, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		data pattern.FileMetadata
+		hash pattern.FileHash
+	)
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	if len(hash) != len(roothash) {
+		return data, errors.New("invalid filehash")
+	}
+
+	for i := 0; i < len(hash); i++ {
+		hash[i] = types.U8(roothash[i])
+	}
+
+	b, err := codec.Encode(hash)
+	if err != nil {
+		return data, errors.Wrap(err, "[Encode]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.FILE, b)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(block)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetBlockHash]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 // QueryFillerMap
 func (c *chainClient) QueryFillerMap(filehash string) (pattern.IdleMetadata, error) {
 	defer func() {

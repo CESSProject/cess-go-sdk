@@ -8,6 +8,7 @@
 package chain
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -278,4 +279,54 @@ func (c *chainClient) TransferToken(dest string, amount uint64) (string, string,
 			return txhash, "", pattern.ERR_RPC_TIMEOUT
 		}
 	}
+}
+
+func (c *chainClient) DecodeEventNameFromBlock(block uint64) ([]string, error) {
+	blockHash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		return nil, err
+	}
+	events, err := c.eventRetriever.GetEvents(blockHash)
+	if err != nil {
+		return nil, err
+	}
+	var result = make([]string, len(events))
+	for k, v := range events {
+		result[k] = v.Name
+		if v.Name == "fileBank.ClaimRestoralOrder" {
+			for _, vv := range v.Fields {
+				fmt.Printf("%s", vv.Name)
+				fmt.Printf("  %v\n", vv.Value)
+			}
+		}
+	}
+	return result, nil
+}
+
+func (c *chainClient) DecodeEventNameFromBlockhash(blockhash types.Hash) ([]string, error) {
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return nil, err
+	}
+	var result = make([]string, len(events))
+	for k, v := range events {
+		result[k] = v.Name
+	}
+	return result, nil
+}
+
+func (c *chainClient) FindEventFromBlock(block uint64, eventname string) ([]string, error) {
+	blockHash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		return nil, err
+	}
+	events, err := c.eventRetriever.GetEvents(blockHash)
+	if err != nil {
+		return nil, err
+	}
+	var result = make([]string, len(events))
+	for k, v := range events {
+		result[k] = v.Name
+	}
+	return result, nil
 }

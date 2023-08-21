@@ -49,11 +49,12 @@ const (
 // Chain state
 const (
 	//AUDIT
-	UNVERIFYPROOF        = "UnverifyProof"
-	CHALLENGEDURATION    = "ChallengeDuration"
-	CHALLENGESNAPSHOT    = "ChallengeSnapShot"
-	UNVERIFYIDLEPROOF    = "UnverifyIdleProof"
-	UNVERIFYSERVICEPROOF = "UnverifyServiceProof"
+	UNVERIFYPROOF           = "UnverifyProof"
+	CHALLENGEDURATION       = "ChallengeDuration"
+	CHALLENGEVERIFYDURATION = "VerifyDuration"
+	CHALLENGESNAPSHOT       = "ChallengeSnapShot"
+	UNVERIFYIDLEPROOF       = "UnverifyIdleProof"
+	UNVERIFYSERVICEPROOF    = "UnverifyServiceProof"
 
 	// OSS
 	// OSS

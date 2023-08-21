@@ -24,9 +24,10 @@ type SDK interface {
 
 	// Audit-State
 
-	// Query Challenge Expired Block Height Interface
+	// Query the expired block height of the challenge.
 	QueryChallengeExpiration() (uint32, error)
-
+	// Query challenge verification expired block height.
+	QueryChallengeVerifyExpiration() (uint32, error)
 	// QueryChallengeSnapshot query challenge information snapshot.
 	QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error)
 	QueryChallengeSt() (pattern.ChallengeSnapshot, error)
@@ -64,6 +65,8 @@ type SDK interface {
 	QueryStorageOrder(roothash string) (pattern.StorageOrder, error)
 	// QueryFileMetadata queries the metadata of the roothash file.
 	QueryFileMetadata(roothash string) (pattern.FileMetadata, error)
+	// QueryFileMetadataByBlock queries the metadata of the roothash file.
+	QueryFileMetadataByBlock(roothash string, block uint64) (pattern.FileMetadata, error)
 	// QueryFillerMap queries filler information.
 	QueryFillerMap(filehash string) (pattern.IdleMetadata, error)
 	// QueryPendingReplacements queries the amount of idle data that can be replaced.
@@ -225,6 +228,10 @@ type SDK interface {
 	SysVersion() (string, error)
 	// NetListening returns whether the current node is listening.
 	NetListening() (bool, error)
+	//
+	DecodeEventNameFromBlock(block uint64) ([]string, error)
+	//
+	DecodeEventNameFromBlockhash(blockhash types.Hash) ([]string, error)
 
 	// TransferToken to dest.
 	//
