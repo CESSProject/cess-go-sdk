@@ -24,9 +24,10 @@ type SDK interface {
 
 	// Audit-State
 
-	// Query Challenge Expired Block Height Interface
+	// Query the expired block height of the challenge.
 	QueryChallengeExpiration() (uint32, error)
-
+	// Query challenge verification expired block height.
+	QueryChallengeVerifyExpiration() (uint32, error)
 	// QueryChallengeSnapshot query challenge information snapshot.
 	QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error)
 	QueryChallengeSt() (pattern.ChallengeSnapshot, error)
