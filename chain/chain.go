@@ -26,6 +26,8 @@ import (
 	p2pgo "github.com/CESSProject/p2p-go"
 	"github.com/CESSProject/p2p-go/core"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/retriever"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/state"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/xxhash"
@@ -38,6 +40,7 @@ type chainClient struct {
 	chainState     *atomic.Bool
 	metadata       *types.Metadata
 	runtimeVersion *types.RuntimeVersion
+	eventRetriever retriever.EventRetriever
 	keyEvents      types.StorageKey
 	genesisHash    types.Hash
 	keyring        signature.KeyringPair
@@ -114,6 +117,10 @@ func NewChainClient(
 		return nil, err
 	}
 	chainClient.keyEvents, err = types.CreateStorageKey(chainClient.metadata, pattern.SYSTEM, pattern.EVENTS, nil)
+	if err != nil {
+		return nil, err
+	}
+	chainClient.eventRetriever, err = retriever.NewDefaultEventRetriever(state.NewEventProvider(chainClient.api.RPC.State), chainClient.api.RPC.State)
 	if err != nil {
 		return nil, err
 	}
