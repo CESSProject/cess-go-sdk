@@ -519,6 +519,17 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
+	buckets, err := c.QueryBucketList(owner_pkey)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[QueryBucketList]")
+	}
+
+	for _, v := range buckets {
+		if utils.CompareSlice(v, []byte(name)) {
+			return "", nil
+		}
+	}
+
 	acc, err := types.NewAccountID(owner_pkey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewAccountID]")

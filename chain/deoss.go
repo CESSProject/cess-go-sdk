@@ -97,17 +97,7 @@ func (c *chainClient) QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, 
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	acc, err := types.NewAccountID(puk)
-	if err != nil {
-		return data, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	b, err := codec.Encode(*acc)
-	if err != nil {
-		return data, errors.Wrap(err, "[EncodeToBytes]")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.OSS, pattern.AUTHORITYLIST, b)
+	key, err := types.CreateStorageKey(c.metadata, pattern.OSS, pattern.AUTHORITYLIST, puk)
 	if err != nil {
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
@@ -457,6 +447,17 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	list, err := c.QuaryAuthorizedAccounts(c.GetSignatureAccPulickey())
+	if err != nil {
+		return txhash, errors.Wrap(err, "[QuaryAuthorizedAccounts]")
+	}
+
+	for _, v := range list {
+		if v == ossAccount {
+			return "", nil
+		}
 	}
 
 	call, err := types.NewCall(c.metadata, pattern.TX_OSS_AUTHORIZE, *acc)

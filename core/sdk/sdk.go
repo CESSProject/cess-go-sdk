@@ -141,7 +141,7 @@ type SDK interface {
 	RegisterOrUpdateDeoss(peerId []byte) (string, error)
 	// ExitDeoss exit deoss
 	ExitDeoss() (string, error)
-	// AuthorizeSpace authorizes space to oss
+	// AuthorizeSpace authorizes space to oss account
 	AuthorizeSpace(ossAccount string) (string, error)
 	// UnAuthorizeSpace cancels space authorization
 	UnAuthorizeSpace() (string, error)
