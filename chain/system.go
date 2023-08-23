@@ -13,7 +13,6 @@ import (
 	"reflect"
 	"strings"
 	"time"
-	"unsafe"
 
 	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
@@ -289,49 +288,82 @@ func (c *chainClient) DecodeEventNameFromBlock(block uint64) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	events, err := c.eventRetriever.GetEvents(blockHash)
 	if err != nil {
 		return nil, err
 	}
+
 	var result = make([]string, len(events))
-	for k, v := range events {
-		result[k] = v.Name
-		if v.Name == "FileBank.ClaimRestoralOrder" {
-			for _, vv := range v.Fields {
-				if strings.Contains(vv.Name, "miner") {
-					//tf := reflect.TypeOf(vv.Value)
-					vf := reflect.ValueOf(vv.Value)
+	for _, e := range events {
+		if e.Name == event.FileBankClaimRestoralOrder {
+			fmt.Printf("Event ID: %x \n", e.EventID)
+			fmt.Printf("Event Name: %s \n", e.Name)
+			fmt.Printf("Event Fields Count: %d \n", len(e.Fields))
+			for k, v := range e.Fields {
+				fmt.Printf("Field Name: %d \n", k)
+				fmt.Printf("Field Type: %v \n", reflect.TypeOf(v))
+				fmt.Printf("Field Value: %v \n", v)
+				vf := reflect.ValueOf(v.Value)
+				fmt.Printf("ValueOf(s):%v Kind:%v Len:%v\n", vf, vf.Kind(), vf.Len())
+				fmt.Printf("vf.Index(0):%v\n", vf.Index(0))
+				allValue := fmt.Sprintf("%v", vf.Index(0))
 
-					//tt := (*types.AccountID)(unsafe.Pointer(reflect.ValueOf(vv.Value).Pointer()))
-
-					tt := (*[32]byte)(unsafe.Pointer(vf.UnsafeAddr()))
-					fmt.Println(tt)
-					// fmt.Println("num field: ", vf.NumField())
-					// for i := 0; i < vf.NumField(); i++ {
-					// 	fmt.Printf("field kind %d: %v\n", i, vf.Field(i).Kind())
-					// }
-					//fmt.Println("type1: ", vf.Bytes())
-					// fmt.Println("value1: ", vf.String())
-					// fmt.Println("kind1: ", tf.Kind())
-
-					// cXgkEZHxMXXvnJMhAVCz1q8GSKPMERM218eFzy9m6RE2baBWG
-					acc, err := utils.EncodePublicKeyAsCessAccount(tt[:])
+				if strings.Contains(v.Name, "miner") {
+					//tt := *(*[32]uint8)(unsafe.Pointer(vf.Index(0).UnsafeAddr()))
+					//fmt.Println("tt:", tt)
+					kk := []byte{78, 59, 65, 83, 136, 44, 95, 74, 235, 247, 165, 98, 39, 37, 147, 62, 225, 126, 131, 209, 116, 184, 129, 163, 96, 92, 152, 22, 42, 88, 38, 20}
+					fmt.Println(strings.Split(allValue, "] "))
+					acc, err := utils.EncodePublicKeyAsCessAccount(kk)
 					if err != nil {
 						fmt.Println(err)
 					} else {
 						fmt.Printf("  %v\n", acc)
 					}
 				}
-				if strings.Contains(vv.Name, "order_id") {
-					tf := reflect.TypeOf(vv.Value)
-					vf := reflect.ValueOf(vv.Value)
-					fmt.Println("type2: ", tf)
-					fmt.Println("value2: ", vf)
-					fmt.Println("kind2: ", tf.Kind())
-				}
 			}
 		}
 	}
+
+	// var result = make([]string, len(events))
+	// for k, v := range events {
+	// 	result[k] = v.Name
+	// 	if v.Name == "FileBank.ClaimRestoralOrder" {
+	// 		for _, vv := range v.Fields {
+	// 			if strings.Contains(vv.Name, "miner") {
+	// 				//tf := reflect.TypeOf(vv.Value)
+	// 				vf := reflect.ValueOf(vv.Value)
+
+	// 				//tt := (*types.AccountID)(unsafe.Pointer(reflect.ValueOf(vv.Value).Pointer()))
+
+	// 				tt := (*[32]byte)(unsafe.Pointer(vf.UnsafeAddr()))
+	// 				fmt.Println(tt)
+	// 				// fmt.Println("num field: ", vf.NumField())
+	// 				// for i := 0; i < vf.NumField(); i++ {
+	// 				// 	fmt.Printf("field kind %d: %v\n", i, vf.Field(i).Kind())
+	// 				// }
+	// 				//fmt.Println("type1: ", vf.Bytes())
+	// 				// fmt.Println("value1: ", vf.String())
+	// 				// fmt.Println("kind1: ", tf.Kind())
+
+	// 				// cXgkEZHxMXXvnJMhAVCz1q8GSKPMERM218eFzy9m6RE2baBWG
+	// 				acc, err := utils.EncodePublicKeyAsCessAccount(tt[:])
+	// 				if err != nil {
+	// 					fmt.Println(err)
+	// 				} else {
+	// 					fmt.Printf("  %v\n", acc)
+	// 				}
+	// 			}
+	// 			if strings.Contains(vv.Name, "order_id") {
+	// 				tf := reflect.TypeOf(vv.Value)
+	// 				vf := reflect.ValueOf(vv.Value)
+	// 				fmt.Println("type2: ", tf)
+	// 				fmt.Println("value2: ", vf)
+	// 				fmt.Println("kind2: ", tf.Kind())
+	// 			}
+	// 		}
+	// 	}
+	// }
 	return result, nil
 }
 
