@@ -10,7 +10,10 @@ package chain
 import (
 	"fmt"
 	"log"
+	"reflect"
+	"strings"
 	"time"
+	"unsafe"
 
 	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
@@ -293,10 +296,39 @@ func (c *chainClient) DecodeEventNameFromBlock(block uint64) ([]string, error) {
 	var result = make([]string, len(events))
 	for k, v := range events {
 		result[k] = v.Name
-		if v.Name == "fileBank.ClaimRestoralOrder" {
+		if v.Name == "FileBank.ClaimRestoralOrder" {
 			for _, vv := range v.Fields {
-				fmt.Printf("%s", vv.Name)
-				fmt.Printf("  %v\n", vv.Value)
+				if strings.Contains(vv.Name, "miner") {
+					//tf := reflect.TypeOf(vv.Value)
+					vf := reflect.ValueOf(vv.Value)
+
+					//tt := (*types.AccountID)(unsafe.Pointer(reflect.ValueOf(vv.Value).Pointer()))
+
+					tt := (*[32]byte)(unsafe.Pointer(vf.UnsafeAddr()))
+					fmt.Println(tt)
+					// fmt.Println("num field: ", vf.NumField())
+					// for i := 0; i < vf.NumField(); i++ {
+					// 	fmt.Printf("field kind %d: %v\n", i, vf.Field(i).Kind())
+					// }
+					//fmt.Println("type1: ", vf.Bytes())
+					// fmt.Println("value1: ", vf.String())
+					// fmt.Println("kind1: ", tf.Kind())
+
+					// cXgkEZHxMXXvnJMhAVCz1q8GSKPMERM218eFzy9m6RE2baBWG
+					acc, err := utils.EncodePublicKeyAsCessAccount(tt[:])
+					if err != nil {
+						fmt.Println(err)
+					} else {
+						fmt.Printf("  %v\n", acc)
+					}
+				}
+				if strings.Contains(vv.Name, "order_id") {
+					tf := reflect.TypeOf(vv.Value)
+					vf := reflect.ValueOf(vv.Value)
+					fmt.Println("type2: ", tf)
+					fmt.Println("value2: ", vf)
+					fmt.Println("kind2: ", tf.Kind())
+				}
 			}
 		}
 	}
