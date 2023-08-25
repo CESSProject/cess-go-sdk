@@ -12,7 +12,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -176,17 +175,9 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.StorageHandler_BuySpace) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_StorageHandler_BuySpace(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -269,17 +260,9 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.StorageHandler_ExpansionSpace) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_StorageHandler_ExpansionSpace(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -362,17 +345,9 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.StorageHandler_RenewalSpace) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_StorageHandler_RenewalSpace(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")

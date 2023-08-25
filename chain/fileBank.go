@@ -212,7 +212,7 @@ func (c *chainClient) QueryFileMetadataByBlock(roothash string, block uint64) (p
 	return data, nil
 }
 
-// QueryFillerMap
+// Deprecated: As cess v0.6
 func (c *chainClient) QueryFillerMap(filehash string) (pattern.IdleMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -301,6 +301,7 @@ func (c *chainClient) QueryStorageOrder(roothash string) (pattern.StorageOrder, 
 	return data, nil
 }
 
+// Deprecated: As cess v0.6
 func (c *chainClient) QueryPendingReplacements(puk []byte) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -377,6 +378,7 @@ func (c *chainClient) QueryPendingReplacements_V2(puk []byte) (types.U128, error
 	return data, nil
 }
 
+// Deprecated: As cess v0.6
 func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error) {
 	c.lock.Lock()
 	defer func() {
@@ -471,6 +473,7 @@ func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.Idle
 	}
 }
 
+// Deprecated: As cess v0.6
 func (c *chainClient) SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error) {
 	var submit = make([]pattern.IdleMetadata, 0)
 	for i := 0; i < len(idlefiles); i++ {
@@ -586,19 +589,9 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_CreateBucket) > 0 {
-					return txhash, nil
-				}
-
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_FileBank_CreateBucket(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -682,19 +675,9 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_DeleteBucket) > 0 {
-					return txhash, nil
-				}
-
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_FileBank_DeleteBucket(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -787,17 +770,9 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_UploadDeclaration) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_FileBank_UploadDeclaration(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -889,23 +864,9 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, hashs, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil {
-					if len(events.FileBank_DeleteFile) > 0 {
-						return txhash, events.FileBank_DeleteFile[0].Filehash, nil
-					}
-					return txhash, nil, nil
-				}
-				if len(events.FileBank_DeleteFile) > 0 {
-					return txhash, events.FileBank_DeleteFile[0].Filehash, nil
-				}
-				return txhash, hashs, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_FileBank_DeleteFile(status.AsInBlock)
+				return txhash, nil, err
 			}
 		case err = <-sub.Err():
 			return txhash, hashs, errors.Wrap(err, "[sub]")
@@ -915,6 +876,7 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 	}
 }
 
+// Deprecated: As cess v0.6
 func (c *chainClient) DeleteFiller(filehash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
@@ -1080,24 +1042,9 @@ func (c *chainClient) SubmitFileReport(roothash []pattern.FileHash) (string, []p
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, nil, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil {
-					if len(events.FileBank_TransferReport) > 0 {
-						return txhash, events.FileBank_TransferReport[0].Failed_list, nil
-					} else {
-						return txhash, nil, nil
-					}
-				}
-				if len(events.FileBank_TransferReport) > 0 {
-					return txhash, events.FileBank_TransferReport[0].Failed_list, nil
-				}
-				return txhash, nil, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_FileBank_TransferReport(status.AsInBlock)
+				return txhash, nil, err
 			}
 		case err = <-sub.Err():
 			return txhash, nil, errors.Wrap(err, "[sub]")
@@ -1122,6 +1069,7 @@ func (c *chainClient) ReportFiles(roothash []string) (string, []string, error) {
 	return txhash, failedfiles, err
 }
 
+// Deprecated: As cess v0.6
 func (c *chainClient) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
@@ -1217,6 +1165,7 @@ func (c *chainClient) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []p
 	}
 }
 
+// Deprecated: As cess v0.6
 func (c *chainClient) ReplaceFile(roothash []string) (string, []string, error) {
 	var hashs = make([]pattern.FileHash, len(roothash))
 	for i := 0; i < len(roothash); i++ {
@@ -1775,17 +1724,9 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_RecoveryCompleted) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_FileBank_RecoveryCompleted(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -1864,17 +1805,9 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pa
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_IdleSpaceCert) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_FileBank_IdleSpaceCert(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -1953,17 +1886,9 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_ReplaceIdleSpace) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_FileBank_ReplaceIdleSpace(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")

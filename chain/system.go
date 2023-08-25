@@ -11,7 +11,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -252,25 +251,9 @@ func (c *chainClient) TransferToken(dest string, amount uint64) (string, string,
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, "", errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil {
-					return txhash, "", nil
-				}
-				if len(events.Balances_Transfer) > 0 {
-					for _, v := range events.Balances_Transfer {
-						if utils.CompareSlice(v.From[:], c.GetSignatureAccPulickey()) {
-							to, _ := utils.EncodePublicKeyAsCessAccount(v.To[:])
-							return txhash, to, nil
-						}
-					}
-				}
-				return txhash, "", errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Balances_Transfer(status.AsInBlock)
+				return txhash, dest, err
 			}
 		case err = <-sub.Err():
 			return txhash, "", errors.Wrap(err, "[sub]")

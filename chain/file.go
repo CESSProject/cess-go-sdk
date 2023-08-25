@@ -125,7 +125,14 @@ func cutfile(file string) ([]string, error) {
 	return segment, nil
 }
 
-func (c *chainClient) GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error) {
+func (c *chainClient) GenerateStorageOrder(
+	roothash string,
+	segment []pattern.SegmentDataInfo,
+	owner []byte,
+	filename string,
+	buckname string,
+	filesize uint64,
+) (string, error) {
 	var err error
 	var segmentList = make([]pattern.SegmentList, len(segment))
 	var user pattern.UserBrief
