@@ -133,6 +133,7 @@ func (c *chainClient) QueryChallengeVerifyExpiration() (uint32, error) {
 	return uint32(data), nil
 }
 
+// Deprecated: As cess v0.6
 func (c *chainClient) ReportProof(idlesigma, servicesigma string) (string, error) {
 	c.lock.Lock()
 	defer func() {
@@ -372,17 +373,9 @@ func (c *chainClient) SubmitIdleProof(idleProve []types.U8) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Audit_SubmitIdleProof) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Audit_SubmitIdleProof(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -461,17 +454,9 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Audit_SubmitServiceProof) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Audit_SubmitServiceProof(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -555,17 +540,9 @@ func (c *chainClient) SubmitIdleProofResult(idleproveHash []types.U8, front, rea
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Audit_SubmitIdleVerifyResult) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Audit_SubmitIdleVerifyResult(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -649,17 +626,9 @@ func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature patt
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Audit_SubmitServiceVerifyResult) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Audit_SubmitServiceVerifyResult(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
