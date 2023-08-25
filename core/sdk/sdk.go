@@ -366,5 +366,51 @@ type SDK interface {
 	//
 	RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash types.Hash) (event.Event_SubmitServiceVerifyResult, error)
 	//
+	RetrieveEvent_Oss_OssUpdate(blockhash types.Hash) (event.Event_OssUpdate, error)
+	//
+	RetrieveEvent_Oss_OssRegister(blockhash types.Hash) (event.Event_OssRegister, error)
+	//
+	RetrieveEvent_Oss_OssDestroy(blockhash types.Hash) (event.Event_OssDestroy, error)
+	//
+	RetrieveEvent_Oss_Authorize(blockhash types.Hash) (event.Event_Authorize, error)
+	//
+	RetrieveEvent_Oss_CancelAuthorize(blockhash types.Hash) (event.Event_CancelAuthorize, error)
+	//
+	RetrieveEvent_FileBank_UploadDeclaration(blockhash types.Hash) (event.Event_UploadDeclaration, error)
+	//
+	RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) (event.Event_CreateBucket, error)
+	//
+	RetrieveEvent_FileBank_DeleteFile(blockhash types.Hash) (event.Event_DeleteFile, error)
+	//
+	RetrieveEvent_FileBank_TransferReport(blockhash types.Hash) (event.Event_TransferReport, error)
+	//
 	RetrieveEvent_FileBank_ClaimRestoralOrder(blockhash types.Hash) (event.Event_ClaimRestoralOrder, error)
+	//
+	RetrieveEvent_FileBank_RecoveryCompleted(blockhash types.Hash) (event.Event_RecoveryCompleted, error)
+	//
+	RetrieveEvent_FileBank_IdleSpaceCert(blockhash types.Hash) (event.Event_IdleSpaceCert, error)
+	//
+	RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Hash) (event.Event_ReplaceIdleSpace, error)
+	//
+	RetrieveEvent_Sminer_Registered(blockhash types.Hash) (event.Event_Registered, error)
+	//
+	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdataIp, error)
+	//
+	RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (event.Event_UpdataBeneficiary, error)
+	//
+	RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (event.Event_MinerExitPrep, error)
+	//
+	RetrieveEvent_Sminer_IncreaseCollateral(blockhash types.Hash) (event.Event_IncreaseCollateral, error)
+	//
+	RetrieveEvent_Sminer_Receive(blockhash types.Hash) (event.Event_Receive, error)
+	//
+	RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (event.Event_Withdraw, error)
+	//
+	RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash) (event.Event_BuySpace, error)
+	//
+	RetrieveEvent_StorageHandler_ExpansionSpace(blockhash types.Hash) (event.Event_ExpansionSpace, error)
+	//
+	RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.Hash) (event.Event_RenewalSpace, error)
+	//
+	RetrieveEvent_Balances_Transfer(blockhash types.Hash) (types.EventBalancesTransfer, error)
 }

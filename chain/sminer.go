@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -280,20 +279,9 @@ func (c *chainClient) RegisterOrUpdateSminer(peerId []byte, earnings string, ple
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, earnings, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil {
-					return txhash, earnings, nil
-				}
-
-				if len(events.Sminer_Registered) > 0 {
-					return txhash, earnings, nil
-				}
+				_, err = c.RetrieveEvent_Sminer_Registered(status.AsInBlock)
+				return txhash, earnings, err
 			}
 		case err = <-sub.Err():
 			return txhash, earnings, errors.Wrap(err, "[sub]")
@@ -355,17 +343,9 @@ func (c *chainClient) updateSminerPeerId(key types.StorageKey, peerid pattern.Pe
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_UpdataIp) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Sminer_UpdataIp(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -442,17 +422,9 @@ func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) 
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_UpdataIp) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Sminer_UpdataIp(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -534,17 +506,9 @@ func (c *chainClient) ExitSminer() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_MinerExitPrep) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Sminer_MinerExitPrep(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -628,17 +592,9 @@ func (c *chainClient) UpdateEarningsAcc(puk []byte) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_UpdataBeneficiary) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Sminer_UpdataBeneficiary(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -705,17 +661,9 @@ func (c *chainClient) updateEarningsAcc(key types.StorageKey, puk []byte) (strin
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_UpdataBeneficiary) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Sminer_UpdataBeneficiary(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -803,17 +751,9 @@ func (c *chainClient) IncreaseStakingAmount(tokens *big.Int) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_IncreaseCollateral) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Sminer_IncreaseCollateral(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -901,17 +841,9 @@ func (c *chainClient) ClaimRewards() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_Receive) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Sminer_Receive(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -991,17 +923,9 @@ func (c *chainClient) Withdraw() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Sminer_Withdraw) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Sminer_Withdraw(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -1168,20 +1092,9 @@ func (c *chainClient) RegisterOrUpdateSminer_V2(peerId []byte, earnings string, 
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, earnings, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil {
-					return txhash, earnings, nil
-				}
-
-				if len(events.Sminer_Registered) > 0 {
-					return txhash, earnings, nil
-				}
+				_, err = c.RetrieveEvent_Sminer_Registered(status.AsInBlock)
+				return txhash, earnings, err
 			}
 		case err = <-sub.Err():
 			return txhash, earnings, errors.Wrap(err, "[sub]")

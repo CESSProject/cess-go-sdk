@@ -12,7 +12,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -236,17 +235,9 @@ func (c *chainClient) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Oss_OssRegister) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Oss_OssRegister(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -308,18 +299,9 @@ func (c *chainClient) updateDeossPeerId(key types.StorageKey, peerid pattern.Pee
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Oss_OssUpdate) > 0 {
-					return txhash, nil
-				}
-
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Oss_OssUpdate(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -401,17 +383,9 @@ func (c *chainClient) ExitDeoss() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Oss_OssDestroy) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Oss_OssDestroy(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -511,19 +485,9 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Oss_Authorize) > 0 {
-					return txhash, nil
-				}
-
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Oss_Authorize(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -602,19 +566,9 @@ func (c *chainClient) UnAuthorizeSpace() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
 				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.Oss_CancelAuthorize) > 0 {
-					return txhash, nil
-				}
-
-				return txhash, errors.New(pattern.ERR_Failed)
+				_, err = c.RetrieveEvent_Oss_CancelAuthorize(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
