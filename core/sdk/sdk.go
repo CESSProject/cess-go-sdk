@@ -11,6 +11,7 @@ import (
 	"io"
 	"math/big"
 
+	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/p2p-go/core"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
@@ -353,4 +354,17 @@ type SDK interface {
 	// Return parameter:
 	//   - error: error message.
 	RedundancyRecovery(out string, shards []string) error
+
+	// retrieve event
+
+	//
+	RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) (event.Event_SubmitIdleProof, error)
+	//
+	RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Hash) (event.Event_SubmitServiceProof, error)
+	//
+	RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types.Hash) (event.Event_SubmitIdleVerifyResult, error)
+	//
+	RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash types.Hash) (event.Event_SubmitServiceVerifyResult, error)
+	//
+	RetrieveEvent_FileBank_ClaimRestoralOrder(blockhash types.Hash) (event.Event_ClaimRestoralOrder, error)
 }

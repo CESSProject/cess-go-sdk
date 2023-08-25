@@ -176,7 +176,7 @@ func (c *chainClient) Reconnect() error {
 		c.api = nil
 	}
 
-	c.api, c.metadata, c.runtimeVersion, c.keyEvents, c.genesisHash, err = reconnectChainSDK(c.rpcAddr)
+	c.api, c.metadata, c.runtimeVersion, c.keyEvents, c.eventRetriever, c.genesisHash, err = reconnectChainSDK(c.rpcAddr)
 	if err != nil {
 		return err
 	}
@@ -249,6 +249,7 @@ func reconnectChainSDK(rpcs []string) (
 	*types.Metadata,
 	*types.RuntimeVersion,
 	types.StorageKey,
+	retriever.EventRetriever,
 	types.Hash,
 	error,
 ) {
@@ -264,31 +265,35 @@ func reconnectChainSDK(rpcs []string) (
 		}
 	}
 	if api == nil {
-		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
 	}
 	var metadata *types.Metadata
 	var runtimeVer *types.RuntimeVersion
 	var keyEvents types.StorageKey
 	var genesisHash types.Hash
+	var eventRetriever retriever.EventRetriever
 
 	metadata, err = api.RPC.State.GetMetadataLatest()
 	if err != nil {
-		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
 	}
 	genesisHash, err = api.RPC.Chain.GetBlockHash(0)
 	if err != nil {
-		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
 	}
 	runtimeVer, err = api.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
-		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
 	}
 	keyEvents, err = types.CreateStorageKey(metadata, pattern.SYSTEM, pattern.EVENTS, nil)
 	if err != nil {
-		return nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
 	}
-
-	return api, metadata, runtimeVer, keyEvents, genesisHash, err
+	eventRetriever, err = retriever.NewDefaultEventRetriever(state.NewEventProvider(api.RPC.State), api.RPC.State)
+	if err != nil {
+		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+	}
+	return api, metadata, runtimeVer, keyEvents, eventRetriever, genesisHash, err
 }
 
 func createPrefixedKey(pallet, method string) []byte {
