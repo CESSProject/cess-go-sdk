@@ -524,12 +524,14 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 
 	buckets, err := c.QueryBucketList(owner_pkey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[QueryBucketList]")
-	}
-
-	for _, v := range buckets {
-		if utils.CompareSlice(v, []byte(name)) {
-			return "", nil
+		if err.Error() != pattern.ERR_Empty {
+			return txhash, errors.Wrap(err, "[QueryBucketList]")
+		}
+	} else {
+		for _, v := range buckets {
+			if utils.CompareSlice(v, []byte(name)) {
+				return "", nil
+			}
 		}
 	}
 
