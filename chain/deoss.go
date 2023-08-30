@@ -425,12 +425,14 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 
 	list, err := c.QuaryAuthorizedAccounts(c.GetSignatureAccPulickey())
 	if err != nil {
-		return txhash, errors.Wrap(err, "[QuaryAuthorizedAccounts]")
-	}
-
-	for _, v := range list {
-		if v == ossAccount {
-			return "", nil
+		if err.Error() != pattern.ERR_Empty {
+			return txhash, errors.Wrap(err, "[QuaryAuthorizedAccounts]")
+		}
+	} else {
+		for _, v := range list {
+			if v == ossAccount {
+				return "", nil
+			}
 		}
 	}
 

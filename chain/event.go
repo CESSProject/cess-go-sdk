@@ -218,30 +218,6 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types
 				vf := reflect.ValueOf(v.Value)
 				if vf.Len() > 0 {
 					allValue := fmt.Sprintf("%v", vf.Index(0))
-					// if strings.Contains(v.Name, "AccountId32.tee") {
-					// 	temp := strings.Split(allValue, "] ")
-					// 	puk := make([]byte, types.AccountIDLen)
-					// 	for _, v := range temp {
-					// 		if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-					// 			subValue := strings.TrimPrefix(v, "[")
-					// 			ids := strings.Split(subValue, " ")
-					// 			if len(ids) != types.AccountIDLen {
-					// 				continue
-					// 			}
-					// 			for kk, vv := range ids {
-					// 				intv, _ := strconv.Atoi(vv)
-					// 				puk[kk] = byte(intv)
-					// 			}
-					// 		}
-					// 	}
-
-					// 	accid, err := types.NewAccountID(puk)
-					// 	if err != nil {
-					// 		continue
-					// 	}
-					// 	suc = true
-					// 	result.Tee = *accid
-					// }
 					if strings.Contains(v.Name, "AccountId32.miner") {
 						temp := strings.Split(allValue, "] ")
 						puk := make([]byte, types.AccountIDLen)
