@@ -58,55 +58,38 @@ func (c *chainClient) RetrieveEvent_FileBank_ClaimRestoralOrder(blockhash types.
 	for _, e := range events {
 		if e.Name == event.FileBankClaimRestoralOrder {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
-						}
 
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Miner = *accid
+							return result, nil
 						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Miner = *accid
-						return result, nil
 					}
-					// if strings.Contains(v.Name, "cp_cess_common.Hash") {
-					// 	temp := strings.Split(allValue, "] ")
-					// 	for _, v := range temp {
-					// 		if strings.Count(v, " ") == (len(pattern.FileHash{}) - 1) {
-					// 			subValue := strings.TrimPrefix(v, "[")
-					// 			ids := strings.Split(subValue, " ")
-					// 			if len(ids) != len(pattern.FileHash{}) {
-					// 				continue
-					// 			}
-					// 			for kk, vv := range ids {
-					// 				intv, _ := strconv.Atoi(vv)
-					// 				result.OrderId[kk] = types.U8(intv)
-					// 			}
-					// 			if suc {
-					// 				return result, nil
-					// 			}
-					// 		}
-					// 	}
-					// }
 				}
 			}
 		}
@@ -123,35 +106,37 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) 
 	for _, e := range events {
 		if e.Name == event.AuditSubmitIdleProof {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
-						}
 
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Miner = *accid
+							return result, nil
 						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Miner = *accid
-						return result, nil
 					}
 				}
 			}
@@ -169,35 +154,37 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Has
 	for _, e := range events {
 		if e.Name == event.AuditSubmitServiceProof {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
-						}
 
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Miner = *accid
+							return result, nil
 						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Miner = *accid
-						return result, nil
 					}
 				}
 			}
@@ -215,34 +202,36 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types
 	for _, e := range events {
 		if e.Name == event.AuditSubmitIdleVerifyResult {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32.miner") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.miner") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Tee = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Tee = *accid
-						return result, nil
 					}
 				}
 			}
@@ -260,34 +249,36 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash ty
 	for _, e := range events {
 		if e.Name == event.AuditSubmitServiceVerifyResult {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32.miner") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.miner") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Tee = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Tee = *accid
-						return result, nil
 					}
 				}
 			}
@@ -305,34 +296,36 @@ func (c *chainClient) RetrieveEvent_Oss_OssUpdate(blockhash types.Hash) (event.E
 	for _, e := range events {
 		if e.Name == event.OssOssUpdate {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -350,34 +343,36 @@ func (c *chainClient) RetrieveEvent_Oss_OssRegister(blockhash types.Hash) (event
 	for _, e := range events {
 		if e.Name == event.OssOssRegister {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -395,34 +390,36 @@ func (c *chainClient) RetrieveEvent_Oss_OssDestroy(blockhash types.Hash) (event.
 	for _, e := range events {
 		if e.Name == event.OssOssDestroy {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -440,34 +437,36 @@ func (c *chainClient) RetrieveEvent_Oss_Authorize(blockhash types.Hash) (event.E
 	for _, e := range events {
 		if e.Name == event.OssAuthorize {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -485,34 +484,36 @@ func (c *chainClient) RetrieveEvent_Oss_CancelAuthorize(blockhash types.Hash) (e
 	for _, e := range events {
 		if e.Name == event.OssCancelAuthorize {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -530,34 +531,36 @@ func (c *chainClient) RetrieveEvent_FileBank_UploadDeclaration(blockhash types.H
 	for _, e := range events {
 		if e.Name == event.FileBankUploadDeclaration {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32.operator") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.operator") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Operator = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Operator = *accid
-						return result, nil
 					}
 				}
 			}
@@ -575,34 +578,36 @@ func (c *chainClient) RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) 
 	for _, e := range events {
 		if e.Name == event.FileBankCreateBucket {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32.acc") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.acc") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -620,34 +625,36 @@ func (c *chainClient) RetrieveEvent_FileBank_DeleteBucket(blockhash types.Hash) 
 	for _, e := range events {
 		if e.Name == event.FileBankDeleteBucket {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32.acc") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.acc") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -665,34 +672,36 @@ func (c *chainClient) RetrieveEvent_FileBank_DeleteFile(blockhash types.Hash) (e
 	for _, e := range events {
 		if e.Name == event.FileBankDeleteFile {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32.operator") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.operator") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Operator = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Operator = *accid
-						return result, nil
 					}
 				}
 			}
@@ -710,34 +719,36 @@ func (c *chainClient) RetrieveEvent_FileBank_TransferReport(blockhash types.Hash
 	for _, e := range events {
 		if e.Name == event.FileBankTransferReport {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -755,34 +766,36 @@ func (c *chainClient) RetrieveEvent_FileBank_RecoveryCompleted(blockhash types.H
 	for _, e := range events {
 		if e.Name == event.FileBankRecoveryCompleted {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Miner = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Miner = *accid
-						return result, nil
 					}
 				}
 			}
@@ -800,34 +813,36 @@ func (c *chainClient) RetrieveEvent_FileBank_IdleSpaceCert(blockhash types.Hash)
 	for _, e := range events {
 		if e.Name == event.FileBankIdleSpaceCert {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -845,34 +860,36 @@ func (c *chainClient) RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Ha
 	for _, e := range events {
 		if e.Name == event.FileBankReplaceIdleSpace {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -890,34 +907,36 @@ func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event
 	for _, e := range events {
 		if e.Name == event.SminerUpdataIp {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -935,34 +954,36 @@ func (c *chainClient) RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Has
 	for _, e := range events {
 		if e.Name == event.SminerUpdataBeneficiary {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -980,34 +1001,36 @@ func (c *chainClient) RetrieveEvent_Sminer_Registered(blockhash types.Hash) (eve
 	for _, e := range events {
 		if e.Name == event.SminerRegistered {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -1025,34 +1048,36 @@ func (c *chainClient) RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (
 	for _, e := range events {
 		if e.Name == event.SminerMinerExitPrep {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Miner = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Miner = *accid
-						return result, nil
 					}
 				}
 			}
@@ -1070,34 +1095,36 @@ func (c *chainClient) RetrieveEvent_Sminer_IncreaseCollateral(blockhash types.Ha
 	for _, e := range events {
 		if e.Name == event.SminerIncreaseCollateral {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -1115,34 +1142,36 @@ func (c *chainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (event.
 	for _, e := range events {
 		if e.Name == event.SminerReceive {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -1160,34 +1189,36 @@ func (c *chainClient) RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (event
 	for _, e := range events {
 		if e.Name == event.SminerWithdraw {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -1205,34 +1236,36 @@ func (c *chainClient) RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash
 	for _, e := range events {
 		if e.Name == event.StorageHandlerBuySpace {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -1250,34 +1283,36 @@ func (c *chainClient) RetrieveEvent_StorageHandler_ExpansionSpace(blockhash type
 	for _, e := range events {
 		if e.Name == event.StorageHandlerExpansionSpace {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -1295,34 +1330,36 @@ func (c *chainClient) RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.
 	for _, e := range events {
 		if e.Name == event.StorageHandlerRenewalSpace {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Acc = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.Acc = *accid
-						return result, nil
 					}
 				}
 			}
@@ -1340,34 +1377,36 @@ func (c *chainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (typ
 	for _, e := range events {
 		if e.Name == "Balances.Transfer" {
 			for _, v := range e.Fields {
-				vf := reflect.ValueOf(v.Value)
-				if vf.Len() > 0 {
-					allValue := fmt.Sprintf("%v", vf.Index(0))
-					if strings.Contains(v.Name, "AccountId32.from") {
-						temp := strings.Split(allValue, "] ")
-						puk := make([]byte, types.AccountIDLen)
-						for _, v := range temp {
-							if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-								subValue := strings.TrimPrefix(v, "[")
-								ids := strings.Split(subValue, " ")
-								if len(ids) != types.AccountIDLen {
-									continue
-								}
-								for kk, vv := range ids {
-									intv, _ := strconv.Atoi(vv)
-									puk[kk] = byte(intv)
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.from") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
 								}
 							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.From = *accid
+							return result, nil
 						}
-						if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-							continue
-						}
-						accid, err := types.NewAccountID(puk)
-						if err != nil {
-							continue
-						}
-						result.From = *accid
-						return result, nil
 					}
 				}
 			}
