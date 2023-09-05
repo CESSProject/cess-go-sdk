@@ -905,7 +905,7 @@ func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerUpdataIp {
+		if e.Name == event.SminerUpdatePeerId {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -952,7 +952,7 @@ func (c *chainClient) RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Has
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerUpdataBeneficiary {
+		if e.Name == event.SminerUpdateBeneficiary {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
