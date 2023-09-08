@@ -45,6 +45,7 @@ type chainClient struct {
 	genesisHash    types.Hash
 	keyring        signature.KeyringPair
 	rpcAddr        []string
+	currentRpcAddr string
 	packingTime    time.Duration
 	tokenSymbol    string
 	networkEnv     string
@@ -90,6 +91,7 @@ func NewChainClient(
 	for i := 0; i < len(rpcs); i++ {
 		chainClient.api, err = gsrpc.NewSubstrateAPI(rpcs[i])
 		if err == nil {
+			chainClient.currentRpcAddr = rpcs[i]
 			break
 		}
 	}
@@ -176,7 +178,7 @@ func (c *chainClient) Reconnect() error {
 		c.api = nil
 	}
 
-	c.api, c.metadata, c.runtimeVersion, c.keyEvents, c.eventRetriever, c.genesisHash, err = reconnectChainSDK(c.rpcAddr)
+	c.api, c.metadata, c.runtimeVersion, c.keyEvents, c.eventRetriever, c.genesisHash, c.currentRpcAddr, err = reconnectChainSDK(c.rpcAddr)
 	if err != nil {
 		return err
 	}
@@ -186,6 +188,10 @@ func (c *chainClient) Reconnect() error {
 
 func (c *chainClient) GetSdkName() string {
 	return c.name
+}
+
+func (c *chainClient) GetCurrentRpcAddr() string {
+	return c.currentRpcAddr
 }
 
 func (c *chainClient) SetSdkName(name string) {
@@ -251,9 +257,11 @@ func reconnectChainSDK(rpcs []string) (
 	types.StorageKey,
 	retriever.EventRetriever,
 	types.Hash,
+	string,
 	error,
 ) {
 	var err error
+	var rpcAddr string
 	var api *gsrpc.SubstrateAPI
 
 	defer log.SetOutput(os.Stdout)
@@ -263,9 +271,10 @@ func reconnectChainSDK(rpcs []string) (
 		if err != nil {
 			continue
 		}
+		rpcAddr = rpcs[i]
 	}
 	if api == nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
 	}
 	var metadata *types.Metadata
 	var runtimeVer *types.RuntimeVersion
@@ -275,25 +284,25 @@ func reconnectChainSDK(rpcs []string) (
 
 	metadata, err = api.RPC.State.GetMetadataLatest()
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
 	}
 	genesisHash, err = api.RPC.Chain.GetBlockHash(0)
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
 	}
 	runtimeVer, err = api.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
 	}
 	keyEvents, err = types.CreateStorageKey(metadata, pattern.SYSTEM, pattern.EVENTS, nil)
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
 	}
 	eventRetriever, err = retriever.NewDefaultEventRetriever(state.NewEventProvider(api.RPC.State), api.RPC.State)
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
 	}
-	return api, metadata, runtimeVer, keyEvents, eventRetriever, genesisHash, err
+	return api, metadata, runtimeVer, keyEvents, eventRetriever, genesisHash, rpcAddr, err
 }
 
 func createPrefixedKey(pallet, method string) []byte {
