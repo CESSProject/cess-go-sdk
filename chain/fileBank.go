@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/event"
@@ -760,8 +761,21 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		c.SetChainState(false)
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				c.SetChainState(false)
+				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			}
+		} else {
+			c.SetChainState(false)
+			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		}
 	}
 	defer sub.Unsubscribe()
 
@@ -856,12 +870,28 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		c.SetChainState(false)
-		return txhash, hashs, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, hashs, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				c.SetChainState(false)
+				return txhash, hashs, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			}
+		} else {
+			c.SetChainState(false)
+			return txhash, hashs, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		}
 	}
+
 	defer sub.Unsubscribe()
+
 	timeout := time.NewTimer(c.packingTime)
 	defer timeout.Stop()
+
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -1032,8 +1062,21 @@ func (c *chainClient) SubmitFileReport(roothash []pattern.FileHash) (string, []p
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		c.SetChainState(false)
-		return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, nil, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				c.SetChainState(false)
+				return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			}
+		} else {
+			c.SetChainState(false)
+			return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		}
 	}
 	defer sub.Unsubscribe()
 
@@ -1444,8 +1487,21 @@ func (c *chainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		c.SetChainState(false)
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				c.SetChainState(false)
+				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			}
+		} else {
+			c.SetChainState(false)
+			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		}
 	}
 	defer sub.Unsubscribe()
 
@@ -1550,8 +1606,21 @@ func (c *chainClient) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFr
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		c.SetChainState(false)
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				c.SetChainState(false)
+				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			}
+		} else {
+			c.SetChainState(false)
+			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		}
 	}
 	defer sub.Unsubscribe()
 
@@ -1714,8 +1783,21 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		c.SetChainState(false)
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				c.SetChainState(false)
+				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			}
+		} else {
+			c.SetChainState(false)
+			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		}
 	}
 	defer sub.Unsubscribe()
 
@@ -1795,8 +1877,21 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pa
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		c.SetChainState(false)
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				c.SetChainState(false)
+				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			}
+		} else {
+			c.SetChainState(false)
+			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		}
 	}
 	defer sub.Unsubscribe()
 
@@ -1876,8 +1971,21 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		c.SetChainState(false)
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				c.SetChainState(false)
+				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			}
+		} else {
+			c.SetChainState(false)
+			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+		}
 	}
 	defer sub.Unsubscribe()
 
