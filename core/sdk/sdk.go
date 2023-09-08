@@ -259,6 +259,8 @@ type SDK interface {
 	SetChainState(state bool)
 	// GetSdkName return sdk name
 	GetSdkName() string
+	// GetCurrentRpcAddr return current rpc address
+	GetCurrentRpcAddr() string
 	// SetSdkName set sdk name
 	SetSdkName(name string)
 	// Reconnect for reconnecting chains.
