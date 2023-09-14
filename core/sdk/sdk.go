@@ -181,6 +181,11 @@ type SDK interface {
 	// ClaimRewards is used to claim rewards.
 	ClaimRewards() (string, error)
 
+	// Staking-State
+
+	// QueryValidatorCount queries the count of all validator
+	QueryValidatorCount() (uint32, error)
+
 	// StorageHandler-State
 
 	// QueryUserSpaceInfo queries the space information purchased by the user.
@@ -188,6 +193,12 @@ type SDK interface {
 	QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error)
 	// QuerySpacePricePerGib query space price per GiB.
 	QuerySpacePricePerGib() (string, error)
+	// QueryTotalIdleSpace query total idle space
+	QueryTotalIdleSpace() (uint64, error)
+	// QueryTotalServiceSpace query total service space
+	QueryTotalServiceSpace() (uint64, error)
+	// QueryPurchasedSpace query purchased space
+	QueryPurchasedSpace() (uint64, error)
 
 	// StorageHandler-Extrinsics
 

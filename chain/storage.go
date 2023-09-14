@@ -396,3 +396,87 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 		}
 	}
 }
+
+func (c *chainClient) QueryTotalIdleSpace() (uint64, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U128
+
+	if !c.GetChainState() {
+		return 0, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.TOTALIDLESPACE)
+	if err != nil {
+		return 0, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return 0, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return 0, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data.Uint64(), nil
+}
+
+func (c *chainClient) QueryTotalServiceSpace() (uint64, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U128
+
+	if !c.GetChainState() {
+		return 0, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.TOTALSERVICESPACE)
+	if err != nil {
+		return 0, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return 0, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return 0, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data.Uint64(), nil
+}
+
+func (c *chainClient) QueryPurchasedSpace() (uint64, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U128
+
+	if !c.GetChainState() {
+		return 0, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.PURCHASEDSPACE)
+	if err != nil {
+		return 0, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return 0, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return 0, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data.Uint64(), nil
+}
