@@ -40,6 +40,8 @@ const (
 	TEEWORKER = "TeeWorker"
 	// SMINER is a module about storage miners
 	SMINER = "Sminer"
+	// STAKING is a module about staking
+	STAKING = "Staking"
 	// SMINER is a module about storage miners
 	STORAGEHANDLER = "StorageHandler"
 	// SYSTEM is a module about the system
@@ -80,9 +82,15 @@ const (
 	PENDINGREPLACE = "PendingReplacements"
 	RESTORALORDER  = "RestoralOrder"
 
+	// STAKING
+	COUNTERFORVALIDATORS = "CounterForValidators"
+
 	// STORAGE_HANDLER
-	USERSPACEINFO = "UserOwnedSpace"
-	UNITPRICE     = "UnitPrice"
+	USERSPACEINFO     = "UserOwnedSpace"
+	UNITPRICE         = "UnitPrice"
+	TOTALIDLESPACE    = "TotalIdleSpace"
+	TOTALSERVICESPACE = "TotalServiceSpace"
+	PURCHASEDSPACE    = "PurchasedSpace"
 
 	// SYSTEM
 	ACCOUNT = "Account"
