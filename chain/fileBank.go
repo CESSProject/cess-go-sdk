@@ -1005,7 +1005,7 @@ func (c *chainClient) DeleteFiller(filehash string) (string, error) {
 	}
 }
 
-func (c *chainClient) SubmitFileReport(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
+func (c *chainClient) SubmitFileReport(roothash pattern.FileHash) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1099,13 +1099,13 @@ func (c *chainClient) SubmitFileReport(roothash []pattern.FileHash) (string, []p
 	}
 }
 
-func (c *chainClient) ReportFiles(roothash []string) (string, []string, error) {
-	var hashs = make([]pattern.FileHash, len(roothash))
-	for i := 0; i < len(roothash); i++ {
-		for j := 0; j < len(roothash[i]); j++ {
-			hashs[i][j] = types.U8(roothash[i][j])
-		}
+func (c *chainClient) ReportFiles(roothash string) (string, []string, error) {
+	var hashs pattern.FileHash
+
+	for j := 0; j < len(roothash); j++ {
+		hashs[j] = types.U8(roothash[j])
 	}
+
 	txhash, failed, err := c.SubmitFileReport(hashs)
 	var failedfiles = make([]string, len(failed))
 	for k, v := range failed {
