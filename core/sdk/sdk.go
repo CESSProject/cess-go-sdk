@@ -109,8 +109,8 @@ type SDK interface {
 	// RestoralComplete reports order recovery completion.
 	RestoralComplete(restoralFragmentHash string) (string, error)
 	// SubmitFileReport submits a stored file report.
-	SubmitFileReport(roothash []pattern.FileHash) (string, []pattern.FileHash, error)
-	ReportFiles(roothash []string) (string, []string, error)
+	SubmitFileReport(roothash pattern.FileHash) (string, []pattern.FileHash, error)
+	ReportFiles(roothash string) (string, []string, error)
 	// UploadDeclaration creates a storage order.
 	UploadDeclaration(roothash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error)
 	// GenerateStorageOrder for generating storage orders
