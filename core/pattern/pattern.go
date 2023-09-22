@@ -202,7 +202,6 @@ const (
 const (
 	SegmentSize  = 16 * SIZE_1MiB
 	FragmentSize = 8 * SIZE_1MiB
-	BlockNumber  = 1024
 	DataShards   = 2
 	ParShards    = 1
 )
