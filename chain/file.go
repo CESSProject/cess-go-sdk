@@ -167,10 +167,6 @@ func ExtractSegmenthash(segment []string) []string {
 	return segmenthash
 }
 
-func (c *chainClient) RedundancyRecovery(outpath string, shardspath []string) error {
-	return erasure.ReedSolomonRestore(outpath, shardspath)
-}
-
 func (c *chainClient) StoreFile(url, file, bucket string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {

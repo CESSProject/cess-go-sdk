@@ -17,7 +17,14 @@ import (
 	"github.com/klauspost/reedsolomon"
 )
 
-// ReedSolomon uses reed-solomon algorithm to redundancy files
+// ReedSolomon uses reed-solomon algorithm to redundancy file
+//
+// Receive parameter:
+//   - path: files to process.
+//
+// Return parameter:
+//   - []string: Processed data fragmentation.
+//   - error: error message.
 func ReedSolomon(path string) ([]string, error) {
 	var shardspath = make([]string, 0)
 	fstat, err := os.Stat(path)
@@ -73,6 +80,14 @@ func ReedSolomon(path string) ([]string, error) {
 	return shardspath, nil
 }
 
+// Restore files from shards and save to outpath.
+//
+// Receive parameter:
+//   - outpath: file save location.
+//   - shardspath: file fragments.
+//
+// Return parameter:
+//   - error: error message.
 func ReedSolomonRestore(outpath string, shardspath []string) error {
 	_, err := os.Stat(outpath)
 	if err == nil {
@@ -113,5 +128,4 @@ func ReedSolomonRestore(outpath string, shardspath []string) error {
 	defer f.Close()
 	err = enc.Join(f, shards, len(shards[0])*datashards)
 	return err
-
 }
