@@ -359,15 +359,6 @@ type SDK interface {
 	//   - error: error message.
 	RetrieveObject(url, fid string) (io.ReadCloser, error)
 
-	// Restore files from shards and save to out.
-	//
-	// Receive parameter:
-	//   - out: file save location.
-	//   - shards: file fragments.
-	// Return parameter:
-	//   - error: error message.
-	RedundancyRecovery(out string, shards []string) error
-
 	// retrieve event
 
 	//
