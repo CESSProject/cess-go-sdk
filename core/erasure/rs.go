@@ -88,7 +88,7 @@ func ReedSolomon(path string) ([]string, error) {
 //
 // Return parameter:
 //   - error: error message.
-func ReedSolomonRestore(outpath string, shardspath []string) error {
+func RSRestore(outpath string, shardspath []string) error {
 	_, err := os.Stat(outpath)
 	if err == nil {
 		return nil
@@ -108,6 +108,50 @@ func ReedSolomonRestore(outpath string, shardspath []string) error {
 			shards[k] = nil
 		}
 	}
+
+	// Verify the shards
+	ok, _ := enc.Verify(shards)
+	if !ok {
+		err = enc.Reconstruct(shards)
+		if err != nil {
+			return err
+		}
+		ok, err = enc.Verify(shards)
+		if !ok {
+			return err
+		}
+	}
+	f, err := os.Create(outpath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	err = enc.Join(f, shards, len(shards[0])*datashards)
+	return err
+}
+
+// Restore files from shards and save to outpath.
+//
+// Receive parameter:
+//   - outpath: file save location.
+//   - sharddata: file fragments data.
+//
+// Return parameter:
+//   - error: error message.
+func RSRestoreData(outpath string, sharddata [][]byte) error {
+	_, err := os.Stat(outpath)
+	if err == nil {
+		return nil
+	}
+
+	datashards, parshards := pattern.DataShards, pattern.ParShards
+
+	enc, err := reedsolomon.New(datashards, parshards)
+	if err != nil {
+		return err
+	}
+
+	shards := sharddata
 
 	// Verify the shards
 	ok, _ := enc.Verify(shards)
