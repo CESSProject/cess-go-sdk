@@ -592,7 +592,7 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_CreateBucket(status.AsInBlock)
 				return txhash, err
 			}
@@ -678,7 +678,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_DeleteBucket(status.AsInBlock)
 				return txhash, err
 			}
@@ -786,7 +786,7 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_UploadDeclaration(status.AsInBlock)
 				return txhash, err
 			}
@@ -896,7 +896,7 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_DeleteFile(status.AsInBlock)
 				return txhash, nil, err
 			}
@@ -904,103 +904,6 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 			return txhash, hashs, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
 			return txhash, hashs, pattern.ERR_RPC_TIMEOUT
-		}
-	}
-}
-
-// Deprecated: As cess v0.6
-func (c *chainClient) DeleteFiller(filehash string) (string, error) {
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var (
-		txhash      string
-		accountInfo types.AccountInfo
-		hashs       pattern.FileHash
-	)
-
-	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
-	}
-
-	if len(filehash) != len(hashs) {
-		return txhash, errors.New("invalid filehash")
-	}
-
-	for i := 0; i < len(filehash); i++ {
-		hashs[i] = types.U8(filehash[i])
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_DELFILLER, hashs)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	ext := types.NewExtrinsic(call)
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		c.SetChainState(false)
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-	}
-	defer sub.Unsubscribe()
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				events := event.EventRecords{}
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_FillerDelete) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
-			}
-		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
@@ -1087,7 +990,7 @@ func (c *chainClient) SubmitFileReport(roothash pattern.FileHash) (string, []pat
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_TransferReport(status.AsInBlock)
 				return txhash, nil, err
 			}
@@ -1112,118 +1015,6 @@ func (c *chainClient) ReportFiles(roothash string) (string, []string, error) {
 		failedfiles[k] = string(v[:])
 	}
 	return txhash, failedfiles, err
-}
-
-// Deprecated: As cess v0.6
-func (c *chainClient) ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error) {
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var (
-		txhash      string
-		accountInfo types.AccountInfo
-	)
-
-	if !c.GetChainState() {
-		return txhash, nil, pattern.ERR_RPC_CONNECTION
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEFILE, roothash)
-	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[NewCall]")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return txhash, nil, pattern.ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	ext := types.NewExtrinsic(call)
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[Sign]")
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		c.SetChainState(false)
-		return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				events := event.EventRecords{}
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, nil, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil {
-					if len(events.FileBank_ReplaceFiller) > 0 {
-						return txhash, events.FileBank_ReplaceFiller[0].Filler_list, nil
-					}
-					return txhash, nil, nil
-				}
-				if len(events.FileBank_ReplaceFiller) > 0 {
-					return txhash, events.FileBank_ReplaceFiller[0].Filler_list, nil
-				}
-				return txhash, nil, errors.New(pattern.ERR_Failed)
-			}
-		case err = <-sub.Err():
-			return txhash, nil, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return txhash, nil, pattern.ERR_RPC_TIMEOUT
-		}
-	}
-}
-
-// Deprecated: As cess v0.6
-func (c *chainClient) ReplaceFile(roothash []string) (string, []string, error) {
-	var hashs = make([]pattern.FileHash, len(roothash))
-	for i := 0; i < len(roothash); i++ {
-		for j := 0; j < len(roothash[i]); j++ {
-			hashs[i][j] = types.U8(roothash[i][j])
-		}
-	}
-	txhash, failed, err := c.ReplaceIdleFiles(hashs)
-	var failedFiles = make([]string, len(failed))
-	for k, v := range failed {
-		failedFiles[k] = string(v[:])
-	}
-	return txhash, failedFiles, err
 }
 
 // QueryRestoralOrder
@@ -1399,17 +1190,9 @@ func (c *chainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (stri
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				events := event.EventRecords{}
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_GenerateRestoralOrder) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
+				txhash = status.AsInBlock.Hex()
+				_, err = c.RetrieveEvent_FilaBank_GenRestoralOrder(status.AsInBlock)
+				return txhash, err
 			}
 		case err = <-sub.Err():
 			return txhash, errors.Wrap(err, "[sub]")
@@ -1512,7 +1295,7 @@ func (c *chainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_ClaimRestoralOrder(status.AsInBlock)
 				return txhash, err
 			}
@@ -1631,7 +1414,7 @@ func (c *chainClient) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFr
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_ClaimRestoralOrder(status.AsInBlock)
 				return txhash, err
 			}
@@ -1808,7 +1591,7 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_RecoveryCompleted(status.AsInBlock)
 				return txhash, err
 			}
@@ -1902,7 +1685,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pa
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_IdleSpaceCert(status.AsInBlock)
 				return txhash, err
 			}
@@ -1996,7 +1779,7 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_ReplaceIdleSpace(status.AsInBlock)
 				return txhash, err
 			}

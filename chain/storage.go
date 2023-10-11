@@ -189,7 +189,7 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_StorageHandler_BuySpace(status.AsInBlock)
 				return txhash, err
 			}
@@ -287,7 +287,7 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_StorageHandler_ExpansionSpace(status.AsInBlock)
 				return txhash, err
 			}
@@ -385,7 +385,7 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_StorageHandler_RenewalSpace(status.AsInBlock)
 				return txhash, err
 			}

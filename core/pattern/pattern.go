@@ -353,9 +353,35 @@ type UserSpaceInfo struct {
 	State          types.Bytes
 }
 
-type ChallengeSnapShot struct {
-	NetSnapshot   NetSnapShot
-	MinerSnapShot []MinerSnapShot
+// type ChallengeSnapShot struct {
+// 	NetSnapshot   NetSnapShot
+// 	MinerSnapShot []MinerSnapShot
+// }
+
+type ChallengeInfo struct {
+	MinerSnapshot    MinerSnapShot
+	ChallengeElement ChallengeElement
+	ProveInfo        ProveInfo
+}
+
+type ProveInfo struct {
+	Assign       types.U8
+	IdleProve    IdleProveInfo
+	ServiceProve ServiceProveInfo
+}
+
+type ChallengeElement struct {
+	Start        types.U32
+	IdleSlip     types.U32
+	ServiceSlip  types.U32
+	VerifySlip   types.U32
+	SpaceParam   SpaceChallengeParam
+	ServiceParam QElement
+}
+
+type QElement struct {
+	Index types.U64
+	Value types.Bytes
 }
 
 type NetSnapShot struct {
@@ -380,9 +406,23 @@ type NetSnapShot_V2 struct {
 }
 
 type MinerSnapShot struct {
-	Miner        types.AccountID
-	IdleSpace    types.U128
-	ServiceSpace types.U128
+	IdleSpace          types.U128
+	ServiceSpace       types.U128
+	ServiceBloomFilter BloomFilter
+	SpaceProofInfo     SpaceProofInfo
+	TeeSignature       TeeSignature
+}
+
+type IdleProveInfo struct {
+	TeeAcc       types.AccountID
+	IdleProve    types.Bytes
+	VerifyResult types.Bool
+}
+
+type ServiceProveInfo struct {
+	TeeAcc       types.AccountID
+	ServiceProve types.Bytes
+	VerifyResult types.Bool
 }
 
 type MinerSnapShot_V2 struct {
@@ -484,16 +524,10 @@ type UserSpaceSt struct {
 	Deadline       uint32
 }
 
-type ChallengeInfo struct {
-	Random          [][]byte
-	RandomIndexList []uint32
-	Start           uint32
-}
-
-type ChallengeSnapshot struct {
-	NetSnapshot   NetSnapshot
-	MinerSnapshot []MinerSnapshot
-}
+// type ChallengeSnapshot struct {
+// 	NetSnapshot   NetSnapshot
+// 	MinerSnapshot []MinerSnapshot
+// }
 
 type NetSnapshot struct {
 	Start               uint32

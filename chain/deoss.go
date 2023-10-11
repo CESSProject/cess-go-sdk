@@ -249,7 +249,7 @@ func (c *chainClient) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Oss_OssRegister(status.AsInBlock)
 				return txhash, err
 			}
@@ -326,7 +326,7 @@ func (c *chainClient) updateDeossPeerId(key types.StorageKey, peerid pattern.Pee
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Oss_OssUpdate(status.AsInBlock)
 				return txhash, err
 			}
@@ -423,7 +423,7 @@ func (c *chainClient) ExitDeoss() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Oss_OssDestroy(status.AsInBlock)
 				return txhash, err
 			}
@@ -540,7 +540,7 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Oss_Authorize(status.AsInBlock)
 				return txhash, err
 			}
@@ -634,7 +634,7 @@ func (c *chainClient) UnAuthorizeSpace() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Oss_CancelAuthorize(status.AsInBlock)
 				return txhash, err
 			}
