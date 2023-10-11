@@ -42,9 +42,6 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(sdk.TransferToken("cXjeCHQW3totBGhQXdAUAqjCNqk1NhiR3UK37czSeUak2pqGV", 1000000000000))
-	return
-
 	// upload file
 	fid, err := sdk.StoreFile(PublicGateway, UploadFile, BucketName)
 	if err != nil {

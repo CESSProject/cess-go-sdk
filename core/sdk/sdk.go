@@ -139,8 +139,6 @@ type SDK interface {
 
 	// QueryStorageMiner queries storage node information.
 	QueryStorageMiner(puk []byte) (pattern.MinerInfo, error)
-	// QueryStorageMiner queries storage node information.
-	QueryStorageMiner_V2(puk []byte) (pattern.MinerInfo_V2, error)
 	// QuerySminerList queries the accounts of all storage miners.
 	QuerySminerList() ([]types.AccountID, error)
 	// QueryStorageNodeReward queries reward information for puk account.

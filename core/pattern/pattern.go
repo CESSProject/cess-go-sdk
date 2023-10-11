@@ -239,17 +239,6 @@ type SysSyncState struct {
 }
 
 type MinerInfo struct {
-	BeneficiaryAcc types.AccountID
-	PeerId         PeerId
-	Collaterals    types.U128
-	Debt           types.U128
-	State          types.Bytes
-	IdleSpace      types.U128
-	ServiceSpace   types.U128
-	LockSpace      types.U128
-}
-
-type MinerInfo_V2 struct {
 	BeneficiaryAcc     types.AccountID
 	PeerId             PeerId
 	Collaterals        types.U128
@@ -353,11 +342,6 @@ type UserSpaceInfo struct {
 	State          types.Bytes
 }
 
-// type ChallengeSnapShot struct {
-// 	NetSnapshot   NetSnapShot
-// 	MinerSnapShot []MinerSnapShot
-// }
-
 type ChallengeInfo struct {
 	MinerSnapshot    MinerSnapShot
 	ChallengeElement ChallengeElement
@@ -382,27 +366,6 @@ type ChallengeElement struct {
 type QElement struct {
 	Index types.U64
 	Value types.Bytes
-}
-
-type NetSnapShot struct {
-	Start             types.U32
-	Life              types.U32
-	TotalReward       types.U128
-	TotalIdleSpace    types.U128
-	TotalServiceSpace types.U128
-	RandomIndexList   []types.U32
-	Random            []Random
-}
-
-type NetSnapShot_V2 struct {
-	Start               types.U32
-	Life                types.U32
-	TotalReward         types.U128
-	TotalIdleSpace      types.U128
-	TotalServiceSpace   types.U128
-	RandomIndexList     []types.U32
-	RandomList          []Random
-	SpaceChallengeParam SpaceChallengeParam
 }
 
 type MinerSnapShot struct {
@@ -436,11 +399,6 @@ type MinerSnapShot_V2 struct {
 	ServiceBloomFilter BloomFilter
 	SpaceProofInfo     SpaceProofInfo
 	TeeSignature       TeeSignature
-}
-
-type ChallengeInfo_V2 struct {
-	NetSnapShot       NetSnapShot_V2
-	MinerSnapshotList []MinerSnapShot_V2
 }
 
 type NodePublickey struct {
