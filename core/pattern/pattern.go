@@ -239,17 +239,6 @@ type SysSyncState struct {
 }
 
 type MinerInfo struct {
-	BeneficiaryAcc types.AccountID
-	PeerId         PeerId
-	Collaterals    types.U128
-	Debt           types.U128
-	State          types.Bytes
-	IdleSpace      types.U128
-	ServiceSpace   types.U128
-	LockSpace      types.U128
-}
-
-type MinerInfo_V2 struct {
 	BeneficiaryAcc     types.AccountID
 	PeerId             PeerId
 	Collaterals        types.U128
@@ -353,36 +342,50 @@ type UserSpaceInfo struct {
 	State          types.Bytes
 }
 
-type ChallengeSnapShot struct {
-	NetSnapshot   NetSnapShot
-	MinerSnapShot []MinerSnapShot
+type ChallengeInfo struct {
+	MinerSnapshot    MinerSnapShot
+	ChallengeElement ChallengeElement
+	ProveInfo        ProveInfo
 }
 
-type NetSnapShot struct {
-	Start             types.U32
-	Life              types.U32
-	TotalReward       types.U128
-	TotalIdleSpace    types.U128
-	TotalServiceSpace types.U128
-	RandomIndexList   []types.U32
-	Random            []Random
+type ProveInfo struct {
+	Assign       types.U8
+	IdleProve    IdleProveInfo
+	ServiceProve ServiceProveInfo
 }
 
-type NetSnapShot_V2 struct {
-	Start               types.U32
-	Life                types.U32
-	TotalReward         types.U128
-	TotalIdleSpace      types.U128
-	TotalServiceSpace   types.U128
-	RandomIndexList     []types.U32
-	RandomList          []Random
-	SpaceChallengeParam SpaceChallengeParam
+type ChallengeElement struct {
+	Start        types.U32
+	IdleSlip     types.U32
+	ServiceSlip  types.U32
+	VerifySlip   types.U32
+	SpaceParam   SpaceChallengeParam
+	ServiceParam QElement
+}
+
+type QElement struct {
+	Index types.U64
+	Value types.Bytes
 }
 
 type MinerSnapShot struct {
-	Miner        types.AccountID
-	IdleSpace    types.U128
-	ServiceSpace types.U128
+	IdleSpace          types.U128
+	ServiceSpace       types.U128
+	ServiceBloomFilter BloomFilter
+	SpaceProofInfo     SpaceProofInfo
+	TeeSignature       TeeSignature
+}
+
+type IdleProveInfo struct {
+	TeeAcc       types.AccountID
+	IdleProve    types.Bytes
+	VerifyResult types.Bool
+}
+
+type ServiceProveInfo struct {
+	TeeAcc       types.AccountID
+	ServiceProve types.Bytes
+	VerifyResult types.Bool
 }
 
 type MinerSnapShot_V2 struct {
@@ -396,11 +399,6 @@ type MinerSnapShot_V2 struct {
 	ServiceBloomFilter BloomFilter
 	SpaceProofInfo     SpaceProofInfo
 	TeeSignature       TeeSignature
-}
-
-type ChallengeInfo_V2 struct {
-	NetSnapShot       NetSnapShot_V2
-	MinerSnapshotList []MinerSnapShot_V2
 }
 
 type NodePublickey struct {
@@ -484,16 +482,10 @@ type UserSpaceSt struct {
 	Deadline       uint32
 }
 
-type ChallengeInfo struct {
-	Random          [][]byte
-	RandomIndexList []uint32
-	Start           uint32
-}
-
-type ChallengeSnapshot struct {
-	NetSnapshot   NetSnapshot
-	MinerSnapshot []MinerSnapshot
-}
+// type ChallengeSnapshot struct {
+// 	NetSnapshot   NetSnapshot
+// 	MinerSnapshot []MinerSnapshot
+// }
 
 type NetSnapshot struct {
 	Start               uint32

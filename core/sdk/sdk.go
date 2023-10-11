@@ -29,17 +29,12 @@ type SDK interface {
 	QueryChallengeExpiration() (uint32, error)
 	// Query challenge verification expired block height.
 	QueryChallengeVerifyExpiration() (uint32, error)
-	// QueryChallengeSnapshot query challenge information snapshot.
-	QueryChallengeSnapshot() (pattern.ChallengeSnapShot, error)
-	QueryChallengeSt() (pattern.ChallengeSnapshot, error)
-	// QueryChallenge queries puk's challenge information.
-	QueryChallenge(puk []byte) (pattern.ChallengeInfo, error)
+	// QueryChallengeInfo queries puk's challenge information.
+	QueryChallengeInfo(puk []byte) (bool, pattern.ChallengeInfo, error)
 	// QueryAssignedProof queries all assigned proof information.
 	QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error)
 	// ProofAssignmentInfo queries the proof information assigned to puk.
 	QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error)
-	//
-	QueryChallenge_V2() (pattern.ChallengeInfo_V2, error)
 	//
 	QueryUnverifiedIdleProof(puk []byte) ([]pattern.IdleProofInfo, error)
 	//
@@ -47,8 +42,6 @@ type SDK interface {
 
 	// Audit-Extrinsics
 
-	// ReportProof is used to report proof data.
-	ReportProof(idlesigma, servicesigma string) (string, error)
 	//
 	SubmitIdleProof(idleProve []types.U8) (string, error)
 	//
@@ -97,15 +90,10 @@ type SDK interface {
 	DeleteBucket(puk []byte, bucketname string) (string, error)
 	// DeleteFile deletes files for puk.
 	DeleteFile(puk []byte, roothash []string) (string, []pattern.FileHash, error)
-	// DeleteFiller deletes an idle file.
-	DeleteFiller(filehash string) (string, error)
 	// GenerateRestoralOrder generates data for restoration orders.
 	GenerateRestoralOrder(rootHash, fragmentHash string) (string, error)
 	// Withdraw is used to withdraw staking.
 	Withdraw() (string, error)
-	// ReplaceIdleFiles replaces idle files.
-	ReplaceIdleFiles(roothash []pattern.FileHash) (string, []pattern.FileHash, error)
-	ReplaceFile(roothash []string) (string, []string, error)
 	// RestoralComplete reports order recovery completion.
 	RestoralComplete(restoralFragmentHash string) (string, error)
 	// SubmitFileReport submits a stored file report.
@@ -151,8 +139,6 @@ type SDK interface {
 
 	// QueryStorageMiner queries storage node information.
 	QueryStorageMiner(puk []byte) (pattern.MinerInfo, error)
-	// QueryStorageMiner queries storage node information.
-	QueryStorageMiner_V2(puk []byte) (pattern.MinerInfo_V2, error)
 	// QuerySminerList queries the accounts of all storage miners.
 	QuerySminerList() ([]types.AccountID, error)
 	// QueryStorageNodeReward queries reward information for puk account.
@@ -299,6 +285,17 @@ type SDK interface {
 	//   - error: error message.
 	ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error)
 
+	// Process the file according to CESS specifications.
+	//
+	// Receive parameter:
+	//   - file: the file to be processed.
+	//   - cipher: encryption and decryption keys.
+	// Return parameter:
+	//   - segmentDataInfo: segment and fragment information of the file.
+	//   - string: [fid] unique identifier for the file.
+	//   - error: error message.
+	ShardedEncryptionProcessing(file string, cipher string) ([]pattern.SegmentDataInfo, string, error)
+
 	// Upload file to CESS gateway.
 	//
 	// Receive parameter:
@@ -417,4 +414,6 @@ type SDK interface {
 	RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.Hash) (event.Event_RenewalSpace, error)
 	//
 	RetrieveEvent_Balances_Transfer(blockhash types.Hash) (types.EventBalancesTransfer, error)
+	//
+	RetrieveEvent_FilaBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error)
 }

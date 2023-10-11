@@ -18,7 +18,6 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
@@ -31,34 +30,6 @@ func (c *chainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 	}()
 
 	var data pattern.MinerInfo
-
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.MINERITEMS, puk)
-	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
-func (c *chainClient) QueryStorageMiner_V2(puk []byte) (pattern.MinerInfo_V2, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var data pattern.MinerInfo_V2
 
 	if !c.GetChainState() {
 		return data, pattern.ERR_RPC_CONNECTION
@@ -293,7 +264,7 @@ func (c *chainClient) RegisterOrUpdateSminer(peerId []byte, earnings string, ple
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_Registered(status.AsInBlock)
 				return txhash, earnings, err
 			}
@@ -370,7 +341,7 @@ func (c *chainClient) updateSminerPeerId(key types.StorageKey, peerid pattern.Pe
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_UpdataIp(status.AsInBlock)
 				return txhash, err
 			}
@@ -462,7 +433,7 @@ func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) 
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_UpdataIp(status.AsInBlock)
 				return txhash, err
 			}
@@ -559,7 +530,7 @@ func (c *chainClient) ExitSminer() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_MinerExitPrep(status.AsInBlock)
 				return txhash, err
 			}
@@ -658,7 +629,7 @@ func (c *chainClient) UpdateEarningsAcc(puk []byte) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_UpdataBeneficiary(status.AsInBlock)
 				return txhash, err
 			}
@@ -740,7 +711,7 @@ func (c *chainClient) updateEarningsAcc(key types.StorageKey, puk []byte) (strin
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_UpdataBeneficiary(status.AsInBlock)
 				return txhash, err
 			}
@@ -843,7 +814,7 @@ func (c *chainClient) IncreaseStakingAmount(tokens *big.Int) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_IncreaseCollateral(status.AsInBlock)
 				return txhash, err
 			}
@@ -946,7 +917,7 @@ func (c *chainClient) ClaimRewards() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_Receive(status.AsInBlock)
 				return txhash, err
 			}
@@ -1041,7 +1012,7 @@ func (c *chainClient) Withdraw() (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_Withdraw(status.AsInBlock)
 				return txhash, err
 			}
@@ -1223,7 +1194,7 @@ func (c *chainClient) RegisterOrUpdateSminer_V2(peerId []byte, earnings string, 
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Sminer_Registered(status.AsInBlock)
 				return txhash, earnings, err
 			}

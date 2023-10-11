@@ -27,3 +27,16 @@ func TestProcessingData(t *testing.T) {
 		}
 	}
 }
+
+func TestShardedEncryptionProcessing(t *testing.T) {
+	var c = &chainClient{}
+	var processFile = "./file_test.go"
+	segmentData, roothash, err := c.ShardedEncryptionProcessing(processFile, "123456")
+	assert.NoError(t, err)
+	fmt.Println(roothash)
+	for _, segment := range segmentData {
+		for _, fragment := range segment.FragmentHash {
+			os.Remove(fragment)
+		}
+	}
+}

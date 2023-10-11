@@ -251,7 +251,7 @@ func (c *chainClient) TransferToken(dest string, amount uint64) (string, string,
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
+				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_Balances_Transfer(status.AsInBlock)
 				return txhash, dest, err
 			}

@@ -1414,3 +1414,50 @@ func (c *chainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (typ
 	}
 	return result, errors.New("failed: no Balances_Transfer event found")
 }
+
+func (c *chainClient) RetrieveEvent_FilaBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error) {
+	var result event.Event_GenerateRestoralOrder
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return result, err
+	}
+	for _, e := range events {
+		if e.Name == event.FileBankGenerateRestoralOrder {
+			for _, v := range e.Fields {
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
+								}
+							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Miner = *accid
+							return result, nil
+						}
+					}
+				}
+			}
+		}
+	}
+	return result, errors.New("failed: no FilaBank_GenerateRestoralOrder event found")
+}
