@@ -139,7 +139,7 @@ func (c *chainClient) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
 	return false, nil
 }
 
-func (c *chainClient) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
+func (c *chainClient) RegisterDeoss(peerId []byte, domain string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -167,24 +167,33 @@ func (c *chainClient) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
 		peerid[i] = types.U8(peerId[i])
 	}
 
+	if len(domain) > 50 {
+		return txhash, errors.New("register deoss: Domain name length cannot exceed 50 characters")
+	}
+
+	if !utils.IsValidDomain(domain) {
+		return txhash, errors.New("register deoss: invalid domain")
+	}
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
-	id, err := c.QueryDeossPeerPublickey(c.keyring.PublicKey)
-	if err != nil {
-		if err.Error() != pattern.ERR_Empty {
-			return txhash, err
-		}
-	} else {
-		if !utils.CompareSlice(id, peerId) {
-			txhash, err = c.updateDeossPeerId(key, peerid)
-			return txhash, err
-		}
-		return "", nil
-	}
-	call, err = types.NewCall(c.metadata, pattern.TX_OSS_REGISTER, peerid)
+	// id, err := c.QueryDeossPeerPublickey(c.keyring.PublicKey)
+	// if err != nil {
+	// 	if err.Error() != pattern.ERR_Empty {
+	// 		return txhash, err
+	// 	}
+	// } else {
+	// 	if !utils.CompareSlice(id, peerId) {
+	// 		txhash, err = c.updateDeossPeerId(key, peerid)
+	// 		return txhash, err
+	// 	}
+	// 	return "", nil
+	// }
+
+	call, err = types.NewCall(c.metadata, pattern.TX_OSS_REGISTER, peerid, types.NewBytes([]byte(domain)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
@@ -261,7 +270,15 @@ func (c *chainClient) RegisterOrUpdateDeoss(peerId []byte) (string, error) {
 	}
 }
 
-func (c *chainClient) updateDeossPeerId(key types.StorageKey, peerid pattern.PeerId) (string, error) {
+func (c *chainClient) UpdateDeoss(peerId string, domain string) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
 	var (
 		err         error
 		txhash      string
@@ -269,7 +286,32 @@ func (c *chainClient) updateDeossPeerId(key types.StorageKey, peerid pattern.Pee
 		accountInfo types.AccountInfo
 	)
 
-	call, err = types.NewCall(c.metadata, pattern.TX_OSS_UPDATE, peerid)
+	if !c.GetChainState() {
+		return txhash, pattern.ERR_RPC_CONNECTION
+	}
+
+	var peerid pattern.PeerId
+	if len(peerid) != len(peerId) {
+		return txhash, errors.New("update deoss: invalid peerid")
+	}
+	for i := 0; i < len(peerid); i++ {
+		peerid[i] = types.U8(peerId[i])
+	}
+
+	if len(domain) > 50 {
+		return txhash, errors.New("register deoss: Domain name length cannot exceed 50 characters")
+	}
+
+	if !utils.IsValidDomain(domain) {
+		return txhash, errors.New("register deoss: invalid domain")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	call, err = types.NewCall(c.metadata, pattern.TX_OSS_UPDATE, peerid, types.NewBytes([]byte(domain)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}

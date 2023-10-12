@@ -126,8 +126,10 @@ type SDK interface {
 
 	// Oss-Extrinsics
 
-	// RegisterOrUpdateDeoss register or update deoss information
-	RegisterOrUpdateDeoss(peerId []byte) (string, error)
+	// RegisterOss register deoss information
+	RegisterDeoss(peerId []byte, domain string) (string, error)
+	//
+	UpdateDeoss(peerId string, domain string) (string, error)
 	// ExitDeoss exit deoss
 	ExitDeoss() (string, error)
 	// AuthorizeSpace authorizes space to oss account

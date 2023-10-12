@@ -200,10 +200,10 @@ const (
 )
 
 const (
-	SegmentSize  = 16 * SIZE_1MiB
-	FragmentSize = 8 * SIZE_1MiB
-	DataShards   = 2
-	ParShards    = 1
+	SegmentSize  = 64 * SIZE_1MiB
+	FragmentSize = 16 * SIZE_1MiB
+	DataShards   = 4
+	ParShards    = 2
 )
 
 var (
@@ -364,8 +364,8 @@ type ChallengeElement struct {
 }
 
 type QElement struct {
-	Index types.U64
-	Value types.Bytes
+	Index []types.U64
+	Value []types.Bytes
 }
 
 type MinerSnapShot struct {
