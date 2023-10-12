@@ -117,8 +117,8 @@ type SDK interface {
 	// QuaryAuthorizedAccounts query accounts in string form.
 	QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, error)
 	QuaryAuthorizedAccounts(puk []byte) ([]string, error)
-	// QueryDeossPeerPublickey queries deoss peer public key.
-	QueryDeossPeerPublickey(pubkey []byte) ([]byte, error)
+	// QueryDeossInfo queries deoss info.
+	QueryDeossInfo(pubkey []byte) (pattern.OssInfo, error)
 	// QueryDeossPeerIdList queries peerid of all deoss.
 	QueryDeossPeerIdList() ([]string, error)
 	// CheckSpaceUsageAuthorization checks if the puk is authorized to itself

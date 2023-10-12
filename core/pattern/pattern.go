@@ -190,6 +190,7 @@ const (
 const (
 	MinBucketNameLength = 3
 	MaxBucketNameLength = 63
+	MaxDomainNameLength = 50
 )
 
 // byte size
@@ -236,6 +237,11 @@ type SysSyncState struct {
 	StartingBlock types.U32
 	CurrentBlock  types.U32
 	HighestBlock  types.U32
+}
+
+type OssInfo struct {
+	Peerid PeerId
+	Domain types.Bytes
 }
 
 type MinerInfo struct {
