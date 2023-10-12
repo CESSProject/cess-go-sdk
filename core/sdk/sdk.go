@@ -117,8 +117,8 @@ type SDK interface {
 	// QuaryAuthorizedAccounts query accounts in string form.
 	QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, error)
 	QuaryAuthorizedAccounts(puk []byte) ([]string, error)
-	// QueryDeossPeerPublickey queries deoss peer public key.
-	QueryDeossPeerPublickey(pubkey []byte) ([]byte, error)
+	// QueryDeossInfo queries deoss info.
+	QueryDeossInfo(pubkey []byte) (pattern.OssInfo, error)
 	// QueryDeossPeerIdList queries peerid of all deoss.
 	QueryDeossPeerIdList() ([]string, error)
 	// CheckSpaceUsageAuthorization checks if the puk is authorized to itself
@@ -126,8 +126,10 @@ type SDK interface {
 
 	// Oss-Extrinsics
 
-	// RegisterOrUpdateDeoss register or update deoss information
-	RegisterOrUpdateDeoss(peerId []byte) (string, error)
+	// RegisterOss register deoss information
+	RegisterDeoss(peerId []byte, domain string) (string, error)
+	//
+	UpdateDeoss(peerId string, domain string) (string, error)
 	// ExitDeoss exit deoss
 	ExitDeoss() (string, error)
 	// AuthorizeSpace authorizes space to oss account

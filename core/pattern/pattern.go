@@ -190,6 +190,7 @@ const (
 const (
 	MinBucketNameLength = 3
 	MaxBucketNameLength = 63
+	MaxDomainNameLength = 50
 )
 
 // byte size
@@ -200,10 +201,10 @@ const (
 )
 
 const (
-	SegmentSize  = 16 * SIZE_1MiB
-	FragmentSize = 8 * SIZE_1MiB
-	DataShards   = 2
-	ParShards    = 1
+	SegmentSize  = 64 * SIZE_1MiB
+	FragmentSize = 16 * SIZE_1MiB
+	DataShards   = 4
+	ParShards    = 2
 )
 
 var (
@@ -236,6 +237,11 @@ type SysSyncState struct {
 	StartingBlock types.U32
 	CurrentBlock  types.U32
 	HighestBlock  types.U32
+}
+
+type OssInfo struct {
+	Peerid PeerId
+	Domain types.Bytes
 }
 
 type MinerInfo struct {
@@ -364,8 +370,8 @@ type ChallengeElement struct {
 }
 
 type QElement struct {
-	Index types.U64
-	Value types.Bytes
+	Index []types.U64
+	Value []types.Bytes
 }
 
 type MinerSnapShot struct {

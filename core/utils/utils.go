@@ -10,6 +10,7 @@ package utils
 import (
 	// std
 	"fmt"
+	"regexp"
 	"strings"
 
 	// 3rd party libs
@@ -62,4 +63,10 @@ func NumsToByteStr[T constraints.Unsigned](nums []T, opts map[string]bool) (stri
 
 func NumsToByteStrDefault[T constraints.Unsigned](nums []T) (string, error) {
 	return NumsToByteStr(nums, map[string]bool{})
+}
+
+var domainRegex = regexp.MustCompile(`^[a-zA-Zd-]+(.[a-zA-Zd-]+)*.[a-zA-Z]{2,}$`)
+
+func IsValidDomain(domain string) bool {
+	return domainRegex.MatchString(domain)
 }
