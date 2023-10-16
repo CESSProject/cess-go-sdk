@@ -356,8 +356,8 @@ type ChallengeInfo struct {
 
 type ProveInfo struct {
 	Assign       types.U8
-	IdleProve    IdleProveInfo
-	ServiceProve ServiceProveInfo
+	IdleProve    types.Option[IdleProveInfo]
+	ServiceProve types.Option[ServiceProveInfo]
 }
 
 type ChallengeElement struct {
@@ -385,13 +385,13 @@ type MinerSnapShot struct {
 type IdleProveInfo struct {
 	TeeAcc       types.AccountID
 	IdleProve    types.Bytes
-	VerifyResult types.Bool
+	VerifyResult types.OptionBool
 }
 
 type ServiceProveInfo struct {
 	TeeAcc       types.AccountID
 	ServiceProve types.Bytes
-	VerifyResult types.Bool
+	VerifyResult types.OptionBool
 }
 
 type MinerSnapShot_V2 struct {
