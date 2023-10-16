@@ -171,7 +171,8 @@ func (c *chainClient) RegisterDeoss(peerId []byte, domain string) (string, error
 		return txhash, fmt.Errorf("register deoss: Domain name length cannot exceed %v characters", pattern.MaxDomainNameLength)
 	}
 
-	if !utils.IsValidDomain(domain) {
+	err = utils.CheckDomain(domain)
+	if err != nil {
 		return txhash, errors.New("register deoss: invalid domain")
 	}
 
@@ -289,7 +290,8 @@ func (c *chainClient) UpdateDeoss(peerId string, domain string) (string, error) 
 		return txhash, errors.New("register deoss: Domain name length cannot exceed 50 characters")
 	}
 
-	if !utils.IsValidDomain(domain) {
+	err = utils.CheckDomain(domain)
+	if err != nil {
 		return txhash, errors.New("register deoss: invalid domain")
 	}
 

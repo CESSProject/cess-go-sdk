@@ -60,7 +60,7 @@ func Example_register_deoss() {
 		log.Fatalf("err: %v", err.Error())
 	}
 
-	_, err = cli.RegisterOrUpdateDeoss(cli.GetPeerPublickey())
+	_, err = cli.RegisterDeoss(cli.GetPeerPublickey(), "")
 	if err != nil {
 		log.Fatalf("err: %v", err.Error())
 	}
