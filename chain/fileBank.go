@@ -1191,7 +1191,7 @@ func (c *chainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (stri
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				txhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FilaBank_GenRestoralOrder(status.AsInBlock)
+				_, err = c.RetrieveEvent_FileBank_GenRestoralOrder(status.AsInBlock)
 				return txhash, err
 			}
 		case err = <-sub.Err():

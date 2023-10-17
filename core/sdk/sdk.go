@@ -417,11 +417,11 @@ type SDK interface {
 	//
 	RetrieveEvent_Balances_Transfer(blockhash types.Hash) (types.EventBalancesTransfer, error)
 	//
-	RetrieveEvent_FilaBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error)
+	RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error)
 	//
-	RetrieveAllEvent_FilaBank_UploadDeclaration(blockhash types.Hash) ([]event.AllUploadDeclarationEvent, error)
+	RetrieveAllEvent_FileBank_UploadDeclaration(blockhash types.Hash) ([]event.AllUploadDeclarationEvent, error)
 	//
-	RetrieveAllEvent_FilaBank_StorageCompleted(blockhash types.Hash) ([]string, error)
+	RetrieveAllEvent_FileBank_StorageCompleted(blockhash types.Hash) ([]string, error)
 	//
 	RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]event.AllDeleteFileEvent, error)
 }

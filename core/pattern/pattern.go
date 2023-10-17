@@ -382,8 +382,8 @@ type ChallengeElement struct {
 }
 
 type QElement struct {
-	Index []types.U64
-	Value []types.Bytes
+	Index []types.U32
+	Value Random
 }
 
 type MinerSnapShot struct {

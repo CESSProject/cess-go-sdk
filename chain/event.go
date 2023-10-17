@@ -1416,7 +1416,7 @@ func (c *chainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (typ
 	return result, errors.New("failed: no Balances_Transfer event found")
 }
 
-func (c *chainClient) RetrieveEvent_FilaBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error) {
+func (c *chainClient) RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error) {
 	var result event.Event_GenerateRestoralOrder
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
@@ -1463,7 +1463,7 @@ func (c *chainClient) RetrieveEvent_FilaBank_GenRestoralOrder(blockhash types.Ha
 	return result, errors.New("failed: no FilaBank_GenerateRestoralOrder event found")
 }
 
-func (c *chainClient) RetrieveAllEvent_FilaBank_UploadDeclaration(blockhash types.Hash) ([]event.AllUploadDeclarationEvent, error) {
+func (c *chainClient) RetrieveAllEvent_FileBank_UploadDeclaration(blockhash types.Hash) ([]event.AllUploadDeclarationEvent, error) {
 	var result = make([]event.AllUploadDeclarationEvent, 0)
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
@@ -1539,7 +1539,7 @@ func (c *chainClient) RetrieveAllEvent_FilaBank_UploadDeclaration(blockhash type
 	return result, nil
 }
 
-func (c *chainClient) RetrieveAllEvent_FilaBank_StorageCompleted(blockhash types.Hash) ([]string, error) {
+func (c *chainClient) RetrieveAllEvent_FileBank_StorageCompleted(blockhash types.Hash) ([]string, error) {
 	var result = make([]string, 0)
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
