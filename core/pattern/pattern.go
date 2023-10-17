@@ -215,16 +215,28 @@ var (
 	ERR_RPC_PRIORITYTOOLOW = "Priority is too low"
 )
 
-type FileHash [64]types.U8
-type Random [20]types.U8
-type TeePodr2Pk [270]types.U8
-type PeerId [38]types.U8
-type PoISKey_G [256]types.U8
-type PoISKey_N [256]types.U8
-type TeeSignature [256]types.U8
-type Accumulator [256]types.U8
-type SpaceChallengeParam [8]types.U64
-type BloomFilter [256]types.U64
+const (
+	FileHashLen            = 64
+	RandomLen              = 20
+	TeePodr2PkLen          = 270
+	PeerIdPublicKeyLen     = 38
+	PoISKeyLen             = 256
+	TeeSignatureLen        = 256
+	AccumulatorLen         = 256
+	SpaceChallengeParamLen = 8
+	BloomFilterLen         = 256
+)
+
+type FileHash [FileHashLen]types.U8
+type Random [RandomLen]types.U8
+type TeePodr2Pk [TeePodr2PkLen]types.U8
+type PeerId [PeerIdPublicKeyLen]types.U8
+type PoISKey_G [PoISKeyLen]types.U8
+type PoISKey_N [PoISKeyLen]types.U8
+type TeeSignature [TeeSignatureLen]types.U8
+type Accumulator [AccumulatorLen]types.U8
+type SpaceChallengeParam [SpaceChallengeParamLen]types.U64
+type BloomFilter [BloomFilterLen]types.U64
 
 type SysProperties struct {
 	Ss58Format    types.Bytes
@@ -356,8 +368,8 @@ type ChallengeInfo struct {
 
 type ProveInfo struct {
 	Assign       types.U8
-	IdleProve    IdleProveInfo
-	ServiceProve ServiceProveInfo
+	IdleProve    types.Option[IdleProveInfo]
+	ServiceProve types.Option[ServiceProveInfo]
 }
 
 type ChallengeElement struct {
@@ -370,8 +382,8 @@ type ChallengeElement struct {
 }
 
 type QElement struct {
-	Index []types.U64
-	Value []types.Bytes
+	Index []types.U32
+	Value []Random
 }
 
 type MinerSnapShot struct {
@@ -385,13 +397,13 @@ type MinerSnapShot struct {
 type IdleProveInfo struct {
 	TeeAcc       types.AccountID
 	IdleProve    types.Bytes
-	VerifyResult types.Bool
+	VerifyResult types.OptionBool
 }
 
 type ServiceProveInfo struct {
 	TeeAcc       types.AccountID
 	ServiceProve types.Bytes
-	VerifyResult types.Bool
+	VerifyResult types.OptionBool
 }
 
 type MinerSnapShot_V2 struct {

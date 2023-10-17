@@ -380,6 +380,18 @@ type ElectionScore struct {
 
 //*******************************************************
 
+type AllUploadDeclarationEvent struct {
+	Operator string
+	Owner    string
+	Filehash string
+}
+
+type AllDeleteFileEvent struct {
+	Operator string
+	Owner    string
+	Filehash string
+}
+
 // Events
 type EventRecords struct {
 	// AUDIT

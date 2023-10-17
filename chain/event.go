@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/CESSProject/cess-go-sdk/core/event"
+	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
@@ -1415,7 +1416,7 @@ func (c *chainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (typ
 	return result, errors.New("failed: no Balances_Transfer event found")
 }
 
-func (c *chainClient) RetrieveEvent_FilaBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error) {
+func (c *chainClient) RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error) {
 	var result event.Event_GenerateRestoralOrder
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
@@ -1460,4 +1461,194 @@ func (c *chainClient) RetrieveEvent_FilaBank_GenRestoralOrder(blockhash types.Ha
 		}
 	}
 	return result, errors.New("failed: no FilaBank_GenerateRestoralOrder event found")
+}
+
+func (c *chainClient) RetrieveAllEvent_FileBank_UploadDeclaration(blockhash types.Hash) ([]event.AllUploadDeclarationEvent, error) {
+	var result = make([]event.AllUploadDeclarationEvent, 0)
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return result, err
+	}
+
+	for _, e := range events {
+		if e.Name == event.FileBankUploadDeclaration {
+			var ele event.AllUploadDeclarationEvent
+			for _, v := range e.Fields {
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.operator") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
+								}
+							}
+							ele.Operator, _ = utils.EncodePublicKeyAsCessAccount(puk)
+						} else if strings.Contains(v.Name, "AccountId32.owner") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
+								}
+							}
+							ele.Owner, _ = utils.EncodePublicKeyAsCessAccount(puk)
+						} else if strings.Contains(v.Name, "deal_hash") {
+							temp := strings.Split(allValue, "] ")
+							for _, v := range temp {
+								if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != pattern.FileHashLen {
+										continue
+									}
+									var fhash pattern.FileHash
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										fhash[kk] = types.U8(intv)
+									}
+									ele.Filehash = string(fhash[:])
+								}
+							}
+						}
+					}
+				}
+			}
+			result = append(result, ele)
+		}
+	}
+	return result, nil
+}
+
+func (c *chainClient) RetrieveAllEvent_FileBank_StorageCompleted(blockhash types.Hash) ([]string, error) {
+	var result = make([]string, 0)
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return result, err
+	}
+	for _, e := range events {
+		if e.Name == event.FileBankStorageCompleted {
+			for _, v := range e.Fields {
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "file_hash") {
+							temp := strings.Split(allValue, "] ")
+							for _, v := range temp {
+								if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != pattern.FileHashLen {
+										continue
+									}
+									var fhash pattern.FileHash
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										fhash[kk] = types.U8(intv)
+									}
+									result = append(result, string(fhash[:]))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return result, nil
+}
+
+func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]event.AllDeleteFileEvent, error) {
+	var result = make([]event.AllDeleteFileEvent, 0)
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return result, err
+	}
+	for _, e := range events {
+		if e.Name == event.FileBankDeleteFile {
+			var ele event.AllDeleteFileEvent
+			for _, v := range e.Fields {
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32.operator") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
+								}
+							}
+							ele.Operator, _ = utils.EncodePublicKeyAsCessAccount(puk)
+						} else if strings.Contains(v.Name, "AccountId32.owner") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
+								}
+							}
+							ele.Owner, _ = utils.EncodePublicKeyAsCessAccount(puk)
+						} else if strings.Contains(v.Name, "deal_hash") {
+							temp := strings.Split(allValue, "] ")
+							for _, v := range temp {
+								if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != pattern.FileHashLen {
+										continue
+									}
+									var fhash pattern.FileHash
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										fhash[kk] = types.U8(intv)
+									}
+									ele.Filehash = string(fhash[:])
+								}
+							}
+						}
+					}
+				}
+			}
+			result = append(result, ele)
+		}
+	}
+	return result, nil
 }
