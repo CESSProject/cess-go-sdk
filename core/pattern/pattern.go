@@ -383,7 +383,7 @@ type ChallengeElement struct {
 
 type QElement struct {
 	Index []types.U32
-	Value Random
+	Value []Random
 }
 
 type MinerSnapShot struct {
