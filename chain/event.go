@@ -1588,11 +1588,13 @@ func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 		if e.Name == event.FileBankDeleteFile {
 			var ele event.AllDeleteFileEvent
 			for _, v := range e.Fields {
+				fmt.Println("name: ", v.Name)
+				fmt.Println(reflect.TypeOf(v.Value).Kind())
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
 					if vf.Len() > 0 {
-						allValue := fmt.Sprintf("%v", vf.Index(0))
 						if strings.Contains(v.Name, "AccountId32.operator") {
+							allValue := fmt.Sprintf("%v", vf.Index(0))
 							temp := strings.Split(allValue, "] ")
 							puk := make([]byte, types.AccountIDLen)
 							for _, v := range temp {
@@ -1610,6 +1612,7 @@ func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 							}
 							ele.Operator, _ = utils.EncodePublicKeyAsCessAccount(puk)
 						} else if strings.Contains(v.Name, "AccountId32.owner") {
+							allValue := fmt.Sprintf("%v", vf.Index(0))
 							temp := strings.Split(allValue, "] ")
 							puk := make([]byte, types.AccountIDLen)
 							for _, v := range temp {
@@ -1626,7 +1629,18 @@ func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 								}
 							}
 							ele.Owner, _ = utils.EncodePublicKeyAsCessAccount(puk)
-						} else if strings.Contains(v.Name, "deal_hash") {
+						} else if strings.Contains(v.Name, "file_hash") {
+							value := vf.Index(0)
+							//t := reflect.TypeOf(value)
+							v := reflect.ValueOf(value)
+							//fmt.Println("Type ", t)
+							//fmt.Println("Value ", v)
+							//fmt.Println("Kind ", t.Kind())
+							for i := 0; i < v.NumField(); i++ {
+								//tt := reflect.TypeOf(v.Field(i))
+								//fmt.Printf("Field:%d kind:%v Type:%T value:%v\n", i, tt.Kind(), tt, v.Field(i))
+							}
+							var allValue string
 							temp := strings.Split(allValue, "] ")
 							for _, v := range temp {
 								if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
