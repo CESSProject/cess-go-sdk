@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/CESSProject/go-keyring v0.0.0-20220614131247-ee3a8da30fde
-	github.com/CESSProject/p2p-go v0.2.2-0.20231023054929-f0c6222306aa
+	github.com/CESSProject/p2p-go v0.2.2-0.20231023092914-57cc0d72c851
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/centrifuge/go-substrate-rpc-client/v4 v4.1.0
