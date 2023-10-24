@@ -40,35 +40,3 @@ func TransactionTimeout(timeout time.Duration) Option {
 		return nil
 	}
 }
-
-// Workspace configuration working directory
-func Workspace(workspace string) Option {
-	return func(cfg *Config) error {
-		cfg.Workspace = workspace
-		return nil
-	}
-}
-
-// P2pPort configuration p2p communication port
-func P2pPort(port int) Option {
-	return func(cfg *Config) error {
-		cfg.P2pPort = port
-		return nil
-	}
-}
-
-// P2pPort configuration boot node list
-func Bootnodes(bootnodes []string) Option {
-	return func(cfg *Config) error {
-		cfg.Bootnodes = bootnodes
-		return nil
-	}
-}
-
-// P2pPort configuration boot node list
-func ProtocolPrefix(protocolPrefix string) Option {
-	return func(cfg *Config) error {
-		cfg.ProtocolPrefix = protocolPrefix
-		return nil
-	}
-}
