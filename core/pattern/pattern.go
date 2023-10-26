@@ -20,6 +20,8 @@ const DOT = "."
 // Unit precision of CESS token
 const TokenPrecision_CESS = "000000000000"
 
+const StakingStakePerTiB = 4000
+
 // BlockInterval is the time interval for generating blocks, in seconds
 const BlockInterval = time.Second * time.Duration(6)
 
@@ -397,13 +399,13 @@ type MinerSnapShot struct {
 type IdleProveInfo struct {
 	TeeAcc       types.AccountID
 	IdleProve    types.Bytes
-	VerifyResult types.OptionBool
+	VerifyResult types.Option[bool]
 }
 
 type ServiceProveInfo struct {
 	TeeAcc       types.AccountID
 	ServiceProve types.Bytes
-	VerifyResult types.OptionBool
+	VerifyResult types.Option[bool]
 }
 
 type MinerSnapShot_V2 struct {

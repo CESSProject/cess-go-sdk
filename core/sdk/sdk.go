@@ -13,16 +13,12 @@ import (
 
 	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
-	"github.com/CESSProject/p2p-go/core"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 // CESS Go SDK Interface Description
 type SDK interface {
-	// References libp2p: https://github.com/libp2p/go-libp2p
-	core.P2P
-
 	// Audit-State
 
 	// Query the expired block height of the challenge.
@@ -275,7 +271,7 @@ type SDK interface {
 	// Verify the signature of the msg with the public key of the signing account.
 	Verify(msg []byte, sig []byte) (bool, error)
 	// EnabledP2P returns the p2p enable status
-	EnabledP2P() bool
+	// EnabledP2P() bool
 
 	// Process the file according to CESS specifications.
 	//

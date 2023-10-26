@@ -20,6 +20,7 @@ import (
 
 	cess "github.com/CESSProject/cess-go-sdk"
 	"github.com/CESSProject/cess-go-sdk/config"
+	p2pgo "github.com/CESSProject/p2p-go"
 )
 
 const DEFAULT_WAIT_TIME = time.Second * 15
@@ -52,15 +53,22 @@ func Example_register_deoss() {
 		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
 		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
 		cess.TransactionTimeout(time.Duration(DEFAULT_WAIT_TIME)),
-		cess.Bootnodes([]string{os.Getenv("BOOTSTRAP_NODES")}),
-		cess.P2pPort(P2P_PORT),
-		cess.Workspace(TMP_DIR),
 	)
 	if err != nil {
 		log.Fatalf("err: %v", err.Error())
 	}
 
-	_, err = cli.RegisterDeoss(cli.GetPeerPublickey(), "")
+	p2p, err := p2pgo.New(
+		context.Background(),
+		p2pgo.ListenPort(P2P_PORT),
+		p2pgo.Workspace(TMP_DIR),
+		p2pgo.BootPeers([]string{os.Getenv("BOOTSTRAP_NODES")}),
+	)
+	if err != nil {
+		log.Fatalf("err: %v", err.Error())
+	}
+
+	_, err = cli.RegisterDeoss(p2p.GetPeerPublickey(), "")
 	if err != nil {
 		log.Fatalf("err: %v", err.Error())
 	}
@@ -73,15 +81,22 @@ func Example_register_storage_node() {
 		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
 		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
 		cess.TransactionTimeout(time.Duration(DEFAULT_WAIT_TIME)),
-		cess.Bootnodes([]string{os.Getenv("BOOTSTRAP_NODES")}),
-		cess.P2pPort(P2P_PORT),
-		cess.Workspace(TMP_DIR),
 	)
 	if err != nil {
 		log.Fatalf("err: %v", err.Error())
 	}
 
-	_, _, err = cli.RegisterOrUpdateSminer(cli.GetPeerPublickey(), os.Getenv("MY_ADDR"), 0)
+	p2p, err := p2pgo.New(
+		context.Background(),
+		p2pgo.ListenPort(P2P_PORT),
+		p2pgo.Workspace(TMP_DIR),
+		p2pgo.BootPeers([]string{os.Getenv("BOOTSTRAP_NODES")}),
+	)
+	if err != nil {
+		log.Fatalf("err: %v", err.Error())
+	}
+
+	_, _, err = cli.RegisterOrUpdateSminer(p2p.GetPeerPublickey(), os.Getenv("MY_ADDR"), 0)
 	if err != nil {
 		log.Fatalf("err: %v", err.Error())
 	}

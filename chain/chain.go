@@ -9,13 +9,10 @@ package chain
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -23,8 +20,6 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/sdk"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
-	p2pgo "github.com/CESSProject/p2p-go"
-	"github.com/CESSProject/p2p-go/core"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/retriever"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/state"
@@ -34,7 +29,6 @@ import (
 )
 
 type chainClient struct {
-	*core.Node
 	lock           *sync.Mutex
 	api            *gsrpc.SubstrateAPI
 	chainState     *atomic.Bool
@@ -51,7 +45,6 @@ type chainClient struct {
 	networkEnv     string
 	signatureAcc   string
 	name           string
-	enabledP2P     bool
 }
 
 var _ sdk.SDK = (*chainClient)(nil)
@@ -66,13 +59,8 @@ func NewChainClient(
 	rpcs []string,
 	mnemonic string,
 	t time.Duration,
-	workspace string,
-	p2pPort int,
-	bootnodes []string,
-	protocolPrefix string,
 ) (*chainClient, error) {
 	var (
-		ok          bool
 		err         error
 		chainClient = &chainClient{
 			lock:        new(sync.Mutex),
@@ -82,10 +70,6 @@ func NewChainClient(
 			name:        serviceName,
 		}
 	)
-
-	if !core.FreeLocalPort(uint32(p2pPort)) {
-		return nil, fmt.Errorf("port [%d] is in use", p2pPort)
-	}
 
 	log.SetOutput(io.Discard)
 	for i := 0; i < len(rpcs); i++ {
@@ -145,24 +129,6 @@ func NewChainClient(
 	chainClient.networkEnv, err = chainClient.SysChain()
 	if err != nil {
 		return nil, err
-	}
-
-	if workspace != "" && p2pPort > 0 {
-		p2p, err := p2pgo.New(
-			ctx,
-			p2pgo.ListenPort(p2pPort),
-			p2pgo.Workspace(filepath.Join(workspace, chainClient.GetSignatureAcc(), chainClient.GetSdkName())),
-			p2pgo.BootPeers(bootnodes),
-			p2pgo.ProtocolPrefix(protocolPrefix),
-		)
-		if err != nil {
-			return nil, err
-		}
-		chainClient.Node, ok = p2p.(*core.Node)
-		if !ok {
-			return nil, errors.New("invalid p2p type")
-		}
-		chainClient.enabledP2P = true
 	}
 
 	return chainClient, nil
@@ -244,10 +210,6 @@ func (c *chainClient) Sign(msg []byte) ([]byte, error) {
 
 func (c *chainClient) Verify(msg []byte, sig []byte) (bool, error) {
 	return signature.Verify(msg, sig, c.keyring.URI)
-}
-
-func (c *chainClient) EnabledP2P() bool {
-	return c.enabledP2P
 }
 
 func reconnectChainSDK(rpcs []string) (

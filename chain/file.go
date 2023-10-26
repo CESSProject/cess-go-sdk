@@ -16,7 +16,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/crypte"
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
@@ -172,7 +171,7 @@ func cutfile(file string) ([]string, error) {
 			if i+1 != segmentCount {
 				return segment, errors.New("read file err")
 			}
-			copy(buf[num:], []byte(utils.RandStr(pattern.SegmentSize-num)))
+			copy(buf[num:], make([]byte, pattern.SegmentSize-num))
 		}
 
 		hash, err := utils.CalcSHA256(buf)
@@ -229,7 +228,7 @@ func cutFileWithEncryption(file string) ([]string, error) {
 			if i+1 != segmentCount {
 				return segment, errors.New("read file err")
 			}
-			copy(buf[num:], []byte(utils.RandStr(segmentSize-num)))
+			copy(buf[num:], make([]byte, segmentSize-num))
 		}
 
 		hash, err := utils.CalcSHA256(buf)
@@ -528,54 +527,54 @@ func (c *chainClient) RetrieveObject(url, fid string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func (c *chainClient) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
-	if !c.enabledP2P {
-		return errors.New("P2P network not enabled")
-	}
+// func (c *chainClient) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
+// 	if !c.enabledP2P {
+// 		return errors.New("P2P network not enabled")
+// 	}
 
-	var err error
+// 	var err error
 
-	// query all assigned miner multiaddr
-	peerids, err := c.QueryAssignedMinerPeerId(minerTaskList)
-	if err != nil {
-		return errors.Wrapf(err, "[QueryAssignedMinerPeerId]")
-	}
+// 	// query all assigned miner multiaddr
+// 	peerids, err := c.QueryAssignedMinerPeerId(minerTaskList)
+// 	if err != nil {
+// 		return errors.Wrapf(err, "[QueryAssignedMinerPeerId]")
+// 	}
 
-	basedir := filepath.Dir(segment[0].FragmentHash[0])
-	for i := 0; i < len(peerids); i++ {
-		for j := 0; j < len(minerTaskList[i].Hash); j++ {
-			err = c.WriteFileAction(peerids[j], roothash, filepath.Join(basedir, string(minerTaskList[i].Hash[j][:])))
-			if err != nil {
-				return errors.Wrapf(err, "[WriteFileAction]")
-			}
-		}
-	}
+// 	basedir := filepath.Dir(segment[0].FragmentHash[0])
+// 	for i := 0; i < len(peerids); i++ {
+// 		for j := 0; j < len(minerTaskList[i].Hash); j++ {
+// 			err = c.WriteFileAction(peerids[j], roothash, filepath.Join(basedir, string(minerTaskList[i].Hash[j][:])))
+// 			if err != nil {
+// 				return errors.Wrapf(err, "[WriteFileAction]")
+// 			}
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func (c *chainClient) FindPeers() map[string]peer.AddrInfo {
-	var peerMap = make(map[string]peer.AddrInfo, 100)
-	timeOut := time.NewTicker(time.Second * 10)
-	defer timeOut.Stop()
-	c.RouteTableFindPeers(0)
-	for {
-		select {
-		case peer, ok := <-c.GetDiscoveredPeers():
-			if !ok {
-				return peerMap
-			}
-			if len(peer.Responses) == 0 {
-				break
-			}
-			for _, v := range peer.Responses {
-				peerMap[v.ID.Pretty()] = *v
-			}
-		case <-timeOut.C:
-			return peerMap
-		}
-	}
-}
+// func (c *chainClient) FindPeers() map[string]peer.AddrInfo {
+// 	var peerMap = make(map[string]peer.AddrInfo, 100)
+// 	timeOut := time.NewTicker(time.Second * 10)
+// 	defer timeOut.Stop()
+// 	c.RouteTableFindPeers(0)
+// 	for {
+// 		select {
+// 		case peer, ok := <-c.GetDiscoveredPeers():
+// 			if !ok {
+// 				return peerMap
+// 			}
+// 			if len(peer.Responses) == 0 {
+// 				break
+// 			}
+// 			for _, v := range peer.Responses {
+// 				peerMap[v.ID.Pretty()] = *v
+// 			}
+// 		case <-timeOut.C:
+// 			return peerMap
+// 		}
+// 	}
+// }
 
 func (c *chainClient) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
 	var peerids = make([]peer.ID, len(minerTaskList))

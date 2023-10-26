@@ -18,14 +18,10 @@ import (
 
 // Config describes a set of settings for a client
 type Config struct {
-	Rpc            []string
-	Bootnodes      []string
-	Mnemonic       string
-	Name           string
-	Workspace      string
-	ProtocolPrefix string
-	P2pPort        int
-	Timeout        time.Duration
+	Rpc      []string
+	Mnemonic string
+	Name     string
+	Timeout  time.Duration
 }
 
 // Option is a client config option that can be given to the client constructor
@@ -38,13 +34,6 @@ const (
 	CharacterName_Deoss  = "deoss"
 )
 
-// cess network protocol prefix
-const (
-	DevnetProtocolPrefix  = "/kldr-devnet"
-	TestnetProtocolPrefix = "/kldr-testnet"
-	MainnetProtocolPrefix = "/kldr-mainnet"
-)
-
 // NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
@@ -52,7 +41,7 @@ func (cfg *Config) NewSDK(ctx context.Context, serviceName string) (sdk.SDK, err
 	if serviceName == "" {
 		return nil, fmt.Errorf("empty service name")
 	}
-	return chain.NewChainClient(ctx, serviceName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout, cfg.Workspace, cfg.P2pPort, cfg.Bootnodes, cfg.ProtocolPrefix)
+	return chain.NewChainClient(ctx, serviceName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
 }
 
 // Apply applies the given options to the config, returning the first error

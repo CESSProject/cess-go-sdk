@@ -1591,8 +1591,8 @@ func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
 					if vf.Len() > 0 {
-						allValue := fmt.Sprintf("%v", vf.Index(0))
 						if strings.Contains(v.Name, "AccountId32.operator") {
+							allValue := fmt.Sprintf("%v", vf.Index(0))
 							temp := strings.Split(allValue, "] ")
 							puk := make([]byte, types.AccountIDLen)
 							for _, v := range temp {
@@ -1610,6 +1610,7 @@ func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 							}
 							ele.Operator, _ = utils.EncodePublicKeyAsCessAccount(puk)
 						} else if strings.Contains(v.Name, "AccountId32.owner") {
+							allValue := fmt.Sprintf("%v", vf.Index(0))
 							temp := strings.Split(allValue, "] ")
 							puk := make([]byte, types.AccountIDLen)
 							for _, v := range temp {
@@ -1626,7 +1627,8 @@ func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 								}
 							}
 							ele.Owner, _ = utils.EncodePublicKeyAsCessAccount(puk)
-						} else if strings.Contains(v.Name, "deal_hash") {
+						} else if strings.Contains(v.Name, "file_hash") {
+							allValue := fmt.Sprintf("%v", vf.Index(0))
 							temp := strings.Split(allValue, "] ")
 							for _, v := range temp {
 								if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
