@@ -96,7 +96,7 @@ func Example_register_storage_node() {
 		log.Fatalf("err: %v", err.Error())
 	}
 
-	_, _, err = cli.RegisterOrUpdateSminer(p2p.GetPeerPublickey(), os.Getenv("MY_ADDR"), 0)
+	_, err = cli.RegisterSminer(p2p.GetPeerPublickey(), os.Getenv("MY_ADDR"), 0)
 	if err != nil {
 		log.Fatalf("err: %v", err.Error())
 	}

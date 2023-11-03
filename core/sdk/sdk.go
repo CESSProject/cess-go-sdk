@@ -148,10 +148,10 @@ type SDK interface {
 
 	// Sminer-Extrinsics
 
-	// RegisterOrUpdateSminer register or update sminer information
-	RegisterOrUpdateSminer(peerId []byte, earnings string, pledge uint64) (string, string, error)
-	//
-	RegisterOrUpdateSminer_V2(peerId []byte, earnings string, pledge uint64, poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, string, error)
+	// RegisterSminer register sminer information
+	RegisterSminer(peerId []byte, earnings string, pledge uint64) (string, error)
+	// RegisterSminerPOISKey register the pois key of sminer
+	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, error)
 	// ExitSminer exit mining
 	ExitSminer() (string, error)
 	// UpdateEarningsAcc update earnings account.
@@ -392,6 +392,8 @@ type SDK interface {
 	RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Hash) (event.Event_ReplaceIdleSpace, error)
 	//
 	RetrieveEvent_Sminer_Registered(blockhash types.Hash) (event.Event_Registered, error)
+	//
+	RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (event.Event_RegisterPoisKey, error)
 	//
 	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdataIp, error)
 	//

@@ -71,6 +71,12 @@ type Event_Registered struct {
 	Topics     []types.Hash
 }
 
+type Event_RegisterPoisKey struct {
+	Phase  types.Phase
+	Miner  types.AccountID
+	Topics []types.Hash
+}
+
 type Event_DrawFaucetMoney struct {
 	Phase  types.Phase
 	Topics []types.Hash
@@ -431,6 +437,7 @@ type EventRecords struct {
 
 	// SMINER
 	Sminer_Registered         []Event_Registered
+	Sminer_RegisterPoisKey    []Event_RegisterPoisKey
 	Sminer_DrawFaucetMoney    []Event_DrawFaucetMoney
 	Sminer_FaucetTopUpMoney   []Event_FaucetTopUpMoney
 	Sminer_LessThan24Hours    []Event_LessThan24Hours
