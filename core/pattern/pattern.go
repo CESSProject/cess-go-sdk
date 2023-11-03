@@ -116,13 +116,14 @@ const (
 	TX_OSS_UNAUTHORIZE = OSS + DOT + "cancel_authorize"
 
 	// SMINER
-	TX_SMINER_REGISTER       = SMINER + DOT + "regnstk"
-	TX_SMINER_INCREASESTAKES = SMINER + DOT + "increase_collateral"
-	TX_SMINER_UPDATEPEERID   = SMINER + DOT + "update_peer_id"
-	TX_SMINER_UPDATEINCOME   = SMINER + DOT + "update_beneficiary"
-	TX_SMINER_CLAIMREWARD    = SMINER + DOT + "receive_reward"
-	TX_SMINER_MINEREXITPREP  = SMINER + DOT + "miner_exit_prep"
-	TX_SMINER_WITHDRAW       = SMINER + DOT + "miner_withdraw"
+	TX_SMINER_REGISTER        = SMINER + DOT + "regnstk"
+	TX_SMINER_INCREASESTAKES  = SMINER + DOT + "increase_collateral"
+	TX_SMINER_UPDATEPEERID    = SMINER + DOT + "update_peer_id"
+	TX_SMINER_UPDATEINCOME    = SMINER + DOT + "update_beneficiary"
+	TX_SMINER_CLAIMREWARD     = SMINER + DOT + "receive_reward"
+	TX_SMINER_MINEREXITPREP   = SMINER + DOT + "miner_exit_prep"
+	TX_SMINER_WITHDRAW        = SMINER + DOT + "miner_withdraw"
+	TX_SMINER_REGISTERPOISKEY = SMINER + DOT + "register_pois_key"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET         = FILEBANK + DOT + "create_bucket"
@@ -267,7 +268,7 @@ type MinerInfo struct {
 	IdleSpace          types.U128
 	ServiceSpace       types.U128
 	LockSpace          types.U128
-	SpaceProofInfo     SpaceProofInfo
+	SpaceProofInfo     types.Option[SpaceProofInfo]
 	ServiceBloomFilter BloomFilter
 	TeeSignature       TeeSignature
 }
@@ -462,8 +463,9 @@ type ExpendersInfo struct {
 }
 
 type PoISKeyInfo struct {
-	G PoISKey_G
-	N PoISKey_N
+	Acc types.AccountID
+	G   PoISKey_G
+	N   PoISKey_N
 }
 
 type IdleSignInfo struct {

@@ -95,7 +95,7 @@ func (c *chainClient) RetrieveEvent_FileBank_ClaimRestoralOrder(blockhash types.
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_ClaimRestoralOrder event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankClaimRestoralOrder)
 }
 
 func (c *chainClient) RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) (event.Event_SubmitIdleProof, error) {
@@ -143,7 +143,7 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) 
 			}
 		}
 	}
-	return result, errors.New("failed: no Audit_SubmitIdleProof event found")
+	return result, errors.Errorf("failed: no %s event found", event.AuditSubmitIdleProof)
 }
 
 func (c *chainClient) RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Hash) (event.Event_SubmitServiceProof, error) {
@@ -191,7 +191,7 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Has
 			}
 		}
 	}
-	return result, errors.New("failed: no Audit_SubmitServiceProof event found")
+	return result, errors.Errorf("failed: no %s event found", event.AuditSubmitServiceProof)
 }
 
 func (c *chainClient) RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types.Hash) (event.Event_SubmitIdleVerifyResult, error) {
@@ -238,7 +238,7 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types
 			}
 		}
 	}
-	return result, errors.New("failed: no Audit_SubmitIdleVerifyResult event found")
+	return result, errors.Errorf("failed: no %s event found", event.AuditSubmitIdleVerifyResult)
 }
 
 func (c *chainClient) RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash types.Hash) (event.Event_SubmitServiceVerifyResult, error) {
@@ -285,7 +285,7 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash ty
 			}
 		}
 	}
-	return result, errors.New("failed: no Audit_SubmitServiceVerifyResult event found")
+	return result, errors.Errorf("failed: no %s event found", event.AuditSubmitServiceVerifyResult)
 }
 
 func (c *chainClient) RetrieveEvent_Oss_OssUpdate(blockhash types.Hash) (event.Event_OssUpdate, error) {
@@ -332,7 +332,7 @@ func (c *chainClient) RetrieveEvent_Oss_OssUpdate(blockhash types.Hash) (event.E
 			}
 		}
 	}
-	return result, errors.New("failed: no Oss_OssUpdate event found")
+	return result, errors.Errorf("failed: no %s event found", event.OssOssUpdate)
 }
 
 func (c *chainClient) RetrieveEvent_Oss_OssRegister(blockhash types.Hash) (event.Event_OssRegister, error) {
@@ -379,7 +379,7 @@ func (c *chainClient) RetrieveEvent_Oss_OssRegister(blockhash types.Hash) (event
 			}
 		}
 	}
-	return result, errors.New("failed: no Oss_OssRegister event found")
+	return result, errors.Errorf("failed: no %s event found", event.OssOssRegister)
 }
 
 func (c *chainClient) RetrieveEvent_Oss_OssDestroy(blockhash types.Hash) (event.Event_OssDestroy, error) {
@@ -426,7 +426,7 @@ func (c *chainClient) RetrieveEvent_Oss_OssDestroy(blockhash types.Hash) (event.
 			}
 		}
 	}
-	return result, errors.New("failed: no Oss_OssDestroy event found")
+	return result, errors.Errorf("failed: no %s event found", event.OssOssDestroy)
 }
 
 func (c *chainClient) RetrieveEvent_Oss_Authorize(blockhash types.Hash) (event.Event_Authorize, error) {
@@ -473,7 +473,7 @@ func (c *chainClient) RetrieveEvent_Oss_Authorize(blockhash types.Hash) (event.E
 			}
 		}
 	}
-	return result, errors.New("failed: no Oss_Authorize event found")
+	return result, errors.Errorf("failed: no %s event found", event.OssAuthorize)
 }
 
 func (c *chainClient) RetrieveEvent_Oss_CancelAuthorize(blockhash types.Hash) (event.Event_CancelAuthorize, error) {
@@ -520,7 +520,7 @@ func (c *chainClient) RetrieveEvent_Oss_CancelAuthorize(blockhash types.Hash) (e
 			}
 		}
 	}
-	return result, errors.New("failed: no Oss_CancelAuthorize event found")
+	return result, errors.Errorf("failed: no %s event found", event.OssCancelAuthorize)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_UploadDeclaration(blockhash types.Hash) (event.Event_UploadDeclaration, error) {
@@ -567,7 +567,7 @@ func (c *chainClient) RetrieveEvent_FileBank_UploadDeclaration(blockhash types.H
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_UploadDeclaration event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankUploadDeclaration)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) (event.Event_CreateBucket, error) {
@@ -614,7 +614,7 @@ func (c *chainClient) RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) 
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_CreateBucket event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankCreateBucket)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_DeleteBucket(blockhash types.Hash) (event.Event_DeleteBucket, error) {
@@ -661,7 +661,7 @@ func (c *chainClient) RetrieveEvent_FileBank_DeleteBucket(blockhash types.Hash) 
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_DeleteBucket event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankDeleteBucket)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_DeleteFile(blockhash types.Hash) (event.Event_DeleteFile, error) {
@@ -708,7 +708,7 @@ func (c *chainClient) RetrieveEvent_FileBank_DeleteFile(blockhash types.Hash) (e
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_DeleteFile event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankDeleteFile)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_TransferReport(blockhash types.Hash) (event.Event_TransferReport, error) {
@@ -755,7 +755,7 @@ func (c *chainClient) RetrieveEvent_FileBank_TransferReport(blockhash types.Hash
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_TransferReport event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankTransferReport)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_RecoveryCompleted(blockhash types.Hash) (event.Event_RecoveryCompleted, error) {
@@ -802,7 +802,7 @@ func (c *chainClient) RetrieveEvent_FileBank_RecoveryCompleted(blockhash types.H
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_RecoveryCompleted event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankRecoveryCompleted)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_IdleSpaceCert(blockhash types.Hash) (event.Event_IdleSpaceCert, error) {
@@ -849,7 +849,7 @@ func (c *chainClient) RetrieveEvent_FileBank_IdleSpaceCert(blockhash types.Hash)
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_IdleSpaceCert event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankIdleSpaceCert)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Hash) (event.Event_ReplaceIdleSpace, error) {
@@ -896,7 +896,7 @@ func (c *chainClient) RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Ha
 			}
 		}
 	}
-	return result, errors.New("failed: no FileBank_ReplaceIdleSpace event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankReplaceIdleSpace)
 }
 
 func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdataIp, error) {
@@ -943,7 +943,7 @@ func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event
 			}
 		}
 	}
-	return result, errors.New("failed: no Sminer_UpdataIp event found")
+	return result, errors.Errorf("failed: no %s event found", event.SminerUpdatePeerId)
 }
 
 func (c *chainClient) RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (event.Event_UpdataBeneficiary, error) {
@@ -990,7 +990,7 @@ func (c *chainClient) RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Has
 			}
 		}
 	}
-	return result, errors.New("failed: no Sminer_UpdataBeneficiary event found")
+	return result, errors.Errorf("failed: no %s event found", event.SminerUpdateBeneficiary)
 }
 
 func (c *chainClient) RetrieveEvent_Sminer_Registered(blockhash types.Hash) (event.Event_Registered, error) {
@@ -1037,7 +1037,54 @@ func (c *chainClient) RetrieveEvent_Sminer_Registered(blockhash types.Hash) (eve
 			}
 		}
 	}
-	return result, errors.New("failed: no Sminer_Registered event found")
+	return result, errors.Errorf("failed: no %s event found", event.SminerRegistered)
+}
+
+func (c *chainClient) RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (event.Event_RegisterPoisKey, error) {
+	var result event.Event_RegisterPoisKey
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return result, err
+	}
+	for _, e := range events {
+		if e.Name == event.SminerRegisterPoisKey {
+			for _, v := range e.Fields {
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
+								}
+							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Miner = *accid
+							return result, nil
+						}
+					}
+				}
+			}
+		}
+	}
+	return result, errors.Errorf("failed: no %s event found", event.SminerRegisterPoisKey)
 }
 
 func (c *chainClient) RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (event.Event_MinerExitPrep, error) {
@@ -1084,7 +1131,7 @@ func (c *chainClient) RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (
 			}
 		}
 	}
-	return result, errors.New("failed: no Sminer_MinerExitPrep event found")
+	return result, errors.Errorf("failed: no %s event found", event.SminerMinerExitPrep)
 }
 
 func (c *chainClient) RetrieveEvent_Sminer_IncreaseCollateral(blockhash types.Hash) (event.Event_IncreaseCollateral, error) {
@@ -1131,7 +1178,7 @@ func (c *chainClient) RetrieveEvent_Sminer_IncreaseCollateral(blockhash types.Ha
 			}
 		}
 	}
-	return result, errors.New("failed: no Sminer_IncreaseCollateral event found")
+	return result, errors.Errorf("failed: no %s event found", event.SminerIncreaseCollateral)
 }
 
 func (c *chainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (event.Event_Receive, error) {
@@ -1178,7 +1225,7 @@ func (c *chainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (event.
 			}
 		}
 	}
-	return result, errors.New("failed: no Sminer_Receive event found")
+	return result, errors.Errorf("failed: no %s event found", event.SminerReceive)
 }
 
 func (c *chainClient) RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (event.Event_Withdraw, error) {
@@ -1225,7 +1272,7 @@ func (c *chainClient) RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (event
 			}
 		}
 	}
-	return result, errors.New("failed: no Sminer_Withdraw event found")
+	return result, errors.Errorf("failed: no %s event found", event.SminerWithdraw)
 }
 
 func (c *chainClient) RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash) (event.Event_BuySpace, error) {
@@ -1272,7 +1319,7 @@ func (c *chainClient) RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash
 			}
 		}
 	}
-	return result, errors.New("failed: no StorageHandler_BuySpace event found")
+	return result, errors.Errorf("failed: no %s event found", event.StorageHandlerBuySpace)
 }
 
 func (c *chainClient) RetrieveEvent_StorageHandler_ExpansionSpace(blockhash types.Hash) (event.Event_ExpansionSpace, error) {
@@ -1319,7 +1366,7 @@ func (c *chainClient) RetrieveEvent_StorageHandler_ExpansionSpace(blockhash type
 			}
 		}
 	}
-	return result, errors.New("failed: no StorageHandler_ExpansionSpace event found")
+	return result, errors.Errorf("failed: no %s event found", event.StorageHandlerExpansionSpace)
 }
 
 func (c *chainClient) RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.Hash) (event.Event_RenewalSpace, error) {
@@ -1366,7 +1413,7 @@ func (c *chainClient) RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.
 			}
 		}
 	}
-	return result, errors.New("failed: no StorageHandler_RenewalSpace event found")
+	return result, errors.Errorf("failed: no %s event found", event.StorageHandlerRenewalSpace)
 }
 
 func (c *chainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (types.EventBalancesTransfer, error) {
@@ -1376,7 +1423,7 @@ func (c *chainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (typ
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == "Balances.Transfer" {
+		if e.Name == event.BalanceTransfer {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1413,7 +1460,7 @@ func (c *chainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (typ
 			}
 		}
 	}
-	return result, errors.New("failed: no Balances_Transfer event found")
+	return result, errors.Errorf("failed: no %s event found", event.BalanceTransfer)
 }
 
 func (c *chainClient) RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error) {
@@ -1460,7 +1507,7 @@ func (c *chainClient) RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Ha
 			}
 		}
 	}
-	return result, errors.New("failed: no FilaBank_GenerateRestoralOrder event found")
+	return result, errors.Errorf("failed: no %s event found", event.FileBankGenerateRestoralOrder)
 }
 
 func (c *chainClient) RetrieveAllEvent_FileBank_UploadDeclaration(blockhash types.Hash) ([]event.AllUploadDeclarationEvent, error) {

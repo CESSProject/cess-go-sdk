@@ -17,6 +17,9 @@ const (
 	AuditSubmitIdleVerifyResult    = "Audit.SubmitIdleVerifyResult"
 	AuditSubmitServiceVerifyResult = "Audit.SubmitServiceVerifyResult"
 
+	// BALANCE
+	BalanceTransfer = "Balances.Transfer"
+
 	// FILEBANK
 	FileBankDeleteFile            = "FileBank.DeleteFile"
 	FileBankFillerDelete          = "FileBank.FillerDelete"
@@ -42,6 +45,7 @@ const (
 
 	// SMINER
 	SminerRegistered         = "Sminer.Registered"
+	SminerRegisterPoisKey    = "Sminer.RegisterPoisKey"
 	SminerDrawFaucetMoney    = "Sminer.DrawFaucetMoney"
 	SminerFaucetTopUpMoney   = "Sminer.FaucetTopUpMoney"
 	SminerIncreaseCollateral = "Sminer.IncreaseCollateral"
