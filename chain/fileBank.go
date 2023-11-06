@@ -690,7 +690,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	}
 }
 
-func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error) {
+func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, hashs [][]pattern.FileHash, user pattern.UserBrief, filesize uint64) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -710,14 +710,19 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 	if filesize <= 0 {
 		return txhash, errors.New("invalid filesize")
 	}
-	if !c.GetChainState() {
-		return txhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetChainState(): %v", pattern.ERR_RPC_CONNECTION)
-	}
 	for i := 0; i < len(hash); i++ {
 		hash[i] = types.U8(filehash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADDEC, hash, dealinfo, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
+	if len(hashs) > pattern.MaxSegmentNum {
+		return txhash, errors.New("segment length exceeds limit")
+	}
+
+	if !c.GetChainState() {
+		return txhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetChainState(): %v", pattern.ERR_RPC_CONNECTION)
+	}
+
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADDEC, hash, dealinfo, hashs, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}

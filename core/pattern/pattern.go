@@ -228,6 +228,7 @@ const (
 	AccumulatorLen         = 256
 	SpaceChallengeParamLen = 8
 	BloomFilterLen         = 256
+	MaxSegmentNum          = 1000
 )
 
 type FileHash [FileHashLen]types.U8

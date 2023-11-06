@@ -96,7 +96,7 @@ type SDK interface {
 	SubmitFileReport(roothash pattern.FileHash, accs []types.AccountID) (string, error)
 	ReportFile(roothash string, accs []string) (string, error)
 	// UploadDeclaration creates a storage order.
-	UploadDeclaration(roothash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error)
+	UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, hashs [][]pattern.FileHash, user pattern.UserBrief, filesize uint64) (string, error)
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
 	// SubmitIdleMetadata Submit idle file metadata.
