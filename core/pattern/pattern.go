@@ -463,9 +463,8 @@ type ExpendersInfo struct {
 }
 
 type PoISKeyInfo struct {
-	Acc types.AccountID
-	G   PoISKey_G
-	N   PoISKey_N
+	G PoISKey_G
+	N PoISKey_N
 }
 
 type IdleSignInfo struct {
