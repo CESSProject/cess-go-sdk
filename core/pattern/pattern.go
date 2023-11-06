@@ -228,6 +228,7 @@ const (
 	AccumulatorLen         = 256
 	SpaceChallengeParamLen = 8
 	BloomFilterLen         = 256
+	MaxSegmentNum          = 1000
 )
 
 type FileHash [FileHashLen]types.U8
@@ -463,9 +464,8 @@ type ExpendersInfo struct {
 }
 
 type PoISKeyInfo struct {
-	Acc types.AccountID
-	G   PoISKey_G
-	N   PoISKey_N
+	G PoISKey_G
+	N PoISKey_N
 }
 
 type IdleSignInfo struct {
