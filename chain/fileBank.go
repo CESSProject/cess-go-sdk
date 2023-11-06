@@ -908,7 +908,7 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 	}
 }
 
-func (c *chainClient) SubmitFileReport(roothash pattern.FileHash) (string, []pattern.FileHash, error) {
+func (c *chainClient) SubmitFileReport(roothash pattern.FileHash, accs []types.AccountID) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -923,25 +923,25 @@ func (c *chainClient) SubmitFileReport(roothash pattern.FileHash) (string, []pat
 	)
 
 	if !c.GetChainState() {
-		return txhash, nil, pattern.ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
 	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_FILEREPORT, roothash)
 	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[NewCall]")
+		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[CreateStorageKey]")
+		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[GetStorageLatest]")
+		return txhash, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return txhash, nil, pattern.ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -959,7 +959,7 @@ func (c *chainClient) SubmitFileReport(roothash pattern.FileHash) (string, []pat
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, nil, errors.Wrap(err, "[Sign]")
+		return txhash, errors.Wrap(err, "[Sign]")
 	}
 
 	// Do the transfer and track the actual status
@@ -969,16 +969,16 @@ func (c *chainClient) SubmitFileReport(roothash pattern.FileHash) (string, []pat
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, nil, errors.Wrap(err, "[Sign]")
+				return txhash, errors.Wrap(err, "[Sign]")
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				c.SetChainState(false)
-				return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 			}
 		} else {
 			c.SetChainState(false)
-			return txhash, nil, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 		}
 	}
 	defer sub.Unsubscribe()
@@ -992,29 +992,35 @@ func (c *chainClient) SubmitFileReport(roothash pattern.FileHash) (string, []pat
 			if status.IsInBlock {
 				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_TransferReport(status.AsInBlock)
-				return txhash, nil, err
+				return txhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, nil, errors.Wrap(err, "[sub]")
+			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, nil, pattern.ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *chainClient) ReportFiles(roothash string) (string, []string, error) {
+func (c *chainClient) ReportFile(roothash string, accs []string) (string, error) {
 	var hashs pattern.FileHash
-
+	var accounts = make([]types.AccountID, 0)
 	for j := 0; j < len(roothash); j++ {
 		hashs[j] = types.U8(roothash[j])
 	}
-
-	txhash, failed, err := c.SubmitFileReport(hashs)
-	var failedfiles = make([]string, len(failed))
-	for k, v := range failed {
-		failedfiles[k] = string(v[:])
+	for _, v := range accs {
+		pubkey, err := utils.ParsingPublickey(v)
+		if err != nil {
+			continue
+		}
+		accountID, err := types.NewAccountID(pubkey)
+		if err != nil {
+			continue
+		}
+		accounts = append(accounts, *accountID)
 	}
-	return txhash, failedfiles, err
+
+	return c.SubmitFileReport(hashs, accounts)
 }
 
 // QueryRestoralOrder
