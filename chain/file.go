@@ -25,7 +25,6 @@ import (
 	keyring "github.com/CESSProject/go-keyring"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/pkg/errors"
 )
 
@@ -584,14 +583,14 @@ func (c *chainClient) RetrieveObject(url, fid string) (io.ReadCloser, error) {
 // 	}
 // }
 
-func (c *chainClient) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
-	var peerids = make([]peer.ID, len(minerTaskList))
-	for i := 0; i < len(minerTaskList); i++ {
-		minerInfo, err := c.QueryStorageMiner(minerTaskList[i].Account[:])
-		if err != nil {
-			return peerids, err
-		}
-		peerids[i], _ = peer.Decode(string(minerInfo.PeerId[:]))
-	}
-	return peerids, nil
-}
+// func (c *chainClient) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
+// 	var peerids = make([]peer.ID, len(minerTaskList))
+// 	for i := 0; i < len(minerTaskList); i++ {
+// 		minerInfo, err := c.QueryStorageMiner(minerTaskList[i].Account[:])
+// 		if err != nil {
+// 			return peerids, err
+// 		}
+// 		peerids[i], _ = peer.Decode(string(minerInfo.PeerId[:]))
+// 	}
+// 	return peerids, nil
+// }
