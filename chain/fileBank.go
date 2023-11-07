@@ -913,7 +913,7 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 	}
 }
 
-func (c *chainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash, accs []types.AccountID) (string, error) {
+func (c *chainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -931,15 +931,11 @@ func (c *chainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash
 		return "", errors.New("invalid index")
 	}
 
-	if len(accs) == 0 || len(accs) > 3 {
-		return "", errors.New("invalid tee list length")
-	}
-
 	if !c.GetChainState() {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_FILEREPORT, index, roothash, accs)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_FILEREPORT, index, roothash)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
@@ -1015,25 +1011,13 @@ func (c *chainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash
 	}
 }
 
-func (c *chainClient) ReportFile(index uint8, roothash string, accs []string) (string, error) {
+func (c *chainClient) ReportFile(index uint8, roothash string) (string, error) {
 	var hashs pattern.FileHash
-	var accounts = make([]types.AccountID, 0)
+
 	for j := 0; j < len(roothash); j++ {
 		hashs[j] = types.U8(roothash[j])
 	}
-	for _, v := range accs {
-		pubkey, err := utils.ParsingPublickey(v)
-		if err != nil {
-			continue
-		}
-		accountID, err := types.NewAccountID(pubkey)
-		if err != nil {
-			continue
-		}
-		accounts = append(accounts, *accountID)
-	}
-
-	return c.SubmitFileReport(types.U8(index), hashs, accounts)
+	return c.SubmitFileReport(types.U8(index), hashs)
 }
 
 // QueryRestoralOrder
