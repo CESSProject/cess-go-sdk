@@ -321,8 +321,8 @@ type SegmentList struct {
 }
 
 type MinerTaskList struct {
-	Account types.AccountID
-	Hash    []FileHash
+	Index        types.U8
+	FragmentList []FileHash
 }
 
 type SegmentInfo struct {
@@ -343,7 +343,7 @@ type StorageOrder struct {
 	SegmentList   []SegmentList
 	NeededList    []SegmentList
 	User          UserBrief
-	AssignedMiner []MinerTaskList
+	MinerTaskList []MinerTaskList
 	ShareInfo     []SegmentInfo
 	CompleteList  []types.AccountID
 }
