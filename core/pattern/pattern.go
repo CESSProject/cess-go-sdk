@@ -322,7 +322,7 @@ type SegmentList struct {
 
 type MinerTaskList struct {
 	Index        types.U8
-	Miner        types.AccountID
+	Miner        types.Option[types.AccountID]
 	FragmentList []FileHash
 }
 
