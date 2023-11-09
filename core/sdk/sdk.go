@@ -57,8 +57,6 @@ type SDK interface {
 	QueryFileMetadata(roothash string) (pattern.FileMetadata, error)
 	// QueryFileMetadataByBlock queries the metadata of the roothash file.
 	QueryFileMetadataByBlock(roothash string, block uint64) (pattern.FileMetadata, error)
-	// QueryFillerMap queries filler information.
-	QueryFillerMap(filehash string) (pattern.IdleMetadata, error)
 	// QueryPendingReplacements queries the amount of idle data that can be replaced.
 	QueryPendingReplacements(puk []byte) (uint32, error)
 	// QueryPendingReplacements queries the amount of idle data that can be replaced.
@@ -96,12 +94,9 @@ type SDK interface {
 	SubmitFileReport(index types.U8, roothash pattern.FileHash) (string, error)
 	ReportFile(index uint8, roothash string) (string, error)
 	// UploadDeclaration creates a storage order.
-	UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, hashs [][]pattern.FileHash, user pattern.UserBrief, filesize uint64) (string, error)
+	UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error)
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
-	// SubmitIdleMetadata Submit idle file metadata.
-	SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error)
-	SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error)
 	// CertIdleSpace
 	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature) (string, error)
 	// ReplaceIdleSpace

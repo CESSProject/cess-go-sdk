@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -213,51 +212,6 @@ func (c *chainClient) QueryFileMetadataByBlock(roothash string, block uint64) (p
 	return data, nil
 }
 
-// Deprecated: As cess v0.6
-func (c *chainClient) QueryFillerMap(filehash string) (pattern.IdleMetadata, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var (
-		data pattern.IdleMetadata
-		hash pattern.FileHash
-	)
-
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	if len(hash) != len(filehash) {
-		return data, errors.New("invalid filehash")
-	}
-
-	for i := 0; i < len(hash); i++ {
-		hash[i] = types.U8(filehash[i])
-	}
-
-	b, err := codec.Encode(hash)
-	if err != nil {
-		return data, errors.Wrap(err, "[Encode]")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.FILLERMAP, c.keyring.PublicKey, b)
-	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
 func (c *chainClient) QueryStorageOrder(roothash string) (pattern.StorageOrder, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -377,132 +331,6 @@ func (c *chainClient) QueryPendingReplacements_V2(puk []byte) (types.U128, error
 		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
-}
-
-// Deprecated: As cess v0.6
-func (c *chainClient) SubmitIdleMetadata(teeAcc []byte, idlefiles []pattern.IdleMetadata) (string, error) {
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var (
-		txhash      string
-		accountInfo types.AccountInfo
-	)
-
-	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
-	}
-
-	acc, err := types.NewAccountID(teeAcc)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADFILLER, *acc, idlefiles)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	ext := types.NewExtrinsic(call)
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		c.SetChainState(false)
-		return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				events := event.EventRecords{}
-				txhash, _ = codec.EncodeToHex(status.AsInBlock)
-				h, err := c.api.RPC.State.GetStorageRaw(c.keyEvents, status.AsInBlock)
-				if err != nil {
-					return txhash, errors.Wrap(err, "[GetStorageRaw]")
-				}
-				err = types.EventRecordsRaw(*h).DecodeEventRecords(c.metadata, &events)
-				if err != nil || len(events.FileBank_FillerUpload) > 0 {
-					return txhash, nil
-				}
-				return txhash, errors.New(pattern.ERR_Failed)
-			}
-		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
-		}
-	}
-}
-
-// Deprecated: As cess v0.6
-func (c *chainClient) SubmitIdleFile(teeAcc []byte, idlefiles []pattern.IdleFileMeta) (string, error) {
-	var submit = make([]pattern.IdleMetadata, 0)
-	for i := 0; i < len(idlefiles); i++ {
-		var filehash pattern.FileHash
-		acc, err := types.NewAccountID(idlefiles[i].MinerAcc)
-		if err != nil {
-			continue
-		}
-
-		if len(idlefiles[i].Hash) != len(pattern.FileHash{}) {
-			continue
-		}
-
-		for j := 0; j < len(idlefiles[i].Hash); j++ {
-			filehash[j] = types.U8(idlefiles[i].Hash[j])
-		}
-
-		var ele = pattern.IdleMetadata{
-			BlockNum: types.NewU32(idlefiles[i].BlockNum),
-			Acc:      *acc,
-			Hash:     filehash,
-		}
-		submit = append(submit, ele)
-		if len(submit) >= pattern.MaxSubmitedIdleFileMeta {
-			break
-		}
-	}
-	return c.SubmitIdleMetadata(teeAcc, submit)
 }
 
 func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, error) {
@@ -690,7 +518,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	}
 }
 
-func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, hashs [][]pattern.FileHash, user pattern.UserBrief, filesize uint64) (string, error) {
+func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -714,15 +542,11 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 		hash[i] = types.U8(filehash[i])
 	}
 
-	if len(hashs) > pattern.MaxSegmentNum {
-		return txhash, errors.New("segment length exceeds limit")
-	}
-
 	if !c.GetChainState() {
 		return txhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetChainState(): %v", pattern.ERR_RPC_CONNECTION)
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADDEC, hash, dealinfo, hashs, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADDEC, hash, dealinfo, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}

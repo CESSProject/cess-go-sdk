@@ -260,6 +260,11 @@ type OssInfo struct {
 	Domain types.Bytes
 }
 
+type BucketInfo struct {
+	ObjectsList []FileHash
+	Authority   []types.AccountID
+}
+
 type MinerInfo struct {
 	BeneficiaryAcc     types.AccountID
 	PeerId             PeerId
@@ -282,18 +287,18 @@ type SpaceProofInfo struct {
 	Accumulator Accumulator
 }
 
-type RewardOrder struct {
-	OrderReward types.U128
-	EachShare   types.U128
-	AwardCount  types.U8
-	HasIssued   types.Bool
-}
-
 type MinerReward struct {
 	TotalReward              types.U128
 	RewardIssued             types.U128
 	CurrentlyAvailableReward types.U128
 	OrderList                []RewardOrder
+}
+
+type RewardOrder struct {
+	OrderReward types.U128
+	EachShare   types.U128
+	AwardCount  types.U8
+	HasIssued   types.Bool
 }
 
 type FileMetadata struct {
@@ -304,31 +309,15 @@ type FileMetadata struct {
 	State       types.U8
 }
 
-type BucketInfo struct {
-	ObjectsList []FileHash
-	Authority   []types.AccountID
+type SegmentInfo struct {
+	Hash         FileHash
+	FragmentList []FragmentList
 }
 
 type UserBrief struct {
 	User       types.AccountID
 	FileName   types.Bytes
 	BucketName types.Bytes
-}
-
-type SegmentList struct {
-	SegmentHash  FileHash
-	FragmentHash []FileHash
-}
-
-type MinerTaskList struct {
-	Index        types.U8
-	Miner        types.Option[types.AccountID]
-	FragmentList []FileHash
-}
-
-type SegmentInfo struct {
-	Hash         FileHash
-	FragmentList []FragmentList
 }
 
 type FragmentList struct {
@@ -338,19 +327,22 @@ type FragmentList struct {
 }
 
 type StorageOrder struct {
-	Stage         types.U8
-	Count         types.U8
-	FileSize      types.U128
-	SegmentList   []SegmentList
-	User          UserBrief
-	MinerTaskList []MinerTaskList
-	CompleteList  []types.AccountID
+	Stage        types.U8
+	Count        types.U8
+	FileSize     types.U128
+	SegmentList  []SegmentList
+	User         UserBrief
+	CompleteInfo []CompleteInfo
 }
 
-type IdleMetadata struct {
-	BlockNum types.U32
-	Acc      types.AccountID
-	Hash     FileHash
+type SegmentList struct {
+	SegmentHash  FileHash
+	FragmentHash []FileHash
+}
+
+type CompleteInfo struct {
+	Index types.U8
+	Miner types.AccountID
 }
 
 type UserSpaceInfo struct {
