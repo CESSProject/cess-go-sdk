@@ -18,6 +18,45 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (c *chainClient) QueryTeeInfo(puk []byte) (pattern.TeeWorkerInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data pattern.TeeWorkerInfo
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	acc, err := types.NewAccountID(puk)
+	if err != nil {
+		return data, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return data, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWORKERMAP, owner)
+	if err != nil {
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	return data, nil
+}
+
 func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -84,7 +123,7 @@ func (c *chainClient) QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error) {
 	return list, nil
 }
 
-func (c *chainClient) QueryTeePeerID(puk []byte) ([]byte, error) {
+func (c *chainClient) QueryTeeEndPoint(puk []byte) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -94,33 +133,33 @@ func (c *chainClient) QueryTeePeerID(puk []byte) ([]byte, error) {
 	var data pattern.TeeWorkerInfo
 
 	if !c.GetChainState() {
-		return nil, pattern.ERR_RPC_CONNECTION
+		return "", pattern.ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
-		return nil, errors.Wrap(err, "[NewAccountID]")
+		return "", errors.Wrap(err, "[NewAccountID]")
 	}
 
 	owner, err := codec.Encode(*acc)
 	if err != nil {
-		return nil, errors.Wrap(err, "[EncodeToBytes]")
+		return "", errors.Wrap(err, "[EncodeToBytes]")
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWORKERMAP, owner)
 	if err != nil {
-		return nil, errors.Wrap(err, "[CreateStorageKey]")
+		return "", errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return nil, errors.Wrap(err, "[GetStorageLatest]")
+		return "", errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
-		return nil, pattern.ERR_RPC_EMPTY_VALUE
+		return "", pattern.ERR_RPC_EMPTY_VALUE
 	}
 
-	return []byte(string(data.PeerId[:])), nil
+	return string(data.EndPoint[:]), nil
 }
 
 func (c *chainClient) QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error) {
