@@ -130,7 +130,7 @@ func (c *chainClient) QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error) {
 	}
 	var results = make([]pattern.TeeWorkerSt, len(teelist))
 	for k, v := range teelist {
-		results[k].Node_key = []byte(string(v.NodeKey.NodePublickey[:]))
+		results[k].End_point = string(v.EndPoint[:])
 		results[k].Peer_id = []byte(string(v.PeerId[:]))
 		results[k].Controller_account, err = utils.EncodePublicKeyAsCessAccount(v.ControllerAccount[:])
 		if err != nil {

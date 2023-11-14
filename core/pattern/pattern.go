@@ -414,15 +414,11 @@ type MinerSnapShot_V2 struct {
 	TeeSignature       TeeSignature
 }
 
-type NodePublickey struct {
-	NodePublickey [32]types.U8
-}
-
 type TeeWorkerInfo struct {
 	ControllerAccount types.AccountID
 	PeerId            PeerId
-	NodeKey           NodePublickey
 	StashAccount      types.AccountID
+	EndPoint          types.Bytes
 }
 
 type ProofAssignmentInfo struct {
@@ -495,11 +491,6 @@ type UserSpaceSt struct {
 	Deadline       uint32
 }
 
-// type ChallengeSnapshot struct {
-// 	NetSnapshot   NetSnapshot
-// 	MinerSnapshot []MinerSnapshot
-// }
-
 type NetSnapshot struct {
 	Start               uint32
 	Life                uint32
@@ -519,8 +510,8 @@ type MinerSnapshot struct {
 type TeeWorkerSt struct {
 	Controller_account string
 	Peer_id            []byte
-	Node_key           []byte
 	Stash_account      string
+	End_point          string
 }
 
 type RewardsType struct {
