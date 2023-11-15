@@ -190,10 +190,12 @@ type SDK interface {
 
 	// TeeWorker-State
 
+	// QueryTeeInfo queries the information of the Tee worker.
+	QueryTeeInfo(puk []byte) (pattern.TeeWorkerInfo, error)
 	// QueryTeePodr2Puk queries the public key of the TEE.
 	QueryTeePodr2Puk() ([]byte, error)
-	// QueryTeePeerID queries the peerid of the Tee worker.
-	QueryTeePeerID(puk []byte) ([]byte, error)
+	// QueryTeeEndPoint queries the end-point of the Tee worker.
+	QueryTeeEndPoint(puk []byte) (string, error)
 	// QueryTeeInfoList queries the information of all tee workers.
 	QueryTeeInfoList() ([]pattern.TeeWorkerInfo, error)
 	QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error)
