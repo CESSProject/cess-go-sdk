@@ -583,7 +583,7 @@ func (c *chainClient) RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) 
 					vf := reflect.ValueOf(v.Value)
 					if vf.Len() > 0 {
 						allValue := fmt.Sprintf("%v", vf.Index(0))
-						if strings.Contains(v.Name, "AccountId32.acc") {
+						if strings.Contains(v.Name, "AccountId32.operator") {
 							temp := strings.Split(allValue, "] ")
 							puk := make([]byte, types.AccountIDLen)
 							for _, v := range temp {
@@ -630,7 +630,7 @@ func (c *chainClient) RetrieveEvent_FileBank_DeleteBucket(blockhash types.Hash) 
 					vf := reflect.ValueOf(v.Value)
 					if vf.Len() > 0 {
 						allValue := fmt.Sprintf("%v", vf.Index(0))
-						if strings.Contains(v.Name, "AccountId32.acc") {
+						if strings.Contains(v.Name, "AccountId32.operator") {
 							temp := strings.Split(allValue, "] ")
 							puk := make([]byte, types.AccountIDLen)
 							for _, v := range temp {
