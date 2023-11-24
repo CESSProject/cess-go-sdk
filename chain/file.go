@@ -170,7 +170,7 @@ func cutfile(file string) ([]string, error) {
 			if i+1 != segmentCount {
 				return segment, errors.New("read file err")
 			}
-			copy(buf[num:], []byte(utils.RandStr(pattern.SegmentSize-num)))
+			copy(buf[num:], make([]byte, pattern.SegmentSize-num, pattern.SegmentSize-num))
 		}
 
 		hash, err := utils.CalcSHA256(buf)
@@ -227,7 +227,7 @@ func cutFileWithEncryption(file string) ([]string, error) {
 			if i+1 != segmentCount {
 				return segment, errors.New("read file err")
 			}
-			copy(buf[num:], []byte(utils.RandStr(segmentSize-num)))
+			copy(buf[num:], make([]byte, segmentSize-num, segmentSize-num))
 		}
 
 		hash, err := utils.CalcSHA256(buf)
