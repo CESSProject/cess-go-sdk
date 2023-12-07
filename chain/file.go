@@ -477,6 +477,7 @@ func (c *chainClient) RetrieveFile(url, fid, savepath string) error {
 	}
 
 	req.Header.Set("Operation", "download")
+	req.Header.Set("Account", c.GetSignatureAcc())
 
 	client := &http.Client{}
 	client.Transport = globalTransport

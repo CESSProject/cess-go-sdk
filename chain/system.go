@@ -144,7 +144,7 @@ func (c *chainClient) SyncState() (pattern.SysSyncState, error) {
 	return data, err
 }
 
-func (c *chainClient) SysVersion() (string, error) {
+func (c *chainClient) ChainVersion() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))

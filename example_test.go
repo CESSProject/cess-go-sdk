@@ -18,7 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/config"
 )
 
 const DEFAULT_WAIT_TIME = time.Second * 15
@@ -36,7 +35,6 @@ func TestMain(m *testing.M) {
 func TestNewClient(t *testing.T) {
 	_, err := cess.New(
 		context.Background(),
-		config.CharacterName_Client,
 		cess.ConnectRpcAddrs(strings.Split(os.Getenv("RPC_ADDRS"), " ")),
 		cess.Mnemonic(os.Getenv("MY_MNEMONIC")),
 		cess.TransactionTimeout(time.Duration(DEFAULT_WAIT_TIME)),

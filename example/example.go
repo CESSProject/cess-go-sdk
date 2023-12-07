@@ -16,7 +16,6 @@ import (
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/config"
 	"github.com/CESSProject/cess-go-sdk/core/sdk"
 )
 
@@ -81,7 +80,6 @@ func main() {
 func NewSDK() (sdk.SDK, error) {
 	return cess.New(
 		context.Background(),
-		config.CharacterName_Client,
 		cess.ConnectRpcAddrs(RPC_ADDRS),
 		cess.Mnemonic(MY_MNEMONIC),
 		cess.TransactionTimeout(time.Second*10),

@@ -40,3 +40,11 @@ func TransactionTimeout(timeout time.Duration) Option {
 		return nil
 	}
 }
+
+// Name configuration sdk name
+func Name(name string) Option {
+	return func(cfg *Config) error {
+		cfg.Name = name
+		return nil
+	}
+}

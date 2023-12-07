@@ -9,7 +9,6 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/chain"
@@ -29,19 +28,20 @@ type Option func(cfg *Config) error
 
 // default service name
 const (
-	CharacterName_Client = "client"
-	CharacterName_Bucket = "bucket"
-	CharacterName_Deoss  = "deoss"
+	CharacterName_Default = "sdk"
+	CharacterName_Client  = "client"
+	CharacterName_Bucket  = "bucket"
+	CharacterName_Deoss   = "deoss"
 )
 
 // NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
-func (cfg *Config) NewSDK(ctx context.Context, serviceName string) (sdk.SDK, error) {
-	if serviceName == "" {
-		return nil, fmt.Errorf("empty service name")
+func (cfg *Config) NewSDK(ctx context.Context) (sdk.SDK, error) {
+	if cfg.Name == "" {
+		cfg.Name = CharacterName_Default
 	}
-	return chain.NewChainClient(ctx, serviceName, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
+	return chain.NewChainClient(ctx, cfg.Name, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
 }
 
 // Apply applies the given options to the config, returning the first error

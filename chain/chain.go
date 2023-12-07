@@ -152,7 +152,7 @@ func (c *chainClient) Reconnect() error {
 	return nil
 }
 
-func (c *chainClient) GetSdkName() string {
+func (c *chainClient) GetSDKName() string {
 	return c.name
 }
 
@@ -160,7 +160,7 @@ func (c *chainClient) GetCurrentRpcAddr() string {
 	return c.currentRpcAddr
 }
 
-func (c *chainClient) SetSdkName(name string) {
+func (c *chainClient) SetSDKName(name string) {
 	c.name = name
 }
 
