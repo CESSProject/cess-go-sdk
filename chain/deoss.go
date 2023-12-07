@@ -49,6 +49,42 @@ func (c *chainClient) QueryDeossInfo(pubkey []byte) (pattern.OssInfo, error) {
 	return data, nil
 }
 
+// QueryAllDeOSSInfo
+func (c *chainClient) QueryAllDeOSSInfo() ([]pattern.OssInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var result []pattern.OssInfo
+
+	if !c.GetChainState() {
+		return nil, pattern.ERR_RPC_CONNECTION
+	}
+
+	key := createPrefixedKey(pattern.OSS, pattern.OSS)
+	keys, err := c.api.RPC.State.GetKeysLatest(key)
+	if err != nil {
+		return nil, errors.Wrap(err, "[GetKeysLatest]")
+	}
+
+	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
+	if err != nil {
+		return nil, errors.Wrap(err, "[QueryStorageAtLatest]")
+	}
+
+	for _, elem := range set {
+		for _, change := range elem.Changes {
+			var data pattern.OssInfo
+			if err := codec.Decode(change.StorageData, &data); err != nil {
+				continue
+			}
+			result = append(result, data)
+		}
+	}
+	return result, nil
+}
+
 // QueryDeossPeerIdList
 func (c *chainClient) QueryDeossPeerIdList() ([]string, error) {
 	defer func() {

@@ -110,6 +110,8 @@ type SDK interface {
 	QuaryAuthorizedAccounts(puk []byte) ([]string, error)
 	// QueryDeossInfo queries deoss info.
 	QueryDeossInfo(pubkey []byte) (pattern.OssInfo, error)
+	// QueryAllDeOSSInfo queries all deoss info
+	QueryAllDeOSSInfo() ([]pattern.OssInfo, error)
 	// QueryDeossPeerIdList queries peerid of all deoss.
 	QueryDeossPeerIdList() ([]string, error)
 	// CheckSpaceUsageAuthorization checks if the puk is authorized to itself
@@ -218,7 +220,7 @@ type SDK interface {
 	// SyncState returns the system sync state.
 	SyncState() (pattern.SysSyncState, error)
 	// SysVersion returns the system version.
-	SysVersion() (string, error)
+	ChainVersion() (string, error)
 	// NetListening returns whether the current node is listening.
 	NetListening() (bool, error)
 	//
@@ -250,11 +252,11 @@ type SDK interface {
 	// SetChainState sets the state of the chain node.
 	SetChainState(state bool)
 	// GetSdkName return sdk name
-	GetSdkName() string
+	GetSDKName() string
 	// GetCurrentRpcAddr return current rpc address
 	GetCurrentRpcAddr() string
 	// SetSdkName set sdk name
-	SetSdkName(name string)
+	SetSDKName(name string)
 	// Reconnect for reconnecting chains.
 	Reconnect() error
 	// GetMetadata returns the metadata of the chain.

@@ -761,7 +761,7 @@ func (c *chainClient) RegisterSminer(peerId []byte, earnings string, pledge uint
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	c.SetSdkName(pattern.Name_Sminer)
+	c.SetSDKName(pattern.Name_Sminer)
 
 	var peerid pattern.PeerId
 	if len(peerid) != len(peerId) {
@@ -886,7 +886,7 @@ func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pa
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	c.SetSdkName(pattern.Name_Sminer)
+	c.SetSDKName(pattern.Name_Sminer)
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
