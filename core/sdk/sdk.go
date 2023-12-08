@@ -128,7 +128,7 @@ type SDK interface {
 	// AuthorizeSpace authorizes space to oss account
 	AuthorizeSpace(ossAccount string) (string, error)
 	// UnAuthorizeSpace cancels space authorization
-	UnAuthorizeSpace() (string, error)
+	UnAuthorizeSpace(oss_acc string) (string, error)
 
 	// Sminer-State
 
