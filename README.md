@@ -52,10 +52,10 @@ To run test:
 	go test -v
 	```
 
-## 📖 Documentation
+## 📖 Document
 
 - [Reference](https://pkg.go.dev/github.com/CESSProject/cess-go-sdk)
-- [guidebook](https://docs.cess.cloud/deoss/get-started/go-sdk)
+- [Guidebook](https://docs.cess.cloud/deoss/get-started/go-sdk)
 
 ## License
 
