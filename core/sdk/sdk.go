@@ -272,27 +272,6 @@ type SDK interface {
 	// EnabledP2P returns the p2p enable status
 	// EnabledP2P() bool
 
-	// Process the file according to CESS specifications.
-	//
-	// Receive parameter:
-	//   - file: the file to be processed.
-	// Return parameter:
-	//   - segmentDataInfo: segment and fragment information of the file.
-	//   - string: [fid] unique identifier for the file.
-	//   - error: error message.
-	ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error)
-
-	// Process the file according to CESS specifications.
-	//
-	// Receive parameter:
-	//   - file: the file to be processed.
-	//   - cipher: encryption and decryption keys.
-	// Return parameter:
-	//   - segmentDataInfo: segment and fragment information of the file.
-	//   - string: [fid] unique identifier for the file.
-	//   - error: error message.
-	ShardedEncryptionProcessing(file string, cipher string) ([]pattern.SegmentDataInfo, string, error)
-
 	// Upload file to CESS gateway.
 	//
 	// Receive parameter:

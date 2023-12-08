@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -331,6 +332,42 @@ func (c *chainClient) QueryPendingReplacements_V2(puk []byte) (types.U128, error
 		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
+}
+
+func (c *chainClient) GenerateStorageOrder(
+	roothash string,
+	segment []pattern.SegmentDataInfo,
+	owner []byte,
+	filename string,
+	buckname string,
+	filesize uint64,
+) (string, error) {
+	var err error
+	var segmentList = make([]pattern.SegmentList, len(segment))
+	var user pattern.UserBrief
+
+	for i := 0; i < len(segment); i++ {
+		hash := filepath.Base(segment[i].SegmentHash)
+		for k := 0; k < len(hash); k++ {
+			segmentList[i].SegmentHash[k] = types.U8(hash[k])
+		}
+		segmentList[i].FragmentHash = make([]pattern.FileHash, len(segment[i].FragmentHash))
+		for j := 0; j < len(segment[i].FragmentHash); j++ {
+			hash := filepath.Base(segment[i].FragmentHash[j])
+			for k := 0; k < len(hash); k++ {
+				segmentList[i].FragmentHash[j][k] = types.U8(hash[k])
+			}
+		}
+	}
+
+	acc, err := types.NewAccountID(owner)
+	if err != nil {
+		return "", err
+	}
+	user.User = *acc
+	user.BucketName = types.NewBytes([]byte(buckname))
+	user.FileName = types.NewBytes([]byte(filename))
+	return c.UploadDeclaration(roothash, segmentList, user, filesize)
 }
 
 func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, error) {
