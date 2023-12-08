@@ -619,7 +619,7 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 	}
 }
 
-func (c *chainClient) UnAuthorizeSpace() (string, error) {
+func (c *chainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -637,12 +637,17 @@ func (c *chainClient) UnAuthorizeSpace() (string, error) {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
+	pubkey, err := utils.ParsingPublickey(oss_acc)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[ParsingPublickey]")
+	}
+
 	call, err := types.NewCall(c.metadata, pattern.TX_OSS_UNAUTHORIZE)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewCall]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, pubkey)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[CreateStorageKey]")
 	}
