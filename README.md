@@ -25,7 +25,7 @@ wss://testnet-rpc2.cess.cloud/ws/
 ```
 **CESS test network bootstrap node**
 ```
-_dnsaddr.boot-kldr-testnet.cess.cloud
+_dnsaddr.boot-bucket-testnet.cess.cloud
 ```
 
 ## 🚰 CESS test network faucet
@@ -52,64 +52,10 @@ To run test:
 	go test -v
 	```
 
-## 📖 Documentation & Examples
+## 📖 Documentation
 
-Please refer to: https://pkg.go.dev/github.com/CESSProject/cess-go-sdk
-
-## 💡 Example
-
-Usually, you only care about how to access your data in the CESS network, you need to build such a web service yourself, this sdk will help you quickly realize data access. Note that [p2p-go](https://github.com/CESSProject/p2p-go) library needs to be used to enable the data transmission.
-
-
-### Create an sdk client
-
-To create an sdk client, you need to provide some configuration information: your rpc address (if not, use the rpc address disclosed by CESS), your wallet private key, and transaction timeout. Please refer to the following examples:
-
-```go
-sdk, err := cess.New(
-	context.Background(),
-	config.CharacterName_Client,
-	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
-	cess.Mnemonic("<your account mnmonic>"),
-	cess.TransactionTimeout(time.Second * 10),
-)
-```
-
-### Create an sdk client with p2p functionality
-
-When you need to use all the functions of the sdk, you need to initialize an sdk with a p2p network. For example, the storage nodes of cess and deoss both use the sdk with a p2p network. Refer to the following code:
-```go
-sdk, err := cess.New(
-	context.Background(),
-	config.CharacterName_Client,
-	cess.ConnectRpcAddrs([]string{"<rpc addr>"}),
-	cess.Mnemonic("<your account mnmonic>"),
-	cess.TransactionTimeout(time.Second * 10),
-	cess.Workspace("<work space>"),
-	cess.P2pPort(<port>),
-	cess.Bootnodes([]string{"<bootstrap node>"}),
-	cess.ProtocolPrefix("<protocol prefix>"),
-)
-```
-
-### Create storage data bucket
-cess as an object storage service, the data are stored in buckets, which can be created automatically when uploading data, or separately, refer to the following code:
-```go
-sdk.CreateBucket(sdk.GetSignatureAccPulickey(), "<your bucket name>")
-```
-
-### Store data
-You need to purchase space with your account before uploading files, please refer to [Buy Space](https://github.com/CESSProject/W3F-illustration/blob/4995c1584006823990806b9d30fa7d554630ec14/deoss/buySpace.png).
-The following is an example of uploading a file:
-```go
-sdk.StoreFile("<your file>", "<your bucket name>")
-```
-
-### Retrieve data
-To retrieve the data, you need to provide the unique hash of the data, which will be returned to you when the data is uploaded successfully, here is the sample code to retrieve the data:
-```go
-sdk.RetrieveFile("<file hash>", "<save path>")
-```
+- [Reference](https://pkg.go.dev/github.com/CESSProject/cess-go-sdk)
+- [guidebook](https://docs.cess.cloud/deoss/get-started/go-sdk)
 
 ## License
 
