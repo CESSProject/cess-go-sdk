@@ -253,6 +253,13 @@ type Event_Withdraw struct {
 	Topics []types.Hash
 }
 
+type Event_IncreaseDeclarationSpace struct {
+	Phase  types.Phase
+	Miner  types.AccountID
+	Space  types.U128
+	Topics []types.Hash
+}
+
 type Event_IdleSpaceCert struct {
 	Phase  types.Phase
 	Acc    types.AccountID
@@ -436,19 +443,20 @@ type EventRecords struct {
 	Oss_OssDestroy      []Event_OssDestroy
 
 	// SMINER
-	Sminer_Registered         []Event_Registered
-	Sminer_RegisterPoisKey    []Event_RegisterPoisKey
-	Sminer_DrawFaucetMoney    []Event_DrawFaucetMoney
-	Sminer_FaucetTopUpMoney   []Event_FaucetTopUpMoney
-	Sminer_LessThan24Hours    []Event_LessThan24Hours
-	Sminer_AlreadyFrozen      []Event_AlreadyFrozen
-	Sminer_IncreaseCollateral []Event_IncreaseCollateral
-	Sminer_Deposit            []Event_Deposit
-	Sminer_UpdataBeneficiary  []Event_UpdataBeneficiary
-	Sminer_UpdataIp           []Event_UpdataIp
-	Sminer_Receive            []Event_Receive
-	Sminer_MinerExitPrep      []Event_MinerExitPrep
-	Sminer_Withdraw           []Event_Withdraw
+	Sminer_Registered               []Event_Registered
+	Sminer_RegisterPoisKey          []Event_RegisterPoisKey
+	Sminer_DrawFaucetMoney          []Event_DrawFaucetMoney
+	Sminer_FaucetTopUpMoney         []Event_FaucetTopUpMoney
+	Sminer_LessThan24Hours          []Event_LessThan24Hours
+	Sminer_AlreadyFrozen            []Event_AlreadyFrozen
+	Sminer_IncreaseCollateral       []Event_IncreaseCollateral
+	Sminer_Deposit                  []Event_Deposit
+	Sminer_UpdataBeneficiary        []Event_UpdataBeneficiary
+	Sminer_UpdataIp                 []Event_UpdataIp
+	Sminer_Receive                  []Event_Receive
+	Sminer_MinerExitPrep            []Event_MinerExitPrep
+	Sminer_Withdraw                 []Event_Withdraw
+	Sminer_IncreaseDeclarationSpace []Event_IncreaseDeclarationSpace
 
 	// StorageHandler
 	StorageHandler_BuySpace             []Event_BuySpace

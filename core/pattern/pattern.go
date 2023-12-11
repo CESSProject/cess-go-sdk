@@ -70,6 +70,7 @@ const (
 	REWARDMAP          = "RewardMap"
 	EXPENDERS          = "Expenders"
 	RESTORALTARGETINFO = "RestoralTarget"
+	STAKINGSTARTBLOCK  = "StakingStartBlock"
 
 	// TEEWORKER
 	TEEWORKERMAP = "TeeWorkerMap"
@@ -116,14 +117,16 @@ const (
 	TX_OSS_UNAUTHORIZE = OSS + DOT + "cancel_authorize"
 
 	// SMINER
-	TX_SMINER_REGISTER        = SMINER + DOT + "regnstk"
-	TX_SMINER_INCREASESTAKES  = SMINER + DOT + "increase_collateral"
-	TX_SMINER_UPDATEPEERID    = SMINER + DOT + "update_peer_id"
-	TX_SMINER_UPDATEINCOME    = SMINER + DOT + "update_beneficiary"
-	TX_SMINER_CLAIMREWARD     = SMINER + DOT + "receive_reward"
-	TX_SMINER_MINEREXITPREP   = SMINER + DOT + "miner_exit_prep"
-	TX_SMINER_WITHDRAW        = SMINER + DOT + "miner_withdraw"
-	TX_SMINER_REGISTERPOISKEY = SMINER + DOT + "register_pois_key"
+	TX_SMINER_REGISTER              = SMINER + DOT + "regnstk"
+	TX_SMINER_REGISTERASSIGNSTAKING = SMINER + DOT + "regnstk_assign_staking"
+	TX_SMINER_INCREASESTAKES        = SMINER + DOT + "increase_collateral"
+	TX_SMINER_UPDATEPEERID          = SMINER + DOT + "update_peer_id"
+	TX_SMINER_UPDATEINCOME          = SMINER + DOT + "update_beneficiary"
+	TX_SMINER_CLAIMREWARD           = SMINER + DOT + "receive_reward"
+	TX_SMINER_MINEREXITPREP         = SMINER + DOT + "miner_exit_prep"
+	TX_SMINER_WITHDRAW              = SMINER + DOT + "miner_withdraw"
+	TX_SMINER_REGISTERPOISKEY       = SMINER + DOT + "register_pois_key"
+	TX_SMINER_INCREASEDECSPACE      = SMINER + DOT + "increase_declaration_space"
 
 	// FILEBANK
 	TX_FILEBANK_PUTBUCKET         = FILEBANK + DOT + "create_bucket"
@@ -266,11 +269,13 @@ type BucketInfo struct {
 }
 
 type MinerInfo struct {
-	BeneficiaryAcc     types.AccountID
+	BeneficiaryAccount types.AccountID
+	StakingAccount     types.AccountID
 	PeerId             PeerId
 	Collaterals        types.U128
 	Debt               types.U128
-	State              []types.U8
+	State              []types.U8 // nomal, exit, frozen, e_frozen
+	DeclarationSpace   types.U128
 	IdleSpace          types.U128
 	ServiceSpace       types.U128
 	LockSpace          types.U128

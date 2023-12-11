@@ -16,7 +16,7 @@ import (
 )
 
 func TestProcessingData(t *testing.T) {
-	var processFile = "./file_test.go"
+	var processFile = "./process.go"
 	segmentData, roothash, err := ProcessingData(processFile)
 	assert.NoError(t, err)
 	fmt.Println(roothash)
@@ -28,7 +28,7 @@ func TestProcessingData(t *testing.T) {
 }
 
 func TestShardedEncryptionProcessing(t *testing.T) {
-	var processFile = "./file_test.go"
+	var processFile = "./process.go"
 	segmentData, roothash, err := ShardedEncryptionProcessing(processFile, "123456")
 	assert.NoError(t, err)
 	fmt.Println(roothash)
