@@ -139,26 +139,31 @@ type SDK interface {
 	// QueryStorageNodeReward queries reward information for puk account.
 	QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error)
 	QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error)
-
+	// QueryStorageMinerStakingStartBlock
+	QueryStorageMinerStakingStartBlock(puk []byte) (types.U32, error)
 	//
 	Expenders() (pattern.ExpendersInfo, error)
 
 	// Sminer-Extrinsics
 
+	//
+	IncreaseDeclarationSpace(tibCount uint32) (string, error)
 	// RegisterSminer register sminer information
-	RegisterSminer(peerId []byte, earnings string, pledge uint64) (string, error)
+	RegisterSminer(earnings string, peerId []byte, pledge uint64, tib_count uint32) (string, error)
+	// RegisterSminerAssignStaking
+	RegisterSminerAssignStaking(beneficiaryAcc string, peerId []byte, stakingAcc string, tib_count uint32) (string, error)
 	// RegisterSminerPOISKey register the pois key of sminer
 	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, error)
 	// ExitSminer exit mining
-	ExitSminer() (string, error)
+	ExitSminer(miner string) (string, error)
 	// UpdateEarningsAcc update earnings account.
 	UpdateEarningsAcc(puk []byte) (string, error)
 	UpdateEarningsAccount(earnings string) (string, error)
 	// UpdateSminerPeerId update miner peerid
 	UpdateSminerPeerId(peerid pattern.PeerId) (string, error)
 	// IncreaseStakingAmount increase staking amount.
-	IncreaseStakingAmount(tokens *big.Int) (string, error)
-	IncreaseStorageNodeStakingAmount(token string) (string, error)
+	IncreaseStakingAmount(miner string, tokens *big.Int) (string, error)
+	IncreaseStorageNodeStakingAmount(miner string, token string) (string, error)
 	// ClaimRewards is used to claim rewards.
 	ClaimRewards() (string, error)
 
@@ -384,6 +389,8 @@ type SDK interface {
 	RetrieveEvent_Sminer_Receive(blockhash types.Hash) (event.Event_Receive, error)
 	//
 	RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (event.Event_Withdraw, error)
+	//
+	RetrieveEvent_Sminer_IncreaseDeclarationSpace(blockhash types.Hash) (event.Event_IncreaseDeclarationSpace, error)
 	//
 	RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash) (event.Event_BuySpace, error)
 	//
