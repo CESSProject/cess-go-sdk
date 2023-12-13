@@ -380,6 +380,8 @@ type SDK interface {
 	//
 	RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Hash) (event.Event_ReplaceIdleSpace, error)
 	//
+	RetrieveEvent_FileBank_CalculateReport(blockhash types.Hash) (event.Event_CalculateReport, error)
+	//
 	RetrieveEvent_Sminer_Registered(blockhash types.Hash) (event.Event_Registered, error)
 	//
 	RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (event.Event_RegisterPoisKey, error)
