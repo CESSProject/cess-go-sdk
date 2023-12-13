@@ -29,7 +29,7 @@ func TestProcessingData(t *testing.T) {
 
 func TestShardedEncryptionProcessing(t *testing.T) {
 	var processFile = "./process.go"
-	segmentData, roothash, err := ShardedEncryptionProcessing(processFile, "123456")
+	segmentData, roothash, err := ShardedEncryptionProcessing(processFile, "")
 	assert.NoError(t, err)
 	fmt.Println(roothash)
 	for _, segment := range segmentData {

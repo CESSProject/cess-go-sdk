@@ -21,8 +21,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// QueryDeossInfo
-func (c *chainClient) QueryDeossInfo(pubkey []byte) (pattern.OssInfo, error) {
+func (c *chainClient) QueryDeOSSInfo(accountID []byte) (pattern.OssInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -34,14 +33,18 @@ func (c *chainClient) QueryDeossInfo(pubkey []byte) (pattern.OssInfo, error) {
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.OSS, pattern.OSS, pubkey)
+	key, err := types.CreateStorageKey(c.metadata, pattern.OSS, pattern.OSS, accountID)
 	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.OSS, pattern.OSS, err)
+		c.SetChainState(false)
+		return data, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.OSS, pattern.OSS, err)
+		c.SetChainState(false)
+		return data, err
 	}
 	if !ok {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
@@ -49,7 +52,6 @@ func (c *chainClient) QueryDeossInfo(pubkey []byte) (pattern.OssInfo, error) {
 	return data, nil
 }
 
-// QueryAllDeOSSInfo
 func (c *chainClient) QueryAllDeOSSInfo() ([]pattern.OssInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -65,12 +67,16 @@ func (c *chainClient) QueryAllDeOSSInfo() ([]pattern.OssInfo, error) {
 	key := createPrefixedKey(pattern.OSS, pattern.OSS)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
-		return nil, errors.Wrap(err, "[GetKeysLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.OSS, pattern.OSS, err)
+		c.SetChainState(false)
+		return nil, err
 	}
 
 	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
 	if err != nil {
-		return nil, errors.Wrap(err, "[QueryStorageAtLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.OSS, pattern.OSS, err)
+		c.SetChainState(false)
+		return nil, err
 	}
 
 	for _, elem := range set {
@@ -85,8 +91,7 @@ func (c *chainClient) QueryAllDeOSSInfo() ([]pattern.OssInfo, error) {
 	return result, nil
 }
 
-// QueryDeossPeerIdList
-func (c *chainClient) QueryDeossPeerIdList() ([]string, error) {
+func (c *chainClient) QueryAllDeOSSPeerId() ([]string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -101,12 +106,16 @@ func (c *chainClient) QueryDeossPeerIdList() ([]string, error) {
 	key := createPrefixedKey(pattern.OSS, pattern.OSS)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
-		return nil, errors.Wrap(err, "[GetKeysLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.OSS, pattern.OSS, err)
+		c.SetChainState(false)
+		return nil, err
 	}
 
 	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
 	if err != nil {
-		return nil, errors.Wrap(err, "[QueryStorageAtLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.OSS, pattern.OSS, err)
+		c.SetChainState(false)
+		return nil, err
 	}
 
 	for _, elem := range set {
@@ -121,7 +130,7 @@ func (c *chainClient) QueryDeossPeerIdList() ([]string, error) {
 	return result, nil
 }
 
-func (c *chainClient) QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, error) {
+func (c *chainClient) QueryAuthorizedAccountIDs(accountID []byte) ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -133,14 +142,18 @@ func (c *chainClient) QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, 
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.OSS, pattern.AUTHORITYLIST, puk)
+	key, err := types.CreateStorageKey(c.metadata, pattern.OSS, pattern.AUTHORITYLIST, accountID)
 	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.OSS, pattern.AUTHORITYLIST, err)
+		c.SetChainState(false)
+		return data, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.OSS, pattern.AUTHORITYLIST, err)
+		c.SetChainState(false)
+		return data, err
 	}
 	if !ok {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
@@ -148,8 +161,8 @@ func (c *chainClient) QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, 
 	return data, nil
 }
 
-func (c *chainClient) QuaryAuthorizedAccounts(puk []byte) ([]string, error) {
-	acc, err := c.QuaryAuthorizedAccountIDs(puk)
+func (c *chainClient) QueryAuthorizedAccounts(accountID []byte) ([]string, error) {
+	acc, err := c.QueryAuthorizedAccountIDs(accountID)
 	if err != nil {
 		return nil, err
 	}
@@ -160,22 +173,7 @@ func (c *chainClient) QuaryAuthorizedAccounts(puk []byte) ([]string, error) {
 	return result, nil
 }
 
-func (c *chainClient) CheckSpaceUsageAuthorization(puk []byte) (bool, error) {
-	grantor, err := c.QuaryAuthorizedAccounts(puk)
-	if err != nil {
-		return false, err
-	}
-	account_local := c.GetSignatureAcc()
-
-	for _, v := range grantor {
-		if account_local == v {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func (c *chainClient) RegisterDeoss(peerId []byte, domain string) (string, error) {
+func (c *chainClient) RegisterDeOSS(peerId []byte, domain string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -214,17 +212,23 @@ func (c *chainClient) RegisterDeoss(peerId []byte, domain string) (string, error
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	call, err = types.NewCall(c.metadata, pattern.TX_OSS_REGISTER, peerid, types.NewBytes([]byte(domain)))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	if !ok {
@@ -251,7 +255,9 @@ func (c *chainClient) RegisterDeoss(peerId []byte, domain string) (string, error
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -265,10 +271,12 @@ func (c *chainClient) RegisterDeoss(peerId []byte, domain string) (string, error
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
 			c.SetChainState(false)
 			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 		}
@@ -294,7 +302,7 @@ func (c *chainClient) RegisterDeoss(peerId []byte, domain string) (string, error
 	}
 }
 
-func (c *chainClient) UpdateDeoss(peerId string, domain string) (string, error) {
+func (c *chainClient) UpdateDeOSS(peerId string, domain string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -322,28 +330,34 @@ func (c *chainClient) UpdateDeoss(peerId string, domain string) (string, error) 
 		peerid[i] = types.U8(peerId[i])
 	}
 
-	if len(domain) > 50 {
-		return txhash, errors.New("register deoss: Domain name length cannot exceed 50 characters")
+	if len(domain) > pattern.MaxSubmitedIdleFileMeta {
+		return txhash, fmt.Errorf("register deoss: domain name length cannot exceed %v", pattern.MaxSubmitedIdleFileMeta)
 	}
 
 	err = utils.CheckDomain(domain)
 	if err != nil {
-		return txhash, errors.New("register deoss: invalid domain")
+		return txhash, errors.New("register deoss: invalid domain name")
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	call, err = types.NewCall(c.metadata, pattern.TX_OSS_UPDATE, peerid, types.NewBytes([]byte(domain)))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -364,7 +378,9 @@ func (c *chainClient) UpdateDeoss(peerId string, domain string) (string, error) 
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -378,12 +394,14 @@ func (c *chainClient) UpdateDeoss(peerId string, domain string) (string, error) 
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -405,7 +423,7 @@ func (c *chainClient) UpdateDeoss(peerId string, domain string) (string, error) 
 	}
 }
 
-func (c *chainClient) ExitDeoss() (string, error) {
+func (c *chainClient) ExitDeOSS() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -427,17 +445,23 @@ func (c *chainClient) ExitDeoss() (string, error) {
 
 	call, err = types.NewCall(c.metadata, pattern.TX_OSS_DESTROY)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_DESTROY, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_DESTROY, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_DESTROY, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	if !ok {
@@ -459,7 +483,9 @@ func (c *chainClient) ExitDeoss() (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_DESTROY, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -473,12 +499,14 @@ func (c *chainClient) ExitDeoss() (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_DESTROY, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_DESTROY, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -530,10 +558,10 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	list, err := c.QuaryAuthorizedAccounts(c.GetSignatureAccPulickey())
+	list, err := c.QueryAuthorizedAccounts(c.GetSignatureAccPulickey())
 	if err != nil {
 		if err.Error() != pattern.ERR_Empty {
-			return txhash, errors.Wrap(err, "[QuaryAuthorizedAccounts]")
+			return txhash, errors.Wrap(err, "[QueryAuthorizedAccounts]")
 		}
 	} else {
 		for _, v := range list {
@@ -545,17 +573,23 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 
 	call, err := types.NewCall(c.metadata, pattern.TX_OSS_AUTHORIZE, *acc)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -576,7 +610,9 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -590,12 +626,14 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -644,17 +682,23 @@ func (c *chainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
 
 	call, err := types.NewCall(c.metadata, pattern.TX_OSS_UNAUTHORIZE)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, pubkey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -675,7 +719,9 @@ func (c *chainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -689,12 +735,14 @@ func (c *chainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()

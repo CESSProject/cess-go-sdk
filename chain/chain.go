@@ -9,10 +9,13 @@ package chain
 
 import (
 	"context"
+	"encoding/hex"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -26,6 +29,9 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/xxhash"
+	"github.com/mr-tron/base58"
+	"github.com/pkg/errors"
+	"github.com/vedhavyas/go-subkey/sr25519"
 )
 
 type chainClient struct {
@@ -134,8 +140,13 @@ func NewChainClient(
 	return chainClient, nil
 }
 
-func (c *chainClient) Reconnect() error {
+func (c *chainClient) ReconnectRPC() error {
 	var err error
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.GetChainState() {
+		return nil
+	}
 	if c.api != nil {
 		if c.api.Client != nil {
 			c.api.Client.Close()
@@ -143,7 +154,6 @@ func (c *chainClient) Reconnect() error {
 		}
 		c.api = nil
 	}
-
 	c.api, c.metadata, c.runtimeVersion, c.keyEvents, c.eventRetriever, c.genesisHash, c.currentRpcAddr, err = reconnectChainSDK(c.rpcAddr)
 	if err != nil {
 		return err
@@ -269,4 +279,52 @@ func reconnectChainSDK(rpcs []string) (
 
 func createPrefixedKey(pallet, method string) []byte {
 	return append(xxhash.New128([]byte(pallet)).Sum(nil), xxhash.New128([]byte(method)).Sum(nil)...)
+}
+
+func (c *chainClient) VerifyPolkaSignatureWithJS(account, msg, signature string) (bool, error) {
+	if len(msg) == 0 {
+		return false, errors.New("msg is empty")
+	}
+
+	pkey, err := utils.ParsingPublickey(account)
+	if err != nil {
+		return false, err
+	}
+
+	pub, err := sr25519.Scheme{}.FromPublicKey(pkey)
+	if err != nil {
+		return false, err
+	}
+
+	sign_bytes, err := hex.DecodeString(strings.TrimPrefix(signature, "0x"))
+	if err != nil {
+		return false, err
+	}
+	message := fmt.Sprintf("<Bytes>%s</Bytes>", msg)
+	ok := pub.Verify([]byte(message), sign_bytes)
+	return ok, nil
+}
+
+func (c *chainClient) VerifyPolkaSignatureWithBase58(account, msg, signature string) (bool, error) {
+	if len(msg) == 0 {
+		return false, errors.New("msg is empty")
+	}
+
+	pkey, err := utils.ParsingPublickey(account)
+	if err != nil {
+		return false, err
+	}
+
+	pub, err := sr25519.Scheme{}.FromPublicKey(pkey)
+	if err != nil {
+		return false, err
+	}
+
+	sign_bytes, err := base58.Decode(signature)
+	if err != nil {
+		return false, err
+	}
+	message := fmt.Sprintf("<Bytes>%s</Bytes>", msg)
+	ok := pub.Verify([]byte(message), sign_bytes)
+	return ok, nil
 }

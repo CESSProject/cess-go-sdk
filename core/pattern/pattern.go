@@ -214,7 +214,7 @@ const (
 )
 
 var (
-	ERR_RPC_CONNECTION     = errors.New("rpc connection failed")
+	ERR_RPC_CONNECTION     = errors.New("rpc err: connection failed")
 	ERR_RPC_IP_FORMAT      = errors.New("unsupported ip format")
 	ERR_RPC_TIMEOUT        = errors.New("timeout")
 	ERR_RPC_EMPTY_VALUE    = errors.New("empty")
@@ -274,7 +274,7 @@ type MinerInfo struct {
 	PeerId             PeerId
 	Collaterals        types.U128
 	Debt               types.U128
-	State              []types.U8 // nomal, exit, frozen, e_frozen
+	State              types.Bytes // positive, exit, frozen, lock
 	DeclarationSpace   types.U128
 	IdleSpace          types.U128
 	ServiceSpace       types.U128
@@ -406,30 +406,11 @@ type ServiceProveInfo struct {
 	VerifyResult types.Option[bool]
 }
 
-type MinerSnapShot_V2 struct {
-	Miner              types.AccountID
-	IdleLife           types.U32
-	ServiceLife        types.U32
-	IdleSpace          types.U128
-	ServiceSpace       types.U128
-	IdleSubmitted      types.Bool
-	ServiceSubmitted   types.Bool
-	ServiceBloomFilter BloomFilter
-	SpaceProofInfo     SpaceProofInfo
-	TeeSignature       TeeSignature
-}
-
 type TeeWorkerInfo struct {
-	ControllerAccount types.AccountID
-	PeerId            PeerId
-	StashAccount      types.AccountID
-	EndPoint          types.Bytes
-}
-
-type ProofAssignmentInfo struct {
-	SnapShot     MinerSnapShot
-	IdleProve    types.Bytes
-	ServiceProve types.Bytes
+	PeerId    PeerId
+	BondStash types.Option[types.AccountID]
+	EndPoint  types.Bytes
+	TeeType   types.U8 // 0:Full 1:Certifier 2:Verifier 3:Marker
 }
 
 type RestoralOrderInfo struct {
@@ -469,16 +450,6 @@ type IdleSignInfo struct {
 	PoisKey            PoISKeyInfo
 }
 
-type IdleProofInfo struct {
-	MinerSnapShot MinerSnapShot_V2
-	IdleProofs    []types.U8
-}
-
-type ServiceProofInfo struct {
-	MinerSnapShot MinerSnapShot_V2
-	ServiceProofs []types.U8
-}
-
 // --------------------customer-----------------
 type IdleFileMeta struct {
 	BlockNum uint32
@@ -513,10 +484,10 @@ type MinerSnapshot struct {
 }
 
 type TeeWorkerSt struct {
-	Controller_account string
-	Peer_id            []byte
-	Stash_account      string
-	End_point          string
+	Peer_id      []byte
+	StashAccount string
+	EndPoint     string
+	// tee_type
 }
 
 type RewardsType struct {

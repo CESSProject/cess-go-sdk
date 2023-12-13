@@ -21,73 +21,65 @@ import (
 type SDK interface {
 	// Audit-State
 
-	// Query the expired block height of the challenge.
-	QueryChallengeExpiration() (uint32, error)
-	// Query challenge verification expired block height.
+	// QueryChallengeVerifyExpiration Query Challenge Expiration Block High
 	QueryChallengeVerifyExpiration() (uint32, error)
-	// QueryChallengeInfo queries puk's challenge information.
-	QueryChallengeInfo(puk []byte) (bool, pattern.ChallengeInfo, error)
-	// QueryAssignedProof queries all assigned proof information.
-	QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error)
-	// ProofAssignmentInfo queries the proof information assigned to puk.
-	QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error)
-	//
-	QueryUnverifiedIdleProof(puk []byte) ([]pattern.IdleProofInfo, error)
-	//
-	QueryUnverifiedServiceProof(puk []byte) ([]pattern.ServiceProofInfo, error)
+	// QueryChallengeInfo queries accountID's challenge information
+	//   Tip: accountID can only be a storage node account
+	QueryChallengeInfo(accountID []byte) (bool, pattern.ChallengeInfo, error)
 
 	// Audit-Extrinsics
 
-	//
+	// SubmitIdleProof submits proof of idle data to the chain
+	//   Tip: This method can only be used for storage nodes
 	SubmitIdleProof(idleProve []types.U8) (string, error)
-	//
+	// SubmitServiceProof submits proof of service data to the chain
+	//   Tip: This method can only be used for storage nodes
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
-	//
-	SubmitIdleProofResult(idleproveHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error)
-	//
+	// SubmitIdleProofResult submits the proof verification results of idle data to the chain
+	//   Tip: This method can only be used for storage nodes
+	SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error)
+	// SubmitServiceProofResult submits the proof verification results of service data to the chain
+	//   Tip: This method can only be used for storage nodes
 	SubmitServiceProofResult(result types.Bool, signature pattern.TeeSignature, bloomFilter pattern.BloomFilter, tee_acc []byte) (string, error)
 
 	// Filebank-State
 
-	// QueryBucketInfo queries the information of the "bucketname" bucket of the puk.
-	QueryBucketInfo(puk []byte, bucketname string) (pattern.BucketInfo, error)
+	// QueryBucketInfo query the bucket information of the accountID
+	QueryBucketInfo(accountID []byte, bucketName string) (pattern.BucketInfo, error)
+	// QueryAllBucket query all buckets of the accountID
+	QueryAllBucket(accountID []byte) ([]types.Bytes, error)
+	// QueryAllBucketString query all bucket names as string of the accountID
+	QueryAllBucketString(accountID []byte) ([]string, error)
 	// QueryStorageOrder query storage order information.
-	QueryStorageOrder(roothash string) (pattern.StorageOrder, error)
+	QueryStorageOrder(fid string) (pattern.StorageOrder, error)
 	// QueryFileMetadata queries the metadata of the roothash file.
-	QueryFileMetadata(roothash string) (pattern.FileMetadata, error)
+	QueryFileMetadata(fid string) (pattern.FileMetadata, error)
 	// QueryFileMetadataByBlock queries the metadata of the roothash file.
-	QueryFileMetadataByBlock(roothash string, block uint64) (pattern.FileMetadata, error)
-	// QueryPendingReplacements queries the amount of idle data that can be replaced.
-	QueryPendingReplacements(puk []byte) (uint32, error)
-	// QueryPendingReplacements queries the amount of idle data that can be replaced.
-	QueryPendingReplacements_V2(puk []byte) (types.U128, error)
+	QueryFileMetadataByBlock(fid string, block uint64) (pattern.FileMetadata, error)
+	// QueryPendingReplacements queries the amount of idle data that can be replaced
+	//   Tip: accountID can only be a storage node account
+	QueryPendingReplacements(accountID []byte) (types.U128, error)
 	// QueryRestoralOrder queries a restore order info.
 	QueryRestoralOrder(roothash string) (pattern.RestoralOrderInfo, error)
 	QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error)
-	// QueryRestoralTargetList for recovery information on all exiting miners.
-	QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, error)
-	QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error)
-	// QueryBucketList queries all buckets of the puk.
-	// QueryAllBucketName queries all bucket names as strings.
-	QueryBucketList(puk []byte) ([]types.Bytes, error)
-	QueryAllBucketName(puk []byte) ([]string, error)
 
 	// Filebank-Extrinsics
 
 	// ClaimRestoralNoExistOrder is used to receive recovery orders from exiting miners.
-	ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragmentHash string) (string, error)
+	ClaimRestoralNoExistOrder(accountID []byte, fid, restoralFragmentHash string) (string, error)
 	// ClaimRestoralOrder is used to collect restoration orders.
 	ClaimRestoralOrder(fragmentHash string) (string, error)
-	// CreateBucket creates a bucket for puk.
-	CreateBucket(puk []byte, bucketname string) (string, error)
-	// DeleteBucket deletes buckets for puk.
-	DeleteBucket(puk []byte, bucketname string) (string, error)
-	// DeleteFile deletes files for puk.
-	DeleteFile(puk []byte, roothash []string) (string, []pattern.FileHash, error)
+	// CreateBucket creates a bucket for accountID
+	//   For details on bucket naming rules, see:
+	// https://app.gitbook.com/o/kiTNX10jBU59sjnYZbiH/s/G1ekWsjn9OlGH381wiK2/get-started/deoss-gateway/step-1-create-a-bucket#naming-conventions-for-a-bucket
+	CreateBucket(accountID []byte, bucketName string) (string, error)
+	// DeleteBucket deletes buckets for accountID
+	//   Tip: Only empty buckets can be deleted
+	DeleteBucket(accountID []byte, bucketName string) (string, error)
+	// DeleteFile deletes files for accountID
+	DeleteFile(accountID []byte, fid []string) (string, []pattern.FileHash, error)
 	// GenerateRestoralOrder generates data for restoration orders.
-	GenerateRestoralOrder(rootHash, fragmentHash string) (string, error)
-	// Withdraw is used to withdraw staking.
-	Withdraw() (string, error)
+	GenerateRestoralOrder(fid, fragmentHash string) (string, error)
 	// RestoralComplete reports order recovery completion.
 	RestoralComplete(restoralFragmentHash string) (string, error)
 	// SubmitFileReport submits a stored file report.
@@ -98,51 +90,61 @@ type SDK interface {
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
 	// CertIdleSpace
-	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature) (string, error)
+	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, tee_acc []byte) (string, error)
 	// ReplaceIdleSpace
-	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature) (string, error)
+	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, tee_acc []byte) (string, error)
 
 	// Oss-State
 
-	// QuaryAuthorizedAccountIDs queries accountIDs authorized by puk.
-	// QuaryAuthorizedAccounts query accounts in string form.
-	QuaryAuthorizedAccountIDs(puk []byte) ([]types.AccountID, error)
-	QuaryAuthorizedAccounts(puk []byte) ([]string, error)
-	// QueryDeossInfo queries deoss info.
-	QueryDeossInfo(pubkey []byte) (pattern.OssInfo, error)
-	// QueryAllDeOSSInfo queries all deoss info
+	// QueryAuthorizedAccountIDs queries all DeOSS accountIDs authorized by accountID
+	QueryAuthorizedAccountIDs(accountID []byte) ([]types.AccountID, error)
+	// QueryAuthorizedAccounts queries all DeOSS accounts authorized by accountID
+	QueryAuthorizedAccounts(accountID []byte) ([]string, error)
+	// QueryDeOSSInfo Query the DeOSS information registered by accountID account
+	QueryDeOSSInfo(accountID []byte) (pattern.OssInfo, error)
+	// QueryAllDeOSSInfo queries all deoss information
 	QueryAllDeOSSInfo() ([]pattern.OssInfo, error)
-	// QueryDeossPeerIdList queries peerid of all deoss.
-	QueryDeossPeerIdList() ([]string, error)
-	// CheckSpaceUsageAuthorization checks if the puk is authorized to itself
-	CheckSpaceUsageAuthorization(puk []byte) (bool, error)
+	// QueryAllDeOSSPeerId queries peerID of all DeOSS
+	QueryAllDeOSSPeerId() ([]string, error)
 
 	// Oss-Extrinsics
 
-	// RegisterOss register deoss information
-	RegisterDeoss(peerId []byte, domain string) (string, error)
-	//
-	UpdateDeoss(peerId string, domain string) (string, error)
+	// RegisterDeOSS register as deoss node
+	RegisterDeOSS(peerId []byte, domain string) (string, error)
+	// UpdateDeOSS updates the peerID and domain of deoss
+	//   Tip: This method can only be used for DeOSS nodes
+	UpdateDeOSS(peerId string, domain string) (string, error)
 	// ExitDeoss exit deoss
-	ExitDeoss() (string, error)
+	//   Tip: This method can only be used for DeOSS nodes
+	ExitDeOSS() (string, error)
 	// AuthorizeSpace authorizes space to oss account
-	AuthorizeSpace(ossAccount string) (string, error)
+	//   Tip: accountID can only be a DeOSS node account
+	AuthorizeSpace(accountID string) (string, error)
 	// UnAuthorizeSpace cancels space authorization
-	UnAuthorizeSpace(oss_acc string) (string, error)
+	//   Tip: accountID can only be a DeOSS node account
+	UnAuthorizeSpace(accountID string) (string, error)
 
 	// Sminer-State
 
+	// QueryExpenders queries expenders information
+	QueryExpenders() (pattern.ExpendersInfo, error)
 	// QueryStorageMiner queries storage node information.
-	QueryStorageMiner(puk []byte) (pattern.MinerInfo, error)
-	// QuerySminerList queries the accounts of all storage miners.
-	QuerySminerList() ([]types.AccountID, error)
-	// QueryStorageNodeReward queries reward information for puk account.
-	QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error)
-	QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error)
+	QueryStorageMiner(accountID []byte) (pattern.MinerInfo, error)
+	// QueryAllSminerAccount queries the accounts of all storage miners.
+	QueryAllSminerAccount() ([]types.AccountID, error)
+	// QueryRewardsMap queries rewardsMap for accountID
+	//   Tip: accountID can only be a storage node account
+	QueryRewardsMap(accountID []byte) (pattern.MinerReward, error)
+	// QueryRewards queries rewards for accountID
+	//   Tip: accountID can only be a storage node account
+	QueryRewards(accountID []byte) (pattern.RewardsType, error)
 	// QueryStorageMinerStakingStartBlock
 	QueryStorageMinerStakingStartBlock(puk []byte) (types.U32, error)
-	//
-	Expenders() (pattern.ExpendersInfo, error)
+	// QueryRestoralTarget queries the space recovery information of the exited storage node
+	//   Tip: accountID can only be a storage node account
+	QueryRestoralTarget(accountID []byte) (pattern.RestoralTargetInfo, error)
+	// QueryRestoralTargetList queries the space recovery information of all exited storage nodes
+	QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error)
 
 	// Sminer-Extrinsics
 
@@ -166,6 +168,8 @@ type SDK interface {
 	IncreaseStorageNodeStakingAmount(miner string, token string) (string, error)
 	// ClaimRewards is used to claim rewards.
 	ClaimRewards() (string, error)
+	// Withdraw is used to withdraw staking.
+	Withdraw() (string, error)
 
 	// Staking-State
 
@@ -262,8 +266,8 @@ type SDK interface {
 	GetCurrentRpcAddr() string
 	// SetSdkName set sdk name
 	SetSDKName(name string)
-	// Reconnect for reconnecting chains.
-	Reconnect() error
+	// ReconnectRPC for reconnecting chains.
+	ReconnectRPC() error
 	// GetMetadata returns the metadata of the chain.
 	GetMetadata() *types.Metadata
 	// GetKeyEvents returns the events storage key.
@@ -274,8 +278,10 @@ type SDK interface {
 	Sign(msg []byte) ([]byte, error)
 	// Verify the signature of the msg with the public key of the signing account.
 	Verify(msg []byte, sig []byte) (bool, error)
-	// EnabledP2P returns the p2p enable status
-	// EnabledP2P() bool
+	// Verify Polka Signature With JavaScript
+	VerifyPolkaSignatureWithJS(account, msg, signature string) (bool, error)
+	// Verify Polka Signature With Base58
+	VerifyPolkaSignatureWithBase58(account, msg, signature string) (bool, error)
 
 	// Upload file to CESS gateway.
 	//
