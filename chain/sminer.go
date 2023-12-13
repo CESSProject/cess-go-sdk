@@ -18,10 +18,42 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
-// QueryStorageMiner
+func (c *chainClient) QueryExpenders() (pattern.ExpendersInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data pattern.ExpendersInfo
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.EXPENDERS)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.EXPENDERS, err)
+		c.SetChainState(false)
+		return data, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.EXPENDERS, err)
+		c.SetChainState(false)
+		return data, err
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 func (c *chainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -37,12 +69,16 @@ func (c *chainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.MINERITEMS, puk)
 	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.MINERITEMS, err)
+		c.SetChainState(false)
+		return data, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.MINERITEMS, err)
+		c.SetChainState(false)
+		return data, err
 	}
 	if !ok {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
@@ -50,7 +86,6 @@ func (c *chainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 	return data, nil
 }
 
-// QueryStorageMinerStakingStartBlock
 func (c *chainClient) QueryStorageMinerStakingStartBlock(puk []byte) (types.U32, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -66,12 +101,16 @@ func (c *chainClient) QueryStorageMinerStakingStartBlock(puk []byte) (types.U32,
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.STAKINGSTARTBLOCK, puk)
 	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.STAKINGSTARTBLOCK, err)
+		c.SetChainState(false)
+		return data, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.STAKINGSTARTBLOCK, err)
+		c.SetChainState(false)
+		return data, err
 	}
 	if !ok {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
@@ -79,8 +118,7 @@ func (c *chainClient) QueryStorageMinerStakingStartBlock(puk []byte) (types.U32,
 	return data, nil
 }
 
-// QuerySminerList
-func (c *chainClient) QuerySminerList() ([]types.AccountID, error) {
+func (c *chainClient) QueryAllSminerAccount() ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -95,12 +133,16 @@ func (c *chainClient) QuerySminerList() ([]types.AccountID, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.ALLMINER)
 	if err != nil {
-		return nil, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.ALLMINER, err)
+		c.SetChainState(false)
+		return nil, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return nil, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.ALLMINER, err)
+		c.SetChainState(false)
+		return nil, err
 	}
 	if !ok {
 		return nil, pattern.ERR_RPC_EMPTY_VALUE
@@ -108,8 +150,7 @@ func (c *chainClient) QuerySminerList() ([]types.AccountID, error) {
 	return data, nil
 }
 
-// QueryMinerRewards
-func (c *chainClient) QueryStorageNodeReward(puk []byte) (pattern.MinerReward, error) {
+func (c *chainClient) QueryRewardsMap(puk []byte) (pattern.MinerReward, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -124,12 +165,16 @@ func (c *chainClient) QueryStorageNodeReward(puk []byte) (pattern.MinerReward, e
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.REWARDMAP, puk)
 	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.REWARDMAP, err)
+		c.SetChainState(false)
+		return data, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.REWARDMAP, err)
+		c.SetChainState(false)
+		return data, err
 	}
 	if !ok {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
@@ -137,9 +182,9 @@ func (c *chainClient) QueryStorageNodeReward(puk []byte) (pattern.MinerReward, e
 	return data, nil
 }
 
-func (c *chainClient) QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsType, error) {
+func (c *chainClient) QueryRewards(puk []byte) (pattern.RewardsType, error) {
 	var reward pattern.RewardsType
-	rewards, err := c.QueryStorageNodeReward(puk)
+	rewards, err := c.QueryRewardsMap(puk)
 	if err != nil {
 		return reward, err
 	}
@@ -149,6 +194,87 @@ func (c *chainClient) QuaryStorageNodeRewardInfo(puk []byte) (pattern.RewardsTyp
 	reward.Available = rewards.CurrentlyAvailableReward.String()
 
 	return reward, nil
+}
+
+func (c *chainClient) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var result []pattern.RestoralTargetInfo
+
+	if !c.GetChainState() {
+		return nil, pattern.ERR_RPC_CONNECTION
+	}
+
+	key := createPrefixedKey(pattern.SMINER, pattern.RESTORALTARGETINFO)
+	keys, err := c.api.RPC.State.GetKeysLatest(key)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.RESTORALTARGETINFO, err)
+		c.SetChainState(false)
+		return nil, err
+	}
+
+	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.RESTORALTARGETINFO, err)
+		c.SetChainState(false)
+		return nil, err
+	}
+
+	for _, elem := range set {
+		for _, change := range elem.Changes {
+			var data pattern.RestoralTargetInfo
+			if err := codec.Decode(change.StorageData, &data); err != nil {
+				continue
+			}
+			result = append(result, data)
+		}
+	}
+	return result, nil
+}
+
+func (c *chainClient) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data pattern.RestoralTargetInfo
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	acc, err := types.NewAccountID(puk)
+	if err != nil {
+		return data, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return data, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.RESTORALTARGETINFO, owner)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.RESTORALTARGETINFO, err)
+		c.SetChainState(false)
+		return data, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.RESTORALTARGETINFO, err)
+		c.SetChainState(false)
+		return data, err
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
 }
 
 func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) {
@@ -171,17 +297,23 @@ func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) 
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEPEERID, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	call, err := types.NewCall(c.metadata, pattern.TX_SMINER_UPDATEPEERID, peerid)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEPEERID, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEPEERID, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -202,7 +334,9 @@ func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) 
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEPEERID, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -216,12 +350,14 @@ func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) 
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEPEERID, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEPEERID, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -274,17 +410,23 @@ func (c *chainClient) ExitSminer(miner string) (string, error) {
 
 	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_MINEREXITPREP, *acc)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_MINEREXITPREP, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_MINEREXITPREP, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_MINEREXITPREP, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	if !ok {
@@ -306,7 +448,9 @@ func (c *chainClient) ExitSminer(miner string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_MINEREXITPREP, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -320,12 +464,14 @@ func (c *chainClient) ExitSminer(miner string) (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_MINEREXITPREP, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_MINEREXITPREP, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -374,17 +520,23 @@ func (c *chainClient) UpdateEarningsAcc(puk []byte) (string, error) {
 
 	call, err := types.NewCall(c.metadata, pattern.TX_SMINER_UPDATEINCOME, *acc)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEINCOME, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEINCOME, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEINCOME, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -405,7 +557,9 @@ func (c *chainClient) UpdateEarningsAcc(puk []byte) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEINCOME, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -419,12 +573,14 @@ func (c *chainClient) UpdateEarningsAcc(puk []byte) (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEINCOME, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_UPDATEINCOME, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -456,7 +612,6 @@ func (c *chainClient) UpdateEarningsAccount(earnings string) (string, error) {
 	return c.UpdateEarningsAcc(puk)
 }
 
-// Storage miners increase deposit function
 func (c *chainClient) IncreaseStakingAmount(miner string, tokens *big.Int) (string, error) {
 	c.lock.Lock()
 	defer func() {
@@ -486,17 +641,23 @@ func (c *chainClient) IncreaseStakingAmount(miner string, tokens *big.Int) (stri
 
 	call, err := types.NewCall(c.metadata, pattern.TX_SMINER_INCREASESTAKES, *acc, types.NewUCompact(tokens))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASESTAKES, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASESTAKES, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASESTAKES, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -517,7 +678,9 @@ func (c *chainClient) IncreaseStakingAmount(miner string, tokens *big.Int) (stri
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASESTAKES, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -531,12 +694,14 @@ func (c *chainClient) IncreaseStakingAmount(miner string, tokens *big.Int) (stri
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASESTAKES, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASESTAKES, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -568,7 +733,6 @@ func (c *chainClient) IncreaseStorageNodeStakingAmount(miner string, token strin
 	return c.IncreaseStakingAmount(miner, tokens)
 }
 
-// ClaimRewards
 func (c *chainClient) ClaimRewards() (string, error) {
 	c.lock.Lock()
 	defer func() {
@@ -589,17 +753,23 @@ func (c *chainClient) ClaimRewards() (string, error) {
 
 	call, err := types.NewCall(c.metadata, pattern.TX_SMINER_CLAIMREWARD)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_CLAIMREWARD, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_CLAIMREWARD, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_CLAIMREWARD, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -620,7 +790,9 @@ func (c *chainClient) ClaimRewards() (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_CLAIMREWARD, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -634,12 +806,14 @@ func (c *chainClient) ClaimRewards() (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_CLAIMREWARD, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_CLAIMREWARD, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -663,7 +837,6 @@ func (c *chainClient) ClaimRewards() (string, error) {
 	}
 }
 
-// Withdraw
 func (c *chainClient) Withdraw() (string, error) {
 	c.lock.Lock()
 	defer func() {
@@ -684,17 +857,23 @@ func (c *chainClient) Withdraw() (string, error) {
 
 	call, err := types.NewCall(c.metadata, pattern.TX_SMINER_WITHDRAW)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_WITHDRAW, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_WITHDRAW, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_WITHDRAW, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -715,7 +894,9 @@ func (c *chainClient) Withdraw() (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_WITHDRAW, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -729,10 +910,12 @@ func (c *chainClient) Withdraw() (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_WITHDRAW, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_WITHDRAW, err)
 			c.SetChainState(false)
 			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 		}
@@ -756,34 +939,6 @@ func (c *chainClient) Withdraw() (string, error) {
 			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
-}
-
-func (s *chainClient) Expenders() (pattern.ExpendersInfo, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var data pattern.ExpendersInfo
-
-	if !s.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(s.metadata, pattern.SMINER, pattern.EXPENDERS)
-	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := s.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
 }
 
 func (c *chainClient) RegisterSminer(earnings string, peerId []byte, pledge uint64, tib_count uint32) (string, error) {
@@ -819,11 +974,6 @@ func (c *chainClient) RegisterSminer(earnings string, peerId []byte, pledge uint
 		peerid[i] = types.U8(peerId[i])
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
 	pubkey, err = utils.ParsingPublickey(earnings)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[DecodeToPub]")
@@ -838,12 +988,23 @@ func (c *chainClient) RegisterSminer(earnings string, peerId []byte, pledge uint
 	}
 	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTER, *acc, peerid, types.NewU128(*realTokens), types.U32(tib_count))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTER, err)
+		c.SetChainState(false)
+		return txhash, err
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTER, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err = c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTER, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	if !ok {
@@ -870,7 +1031,9 @@ func (c *chainClient) RegisterSminer(earnings string, peerId []byte, pledge uint
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTER, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -884,12 +1047,14 @@ func (c *chainClient) RegisterSminer(earnings string, peerId []byte, pledge uint
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTER, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTER, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -945,11 +1110,6 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 		peerid[i] = types.U8(peerId[i])
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
 	pubkey, err = utils.ParsingPublickey(beneficiaryAcc)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[DecodeToPub]")
@@ -975,12 +1135,23 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 		types.U32(tib_count),
 	)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERASSIGNSTAKING, err)
+		c.SetChainState(false)
+		return txhash, err
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERASSIGNSTAKING, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERASSIGNSTAKING, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	if !ok {
@@ -1007,7 +1178,9 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERASSIGNSTAKING, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -1021,12 +1194,14 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERASSIGNSTAKING, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERASSIGNSTAKING, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -1072,19 +1247,25 @@ func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pa
 
 	c.SetSDKName(pattern.Name_Sminer)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
 	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTERPOISKEY, poisKey, sign)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
+		c.SetChainState(false)
+		return txhash, err
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	if !ok {
@@ -1111,7 +1292,9 @@ func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pa
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -1125,12 +1308,14 @@ func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pa
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -1174,17 +1359,23 @@ func (c *chainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 
 	call, err := types.NewCall(c.metadata, pattern.TX_SMINER_INCREASEDECSPACE, types.NewU32(tibCount))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASEDECSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASEDECSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASEDECSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -1205,7 +1396,9 @@ func (c *chainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASEDECSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -1219,12 +1412,14 @@ func (c *chainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASEDECSPACE, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_INCREASEDECSPACE, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()

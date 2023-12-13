@@ -35,12 +35,16 @@ func (c *chainClient) QuerySpacePricePerGib() (string, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.UNITPRICE)
 	if err != nil {
-		return "", errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.UNITPRICE, err)
+		c.SetChainState(false)
+		return "", err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return "", errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.UNITPRICE, err)
+		c.SetChainState(false)
+		return "", err
 	}
 	if !ok {
 		return "", pattern.ERR_RPC_EMPTY_VALUE
@@ -74,12 +78,16 @@ func (c *chainClient) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, err
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.USERSPACEINFO, owner)
 	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.USERSPACEINFO, err)
+		c.SetChainState(false)
+		return data, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.USERSPACEINFO, err)
+		c.SetChainState(false)
+		return data, err
 	}
 	if !ok {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
@@ -101,6 +109,102 @@ func (c *chainClient) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) 
 	userSpaceSt.LockedSpace = spaceinfo.LockedSpace.String()
 	userSpaceSt.State = string(spaceinfo.State)
 	return userSpaceSt, nil
+}
+
+func (c *chainClient) QueryTotalIdleSpace() (uint64, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U128
+
+	if !c.GetChainState() {
+		return 0, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.TOTALIDLESPACE)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.TOTALIDLESPACE, err)
+		c.SetChainState(false)
+		return 0, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.TOTALIDLESPACE, err)
+		c.SetChainState(false)
+		return 0, err
+	}
+	if !ok {
+		return 0, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data.Uint64(), nil
+}
+
+func (c *chainClient) QueryTotalServiceSpace() (uint64, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U128
+
+	if !c.GetChainState() {
+		return 0, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.TOTALSERVICESPACE)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.TOTALSERVICESPACE, err)
+		c.SetChainState(false)
+		return 0, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.TOTALSERVICESPACE, err)
+		c.SetChainState(false)
+		return 0, err
+	}
+	if !ok {
+		return 0, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data.Uint64(), nil
+}
+
+func (c *chainClient) QueryPurchasedSpace() (uint64, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U128
+
+	if !c.GetChainState() {
+		return 0, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.PURCHASEDSPACE)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.PURCHASEDSPACE, err)
+		c.SetChainState(false)
+		return 0, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STORAGEHANDLER, pattern.PURCHASEDSPACE, err)
+		c.SetChainState(false)
+		return 0, err
+	}
+	if !ok {
+		return 0, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data.Uint64(), nil
 }
 
 func (c *chainClient) BuySpace(count uint32) (string, error) {
@@ -127,17 +231,23 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 
 	call, err := types.NewCall(c.metadata, pattern.TX_STORAGE_BUYSPACE, types.NewU32(count))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_BUYSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_BUYSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_BUYSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -158,7 +268,9 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_BUYSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -172,12 +284,14 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_BUYSPACE, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_BUYSPACE, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -225,17 +339,23 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 
 	call, err := types.NewCall(c.metadata, pattern.TX_STORAGE_EXPANSIONSPACE, types.NewU32(count))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_EXPANSIONSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_EXPANSIONSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_EXPANSIONSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -256,7 +376,9 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_EXPANSIONSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -270,12 +392,14 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_EXPANSIONSPACE, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_EXPANSIONSPACE, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -323,17 +447,23 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 
 	call, err := types.NewCall(c.metadata, pattern.TX_STORAGE_RENEWALSPACE, types.NewU32(days))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_RENEWALSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_RENEWALSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_RENEWALSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -354,7 +484,9 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_RENEWALSPACE, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -368,12 +500,14 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_RENEWALSPACE, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_RENEWALSPACE, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -395,88 +529,4 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
-}
-
-func (c *chainClient) QueryTotalIdleSpace() (uint64, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var data types.U128
-
-	if !c.GetChainState() {
-		return 0, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.TOTALIDLESPACE)
-	if err != nil {
-		return 0, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return 0, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return 0, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data.Uint64(), nil
-}
-
-func (c *chainClient) QueryTotalServiceSpace() (uint64, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var data types.U128
-
-	if !c.GetChainState() {
-		return 0, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.TOTALSERVICESPACE)
-	if err != nil {
-		return 0, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return 0, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return 0, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data.Uint64(), nil
-}
-
-func (c *chainClient) QueryPurchasedSpace() (uint64, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var data types.U128
-
-	if !c.GetChainState() {
-		return 0, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.STORAGEHANDLER, pattern.PURCHASEDSPACE)
-	if err != nil {
-		return 0, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return 0, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return 0, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data.Uint64(), nil
 }

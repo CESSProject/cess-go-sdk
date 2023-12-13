@@ -169,15 +169,16 @@ func (c *chainClient) QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error) {
 	}
 	var results = make([]pattern.TeeWorkerSt, len(teelist))
 	for k, v := range teelist {
-		results[k].End_point = string(v.EndPoint[:])
+		results[k].EndPoint = string(v.EndPoint[:])
 		results[k].Peer_id = []byte(string(v.PeerId[:]))
-		results[k].Controller_account, err = utils.EncodePublicKeyAsCessAccount(v.ControllerAccount[:])
-		if err != nil {
-			return results, err
-		}
-		results[k].Stash_account, err = utils.EncodePublicKeyAsCessAccount(v.StashAccount[:])
-		if err != nil {
-			return results, err
+		if v.BondStash.HasValue() {
+			ok, acc := v.BondStash.Unwrap()
+			if ok {
+				results[k].StashAccount, err = utils.EncodePublicKeyAsCessAccount(acc[:])
+				if err != nil {
+					return results, err
+				}
+			}
 		}
 	}
 	return results, nil

@@ -8,6 +8,7 @@
 package chain
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -15,96 +16,8 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
-
-func (c *chainClient) QueryAssignedProof() ([][]pattern.ProofAssignmentInfo, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-	if !c.GetChainState() {
-		return nil, pattern.ERR_RPC_CONNECTION
-	}
-	var list [][]pattern.ProofAssignmentInfo
-	key := createPrefixedKey(pattern.AUDIT, pattern.UNVERIFYPROOF)
-	keys, err := c.api.RPC.State.GetKeysLatest(key)
-	if err != nil {
-		return list, errors.Wrap(err, "[GetKeysLatest]")
-	}
-	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
-
-	if err != nil {
-		return list, errors.Wrap(err, "[QueryStorageAtLatest]")
-	}
-	for _, elem := range set {
-		for _, change := range elem.Changes {
-			var data []pattern.ProofAssignmentInfo
-			if err := codec.Decode(change.StorageData, &data); err != nil {
-				log.Println(err)
-				continue
-			}
-			list = append(list, data)
-		}
-	}
-	return list, nil
-}
-
-func (c *chainClient) QueryTeeAssignedProof(puk []byte) ([]pattern.ProofAssignmentInfo, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-	var data []pattern.ProofAssignmentInfo
-
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYPROOF, puk)
-	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
-func (c *chainClient) QueryChallengeExpiration() (uint32, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-	var data types.U32
-
-	if !c.GetChainState() {
-		return 0, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.CHALLENGEDURATION)
-	if err != nil {
-		return 0, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return 0, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return 0, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return uint32(data), nil
-}
 
 func (c *chainClient) QueryChallengeVerifyExpiration() (uint32, error) {
 	defer func() {
@@ -120,12 +33,16 @@ func (c *chainClient) QueryChallengeVerifyExpiration() (uint32, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.CHALLENGEVERIFYDURATION)
 	if err != nil {
-		return 0, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.AUDIT, pattern.CHALLENGEVERIFYDURATION, err)
+		c.SetChainState(false)
+		return 0, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return 0, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.AUDIT, pattern.CHALLENGEVERIFYDURATION, err)
+		c.SetChainState(false)
+		return 0, err
 	}
 	if !ok {
 		return 0, pattern.ERR_RPC_EMPTY_VALUE
@@ -133,7 +50,7 @@ func (c *chainClient) QueryChallengeVerifyExpiration() (uint32, error) {
 	return uint32(data), nil
 }
 
-func (c *chainClient) QueryChallengeInfo(puk []byte) (bool, pattern.ChallengeInfo, error) {
+func (c *chainClient) QueryChallengeInfo(accountID []byte) (bool, pattern.ChallengeInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -146,74 +63,24 @@ func (c *chainClient) QueryChallengeInfo(puk []byte) (bool, pattern.ChallengeInf
 		return false, data, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.CHALLENGESNAPSHOT, puk)
+	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.CHALLENGESNAPSHOT, accountID)
 	if err != nil {
-		return false, data, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.AUDIT, pattern.CHALLENGESNAPSHOT, err)
+		c.SetChainState(false)
+		return false, data, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		return false, data, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.AUDIT, pattern.CHALLENGESNAPSHOT, err)
+		c.SetChainState(false)
+		return false, data, err
 	}
 
 	return ok, data, nil
 }
 
-func (c *chainClient) QueryUnverifiedIdleProof(puk []byte) ([]pattern.IdleProofInfo, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-	var data []pattern.IdleProofInfo
-
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYIDLEPROOF, puk)
-	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
-func (c *chainClient) QueryUnverifiedServiceProof(puk []byte) ([]pattern.ServiceProofInfo, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-	var data []pattern.ServiceProofInfo
-
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.AUDIT, pattern.UNVERIFYSERVICEPROOF, puk)
-	if err != nil {
-		return data, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
-func (c *chainClient) SubmitIdleProof(idleProve []types.U8) (string, error) {
+func (c *chainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -231,19 +98,25 @@ func (c *chainClient) SubmitIdleProof(idleProve []types.U8) (string, error) {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOF, idleProve)
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOF, idleProof)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOF, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOF, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOF, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -264,7 +137,9 @@ func (c *chainClient) SubmitIdleProof(idleProve []types.U8) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOF, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -278,12 +153,14 @@ func (c *chainClient) SubmitIdleProof(idleProve []types.U8) (string, error) {
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOF, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOF, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -327,17 +204,23 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 
 	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITSERVICEPROOF, serviceProof)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOF, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOF, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOF, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -358,7 +241,9 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOF, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -372,12 +257,14 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOF, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOF, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -401,7 +288,7 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	}
 }
 
-func (c *chainClient) SubmitIdleProofResult(idleproveHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error) {
+func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -424,19 +311,25 @@ func (c *chainClient) SubmitIdleProofResult(idleproveHash []types.U8, front, rea
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, idleproveHash, front, rear, accumulator, result, signature, *teeacc)
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, totalProofHash, front, rear, accumulator, result, signature, *teeacc)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -457,7 +350,9 @@ func (c *chainClient) SubmitIdleProofResult(idleproveHash []types.U8, front, rea
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -471,12 +366,14 @@ func (c *chainClient) SubmitIdleProofResult(idleproveHash []types.U8, front, rea
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -525,17 +422,23 @@ func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature patt
 
 	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, result, signature, bloomFilter, *teeacc)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewCall]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[GetStorageLatest]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 	if !ok {
 		return txhash, pattern.ERR_RPC_EMPTY_VALUE
@@ -556,7 +459,9 @@ func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature patt
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, err)
+		c.SetChainState(false)
+		return txhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -570,12 +475,14 @@ func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature patt
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, err)
 				c.SetChainState(false)
-				return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+				return txhash, err
 			}
 		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, err)
 			c.SetChainState(false)
-			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
+			return txhash, err
 		}
 	}
 	defer sub.Unsubscribe()
