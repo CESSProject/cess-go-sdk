@@ -274,6 +274,13 @@ type Event_ReplaceIdleSpace struct {
 	Topics []types.Hash
 }
 
+type Event_CalculateReport struct {
+	Phase    types.Phase
+	Miner    types.AccountID
+	FileHash pattern.FileHash
+	Topics   []types.Hash
+}
+
 // ------------------------StorageHandler--------------------------------
 type Event_BuySpace struct {
 	Phase            types.Phase
@@ -434,6 +441,7 @@ type EventRecords struct {
 	FileBank_StorageCompleted      []Event_StorageCompleted
 	FileBank_IdleSpaceCert         []Event_IdleSpaceCert
 	FileBank_ReplaceIdleSpace      []Event_ReplaceIdleSpace
+	FileBank_CalculateReport       []Event_CalculateReport
 
 	// OSS
 	Oss_Authorize       []Event_Authorize

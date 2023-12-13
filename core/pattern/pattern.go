@@ -143,6 +143,7 @@ const (
 	TX_FILEBANK_RESTORALCOMPLETE  = FILEBANK + DOT + "restoral_order_complete"
 	TX_FILEBANK_CERTIDLESPACE     = FILEBANK + DOT + "cert_idle_space"
 	TX_FILEBANK_REPLACEIDLESPACE  = FILEBANK + DOT + "replace_idle_space"
+	TX_FILEBANK_CALCULATEREPORT   = FILEBANK + DOT + "calculate_report"
 
 	// STORAGE_HANDLER
 	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
@@ -316,7 +317,7 @@ type FileMetadata struct {
 
 type SegmentInfo struct {
 	Hash         FileHash
-	FragmentList []FragmentList
+	FragmentList []FragmentInfo
 }
 
 type UserBrief struct {
@@ -325,19 +326,18 @@ type UserBrief struct {
 	BucketName types.Bytes
 }
 
-type FragmentList struct {
+type FragmentInfo struct {
 	Hash  FileHash
 	Avail types.Bool
+	Tag   types.Option[types.U32]
 	Miner types.AccountID
 }
 
 type StorageOrder struct {
-	Stage        types.U8
-	Count        types.U8
 	FileSize     types.U128
 	SegmentList  []SegmentList
 	User         UserBrief
-	CompleteInfo []CompleteInfo
+	CompleteList []CompleteInfo
 }
 
 type SegmentList struct {

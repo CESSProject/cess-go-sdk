@@ -899,6 +899,53 @@ func (c *chainClient) RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Ha
 	return result, errors.Errorf("failed: no %s event found", event.FileBankReplaceIdleSpace)
 }
 
+func (c *chainClient) RetrieveEvent_FileBank_CalculateReport(blockhash types.Hash) (event.Event_CalculateReport, error) {
+	var result event.Event_CalculateReport
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return result, err
+	}
+	for _, e := range events {
+		if e.Name == event.FileBankCalculateReport {
+			for _, v := range e.Fields {
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "AccountId32") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
+								}
+							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							accid, err := types.NewAccountID(puk)
+							if err != nil {
+								continue
+							}
+							result.Miner = *accid
+							return result, nil
+						}
+					}
+				}
+			}
+		}
+	}
+	return result, errors.Errorf("failed: no %s event found", event.FileBankCalculateReport)
+}
+
 func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdataIp, error) {
 	var result event.Event_UpdataIp
 	events, err := c.eventRetriever.GetEvents(blockhash)

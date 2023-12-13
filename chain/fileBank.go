@@ -1680,3 +1680,117 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign
 		}
 	}
 }
+
+func (c *chainClient) ReportTagCalculated(fragmentHash string) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		txhash      string
+		accountInfo types.AccountInfo
+	)
+
+	if !c.GetChainState() {
+		return txhash, pattern.ERR_RPC_CONNECTION
+	}
+
+	var fragmenthash pattern.FileHash
+
+	if len(fragmentHash) != pattern.FileHashLen {
+		return txhash, errors.New("invalid fragment hash")
+	}
+
+	for i := 0; i < len(fragmentHash); i++ {
+		fragmenthash[i] = types.U8(fragmentHash[i])
+	}
+
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CALCULATEREPORT, fragmenthash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+		c.SetChainState(false)
+		return txhash, err
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+		c.SetChainState(false)
+		return txhash, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+		c.SetChainState(false)
+		return txhash, err
+	}
+	if !ok {
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+		c.SetChainState(false)
+		return txhash, err
+	}
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return txhash, errors.Wrap(err, "[Sign]")
+			}
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+				c.SetChainState(false)
+				return txhash, err
+			}
+		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+			c.SetChainState(false)
+			return txhash, err
+		}
+	}
+	defer sub.Unsubscribe()
+
+	timeout := time.NewTimer(c.packingTime)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				txhash = status.AsInBlock.Hex()
+				_, err = c.RetrieveEvent_Sminer_IncreaseDeclarationSpace(status.AsInBlock)
+				return txhash, err
+			}
+		case err = <-sub.Err():
+			return txhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return txhash, pattern.ERR_RPC_TIMEOUT
+		}
+	}
+}

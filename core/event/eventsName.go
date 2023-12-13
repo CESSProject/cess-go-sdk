@@ -35,6 +35,7 @@ const (
 	FileBankStorageCompleted      = "FileBank.StorageCompleted"
 	FileBankIdleSpaceCert         = "FileBank.IdleSpaceCert"
 	FileBankReplaceIdleSpace      = "FileBank.ReplaceIdleSpace"
+	FileBankCalculateReport       = "FileBank.CalculateReport "
 
 	// OSS
 	OssAuthorize       = "Oss.Authorize"
