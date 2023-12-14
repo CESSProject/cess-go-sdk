@@ -414,7 +414,7 @@ type ServiceProveInfo struct {
 	VerifyResult types.Option[bool]
 }
 
-type TeeWorkerInfo struct {
+type TeeWorkerMap struct {
 	WorkAccount types.AccountID
 	PeerId      PeerId
 	BondStash   types.Option[types.AccountID]
@@ -492,9 +492,9 @@ type MinerSnapshot struct {
 	Service_space string
 }
 
-type TeeWorkerSt struct {
+type TeeInfo struct {
 	WorkAccount  string
-	Peer_id      []byte
+	PeerId       []byte
 	StashAccount string
 	EndPoint     string
 	TeeType      uint8 // 0:Full 1:Certifier 2:Verifier 3:Marker
