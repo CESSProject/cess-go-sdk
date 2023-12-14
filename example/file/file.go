@@ -34,37 +34,50 @@ var RPC_ADDRS = []string{
 }
 
 const PublicGateway = "http://deoss-pub-gateway.cess.cloud/"
-
-const UploadFile = "example.go"
+const PublicGatewayAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
+const UploadFile = "file.go"
 const BucketName = "myBucket"
 
 func main() {
+	// 1. new sdk
 	sdk, err := NewSDK()
 	if err != nil {
 		panic(err)
 	}
 
-	// upload file
+	// 2. buy space
+	_, err = sdk.BuySpace(1)
+	if err != nil {
+		panic(err)
+	}
+
+	// 3. authorize space to deoss
+	_, err = sdk.AuthorizeSpace(PublicGatewayAccount)
+	if err != nil {
+		panic(err)
+	}
+
+	// 4. upload file to deoss
 	fid, err := sdk.StoreFile(PublicGateway, UploadFile, BucketName)
 	if err != nil {
 		panic(err)
 	}
 	log.Println("fid:", fid)
 
-	// Retrieve file
+	// 5. downloag file from deoss
 	err = sdk.RetrieveFile(PublicGateway, fid, fmt.Sprintf("download_%d", time.Now().UnixNano()))
 	if err != nil {
 		panic(err)
 	}
 
-	// upload object
+	// 6. upload object to deoss
 	fid, err = sdk.StoreObject(PublicGateway, bytes.NewReader([]byte("test date")), BucketName)
 	if err != nil {
 		panic(err)
 	}
 	log.Println("fid:", fid)
 
-	// Retrieve file
+	// 7. download object from deoss
 	body, err := sdk.RetrieveObject(PublicGateway, fid)
 	if err != nil {
 		panic(err)

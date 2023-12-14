@@ -487,7 +487,7 @@ type TeeWorkerSt struct {
 	Peer_id      []byte
 	StashAccount string
 	EndPoint     string
-	// tee_type
+	TeeType      uint8 // 0:Full 1:Certifier 2:Verifier 3:Marker
 }
 
 type RewardsType struct {
