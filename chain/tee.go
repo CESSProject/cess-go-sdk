@@ -171,6 +171,8 @@ func (c *chainClient) QueryTeeWorkerList() ([]pattern.TeeWorkerSt, error) {
 	for k, v := range teelist {
 		results[k].EndPoint = string(v.EndPoint[:])
 		results[k].Peer_id = []byte(string(v.PeerId[:]))
+		results[k].TeeType = uint8(v.TeeType)
+		results[k].WorkAccount, _ = utils.EncodePublicKeyAsCessAccount(v.WorkAccount[:])
 		if v.BondStash.HasValue() {
 			ok, acc := v.BondStash.Unwrap()
 			if ok {

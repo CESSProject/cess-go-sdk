@@ -188,6 +188,14 @@ const (
 	MINER_STATE_LOCK     = "lock"
 )
 
+// 0:Full 1:Certifier 2:Verifier 3:Marker
+const (
+	TeeType_Full      uint8 = 0
+	TeeType_Certifier uint8 = 1
+	TeeType_Verifier  uint8 = 2
+	TeeType_Marker    uint8 = 3
+)
+
 const (
 	ERR_Failed  = "failed"
 	ERR_Timeout = "timeout"
@@ -407,10 +415,11 @@ type ServiceProveInfo struct {
 }
 
 type TeeWorkerInfo struct {
-	PeerId    PeerId
-	BondStash types.Option[types.AccountID]
-	EndPoint  types.Bytes
-	TeeType   types.U8 // 0:Full 1:Certifier 2:Verifier 3:Marker
+	WorkAccount types.AccountID
+	PeerId      PeerId
+	BondStash   types.Option[types.AccountID]
+	EndPoint    types.Bytes
+	TeeType     types.U8 // 0:Full 1:Certifier 2:Verifier 3:Marker
 }
 
 type RestoralOrderInfo struct {
@@ -484,6 +493,7 @@ type MinerSnapshot struct {
 }
 
 type TeeWorkerSt struct {
+	WorkAccount  string
 	Peer_id      []byte
 	StashAccount string
 	EndPoint     string
