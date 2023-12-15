@@ -93,6 +93,8 @@ type SDK interface {
 	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, tee_acc []byte) (string, error)
 	// ReplaceIdleSpace
 	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, tee_acc []byte) (string, error)
+	// ReportTagCalculated
+	ReportTagCalculated(teeSig pattern.TeeSignature, tagSigInfo pattern.TagSigInfo) (string, error)
 
 	// Oss-State
 
