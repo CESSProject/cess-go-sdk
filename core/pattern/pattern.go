@@ -186,6 +186,7 @@ const (
 	MINER_STATE_FROZEN   = "frozen"
 	MINER_STATE_EXIT     = "exit"
 	MINER_STATE_LOCK     = "lock"
+	MINER_STATE_OFFLINE  = "offline"
 )
 
 // 0:Full 1:Verifier 2:Marker
