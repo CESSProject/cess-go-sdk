@@ -1681,7 +1681,7 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign
 	}
 }
 
-func (c *chainClient) ReportTagCalculated(fragmentHash string) (string, error) {
+func (c *chainClient) ReportTagCalculated(teeSig pattern.TeeSignature, tagSigInfo pattern.TagSigInfo) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1699,17 +1699,7 @@ func (c *chainClient) ReportTagCalculated(fragmentHash string) (string, error) {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	var fragmenthash pattern.FileHash
-
-	if len(fragmentHash) != pattern.FileHashLen {
-		return txhash, errors.New("invalid fragment hash")
-	}
-
-	for i := 0; i < len(fragmentHash); i++ {
-		fragmenthash[i] = types.U8(fragmentHash[i])
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CALCULATEREPORT, fragmenthash)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CALCULATEREPORT, teeSig, tagSigInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
 		c.SetChainState(false)

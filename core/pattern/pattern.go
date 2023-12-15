@@ -188,12 +188,11 @@ const (
 	MINER_STATE_LOCK     = "lock"
 )
 
-// 0:Full 1:Certifier 2:Verifier 3:Marker
+// 0:Full 1:Verifier 2:Marker
 const (
-	TeeType_Full      uint8 = 0
-	TeeType_Certifier uint8 = 1
-	TeeType_Verifier  uint8 = 2
-	TeeType_Marker    uint8 = 3
+	TeeType_Full     uint8 = 0
+	TeeType_Verifier uint8 = 1
+	TeeType_Marker   uint8 = 2
 )
 
 const (
@@ -213,6 +212,7 @@ const (
 	SIZE_1KiB = 1024
 	SIZE_1MiB = 1024 * SIZE_1KiB
 	SIZE_1GiB = 1024 * SIZE_1MiB
+	SIZE_1TiB = 1024 * SIZE_1GiB
 )
 
 const (
@@ -419,7 +419,7 @@ type TeeWorkerMap struct {
 	PeerId      PeerId
 	BondStash   types.Option[types.AccountID]
 	EndPoint    types.Bytes
-	TeeType     types.U8 // 0:Full 1:Certifier 2:Verifier 3:Marker
+	TeeType     types.U8 // 0:Full 1:Verifier 2:Marker
 }
 
 type RestoralOrderInfo struct {
@@ -457,6 +457,11 @@ type IdleSignInfo struct {
 	Accumulator        Accumulator
 	LastOperationBlock types.U32
 	PoisKey            PoISKeyInfo
+}
+type TagSigInfo struct {
+	Miner    types.AccountID
+	Filehash FileHash
+	TeeAcc   types.AccountID
 }
 
 // --------------------customer-----------------
@@ -497,7 +502,7 @@ type TeeInfo struct {
 	PeerId       []byte
 	StashAccount string
 	EndPoint     string
-	TeeType      uint8 // 0:Full 1:Certifier 2:Verifier 3:Marker
+	TeeType      uint8 // 0:Full 1:Verifier 2:Marker
 }
 
 type RewardsType struct {
