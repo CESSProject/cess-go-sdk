@@ -1463,7 +1463,7 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 	}
 }
 
-func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, tee_acc []byte) (string, error) {
+func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1480,7 +1480,10 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pa
 	if !c.GetChainState() {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
-
+	tee_acc, err := utils.ParsingPublickey(teeWorkAcc)
+	if err != nil {
+		return txhash, errors.Wrap(err, fmt.Sprintf("[ParsingPublickey(%s)]", teeWorkAcc))
+	}
 	acc, err := types.NewAccountID(tee_acc)
 	if err != nil {
 		return txhash, errors.Wrap(err, "[NewAccountID]")
@@ -1572,7 +1575,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pa
 	}
 }
 
-func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, tee_acc []byte) (string, error) {
+func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1588,6 +1591,10 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign
 
 	if !c.GetChainState() {
 		return txhash, pattern.ERR_RPC_CONNECTION
+	}
+	tee_acc, err := utils.ParsingPublickey(teeWorkAcc)
+	if err != nil {
+		return txhash, errors.Wrap(err, fmt.Sprintf("[ParsingPublickey(%s)]", teeWorkAcc))
 	}
 
 	acc, err := types.NewAccountID(tee_acc)

@@ -90,9 +90,9 @@ type SDK interface {
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
 	// CertIdleSpace
-	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, tee_acc []byte) (string, error)
+	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error)
 	// ReplaceIdleSpace
-	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, tee_acc []byte) (string, error)
+	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error)
 	// ReportTagCalculated
 	ReportTagCalculated(teeSig pattern.TeeSignature, tagSigInfo pattern.TagSigInfo) (string, error)
 
