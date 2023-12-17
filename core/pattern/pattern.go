@@ -186,6 +186,14 @@ const (
 	MINER_STATE_FROZEN   = "frozen"
 	MINER_STATE_EXIT     = "exit"
 	MINER_STATE_LOCK     = "lock"
+	MINER_STATE_OFFLINE  = "offline"
+)
+
+// 0:Full 1:Verifier 2:Marker
+const (
+	TeeType_Full     uint8 = 0
+	TeeType_Verifier uint8 = 1
+	TeeType_Marker   uint8 = 2
 )
 
 const (
@@ -205,6 +213,7 @@ const (
 	SIZE_1KiB = 1024
 	SIZE_1MiB = 1024 * SIZE_1KiB
 	SIZE_1GiB = 1024 * SIZE_1MiB
+	SIZE_1TiB = 1024 * SIZE_1GiB
 )
 
 const (
@@ -406,11 +415,12 @@ type ServiceProveInfo struct {
 	VerifyResult types.Option[bool]
 }
 
-type TeeWorkerInfo struct {
-	PeerId    PeerId
-	BondStash types.Option[types.AccountID]
-	EndPoint  types.Bytes
-	TeeType   types.U8 // 0:Full 1:Certifier 2:Verifier 3:Marker
+type TeeWorkerMap struct {
+	WorkAccount types.AccountID
+	PeerId      PeerId
+	BondStash   types.Option[types.AccountID]
+	EndPoint    types.Bytes
+	TeeType     types.U8 // 0:Full 1:Verifier 2:Marker
 }
 
 type RestoralOrderInfo struct {
@@ -449,6 +459,11 @@ type IdleSignInfo struct {
 	LastOperationBlock types.U32
 	PoisKey            PoISKeyInfo
 }
+type TagSigInfo struct {
+	Miner    types.AccountID
+	Filehash FileHash
+	TeeAcc   types.AccountID
+}
 
 // --------------------customer-----------------
 type IdleFileMeta struct {
@@ -483,11 +498,12 @@ type MinerSnapshot struct {
 	Service_space string
 }
 
-type TeeWorkerSt struct {
-	Peer_id      []byte
+type TeeInfo struct {
+	WorkAccount  string
+	PeerId       []byte
 	StashAccount string
 	EndPoint     string
-	// tee_type
+	TeeType      uint8 // 0:Full 1:Verifier 2:Marker
 }
 
 type RewardsType struct {
