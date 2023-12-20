@@ -277,6 +277,48 @@ func (c *chainClient) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInf
 	return data, nil
 }
 
+func (c *chainClient) QueryPendingReplacements(puk []byte) (types.U128, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U128
+
+	acc, err := types.NewAccountID(puk)
+	if err != nil {
+		return data, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return data, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.PENDINGREPLACE, owner)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.PENDINGREPLACE, err)
+		c.SetChainState(false)
+		return data, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.PENDINGREPLACE, err)
+		c.SetChainState(false)
+		return data, err
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) {
 	c.lock.Lock()
 	defer func() {

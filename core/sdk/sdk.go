@@ -56,9 +56,6 @@ type SDK interface {
 	QueryFileMetadata(fid string) (pattern.FileMetadata, error)
 	// QueryFileMetadataByBlock queries the metadata of the roothash file.
 	QueryFileMetadataByBlock(fid string, block uint64) (pattern.FileMetadata, error)
-	// QueryPendingReplacements queries the amount of idle data that can be replaced
-	//   Tip: accountID can only be a storage node account
-	QueryPendingReplacements(accountID []byte) (types.U128, error)
 	// QueryRestoralOrder queries a restore order info.
 	QueryRestoralOrder(roothash string) (pattern.RestoralOrderInfo, error)
 	QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error)
@@ -147,6 +144,9 @@ type SDK interface {
 	QueryRestoralTarget(accountID []byte) (pattern.RestoralTargetInfo, error)
 	// QueryRestoralTargetList queries the space recovery information of all exited storage nodes
 	QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error)
+	// QueryPendingReplacements queries the amount of idle data that can be replaced
+	//   Tip: accountID can only be a storage node account
+	QueryPendingReplacements(accountID []byte) (types.U128, error)
 
 	// Sminer-Extrinsics
 
