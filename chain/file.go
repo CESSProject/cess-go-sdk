@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/CESSProject/cess-go-sdk/utils"
 	keyring "github.com/CESSProject/go-keyring"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/pkg/errors"

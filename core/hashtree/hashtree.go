@@ -14,7 +14,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/cbergoon/merkletree"
 )
 

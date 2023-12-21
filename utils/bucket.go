@@ -25,7 +25,11 @@ func CheckBucketName(name string) bool {
 		return false
 	}
 
-	if strings.Contains(name, "..") {
+	if strings.Contains(name, " ") {
+		return false
+	}
+
+	if strings.Count(name, ".") > 2 {
 		return false
 	}
 
