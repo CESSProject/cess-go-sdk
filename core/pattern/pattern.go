@@ -166,12 +166,6 @@ const (
 	RPC_NET_Listening = "net_listening"
 )
 
-const (
-	Name_Deoss  = "deoss"
-	Name_Sminer = "bucket"
-	Name_SDK    = "client"
-)
-
 const DirMode = 0644
 
 const (

@@ -157,7 +157,7 @@ type SDK interface {
 	// RegisterSminerAssignStaking
 	RegisterSminerAssignStaking(beneficiaryAcc string, peerId []byte, stakingAcc string, tib_count uint32) (string, error)
 	// RegisterSminerPOISKey register the pois key of sminer
-	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, error)
+	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error)
 	// ExitSminer exit mining
 	ExitSminer(miner string) (string, error)
 	// UpdateEarningsAcc update earnings account.
