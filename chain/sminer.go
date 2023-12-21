@@ -1263,7 +1263,7 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 	}
 }
 
-func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error) {
+func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1292,7 +1292,7 @@ func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pa
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTERPOISKEY, poisKey, sign, *teeWorkAccount)
+	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTERPOISKEY, poisKey, teeSignWithAcc, teeSign, *teeWorkAccount)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
 		c.SetChainState(false)

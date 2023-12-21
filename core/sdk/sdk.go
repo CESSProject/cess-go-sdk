@@ -87,9 +87,9 @@ type SDK interface {
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
 	// CertIdleSpace
-	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error)
+	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error)
 	// ReplaceIdleSpace
-	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error)
+	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error)
 	// ReportTagCalculated
 	ReportTagCalculated(teeSig pattern.TeeSignature, tagSigInfo pattern.TagSigInfo) (string, error)
 
@@ -157,7 +157,7 @@ type SDK interface {
 	// RegisterSminerAssignStaking
 	RegisterSminerAssignStaking(beneficiaryAcc string, peerId []byte, stakingAcc string, tib_count uint32) (string, error)
 	// RegisterSminerPOISKey register the pois key of sminer
-	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error)
+	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error)
 	// ExitSminer exit mining
 	ExitSminer(miner string) (string, error)
 	// UpdateEarningsAcc update earnings account.

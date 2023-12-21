@@ -1421,7 +1421,7 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 	}
 }
 
-func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error) {
+func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1447,7 +1447,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pa
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CERTIDLESPACE, idleSignInfo, sign, *acc)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CERTIDLESPACE, idleSignInfo, teeSignWithAcc, teeSign, *acc)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
 		c.SetChainState(false)
@@ -1533,7 +1533,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pa
 	}
 }
 
-func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign pattern.TeeSignature, teeWorkAcc string) (string, error) {
+func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1560,7 +1560,7 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, sign
 		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEIDLESPACE, idleSignInfo, sign, *acc)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEIDLESPACE, idleSignInfo, teeSignWithAcc, teeSign, *acc)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
 		c.SetChainState(false)
