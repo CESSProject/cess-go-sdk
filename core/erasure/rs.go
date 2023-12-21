@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
-	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/klauspost/reedsolomon"
 )
 

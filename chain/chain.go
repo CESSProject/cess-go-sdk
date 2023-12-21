@@ -22,7 +22,7 @@ import (
 
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/core/sdk"
-	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/CESSProject/cess-go-sdk/utils"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/retriever"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/state"
@@ -154,7 +154,13 @@ func (c *chainClient) ReconnectRPC() error {
 		}
 		c.api = nil
 	}
-	c.api, c.metadata, c.runtimeVersion, c.keyEvents, c.eventRetriever, c.genesisHash, c.currentRpcAddr, err = reconnectChainSDK(c.rpcAddr)
+	c.api,
+		c.metadata,
+		c.runtimeVersion,
+		c.keyEvents,
+		c.eventRetriever,
+		c.genesisHash,
+		c.currentRpcAddr, err = reconnectChainSDK(c.currentRpcAddr, c.rpcAddr)
 	if err != nil {
 		return err
 	}
@@ -222,7 +228,7 @@ func (c *chainClient) Verify(msg []byte, sig []byte) (bool, error) {
 	return signature.Verify(msg, sig, c.keyring.URI)
 }
 
-func reconnectChainSDK(rpcs []string) (
+func reconnectChainSDK(oldRpc string, rpcs []string) (
 	*gsrpc.SubstrateAPI,
 	*types.Metadata,
 	*types.RuntimeVersion,
@@ -235,15 +241,25 @@ func reconnectChainSDK(rpcs []string) (
 	var err error
 	var rpcAddr string
 	var api *gsrpc.SubstrateAPI
-
+	var rpcaddrs = make([]string, 0)
+	utils.RandSlice(rpcs)
+	for i := 0; i < len(rpcs); i++ {
+		if rpcs[i] != oldRpc {
+			rpcaddrs = append(rpcaddrs, rpcs[i])
+		}
+	}
+	rpcaddrs = append(rpcaddrs, oldRpc)
 	defer log.SetOutput(os.Stdout)
 	log.SetOutput(io.Discard)
-	for i := 0; i < len(rpcs); i++ {
-		api, err = gsrpc.NewSubstrateAPI(rpcs[i])
+	for i := 0; i < len(rpcaddrs); i++ {
+		if oldRpc == rpcaddrs[i] {
+			continue
+		}
+		api, err = gsrpc.NewSubstrateAPI(rpcaddrs[i])
 		if err != nil {
 			continue
 		}
-		rpcAddr = rpcs[i]
+		rpcAddr = rpcaddrs[i]
 	}
 	if api == nil {
 		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION

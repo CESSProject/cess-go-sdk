@@ -9,6 +9,7 @@ package utils
 
 import (
 	"math/rand"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -49,4 +50,23 @@ func RandStr(n int) string {
 		remain--
 	}
 	return sb.String()
+}
+
+func RandSlice(slice interface{}) {
+	rv := reflect.ValueOf(slice)
+	if rv.Type().Kind() != reflect.Slice {
+		return
+	}
+
+	length := rv.Len()
+	if length < 2 {
+		return
+	}
+
+	swap := reflect.Swapper(slice)
+	for i := length - 1; i >= 0; i-- {
+		j := rand.New(rand.NewSource(time.Now().Unix())).Intn(length)
+		swap(i, j)
+	}
+	return
 }

@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	// cess libs
-	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/CESSProject/cess-go-sdk/utils"
 )
 
 // Test cases for [TestNumsToByteStr] function, testing [utils.NumsToByteStr].

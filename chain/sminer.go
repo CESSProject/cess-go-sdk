@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
-	"github.com/CESSProject/cess-go-sdk/core/utils"
+	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
@@ -1005,8 +1005,6 @@ func (c *chainClient) RegisterSminer(earnings string, peerId []byte, pledge uint
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	c.SetSDKName(pattern.Name_Sminer)
-
 	var peerid pattern.PeerId
 	if len(peerid) != len(peerId) {
 		return txhash, fmt.Errorf("invalid peerid: %v", peerId)
@@ -1141,8 +1139,6 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	c.SetSDKName(pattern.Name_Sminer)
-
 	var peerid pattern.PeerId
 	if len(peerid) != len(peerId) {
 		return txhash, fmt.Errorf("invalid peerid: %v", peerId)
@@ -1267,7 +1263,7 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 	}
 }
 
-func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pattern.TeeSignature) (string, error) {
+func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1287,9 +1283,16 @@ func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, sign pa
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	c.SetSDKName(pattern.Name_Sminer)
+	pubkey, err := utils.ParsingPublickey(teeWorkAcc)
+	if err != nil {
+		return txhash, fmt.Errorf("[DecodeToPub(%s)] %v", teeWorkAcc, err)
+	}
+	teeWorkAccount, err := types.NewAccountID(pubkey)
+	if err != nil {
+		return txhash, errors.Wrap(err, "[NewAccountID]")
+	}
 
-	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTERPOISKEY, poisKey, sign)
+	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTERPOISKEY, poisKey, teeSignWithAcc, teeSign, *teeWorkAccount)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
 		c.SetChainState(false)
