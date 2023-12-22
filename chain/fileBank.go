@@ -1739,7 +1739,7 @@ func (c *chainClient) ReportTagCalculated(teeSig pattern.TeeSignature, tagSigInf
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				txhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_IncreaseDeclarationSpace(status.AsInBlock)
+				_, err = c.RetrieveEvent_FileBank_CalculateReport(status.AsInBlock)
 				return txhash, err
 			}
 		case err = <-sub.Err():
