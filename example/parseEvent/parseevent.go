@@ -11,7 +11,7 @@ import (
 // Substrate well-known mnemonic:
 //
 //	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
+var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk" //
 
 var RPC_ADDRS = []string{
 	//devnet
@@ -33,9 +33,10 @@ func main() {
 		panic(err)
 	}
 	// RetrieveEvent_FileBank_CalculateReport
-	bhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(102820)
+	bhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(72745)
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Println(sdk.RetrieveEvent_FileBank_CalculateReport(bhash))
 }

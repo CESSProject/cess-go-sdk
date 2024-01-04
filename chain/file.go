@@ -26,6 +26,7 @@ import (
 func (c *chainClient) StoreFile(url, file, bucket string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
+
 		return "", err
 	}
 

@@ -770,7 +770,7 @@ func (c *chainClient) IncreaseStakingAmount(miner string, tokens *big.Int) (stri
 func (c *chainClient) IncreaseStorageNodeStakingAmount(miner string, token string) (string, error) {
 	tokens, ok := new(big.Int).SetString(token+pattern.TokenPrecision_CESS, 10)
 	if !ok {
-		return "", fmt.Errorf("Invalid tokens: %s", token)
+		return "", fmt.Errorf("invalid tokens: %s", token)
 	}
 	return c.IncreaseStakingAmount(miner, tokens)
 }
