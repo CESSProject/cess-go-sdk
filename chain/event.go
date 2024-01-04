@@ -906,18 +906,14 @@ func (c *chainClient) RetrieveEvent_FileBank_CalculateReport(blockhash types.Has
 		return result, err
 	}
 	for _, e := range events {
-		fmt.Println(e.Name)
 		if e.Name == event.FileBankCalculateReport {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
-					fmt.Println("1")
 					vf := reflect.ValueOf(v.Value)
 					if vf.Len() > 0 {
-						fmt.Println("2")
 						allValue := fmt.Sprintf("%v", vf.Index(0))
 						if strings.Contains(v.Name, "AccountId32") {
 							temp := strings.Split(allValue, "] ")
-							fmt.Println("3: ", temp)
 							puk := make([]byte, types.AccountIDLen)
 							for _, v := range temp {
 								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
@@ -932,17 +928,13 @@ func (c *chainClient) RetrieveEvent_FileBank_CalculateReport(blockhash types.Has
 									}
 								}
 							}
-							fmt.Println("4: ", puk)
-							fmt.Println("4: ", c.GetSignatureAccPulickey())
 							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
 								continue
 							}
-							fmt.Println("5")
 							accid, err := types.NewAccountID(puk)
 							if err != nil {
 								continue
 							}
-							fmt.Println("6")
 							result.Miner = *accid
 							return result, nil
 						}
