@@ -210,16 +210,18 @@ func (c *chainClient) RegisterDeOSS(peerId []byte, domain string) (string, error
 		return txhash, errors.New("register deoss: invalid domain")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	call, err = types.NewCall(c.metadata, pattern.TX_OSS_REGISTER, peerid, types.NewBytes([]byte(domain)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
 		c.SetChainState(false)
 		return txhash, err
 	}
 
-	call, err = types.NewCall(c.metadata, pattern.TX_OSS_REGISTER, peerid, types.NewBytes([]byte(domain)))
+	ext := types.NewExtrinsic(call)
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_REGISTER, err)
 		c.SetChainState(false)
 		return txhash, err
 	}
@@ -250,8 +252,6 @@ func (c *chainClient) RegisterDeOSS(peerId []byte, domain string) (string, error
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -259,7 +259,7 @@ func (c *chainClient) RegisterDeOSS(peerId []byte, domain string) (string, error
 		c.SetChainState(false)
 		return txhash, err
 	}
-
+	<-c.txTicker.C
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -339,13 +339,6 @@ func (c *chainClient) UpdateDeOSS(peerId string, domain string) (string, error) 
 		return txhash, errors.New("register deoss: invalid domain name")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
-		c.SetChainState(false)
-		return txhash, err
-	}
-
 	call, err = types.NewCall(c.metadata, pattern.TX_OSS_UPDATE, peerid, types.NewBytes([]byte(domain)))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
@@ -353,6 +346,14 @@ func (c *chainClient) UpdateDeOSS(peerId string, domain string) (string, error) 
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
+		c.SetChainState(false)
+		return txhash, err
+	}
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_UPDATE, err)
@@ -373,8 +374,6 @@ func (c *chainClient) UpdateDeOSS(peerId string, domain string) (string, error) 
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -382,6 +381,8 @@ func (c *chainClient) UpdateDeOSS(peerId string, domain string) (string, error) 
 		c.SetChainState(false)
 		return txhash, err
 	}
+
+	<-c.txTicker.C
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -450,6 +451,8 @@ func (c *chainClient) ExitDeOSS() (string, error) {
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_DESTROY, err)
@@ -478,8 +481,6 @@ func (c *chainClient) ExitDeOSS() (string, error) {
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -487,6 +488,8 @@ func (c *chainClient) ExitDeOSS() (string, error) {
 		c.SetChainState(false)
 		return txhash, err
 	}
+
+	<-c.txTicker.C
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -578,6 +581,8 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
@@ -605,8 +610,6 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -614,6 +617,8 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 		c.SetChainState(false)
 		return txhash, err
 	}
+
+	<-c.txTicker.C
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -687,6 +692,8 @@ func (c *chainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, pubkey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_OSS_AUTHORIZE, err)
@@ -714,8 +721,6 @@ func (c *chainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -723,6 +728,8 @@ func (c *chainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
 		c.SetChainState(false)
 		return txhash, err
 	}
+
+	<-c.txTicker.C
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
