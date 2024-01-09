@@ -236,6 +236,8 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_BUYSPACE, err)
@@ -263,8 +265,6 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -272,6 +272,8 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 		c.SetChainState(false)
 		return txhash, err
 	}
+
+	<-c.txTicker.C
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -344,6 +346,8 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_EXPANSIONSPACE, err)
@@ -371,8 +375,6 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -380,6 +382,8 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 		c.SetChainState(false)
 		return txhash, err
 	}
+
+	<-c.txTicker.C
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -452,6 +456,8 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_STORAGE_RENEWALSPACE, err)
@@ -479,8 +485,6 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -488,6 +492,8 @@ func (c *chainClient) RenewalSpace(days uint32) (string, error) {
 		c.SetChainState(false)
 		return txhash, err
 	}
+
+	<-c.txTicker.C
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)

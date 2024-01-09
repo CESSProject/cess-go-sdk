@@ -22,8 +22,10 @@ const TokenPrecision_CESS = "000000000000"
 
 const StakingStakePerTiB = 4000
 
+const BlockIntervalSec = 6
+
 // BlockInterval is the time interval for generating blocks, in seconds
-const BlockInterval = time.Second * time.Duration(6)
+const BlockInterval = time.Second * time.Duration(BlockIntervalSec)
 
 const MaxSubmitedIdleFileMeta = 30
 

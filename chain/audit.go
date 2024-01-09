@@ -105,6 +105,8 @@ func (c *chainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOF, err)
@@ -132,8 +134,6 @@ func (c *chainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -141,7 +141,7 @@ func (c *chainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 		c.SetChainState(false)
 		return txhash, err
 	}
-
+	<-c.txTicker.C
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -209,6 +209,8 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOF, err)
@@ -236,8 +238,6 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -245,7 +245,7 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		c.SetChainState(false)
 		return txhash, err
 	}
-
+	<-c.txTicker.C
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -318,6 +318,8 @@ func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, re
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, err)
@@ -345,8 +347,6 @@ func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, re
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -354,7 +354,7 @@ func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, re
 		c.SetChainState(false)
 		return txhash, err
 	}
-
+	<-c.txTicker.C
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -427,6 +427,8 @@ func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature patt
 		return txhash, err
 	}
 
+	ext := types.NewExtrinsic(call)
+
 	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, err)
@@ -454,8 +456,6 @@ func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature patt
 		TransactionVersion: c.runtimeVersion.TransactionVersion,
 	}
 
-	ext := types.NewExtrinsic(call)
-
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
@@ -463,7 +463,7 @@ func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature patt
 		c.SetChainState(false)
 		return txhash, err
 	}
-
+	<-c.txTicker.C
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {

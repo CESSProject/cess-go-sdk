@@ -17,7 +17,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
@@ -36,8 +35,9 @@ import (
 
 type chainClient struct {
 	lock           *sync.Mutex
+	chainStLock    *sync.Mutex
+	txTicker       *time.Ticker
 	api            *gsrpc.SubstrateAPI
-	chainState     *atomic.Bool
 	metadata       *types.Metadata
 	runtimeVersion *types.RuntimeVersion
 	eventRetriever retriever.EventRetriever
@@ -51,6 +51,7 @@ type chainClient struct {
 	networkEnv     string
 	signatureAcc   string
 	name           string
+	chainState     bool
 }
 
 var _ sdk.SDK = (*chainClient)(nil)
@@ -70,7 +71,8 @@ func NewChainClient(
 		err         error
 		chainClient = &chainClient{
 			lock:        new(sync.Mutex),
-			chainState:  new(atomic.Bool),
+			chainStLock: new(sync.Mutex),
+			txTicker:    time.NewTicker(pattern.BlockInterval),
 			rpcAddr:     rpcs,
 			packingTime: t,
 			name:        serviceName,
@@ -181,11 +183,16 @@ func (c *chainClient) SetSDKName(name string) {
 }
 
 func (c *chainClient) SetChainState(state bool) {
-	c.chainState.Store(state)
+	c.chainStLock.Lock()
+	c.chainState = state
+	c.chainStLock.Unlock()
 }
 
 func (c *chainClient) GetChainState() bool {
-	return c.chainState.Load()
+	c.chainStLock.Lock()
+	st := c.chainState
+	c.chainStLock.Unlock()
+	return st
 }
 
 func (c *chainClient) GetSignatureAcc() string {
