@@ -9,7 +9,7 @@ package event
 
 const (
 	// AUDIT
-	AuditVerifyProof               = "Audit.VerifyProof "
+	AuditVerifyProof               = "Audit.VerifyProof"
 	AuditSubmitProof               = "Audit.SubmitProof"
 	AuditGenerateChallenge         = "Audit.GenerateChallenge"
 	AuditSubmitIdleProof           = "Audit.SubmitIdleProof"
@@ -56,7 +56,7 @@ const (
 	SminerReceive                  = "Sminer.Receive"
 	SminerMinerExitPrep            = "Sminer.MinerExitPrep"
 	SminerWithdraw                 = "Sminer.Withdraw"
-	SminerIncreaseDeclarationSpace = "Sminer.IncreaseDeclarationSpace "
+	SminerIncreaseDeclarationSpace = "Sminer.IncreaseDeclarationSpace"
 
 	// StorageHandler
 	StorageHandlerBuySpace       = "StorageHandler.BuySpace"
