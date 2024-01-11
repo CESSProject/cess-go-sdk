@@ -307,9 +307,6 @@ type MinerReward struct {
 
 type RewardOrder struct {
 	OrderReward types.U128
-	EachShare   types.U128
-	AwardCount  types.U8
-	HasIssued   types.Bool
 }
 
 type FileMetadata struct {
