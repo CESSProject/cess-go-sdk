@@ -14,7 +14,7 @@ The go sdk implementation of the CESS network, which provides RPC calls, status 
 
 ## 📝 Reporting Vulnerability
 
-If you find any system errors or you have better suggestions, please submit an issue or submit a pull request. You can also join the [CESS discord](https://discord.gg/mYHTMfBwNS) to communicate with us.
+If you find any system errors or you have better suggestions, please submit an issue or PR, or join the [CESS discord](https://discord.gg/mYHTMfBwNS) to communicate with us.
 
 ## 📢 Announcement
 **CESS test network rpc endpoints**
