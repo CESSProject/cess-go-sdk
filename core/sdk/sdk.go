@@ -418,4 +418,6 @@ type SDK interface {
 	RetrieveAllEvent_FileBank_StorageCompleted(blockhash types.Hash) ([]string, error)
 	//
 	RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]event.AllDeleteFileEvent, error)
+	//
+	RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error)
 }

@@ -1795,3 +1795,25 @@ func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 	}
 	return result, nil
 }
+
+func (c *chainClient) RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error) {
+	var flag bool
+	var systemEvents = make([]string, 0)
+	var extrinsicsEvents = make([]string, 0)
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return systemEvents, extrinsicsEvents, err
+	}
+	for _, e := range events {
+		fmt.Println("event name: ", e.Name)
+		if e.Name == "System.ExtrinsicSuccess" {
+			flag = true
+		}
+		if flag {
+			extrinsicsEvents = append(extrinsicsEvents, e.Name)
+		} else {
+			systemEvents = append(systemEvents, e.Name)
+		}
+	}
+	return systemEvents, extrinsicsEvents, nil
+}
