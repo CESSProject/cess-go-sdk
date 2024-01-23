@@ -214,7 +214,7 @@ type SDK interface {
 	// QueryAllTeeInfo queries the information of all tee workers.
 	QueryAllTeeInfo() ([]pattern.TeeInfo, error)
 	// QueryTeeWorkEndpoint queries the endpoint of tee workers.
-	QueryTeeWorkEndpoint() (string, error)
+	QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (string, error)
 
 	// System
 
