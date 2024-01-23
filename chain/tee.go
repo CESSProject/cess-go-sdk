@@ -196,7 +196,7 @@ func (c *chainClient) QueryAllTeeInfo() ([]pattern.TeeInfo, error) {
 	return results, nil
 }
 
-func (c *chainClient) QueryTeeWorkEndpoint() (string, error) {
+func (c *chainClient) QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -209,7 +209,11 @@ func (c *chainClient) QueryTeeWorkEndpoint() (string, error) {
 		return "", pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEEndpoints)
+	val, err := codec.Encode(workPuk)
+	if err != nil {
+		return "", errors.Wrap(err, "[Encode]")
+	}
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEEndpoints, val)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEEndpoints, err)
 		return "", errors.Wrap(err, "[CreateStorageKey]")
