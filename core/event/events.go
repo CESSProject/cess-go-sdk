@@ -19,7 +19,7 @@ import (
 // ------------------------Audit-------------------
 type Event_VerifyProof struct {
 	Phase     types.Phase
-	TeeWorker types.AccountID
+	TeeWorker pattern.WorkerPublicKey
 	Miner     types.AccountID
 	Topics    []types.Hash
 }
@@ -49,7 +49,7 @@ type Event_SubmitServiceProof struct {
 
 type Event_SubmitIdleVerifyResult struct {
 	Phase  types.Phase
-	Tee    types.AccountID
+	Tee    pattern.WorkerPublicKey
 	Miner  types.AccountID
 	Result types.Bool
 	Topics []types.Hash
@@ -57,7 +57,7 @@ type Event_SubmitIdleVerifyResult struct {
 
 type Event_SubmitServiceVerifyResult struct {
 	Phase  types.Phase
-	Tee    types.AccountID
+	Tee    pattern.WorkerPublicKey
 	Miner  types.AccountID
 	Result types.Bool
 	Topics []types.Hash
@@ -340,6 +340,49 @@ type Event_Exit struct {
 	Topics []types.Hash
 }
 
+type Event_MasterKeyLaunched struct {
+	Phase  types.Phase
+	Topics []types.Hash
+}
+
+type Event_KeyfairyAdded struct {
+	Phase               types.Phase
+	Pubkey              pattern.WorkerPublicKey
+	AttestationProvider types.Option[types.U8]
+	ConfidenceLevel     types.U8
+	Topics              []types.Hash
+}
+
+type Event_WorkerUpdated struct {
+	Phase               types.Phase
+	Pubkey              pattern.WorkerPublicKey
+	AttestationProvider types.Option[types.U8]
+	ConfidenceLevel     types.U8
+	Topics              []types.Hash
+}
+
+type Event_MasterKeyRotated struct {
+	Phase        types.Phase
+	RotationId   types.U64
+	MasterPubkey pattern.WorkerPublicKey
+	Topics       []types.Hash
+}
+
+type Event_MasterKeyRotationFailed struct {
+	Phase              types.Phase
+	RotationLock       types.Option[types.U64]
+	KeyfairyRotationId types.U64
+	Topics             []types.Hash
+}
+
+type Event_MinimumCesealVersionChangedTo struct {
+	Phase  types.Phase
+	Elem1  types.U32
+	Elem2  types.U32
+	Elem3  types.U32
+	Topics []types.Hash
+}
+
 // ------------------------Oss---------------------------
 type Event_OssRegister struct {
 	Phase    types.Phase
@@ -477,6 +520,13 @@ type EventRecords struct {
 	TeeWorker_RegistrationTeeWorker []Event_RegistrationTeeWorker
 	TeeWorker_UpdatePeerId          []Event_UpdatePeerId
 	TeeWorker_Exit                  []Event_Exit
+	TeeWorker_MasterKeyLaunched     []Event_MasterKeyLaunched
+	TeeWorker_KeyfairyAdded         []Event_KeyfairyAdded
+
+	TeeWorker_WorkerUpdated                 []Event_WorkerUpdated
+	TeeWorker_MasterKeyRotated              []Event_MasterKeyRotated
+	TeeWorker_MasterKeyRotationFailed       []Event_MasterKeyRotationFailed
+	TeeWorker_MinimumCesealVersionChangedTo []Event_MinimumCesealVersionChangedTo
 
 	// system
 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized

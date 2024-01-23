@@ -37,7 +37,7 @@ func main() {
 	sdk, err := cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),
-		//cess.Mnemonic(MY_MNEMONIC),
+		cess.Mnemonic(MY_MNEMONIC),
 		cess.TransactionTimeout(time.Second*10),
 	)
 	if err != nil {

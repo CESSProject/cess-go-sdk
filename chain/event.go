@@ -230,7 +230,7 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types
 							if err != nil {
 								continue
 							}
-							result.Tee = *accid
+							result.Miner = *accid
 							return result, nil
 						}
 					}
@@ -277,7 +277,7 @@ func (c *chainClient) RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash ty
 							if err != nil {
 								continue
 							}
-							result.Tee = *accid
+							result.Miner = *accid
 							return result, nil
 						}
 					}

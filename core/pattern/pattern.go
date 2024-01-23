@@ -238,6 +238,10 @@ const (
 	SpaceChallengeParamLen = 8
 	BloomFilterLen         = 256
 	MaxSegmentNum          = 1000
+	WorkerPublicKeyLen     = 32
+	MasterPublicKeyLen     = 32
+	EcdhPublicKeyLen       = 32
+	TeeSigLen              = 64
 )
 
 type FileHash [FileHashLen]types.U8
@@ -250,6 +254,10 @@ type TeeSignature [TeeSignatureLen]types.U8
 type Accumulator [AccumulatorLen]types.U8
 type SpaceChallengeParam [SpaceChallengeParamLen]types.U64
 type BloomFilter [BloomFilterLen]types.U64
+type WorkerPublicKey [WorkerPublicKeyLen]types.U8
+type MasterPublicKey [MasterPublicKeyLen]types.U8
+type EcdhPublicKey [EcdhPublicKeyLen]types.U8
+type TeeSig [TeeSigLen]types.U8
 
 type SysProperties struct {
 	Ss58Format    types.Bytes
@@ -287,7 +295,7 @@ type MinerInfo struct {
 	LockSpace          types.U128
 	SpaceProofInfo     types.Option[SpaceProofInfo]
 	ServiceBloomFilter BloomFilter
-	TeeSignature       TeeSignature
+	TeeSig             TeeSig
 }
 
 type SpaceProofInfo struct {
@@ -393,7 +401,7 @@ type MinerSnapShot struct {
 	ServiceSpace       types.U128
 	ServiceBloomFilter BloomFilter
 	SpaceProofInfo     SpaceProofInfo
-	TeeSignature       TeeSignature
+	TeeSig             TeeSig
 }
 
 type IdleProveInfo struct {
@@ -408,12 +416,16 @@ type ServiceProveInfo struct {
 	VerifyResult types.Option[bool]
 }
 
-type TeeWorkerMap struct {
-	WorkAccount types.AccountID
-	PeerId      PeerId
-	BondStash   types.Option[types.AccountID]
-	EndPoint    types.Bytes
-	TeeType     types.U8 // 0:Full 1:Verifier 2:Marker
+type TeeWorkerInfo struct {
+	Pubkey              WorkerPublicKey
+	EcdhPubkey          EcdhPublicKey
+	Version             types.U32
+	LastUpdated         types.U64
+	StashAccount        types.Option[types.AccountID]
+	AttestationProvider types.Option[types.U8]
+	ConfidenceLevel     types.U8
+	Features            []types.U32
+	Role                types.U8 // 0:Full 1:Verifier 2:Marker
 }
 
 type RestoralOrderInfo struct {
@@ -454,8 +466,13 @@ type IdleSignInfo struct {
 }
 type TagSigInfo struct {
 	Miner    types.AccountID
+	Digest   []DigestInfo
 	Filehash FileHash
-	TeeAcc   types.AccountID
+}
+
+type DigestInfo struct {
+	Fragment FileHash
+	TeePuk   WorkerPublicKey
 }
 
 // --------------------customer-----------------
@@ -492,11 +509,15 @@ type MinerSnapshot struct {
 }
 
 type TeeInfo struct {
-	WorkAccount  string
-	PeerId       []byte
-	StashAccount string
-	EndPoint     string
-	TeeType      uint8 // 0:Full 1:Verifier 2:Marker
+	Pubkey              string
+	EcdhPubkey          string
+	Version             uint32
+	LastUpdated         uint64
+	StashAccount        string
+	AttestationProvider uint8
+	ConfidenceLevel     uint8
+	Features            []uint32
+	WorkerRole          uint8 // 0:Full 1:Verifier 2:Marker
 }
 
 type RewardsType struct {

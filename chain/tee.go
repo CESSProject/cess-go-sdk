@@ -18,14 +18,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryTeeWorkerMap(puk []byte) (pattern.TeeWorkerMap, error) {
+func (c *chainClient) QueryTeeWorkerMap(puk []byte) (pattern.TeeWorkerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data pattern.TeeWorkerMap
+	var data pattern.TeeWorkerInfo
 
 	if !c.GetChainState() {
 		return data, pattern.ERR_RPC_CONNECTION
@@ -70,16 +70,26 @@ func (c *chainClient) QueryTeeInfo(puk []byte) (pattern.TeeInfo, error) {
 	if err != nil {
 		return data, err
 	}
-	data.EndPoint = string(teeWorkerInfo.EndPoint)
-	data.WorkAccount, _ = utils.EncodePublicKeyAsCessAccount(teeWorkerInfo.WorkAccount[:])
-	data.TeeType = uint8(teeWorkerInfo.TeeType)
-	data.PeerId = []byte(string(teeWorkerInfo.PeerId[:]))
-	if teeWorkerInfo.BondStash.HasValue() {
-		ok, val := teeWorkerInfo.BondStash.Unwrap()
-		if ok {
-			data.StashAccount, _ = utils.EncodePublicKeyAsCessAccount(val[:])
+	data.Pubkey = string(teeWorkerInfo.Pubkey[:])
+	data.EcdhPubkey = string(teeWorkerInfo.EcdhPubkey[:])
+	data.Version = uint32(teeWorkerInfo.Version)
+	data.LastUpdated = uint64(teeWorkerInfo.LastUpdated)
+	if teeWorkerInfo.StashAccount.HasValue() {
+		if ok, puk := teeWorkerInfo.StashAccount.Unwrap(); ok {
+			data.StashAccount, _ = utils.EncodePublicKeyAsCessAccount(puk[:])
 		}
 	}
+	if teeWorkerInfo.AttestationProvider.HasValue() {
+		if ok, val := teeWorkerInfo.AttestationProvider.Unwrap(); ok {
+			data.AttestationProvider = uint8(val)
+		}
+	}
+	data.ConfidenceLevel = uint8(teeWorkerInfo.ConfidenceLevel)
+	data.Features = make([]uint32, len(teeWorkerInfo.Features))
+	for i := 0; i < len(teeWorkerInfo.Features); i++ {
+		data.Features[i] = uint32(teeWorkerInfo.Features[i])
+	}
+	data.WorkerRole = uint8(teeWorkerInfo.Role)
 	return data, nil
 }
 
@@ -112,14 +122,14 @@ func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 	return []byte(string(data[:])), nil
 }
 
-func (c *chainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerMap, error) {
+func (c *chainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var list []pattern.TeeWorkerMap
+	var list []pattern.TeeWorkerInfo
 
 	if !c.GetChainState() {
 		return list, pattern.ERR_RPC_CONNECTION
@@ -138,7 +148,7 @@ func (c *chainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerMap, error) {
 
 	for _, elem := range set {
 		for _, change := range elem.Changes {
-			var teeWorker pattern.TeeWorkerMap
+			var teeWorker pattern.TeeWorkerInfo
 			if err := codec.Decode(change.StorageData, &teeWorker); err != nil {
 				fmt.Println(err)
 				continue
@@ -156,19 +166,26 @@ func (c *chainClient) QueryAllTeeInfo() ([]pattern.TeeInfo, error) {
 	}
 	var results = make([]pattern.TeeInfo, len(teelist))
 	for k, v := range teelist {
-		results[k].EndPoint = string(v.EndPoint[:])
-		results[k].PeerId = []byte(string(v.PeerId[:]))
-		results[k].TeeType = uint8(v.TeeType)
-		results[k].WorkAccount, _ = utils.EncodePublicKeyAsCessAccount(v.WorkAccount[:])
-		if v.BondStash.HasValue() {
-			ok, acc := v.BondStash.Unwrap()
-			if ok {
-				results[k].StashAccount, err = utils.EncodePublicKeyAsCessAccount(acc[:])
-				if err != nil {
-					return results, err
-				}
+		results[k].Pubkey = string(v.Pubkey[:])
+		results[k].EcdhPubkey = string(v.EcdhPubkey[:])
+		results[k].Version = uint32(v.Version)
+		results[k].LastUpdated = uint64(v.LastUpdated)
+		if v.StashAccount.HasValue() {
+			if ok, puk := v.StashAccount.Unwrap(); ok {
+				results[k].StashAccount, _ = utils.EncodePublicKeyAsCessAccount(puk[:])
 			}
 		}
+		if v.AttestationProvider.HasValue() {
+			if ok, val := v.AttestationProvider.Unwrap(); ok {
+				results[k].AttestationProvider = uint8(val)
+			}
+		}
+		results[k].ConfidenceLevel = uint8(v.ConfidenceLevel)
+		results[k].Features = make([]uint32, len(v.Features))
+		for i := 0; i < len(v.Features); i++ {
+			results[k].Features[i] = uint32(v.Features[i])
+		}
+		results[k].WorkerRole = uint8(v.Role)
 	}
 	return results, nil
 }
