@@ -1279,7 +1279,7 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 	}
 }
 
-func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error) {
+func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1299,16 +1299,7 @@ func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSign
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	pubkey, err := utils.ParsingPublickey(teeWorkAcc)
-	if err != nil {
-		return txhash, fmt.Errorf("[DecodeToPub(%s)] %v", teeWorkAcc, err)
-	}
-	teeWorkAccount, err := types.NewAccountID(pubkey)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTERPOISKEY, poisKey, teeSignWithAcc, teeSign, *teeWorkAccount)
+	call, err = types.NewCall(c.metadata, pattern.TX_SMINER_REGISTERPOISKEY, poisKey, teeSignWithAcc, teeSign, teePuk)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_SMINER_REGISTERPOISKEY, err)
 		c.SetChainState(false)

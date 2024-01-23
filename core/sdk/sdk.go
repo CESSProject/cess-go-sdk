@@ -37,10 +37,10 @@ type SDK interface {
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
 	// SubmitIdleProofResult submits the proof verification results of idle data to the chain
 	//   Tip: This method can only be used for storage nodes
-	SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error)
+	SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, sig pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error)
 	// SubmitServiceProofResult submits the proof verification results of service data to the chain
 	//   Tip: This method can only be used for storage nodes
-	SubmitServiceProofResult(result types.Bool, signature pattern.TeeSignature, bloomFilter pattern.BloomFilter, tee_acc []byte) (string, error)
+	SubmitServiceProofResult(result types.Bool, sign pattern.TeeSig, bloomFilter pattern.BloomFilter, teePuk pattern.WorkerPublicKey) (string, error)
 
 	// Filebank-State
 
@@ -87,11 +87,11 @@ type SDK interface {
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
 	// CertIdleSpace
-	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error)
+	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error)
 	// ReplaceIdleSpace
-	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error)
+	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error)
 	// ReportTagCalculated
-	ReportTagCalculated(teeSig pattern.TeeSignature, tagSigInfo pattern.TagSigInfo) (string, error)
+	ReportTagCalculated(teeSig pattern.TeeSig, tagSigInfo pattern.TagSigInfo) (string, error)
 
 	// Oss-State
 
@@ -157,7 +157,7 @@ type SDK interface {
 	// RegisterSminerAssignStaking
 	RegisterSminerAssignStaking(beneficiaryAcc string, peerId []byte, stakingAcc string, tib_count uint32) (string, error)
 	// RegisterSminerPOISKey register the pois key of sminer
-	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error)
+	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error)
 	// ExitSminer exit mining
 	ExitSminer(miner string) (string, error)
 	// UpdateEarningsAcc update earnings account.
@@ -204,13 +204,13 @@ type SDK interface {
 	// TeeWorker-State
 
 	// QueryTeeWorkerMap queries the information of the Tee worker.
-	QueryTeeWorkerMap(accountID []byte) (pattern.TeeWorkerMap, error)
+	QueryTeeWorkerMap(accountID []byte) (pattern.TeeWorkerInfo, error)
 	// QueryTeeInfo queries the information of the Tee worker.
 	QueryTeeInfo(accountID []byte) (pattern.TeeInfo, error)
 	// QueryTeePodr2Puk queries the public key of the TEE.
 	QueryTeePodr2Puk() ([]byte, error)
 	// QueryAllTeeWorkerMap queries the information of all tee workers.
-	QueryAllTeeWorkerMap() ([]pattern.TeeWorkerMap, error)
+	QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error)
 	// QueryAllTeeInfo queries the information of all tee workers.
 	QueryAllTeeInfo() ([]pattern.TeeInfo, error)
 
@@ -418,4 +418,6 @@ type SDK interface {
 	RetrieveAllEvent_FileBank_StorageCompleted(blockhash types.Hash) ([]string, error)
 	//
 	RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]event.AllDeleteFileEvent, error)
+	//
+	RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error)
 }

@@ -288,7 +288,7 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	}
 }
 
-func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, signature pattern.TeeSignature, tee_acc []byte) (string, error) {
+func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, sig pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -306,12 +306,7 @@ func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, re
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	teeacc, err := types.NewAccountID(tee_acc)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, totalProofHash, front, rear, accumulator, result, signature, *teeacc)
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, totalProofHash, front, rear, accumulator, result, sig, teePuk)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITIDLEPROOFRESULT, err)
 		c.SetChainState(false)
@@ -397,7 +392,7 @@ func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, re
 	}
 }
 
-func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature pattern.TeeSignature, bloomFilter pattern.BloomFilter, tee_acc []byte) (string, error) {
+func (c *chainClient) SubmitServiceProofResult(result types.Bool, sign pattern.TeeSig, bloomFilter pattern.BloomFilter, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -415,12 +410,7 @@ func (c *chainClient) SubmitServiceProofResult(result types.Bool, signature patt
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	teeacc, err := types.NewAccountID(tee_acc)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, result, signature, bloomFilter, *teeacc)
+	call, err := types.NewCall(c.metadata, pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, result, sign, bloomFilter, teePuk)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_AUDIT_SUBMITSERVICEPROOFRESULT, err)
 		c.SetChainState(false)

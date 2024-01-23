@@ -351,3 +351,7 @@ func (c *chainClient) VerifyPolkaSignatureWithBase58(account, msg, signature str
 	ok := pub.Verify([]byte(message), sign_bytes)
 	return ok, nil
 }
+
+func subkeytest() {
+
+}

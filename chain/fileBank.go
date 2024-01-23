@@ -1437,7 +1437,7 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 	}
 }
 
-func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error) {
+func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1454,16 +1454,8 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign
 	if !c.GetChainState() {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
-	tee_acc, err := utils.ParsingPublickey(teeWorkAcc)
-	if err != nil {
-		return txhash, errors.Wrap(err, fmt.Sprintf("[ParsingPublickey(%s)]", teeWorkAcc))
-	}
-	acc, err := types.NewAccountID(tee_acc)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
-	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CERTIDLESPACE, idleSignInfo, teeSignWithAcc, teeSign, *acc)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CERTIDLESPACE, idleSignInfo, teeSign, teePuk)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
 		c.SetChainState(false)
@@ -1549,7 +1541,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign
 	}
 }
 
-func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign pattern.TeeSignature, teeWorkAcc string) (string, error) {
+func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1566,17 +1558,8 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeS
 	if !c.GetChainState() {
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
-	tee_acc, err := utils.ParsingPublickey(teeWorkAcc)
-	if err != nil {
-		return txhash, errors.Wrap(err, fmt.Sprintf("[ParsingPublickey(%s)]", teeWorkAcc))
-	}
 
-	acc, err := types.NewAccountID(tee_acc)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEIDLESPACE, idleSignInfo, teeSignWithAcc, teeSign, *acc)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEIDLESPACE, idleSignInfo, teeSign, teePuk)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
 		c.SetChainState(false)
@@ -1662,7 +1645,7 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeS
 	}
 }
 
-func (c *chainClient) ReportTagCalculated(teeSig pattern.TeeSignature, tagSigInfo pattern.TagSigInfo) (string, error) {
+func (c *chainClient) ReportTagCalculated(teeSig pattern.TeeSig, tagSigInfo pattern.TagSigInfo) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

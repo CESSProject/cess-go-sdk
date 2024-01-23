@@ -64,7 +64,14 @@ const (
 	StorageHandlerRenewalSpace   = "StorageHandler.RenewalSpace"
 
 	// TeeWorker
-	TeeWorkerRegistrationTeeWorker = "TeeWorker.RegistrationTeeWorker"
-	TeeWorkerUpdatePeerId          = "TeeWorker.UpdatePeerId"
-	TeeWorkerExit                  = "TeeWorker.Exit"
+	TeeWorkerRegistrationTeeWorker         = "TeeWorker.RegistrationTeeWorker"
+	TeeWorkerUpdatePeerId                  = "TeeWorker.UpdatePeerId"
+	TeeWorkerExit                          = "TeeWorker.Exit"
+	TeeWorkerMasterKeyLaunched             = "TeeWorker.MasterKeyLaunched"
+	TeeWorkerKeyfairyAdded                 = "TeeWorker.KeyfairyAdded"
+	TeeWorkerWorkerAdded                   = "TeeWorker.WorkerAdded"
+	TeeWorkerWorkerUpdated                 = "TeeWorker.WorkerUpdated"
+	TeeWorkerMasterKeyRotated              = "TeeWorker.MasterKeyRotated"
+	TeeWorkerMasterKeyRotationFailed       = "TeeWorker.MasterKeyRotationFailed"
+	TeeWorkerMinimumCesealVersionChangedTo = "TeeWorker.MinimumCesealVersionChangedTo"
 )
