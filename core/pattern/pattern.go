@@ -77,6 +77,7 @@ const (
 	// TEEWORKER
 	TEEWORKERMAP = "TeeWorkerMap"
 	TEEPODR2PK   = "TeePodr2Pk"
+	TEEEndpoints = "Endpoints"
 
 	// FILEBANK
 	FILE           = "File"

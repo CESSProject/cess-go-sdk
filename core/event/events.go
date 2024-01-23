@@ -321,19 +321,6 @@ type Event_LeaseExpireIn24Hours struct {
 }
 
 // ------------------------TEE Worker--------------------
-type Event_RegistrationTeeWorker struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	PeerId pattern.PeerId
-	Topics []types.Hash
-}
-
-type Event_UpdatePeerId struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Topics []types.Hash
-}
-
 type Event_Exit struct {
 	Phase  types.Phase
 	Acc    types.AccountID
@@ -517,12 +504,9 @@ type EventRecords struct {
 	StorageHandler_LeaseExpireIn24Hours []Event_LeaseExpireIn24Hours
 
 	// TeeWorker
-	TeeWorker_RegistrationTeeWorker []Event_RegistrationTeeWorker
-	TeeWorker_UpdatePeerId          []Event_UpdatePeerId
-	TeeWorker_Exit                  []Event_Exit
-	TeeWorker_MasterKeyLaunched     []Event_MasterKeyLaunched
-	TeeWorker_KeyfairyAdded         []Event_KeyfairyAdded
-
+	TeeWorker_Exit                          []Event_Exit
+	TeeWorker_MasterKeyLaunched             []Event_MasterKeyLaunched
+	TeeWorker_KeyfairyAdded                 []Event_KeyfairyAdded
 	TeeWorker_WorkerUpdated                 []Event_WorkerUpdated
 	TeeWorker_MasterKeyRotated              []Event_MasterKeyRotated
 	TeeWorker_MasterKeyRotationFailed       []Event_MasterKeyRotationFailed

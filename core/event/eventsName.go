@@ -64,8 +64,6 @@ const (
 	StorageHandlerRenewalSpace   = "StorageHandler.RenewalSpace"
 
 	// TeeWorker
-	TeeWorkerRegistrationTeeWorker         = "TeeWorker.RegistrationTeeWorker"
-	TeeWorkerUpdatePeerId                  = "TeeWorker.UpdatePeerId"
 	TeeWorkerExit                          = "TeeWorker.Exit"
 	TeeWorkerMasterKeyLaunched             = "TeeWorker.MasterKeyLaunched"
 	TeeWorkerKeyfairyAdded                 = "TeeWorker.KeyfairyAdded"

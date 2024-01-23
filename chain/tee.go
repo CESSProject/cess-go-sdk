@@ -43,11 +43,13 @@ func (c *chainClient) QueryTeeWorkerMap(puk []byte) (pattern.TeeWorkerInfo, erro
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWORKERMAP, owner)
 	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWORKERMAP, err)
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWORKERMAP, err)
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
@@ -108,11 +110,13 @@ func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEPODR2PK)
 	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEPODR2PK, err)
 		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEPODR2PK, err)
 		return nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
@@ -138,11 +142,13 @@ func (c *chainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
 	key := createPrefixedKey(pattern.TEEWORKER, pattern.TEEWORKERMAP)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWORKERMAP, err)
 		return list, errors.Wrap(err, "[GetKeysLatest]")
 	}
 
 	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
 	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWORKERMAP, err)
 		return list, errors.Wrap(err, "[QueryStorageAtLatest]")
 	}
 
@@ -150,7 +156,7 @@ func (c *chainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
 		for _, change := range elem.Changes {
 			var teeWorker pattern.TeeWorkerInfo
 			if err := codec.Decode(change.StorageData, &teeWorker); err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			list = append(list, teeWorker)
@@ -188,4 +194,35 @@ func (c *chainClient) QueryAllTeeInfo() ([]pattern.TeeInfo, error) {
 		results[k].WorkerRole = uint8(v.Role)
 	}
 	return results, nil
+}
+
+func (c *chainClient) QueryTeeWorkEndpoint() (string, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.Text
+
+	if !c.GetChainState() {
+		return "", pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEEndpoints)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEEndpoints, err)
+		return "", errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEEndpoints, err)
+		return "", errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return "", pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	return string(data), nil
 }
