@@ -75,9 +75,10 @@ const (
 	STAKINGSTARTBLOCK  = "StakingStartBlock"
 
 	// TEEWORKER
-	TEEWORKERMAP = "TeeWorkerMap"
-	TEEPODR2PK   = "TeePodr2Pk"
-	TEEEndpoints = "Endpoints"
+	TEEWorkers       = "Workers"
+	TEEMasterPubkey  = "MasterPubkey"
+	TEEEndpoints     = "Endpoints"
+	TEEWorkerAddedAt = "WorkerAddedAt"
 
 	// FILEBANK
 	FILE           = "File"
@@ -231,7 +232,6 @@ var (
 const (
 	FileHashLen            = 64
 	RandomLen              = 20
-	TeePodr2PkLen          = 270
 	PeerIdPublicKeyLen     = 38
 	PoISKeyLen             = 256
 	TeeSignatureLen        = 256
@@ -247,7 +247,6 @@ const (
 
 type FileHash [FileHashLen]types.U8
 type Random [RandomLen]types.U8
-type TeePodr2Pk [TeePodr2PkLen]types.U8
 type PeerId [PeerIdPublicKeyLen]types.U8
 type PoISKey_G [PoISKeyLen]types.U8
 type PoISKey_N [PoISKeyLen]types.U8
