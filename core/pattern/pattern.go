@@ -18,7 +18,7 @@ import (
 const DOT = "."
 
 // Unit precision of CESS token
-const TokenPrecision_CESS = "000000000000"
+const TokenPrecision_CESS = "000000000000000000"
 
 const StakingStakePerTiB = 4000
 
@@ -406,13 +406,13 @@ type MinerSnapShot struct {
 }
 
 type IdleProveInfo struct {
-	TeeAcc       types.AccountID
+	TeePubkey    WorkerPublicKey
 	IdleProve    types.Bytes
 	VerifyResult types.Option[bool]
 }
 
 type ServiceProveInfo struct {
-	TeeAcc       types.AccountID
+	TeePubkey    WorkerPublicKey
 	ServiceProve types.Bytes
 	VerifyResult types.Option[bool]
 }
@@ -472,8 +472,8 @@ type TagSigInfo struct {
 }
 
 type DigestInfo struct {
-	Fragment FileHash
-	TeePuk   WorkerPublicKey
+	Fragment  FileHash
+	TeePubkey WorkerPublicKey
 }
 
 // --------------------customer-----------------
