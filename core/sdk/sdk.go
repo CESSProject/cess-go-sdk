@@ -203,18 +203,20 @@ type SDK interface {
 
 	// TeeWorker-State
 
-	// QueryTeeWorkerMap queries the information of the Tee worker.
-	QueryTeeWorkerMap(accountID []byte) (pattern.TeeWorkerInfo, error)
+	// QueryTeeWorker queries the information of the Tee worker.
+	QueryTeeWorker(puk pattern.WorkerPublicKey) (pattern.TeeWorkerInfo, error)
 	// QueryTeeInfo queries the information of the Tee worker.
-	QueryTeeInfo(accountID []byte) (pattern.TeeInfo, error)
-	// QueryTeePodr2Puk queries the public key of the TEE.
-	QueryTeePodr2Puk() ([]byte, error)
+	QueryTeeInfo(puk pattern.WorkerPublicKey) (pattern.TeeInfo, error)
+	// QueryMasterPublicKey queries the master publicKey.
+	QueryMasterPublicKey() ([]byte, error)
 	// QueryAllTeeWorkerMap queries the information of all tee workers.
 	QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error)
 	// QueryAllTeeInfo queries the information of all tee workers.
 	QueryAllTeeInfo() ([]pattern.TeeInfo, error)
 	// QueryTeeWorkEndpoint queries the endpoint of tee workers.
 	QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (string, error)
+	//
+	QueryWorkerAddedAt(workPuk pattern.WorkerPublicKey) (types.U32, error)
 
 	// System
 

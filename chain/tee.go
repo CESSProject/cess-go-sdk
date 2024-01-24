@@ -18,7 +18,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryTeeWorkerMap(puk []byte) (pattern.TeeWorkerInfo, error) {
+func (c *chainClient) QueryTeeWorker(puk pattern.WorkerPublicKey) (pattern.TeeWorkerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -31,25 +31,20 @@ func (c *chainClient) QueryTeeWorkerMap(puk []byte) (pattern.TeeWorkerInfo, erro
 		return data, pattern.ERR_RPC_CONNECTION
 	}
 
-	acc, err := types.NewAccountID(puk)
-	if err != nil {
-		return data, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	owner, err := codec.Encode(*acc)
+	publickey, err := codec.Encode(puk)
 	if err != nil {
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWORKERMAP, owner)
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWorkers, publickey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWORKERMAP, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkers, err)
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWORKERMAP, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkers, err)
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
@@ -59,7 +54,7 @@ func (c *chainClient) QueryTeeWorkerMap(puk []byte) (pattern.TeeWorkerInfo, erro
 	return data, nil
 }
 
-func (c *chainClient) QueryTeeInfo(puk []byte) (pattern.TeeInfo, error) {
+func (c *chainClient) QueryTeeInfo(puk pattern.WorkerPublicKey) (pattern.TeeInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -68,7 +63,7 @@ func (c *chainClient) QueryTeeInfo(puk []byte) (pattern.TeeInfo, error) {
 
 	var data pattern.TeeInfo
 
-	teeWorkerInfo, err := c.QueryTeeWorkerMap(puk)
+	teeWorkerInfo, err := c.QueryTeeWorker(puk)
 	if err != nil {
 		return data, err
 	}
@@ -95,28 +90,28 @@ func (c *chainClient) QueryTeeInfo(puk []byte) (pattern.TeeInfo, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryTeePodr2Puk() ([]byte, error) {
+func (c *chainClient) QueryMasterPublicKey() ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data pattern.TeePodr2Pk
+	var data pattern.MasterPublicKey
 
 	if !c.GetChainState() {
 		return nil, pattern.ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEPODR2PK)
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEMasterPubkey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEPODR2PK, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEMasterPubkey, err)
 		return nil, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEPODR2PK, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEMasterPubkey, err)
 		return nil, errors.Wrap(err, "[GetStorageLatest]")
 	}
 	if !ok {
@@ -139,16 +134,16 @@ func (c *chainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
 		return list, pattern.ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(pattern.TEEWORKER, pattern.TEEWORKERMAP)
+	key := createPrefixedKey(pattern.TEEWORKER, pattern.TEEWorkers)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWORKERMAP, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkers, err)
 		return list, errors.Wrap(err, "[GetKeysLatest]")
 	}
 
 	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWORKERMAP, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkers, err)
 		return list, errors.Wrap(err, "[QueryStorageAtLatest]")
 	}
 
@@ -229,4 +224,39 @@ func (c *chainClient) QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (str
 	}
 
 	return string(data), nil
+}
+
+func (c *chainClient) QueryWorkerAddedAt(workPuk pattern.WorkerPublicKey) (types.U32, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data types.U32
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	val, err := codec.Encode(workPuk)
+	if err != nil {
+		return data, errors.Wrap(err, "[Encode]")
+	}
+	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWorkerAddedAt, val)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkerAddedAt, err)
+		return data, errors.Wrap(err, "[CreateStorageKey]")
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkerAddedAt, err)
+		return data, errors.Wrap(err, "[GetStorageLatest]")
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	return data, nil
 }
