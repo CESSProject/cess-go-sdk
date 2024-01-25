@@ -87,9 +87,9 @@ type SDK interface {
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
 	// CertIdleSpace
-	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error)
+	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error)
 	// ReplaceIdleSpace
-	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error)
+	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error)
 	// ReportTagCalculated
 	ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern.TagSigInfo) (string, error)
 
