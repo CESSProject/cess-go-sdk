@@ -157,7 +157,7 @@ type SDK interface {
 	// RegisterSminerAssignStaking
 	RegisterSminerAssignStaking(beneficiaryAcc string, peerId []byte, stakingAcc string, tib_count uint32) (string, error)
 	// RegisterSminerPOISKey register the pois key of sminer
-	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error)
+	RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error)
 	// ExitSminer exit mining
 	ExitSminer(miner string) (string, error)
 	// UpdateEarningsAcc update earnings account.
@@ -423,5 +423,10 @@ type SDK interface {
 	//
 	RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]event.AllDeleteFileEvent, error)
 	//
-	RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error)
+	//RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error)
+	//
+	RetrieveAllEventFromBlock(blockhash types.Hash) ([]string, map[string][]string, error)
+
+	//
+	InitExtrinsicsName() error
 }

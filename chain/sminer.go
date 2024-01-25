@@ -1279,7 +1279,7 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 	}
 }
 
-func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
