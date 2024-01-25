@@ -37,10 +37,10 @@ type SDK interface {
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
 	// SubmitIdleProofResult submits the proof verification results of idle data to the chain
 	//   Tip: This method can only be used for storage nodes
-	SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, sig pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error)
+	SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, sig types.Bytes, teePuk pattern.WorkerPublicKey) (string, error)
 	// SubmitServiceProofResult submits the proof verification results of service data to the chain
 	//   Tip: This method can only be used for storage nodes
-	SubmitServiceProofResult(result types.Bool, sign pattern.TeeSig, bloomFilter pattern.BloomFilter, teePuk pattern.WorkerPublicKey) (string, error)
+	SubmitServiceProofResult(result types.Bool, sign types.Bytes, bloomFilter pattern.BloomFilter, teePuk pattern.WorkerPublicKey) (string, error)
 
 	// Filebank-State
 
@@ -87,11 +87,11 @@ type SDK interface {
 	// GenerateStorageOrder for generating storage orders
 	GenerateStorageOrder(roothash string, segment []pattern.SegmentDataInfo, owner []byte, filename, buckname string, filesize uint64) (string, error)
 	// CertIdleSpace
-	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error)
+	CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error)
 	// ReplaceIdleSpace
-	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error)
+	ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error)
 	// ReportTagCalculated
-	ReportTagCalculated(teeSig pattern.TeeSig, tagSigInfo pattern.TagSigInfo) (string, error)
+	ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern.TagSigInfo) (string, error)
 
 	// Oss-State
 

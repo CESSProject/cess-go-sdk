@@ -1437,7 +1437,7 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 	}
 }
 
-func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1541,7 +1541,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign
 	}
 }
 
-func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1645,7 +1645,7 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeS
 	}
 }
 
-func (c *chainClient) ReportTagCalculated(teeSig pattern.TeeSig, tagSigInfo pattern.TagSigInfo) (string, error) {
+func (c *chainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern.TagSigInfo) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
