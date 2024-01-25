@@ -1455,7 +1455,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CERTIDLESPACE, idleSignInfo, teeSign, teePuk)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CERTIDLESPACE, idleSignInfo, teeSignWithAcc, teeSign, teePuk)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
 		c.SetChainState(false)
@@ -1559,7 +1559,7 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeS
 		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEIDLESPACE, idleSignInfo, teeSign, teePuk)
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEIDLESPACE, idleSignInfo, teeSignWithAcc, teeSign, teePuk)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
 		c.SetChainState(false)
