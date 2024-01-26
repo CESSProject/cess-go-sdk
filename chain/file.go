@@ -180,6 +180,14 @@ func (c *chainClient) RetrieveFile(url, fid, savepath string) error {
 		return err
 	}
 
+	kr, _ := keyring.FromURI(c.GetURI(), keyring.NetSubstrate{})
+
+	// sign message
+	message := utils.GetRandomcode(16)
+	sig, _ := kr.Sign(kr.SigningContext([]byte(message)))
+	req.Header.Set("Message", message)
+	req.Header.Set("Signature", base58.Encode(sig[:]))
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Operation", "download")
 	req.Header.Set("Account", c.GetSignatureAcc())
 
@@ -216,7 +224,15 @@ func (c *chainClient) RetrieveObject(url, fid string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+	kr, _ := keyring.FromURI(c.GetURI(), keyring.NetSubstrate{})
 
+	// sign message
+	message := utils.GetRandomcode(16)
+	sig, _ := kr.Sign(kr.SigningContext([]byte(message)))
+	req.Header.Set("Message", message)
+	req.Header.Set("Signature", base58.Encode(sig[:]))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Account", c.GetSignatureAcc())
 	req.Header.Set("Operation", "download")
 
 	client := &http.Client{}
@@ -232,64 +248,3 @@ func (c *chainClient) RetrieveObject(url, fid string) (io.ReadCloser, error) {
 
 	return resp.Body, nil
 }
-
-// func (c *chainClient) StorageData(roothash string, segment []pattern.SegmentDataInfo, minerTaskList []pattern.MinerTaskList) error {
-// 	if !c.enabledP2P {
-// 		return errors.New("P2P network not enabled")
-// 	}
-
-// 	var err error
-
-// 	// query all assigned miner multiaddr
-// 	peerids, err := c.QueryAssignedMinerPeerId(minerTaskList)
-// 	if err != nil {
-// 		return errors.Wrapf(err, "[QueryAssignedMinerPeerId]")
-// 	}
-
-// 	basedir := filepath.Dir(segment[0].FragmentHash[0])
-// 	for i := 0; i < len(peerids); i++ {
-// 		for j := 0; j < len(minerTaskList[i].Hash); j++ {
-// 			err = c.WriteFileAction(peerids[j], roothash, filepath.Join(basedir, string(minerTaskList[i].Hash[j][:])))
-// 			if err != nil {
-// 				return errors.Wrapf(err, "[WriteFileAction]")
-// 			}
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// func (c *chainClient) FindPeers() map[string]peer.AddrInfo {
-// 	var peerMap = make(map[string]peer.AddrInfo, 100)
-// 	timeOut := time.NewTicker(time.Second * 10)
-// 	defer timeOut.Stop()
-// 	c.RouteTableFindPeers(0)
-// 	for {
-// 		select {
-// 		case peer, ok := <-c.GetDiscoveredPeers():
-// 			if !ok {
-// 				return peerMap
-// 			}
-// 			if len(peer.Responses) == 0 {
-// 				break
-// 			}
-// 			for _, v := range peer.Responses {
-// 				peerMap[v.ID.Pretty()] = *v
-// 			}
-// 		case <-timeOut.C:
-// 			return peerMap
-// 		}
-// 	}
-// }
-
-// func (c *chainClient) QueryAssignedMinerPeerId(minerTaskList []pattern.MinerTaskList) ([]peer.ID, error) {
-// 	var peerids = make([]peer.ID, len(minerTaskList))
-// 	for i := 0; i < len(minerTaskList); i++ {
-// 		minerInfo, err := c.QueryStorageMiner(minerTaskList[i].Account[:])
-// 		if err != nil {
-// 			return peerids, err
-// 		}
-// 		peerids[i], _ = peer.Decode(string(minerInfo.PeerId[:]))
-// 	}
-// 	return peerids, nil
-// }

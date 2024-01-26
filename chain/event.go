@@ -1796,21 +1796,47 @@ func (c *chainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 	return result, nil
 }
 
-func (c *chainClient) RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error) {
-	var flag bool
+// func (c *chainClient) RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error) {
+// 	var flag bool
+// 	var systemEvents = make([]string, 0)
+// 	var extrinsicsEvents = make([]string, 0)
+// 	events, err := c.eventRetriever.GetEvents(blockhash)
+// 	if err != nil {
+// 		return systemEvents, extrinsicsEvents, err
+// 	}
+// 	for _, e := range events {
+// 		fmt.Println("event name: ", e.Name)
+// 		if e.Name == "System.ExtrinsicSuccess" {
+// 			flag = true
+// 		}
+// 		if flag {
+// 			extrinsicsEvents = append(extrinsicsEvents, e.Name)
+// 		} else {
+// 			systemEvents = append(systemEvents, e.Name)
+// 		}
+// 	}
+// 	return systemEvents, extrinsicsEvents, nil
+// }
+
+func (c *chainClient) RetrieveAllEventFromBlock(blockhash types.Hash) ([]string, map[string][]string, error) {
 	var systemEvents = make([]string, 0)
-	var extrinsicsEvents = make([]string, 0)
+	var extrinsicsEvents = make(map[string][]string, 0)
+	block, err := c.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
+	if err != nil {
+		return systemEvents, extrinsicsEvents, err
+	}
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return systemEvents, extrinsicsEvents, err
 	}
 	for _, e := range events {
-		fmt.Println("event name: ", e.Name)
-		if e.Name == "System.ExtrinsicSuccess" {
-			flag = true
-		}
-		if flag {
-			extrinsicsEvents = append(extrinsicsEvents, e.Name)
+		if e.Phase.IsApplyExtrinsic {
+			if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+				if extrinsicsEvents[name] == nil {
+					extrinsicsEvents[name] = make([]string, 0)
+				}
+				extrinsicsEvents[name] = append(extrinsicsEvents[name], e.Name)
+			}
 		} else {
 			systemEvents = append(systemEvents, e.Name)
 		}

@@ -288,7 +288,7 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	}
 }
 
-func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, sig pattern.TeeSig, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, sig types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -392,7 +392,7 @@ func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, re
 	}
 }
 
-func (c *chainClient) SubmitServiceProofResult(result types.Bool, sign pattern.TeeSig, bloomFilter pattern.BloomFilter, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *chainClient) SubmitServiceProofResult(result types.Bool, sign types.Bytes, bloomFilter pattern.BloomFilter, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
