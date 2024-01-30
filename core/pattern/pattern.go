@@ -304,14 +304,18 @@ type SpaceProofInfo struct {
 }
 
 type MinerReward struct {
-	TotalReward              types.U128
-	RewardIssued             types.U128
-	CurrentlyAvailableReward types.U128
-	OrderList                []RewardOrder
+	TotalReward  types.U128
+	RewardIssued types.U128
+	OrderList    []RewardOrder
 }
 
 type RewardOrder struct {
-	OrderReward types.U128
+	ReceiveCount     types.U8
+	MaxCount         types.U8
+	Atonce           types.Bool
+	OrderReward      types.U128
+	EachAmount       types.U128
+	LastReceiveBlock types.U32
 }
 
 type FileMetadata struct {
@@ -518,9 +522,8 @@ type TeeInfo struct {
 }
 
 type RewardsType struct {
-	Total     string
-	Claimed   string
-	Available string
+	Total   string
+	Claimed string
 }
 
 type SegmentDataInfo struct {
