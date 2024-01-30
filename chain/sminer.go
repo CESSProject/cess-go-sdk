@@ -191,7 +191,6 @@ func (c *chainClient) QueryRewards(puk []byte) (pattern.RewardsType, error) {
 
 	reward.Total = rewards.TotalReward.String()
 	reward.Claimed = rewards.RewardIssued.String()
-	reward.Available = rewards.CurrentlyAvailableReward.String()
 
 	return reward, nil
 }
