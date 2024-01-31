@@ -1740,7 +1740,6 @@ func (c *chainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				txhash = status.AsInBlock.Hex()
-				fmt.Println(txhash)
 				blockhash := status.AsInBlock
 				_, err = c.RetrieveEvent_FileBank_CalculateReport(blockhash)
 				return txhash, err
