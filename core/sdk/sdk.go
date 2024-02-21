@@ -426,7 +426,8 @@ type SDK interface {
 	//RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error)
 	//
 	RetrieveAllEventFromBlock(blockhash types.Hash) ([]string, map[string][]string, error)
-
+	//
+	RetrieveBlock(blocknumber uint64) ([]string, map[string][]string, string, string, string, string, int64, error)
 	//
 	InitExtrinsicsName() error
 }

@@ -15,7 +15,7 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//devnet
-	"wss://devnet-rpc.cess.cloud/ws/",
+	//"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
 	"wss://testnet-rpc0.cess.cloud/ws/",
 	"wss://testnet-rpc1.cess.cloud/ws/",
@@ -26,17 +26,20 @@ func main() {
 	sdk, err := cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
+		//cess.Mnemonic(MY_MNEMONIC),
 		cess.TransactionTimeout(time.Second*10),
 	)
 	if err != nil {
 		panic(err)
 	}
+	sdk.InitExtrinsicsName()
 	// RetrieveEvent_FileBank_CalculateReport
-	bhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(72745)
+	bhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(745)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(sdk.RetrieveEvent_FileBank_CalculateReport(bhash))
+	fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
+	fmt.Println(" --------- ")
+	fmt.Println(sdk.RetrieveBlock(745))
+	//fmt.Println(sdk.RetrieveEvent_FileBank_CalculateReport(bhash))
 }

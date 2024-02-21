@@ -8,6 +8,7 @@
 package chain
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -18,6 +19,7 @@ import (
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
+	"github.com/vedhavyas/go-subkey/scale"
 )
 
 func (c *chainClient) DecodeEventNameFromBlock(block uint64) ([]string, error) {
@@ -1842,4 +1844,43 @@ func (c *chainClient) RetrieveAllEventFromBlock(blockhash types.Hash) ([]string,
 		}
 	}
 	return systemEvents, extrinsicsEvents, nil
+}
+
+func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, map[string][]string, string, string, string, string, int64, error) {
+	var timeUnixMilli int64
+	var systemEvents = make([]string, 0)
+	var extrinsicsEvents = make(map[string][]string, 0)
+	blockhash, err := c.GetSubstrateAPI().RPC.Chain.GetBlockHash(blocknumber)
+	if err != nil {
+		return systemEvents, extrinsicsEvents, "", "", "", "", 0, err
+	}
+	block, err := c.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
+	if err != nil {
+		return systemEvents, extrinsicsEvents, "", "", "", "", 0, err
+	}
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return systemEvents, extrinsicsEvents, "", "", "", "", 0, err
+	}
+	for _, e := range events {
+		if e.Phase.IsApplyExtrinsic {
+			if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+				if extrinsicsEvents[name] == nil {
+					extrinsicsEvents[name] = make([]string, 0)
+				}
+				extrinsicsEvents[name] = append(extrinsicsEvents[name], e.Name)
+				if name == ExtName_Timestamp_set {
+					timeDecoder := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args))
+					timestamp, err := timeDecoder.DecodeUintCompact()
+					if err != nil {
+						return systemEvents, extrinsicsEvents, "", "", "", "", 0, err
+					}
+					timeUnixMilli = timestamp.Int64()
+				}
+			}
+		} else {
+			systemEvents = append(systemEvents, e.Name)
+		}
+	}
+	return systemEvents, extrinsicsEvents, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
 }
