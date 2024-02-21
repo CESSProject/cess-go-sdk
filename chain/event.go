@@ -1869,10 +1869,10 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 	var ok bool
 	var name string
 	var preExtName string
+	var result bool
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
 			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
-				fmt.Println("preExtName: ", preExtName)
 				if name == ExtName_Timestamp_set {
 					timeDecoder := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args))
 					timestamp, err := timeDecoder.DecodeUintCompact()
@@ -1883,16 +1883,29 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 					extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
 						Name:   name,
 						Events: []string{e.Name},
+						Result: true,
 					})
 					preExtName = name
 					continue
 				}
 				if e.Name == event.BalancesWithdraw {
 					if len(eventsBuf) > 0 {
+						result = false
+						for i := 0; i < len(eventsBuf); i++ {
+							if eventsBuf[i] == event.SystemExtrinsicSuccess {
+								result = true
+								break
+							}
+							if eventsBuf[i] == event.SystemExtrinsicFailed {
+								result = false
+								break
+							}
+						}
 						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
 							Name:    preExtName,
 							Signer:  signer,
 							FeePaid: fee,
+							Result:  result,
 							Events:  append(make([]string, 0), eventsBuf...),
 						})
 						preExtName = name
@@ -1909,10 +1922,22 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 		}
 	}
 	if len(eventsBuf) > 0 {
+		result = false
+		for i := 0; i < len(eventsBuf); i++ {
+			if eventsBuf[i] == event.SystemExtrinsicSuccess {
+				result = true
+				break
+			}
+			if eventsBuf[i] == event.SystemExtrinsicFailed {
+				result = false
+				break
+			}
+		}
 		extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
 			Name:    name,
 			Signer:  signer,
 			FeePaid: fee,
+			Result:  result,
 			Events:  append(make([]string, 0), eventsBuf...),
 		})
 	}

@@ -523,5 +523,6 @@ type ExtrinsicsInfo struct {
 	Name    string
 	Signer  string
 	FeePaid string
+	Result  bool
 	Events  []string
 }

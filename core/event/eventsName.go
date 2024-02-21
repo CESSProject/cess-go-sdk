@@ -77,4 +77,7 @@ const (
 	TransactionPaymentTransactionFeePaid = "TransactionPayment.TransactionFeePaid"
 	//
 	BalancesWithdraw = "Balances.Withdraw"
+	//
+	SystemExtrinsicSuccess = "System.ExtrinsicSuccess"
+	SystemExtrinsicFailed  = "System.ExtrinsicFailed"
 )
