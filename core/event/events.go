@@ -518,3 +518,10 @@ type EventRecords struct {
 	// system-gsrpc
 	types.EventRecords
 }
+
+type ExtrinsicsInfo struct {
+	Name    string
+	Signer  string
+	FeePaid string
+	Events  []string
+}

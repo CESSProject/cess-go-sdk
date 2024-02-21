@@ -72,4 +72,9 @@ const (
 	TeeWorkerMasterKeyRotated              = "TeeWorker.MasterKeyRotated"
 	TeeWorkerMasterKeyRotationFailed       = "TeeWorker.MasterKeyRotationFailed"
 	TeeWorkerMinimumCesealVersionChangedTo = "TeeWorker.MinimumCesealVersionChangedTo"
+
+	//
+	TransactionPaymentTransactionFeePaid = "TransactionPayment.TransactionFeePaid"
+	//
+	BalancesWithdraw = "Balances.Withdraw"
 )

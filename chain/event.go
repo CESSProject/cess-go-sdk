@@ -17,6 +17,7 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
 	"github.com/vedhavyas/go-subkey/scale"
@@ -1846,41 +1847,156 @@ func (c *chainClient) RetrieveAllEventFromBlock(blockhash types.Hash) ([]string,
 	return systemEvents, extrinsicsEvents, nil
 }
 
-func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, map[string][]string, string, string, string, string, int64, error) {
+func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, string, string, string, string, int64, error) {
 	var timeUnixMilli int64
 	var systemEvents = make([]string, 0)
-	var extrinsicsEvents = make(map[string][]string, 0)
+	var extrinsicsInfo = make([]event.ExtrinsicsInfo, 0)
 	blockhash, err := c.GetSubstrateAPI().RPC.Chain.GetBlockHash(blocknumber)
 	if err != nil {
-		return systemEvents, extrinsicsEvents, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, "", "", "", "", 0, err
 	}
 	block, err := c.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
 	if err != nil {
-		return systemEvents, extrinsicsEvents, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, "", "", "", "", 0, err
 	}
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
-		return systemEvents, extrinsicsEvents, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, "", "", "", "", 0, err
 	}
+	var eventsBuf = make([]string, 0)
+	var signer string
+	var fee string
+	var ok bool
+	var name string
+	var preExtName string
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
-			if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
-				if extrinsicsEvents[name] == nil {
-					extrinsicsEvents[name] = make([]string, 0)
-				}
-				extrinsicsEvents[name] = append(extrinsicsEvents[name], e.Name)
+			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+				fmt.Println("preExtName: ", preExtName)
 				if name == ExtName_Timestamp_set {
 					timeDecoder := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args))
 					timestamp, err := timeDecoder.DecodeUintCompact()
 					if err != nil {
-						return systemEvents, extrinsicsEvents, "", "", "", "", 0, err
+						return systemEvents, extrinsicsInfo, "", "", "", "", 0, err
 					}
 					timeUnixMilli = timestamp.Int64()
+					extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+						Name:   name,
+						Events: []string{e.Name},
+					})
+					preExtName = name
+					continue
+				}
+				if e.Name == event.BalancesWithdraw {
+					if len(eventsBuf) > 0 {
+						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+							Name:    preExtName,
+							Signer:  signer,
+							FeePaid: fee,
+							Events:  append(make([]string, 0), eventsBuf...),
+						})
+						preExtName = name
+						eventsBuf = make([]string, 0)
+					}
+				}
+				eventsBuf = append(eventsBuf, e.Name)
+				if e.Name == event.TransactionPaymentTransactionFeePaid {
+					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
 				}
 			}
 		} else {
 			systemEvents = append(systemEvents, e.Name)
 		}
 	}
-	return systemEvents, extrinsicsEvents, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
+	if len(eventsBuf) > 0 {
+		extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+			Name:    name,
+			Signer:  signer,
+			FeePaid: fee,
+			Events:  append(make([]string, 0), eventsBuf...),
+		})
+	}
+	return systemEvents, extrinsicsInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
+}
+
+func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
+	if e == nil {
+		return "", "", errors.New("event is nil")
+	}
+	if e.Name != event.TransactionPaymentTransactionFeePaid {
+		return "", "", fmt.Errorf("event is not %s", event.TransactionPaymentTransactionFeePaid)
+	}
+	var signAcc string
+	var fee string
+	for _, v := range e.Fields {
+		val := reflect.ValueOf(v.Value)
+		if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+			signAcc = parseSigner(val)
+		}
+		if reflect.TypeOf(v.Value).Kind() == reflect.Struct {
+			if v.Name == "actual_fee" {
+				fee = Explicit(val, 0)
+			}
+		}
+	}
+	return signAcc, fee, nil
+}
+
+func parseSigner(v reflect.Value) string {
+	var signer string
+	if v.Len() > 0 {
+		allValue := fmt.Sprintf("%v", v.Index(0))
+		temp := strings.Split(allValue, "] ")
+		puk := make([]byte, types.AccountIDLen)
+		for _, v := range temp {
+			if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+				subValue := strings.TrimPrefix(v, "[")
+				ids := strings.Split(subValue, " ")
+				if len(ids) != types.AccountIDLen {
+					continue
+				}
+				for kk, vv := range ids {
+					intv, _ := strconv.Atoi(vv)
+					puk[kk] = byte(intv)
+				}
+			}
+		}
+		signer, _ = utils.EncodePublicKeyAsCessAccount(puk)
+	}
+	return signer
+}
+
+func Explicit(v reflect.Value, depth int) string {
+	var fee string
+	if v.CanInterface() {
+		t := v.Type()
+		switch v.Kind() {
+		case reflect.Ptr:
+			fee = Explicit(v.Elem(), depth)
+		case reflect.Struct:
+			//fmt.Printf(strings.Repeat("\t", depth)+"%v %v {\n", t.Name(), t.Kind())
+			for i := 0; i < v.NumField(); i++ {
+				f := v.Field(i)
+				if f.Kind() == reflect.Struct || f.Kind() == reflect.Ptr {
+					//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : \n", t.Field(i).Name, f.Type())
+					fee = Explicit(f, depth+2)
+				} else {
+					if f.CanInterface() {
+						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f.Interface())
+					} else {
+						if t.Field(i).Name == "abs" {
+							val := fmt.Sprintf("%v", f)
+							return val[1 : len(val)-1]
+						}
+						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f)
+					}
+				}
+			}
+			//fmt.Println(strings.Repeat("\t", depth) + "}")
+		}
+	}
+	// else {
+	// 	  fmt.Printf(strings.Repeat("\t", depth)+"%+v\n", v)
+	// }
+	return fee
 }

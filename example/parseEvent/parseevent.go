@@ -34,12 +34,29 @@ func main() {
 	}
 	sdk.InitExtrinsicsName()
 	// RetrieveEvent_FileBank_CalculateReport
-	bhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(745)
+	// bhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(298712)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
+	fmt.Println(" --------- ")
+	sysEvents, extrinsics, blockhash, preHash, extHash, stHash, t, err := sdk.RetrieveBlock(298712)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
-	fmt.Println(" --------- ")
-	fmt.Println(sdk.RetrieveBlock(745))
+	fmt.Println("system events: ", sysEvents)
+	fmt.Println("extrinsics:")
+	for k, v := range extrinsics {
+		fmt.Println("  ", k, ": ", v.Name)
+		fmt.Println("    Singer: ", v.Signer)
+		fmt.Println("    FeePaid: ", v.FeePaid)
+		fmt.Println("    Events: ", v.Events)
+	}
+
+	fmt.Println("blockhash: ", blockhash)
+	fmt.Println("preHash: ", preHash)
+	fmt.Println("extHash: ", extHash)
+	fmt.Println("stHash: ", stHash)
+	fmt.Println("timpstamp: ", t)
 	//fmt.Println(sdk.RetrieveEvent_FileBank_CalculateReport(bhash))
 }
