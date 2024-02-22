@@ -40,7 +40,7 @@ func main() {
 	// }
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 	fmt.Println(" --------- ")
-	sysEvents, extrinsics, blockhash, preHash, extHash, stHash, t, err := sdk.RetrieveBlock(298712)
+	sysEvents, extrinsics, transferInfo, blockhash, preHash, extHash, stHash, t, err := sdk.RetrieveBlock(312732)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +52,7 @@ func main() {
 		fmt.Println("    FeePaid: ", v.FeePaid)
 		fmt.Println("    Events: ", v.Events)
 	}
-
+	fmt.Println("transfer info: ", transferInfo)
 	fmt.Println("blockhash: ", blockhash)
 	fmt.Println("preHash: ", preHash)
 	fmt.Println("extHash: ", extHash)

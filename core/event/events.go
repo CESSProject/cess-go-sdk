@@ -526,3 +526,10 @@ type ExtrinsicsInfo struct {
 	Result  bool
 	Events  []string
 }
+
+type TransferInfo struct {
+	From   string
+	To     string
+	Amount string
+	Result bool
+}

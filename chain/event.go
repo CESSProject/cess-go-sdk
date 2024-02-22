@@ -1847,25 +1847,29 @@ func (c *chainClient) RetrieveAllEventFromBlock(blockhash types.Hash) ([]string,
 	return systemEvents, extrinsicsEvents, nil
 }
 
-func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, string, string, string, string, int64, error) {
+func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error) {
 	var timeUnixMilli int64
 	var systemEvents = make([]string, 0)
 	var extrinsicsInfo = make([]event.ExtrinsicsInfo, 0)
+	var transferInfo = make([]event.TransferInfo, 0)
 	blockhash, err := c.GetSubstrateAPI().RPC.Chain.GetBlockHash(blocknumber)
 	if err != nil {
-		return systemEvents, extrinsicsInfo, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
 	}
 	block, err := c.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
 	if err != nil {
-		return systemEvents, extrinsicsInfo, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
 	}
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
-		return systemEvents, extrinsicsInfo, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
 	}
 	var eventsBuf = make([]string, 0)
 	var signer string
 	var fee string
+	var from string
+	var to string
+	var amount string
 	var ok bool
 	var name string
 	var preExtName string
@@ -1877,7 +1881,7 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 					timeDecoder := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args))
 					timestamp, err := timeDecoder.DecodeUintCompact()
 					if err != nil {
-						return systemEvents, extrinsicsInfo, "", "", "", "", 0, err
+						return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
 					}
 					timeUnixMilli = timestamp.Int64()
 					extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
@@ -1915,6 +1919,17 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 				eventsBuf = append(eventsBuf, e.Name)
 				if e.Name == event.TransactionPaymentTransactionFeePaid {
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
+
+				}
+				if e.Name == event.BalancesTransfer {
+					fmt.Println("find transfer event")
+					from, to, amount, _ = parseTransferInfoFromEvent(e)
+					transferInfo = append(transferInfo, event.TransferInfo{
+						From:   from,
+						To:     to,
+						Amount: amount,
+						Result: true,
+					})
 				}
 			}
 		} else {
@@ -1941,7 +1956,7 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 			Events:  append(make([]string, 0), eventsBuf...),
 		})
 	}
-	return systemEvents, extrinsicsInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
+	return systemEvents, extrinsicsInfo, transferInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
 }
 
 func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
@@ -1956,7 +1971,7 @@ func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
 	for _, v := range e.Fields {
 		val := reflect.ValueOf(v.Value)
 		if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
-			signAcc = parseSigner(val)
+			signAcc = parseAccount(val)
 		}
 		if reflect.TypeOf(v.Value).Kind() == reflect.Struct {
 			if v.Name == "actual_fee" {
@@ -1967,8 +1982,8 @@ func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
 	return signAcc, fee, nil
 }
 
-func parseSigner(v reflect.Value) string {
-	var signer string
+func parseAccount(v reflect.Value) string {
+	var acc string
 	if v.Len() > 0 {
 		allValue := fmt.Sprintf("%v", v.Index(0))
 		temp := strings.Split(allValue, "] ")
@@ -1986,9 +2001,9 @@ func parseSigner(v reflect.Value) string {
 				}
 			}
 		}
-		signer, _ = utils.EncodePublicKeyAsCessAccount(puk)
+		acc, _ = utils.EncodePublicKeyAsCessAccount(puk)
 	}
-	return signer
+	return acc
 }
 
 func Explicit(v reflect.Value, depth int) string {
@@ -2024,4 +2039,35 @@ func Explicit(v reflect.Value, depth int) string {
 	// 	  fmt.Printf(strings.Repeat("\t", depth)+"%+v\n", v)
 	// }
 	return fee
+}
+
+func parseTransferInfoFromEvent(e *parser.Event) (string, string, string, error) {
+	if e == nil {
+		return "", "", "", errors.New("event is nil")
+	}
+	if e.Name != event.BalancesTransfer {
+		return "", "", "", fmt.Errorf("event is not %s", event.BalancesTransfer)
+	}
+	var from string
+	var to string
+	var amount string
+	for _, v := range e.Fields {
+		val := reflect.ValueOf(v.Value)
+		fmt.Println("reflect.TypeOf(v.Value).Kind() : ", reflect.TypeOf(v.Value).Kind())
+		fmt.Println("v.Name: ", v.Name)
+		if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+			if strings.Contains(v.Name, "from") {
+				from = parseAccount(val)
+			}
+			if strings.Contains(v.Name, "to") {
+				to = parseAccount(val)
+			}
+		}
+		if reflect.TypeOf(v.Value).Kind() == reflect.Struct {
+			if v.Name == "amount" {
+				amount = Explicit(val, 0)
+			}
+		}
+	}
+	return from, to, amount, nil
 }
