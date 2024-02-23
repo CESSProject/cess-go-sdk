@@ -1921,7 +1921,7 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
 				}
 				if e.Name == event.BalancesTransfer {
-					fmt.Println("find transfer event")
+					// fmt.Println("find transfer event")
 					// from, to, amount, _ = parseTransferInfoFromEvent(e)
 					// transferInfo = append(transferInfo, event.TransferInfo{
 					// 	From:   from,

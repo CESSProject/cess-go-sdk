@@ -331,12 +331,18 @@ type Event_MasterKeyLaunched struct {
 	Topics []types.Hash
 }
 
-type Event_KeyfairyAdded struct {
+type Event_WorkerAdded struct {
 	Phase               types.Phase
 	Pubkey              pattern.WorkerPublicKey
 	AttestationProvider types.Option[types.U8]
 	ConfidenceLevel     types.U8
 	Topics              []types.Hash
+}
+
+type Event_KeyfairyAdded struct {
+	Phase  types.Phase
+	Pubkey pattern.WorkerPublicKey
+	Topics []types.Hash
 }
 
 type Event_WorkerUpdated struct {
@@ -505,6 +511,7 @@ type EventRecords struct {
 	// TeeWorker
 	TeeWorker_Exit                          []Event_Exit
 	TeeWorker_MasterKeyLaunched             []Event_MasterKeyLaunched
+	TeeWorker_WorkerAdded                   []Event_WorkerAdded
 	TeeWorker_KeyfairyAdded                 []Event_KeyfairyAdded
 	TeeWorker_WorkerUpdated                 []Event_WorkerUpdated
 	TeeWorker_MasterKeyRotated              []Event_MasterKeyRotated
