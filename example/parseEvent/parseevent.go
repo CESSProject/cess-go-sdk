@@ -6,6 +6,8 @@ import (
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/core/event"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 // Substrate well-known mnemonic:
@@ -22,6 +24,11 @@ var RPC_ADDRS = []string{
 	"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
+type MyEvent struct {
+	Sminer_FaucetTopUpMoney []event.Event_FaucetTopUpMoney
+	types.EventRecords
+}
+
 func main() {
 	sdk, err := cess.New(
 		context.Background(),
@@ -33,14 +40,38 @@ func main() {
 		panic(err)
 	}
 	sdk.InitExtrinsicsName()
+
 	// RetrieveEvent_FileBank_CalculateReport
-	// bhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(298712)
+	// bhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(713)
 	// if err != nil {
 	// 	panic(err)
 	// }
+	// var data types.StorageDataRaw
+	// key, err := types.CreateStorageKey(sdk.GetMetadata(), "System", "Events", nil, nil)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// ok, err := sdk.GetSubstrateAPI().RPC.State.GetStorage(key, &data, bhash)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// if ok {
+	// 	events := MyEvent{}
+	// 	err = types.EventRecordsRaw(data).DecodeEventRecords(sdk.GetMetadata(), &events)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+
+	// 	for _, e := range events.Balances_Transfer {
+	// 		fmt.Printf("Balances:Transfer:: (phase=%#v)\n", e.Phase)
+	// 		fmt.Printf("\t%v, %v, %v\n", e.From, e.To, e.Value)
+	// 	}
+	// }
+
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 	fmt.Println(" --------- ")
-	sysEvents, extrinsics, transferInfo, blockhash, preHash, extHash, stHash, t, err := sdk.RetrieveBlock(312732)
+	sysEvents, extrinsics, transferInfo, blockhash, preHash, extHash, stHash, t, err := sdk.RetrieveBlock(713)
 	if err != nil {
 		panic(err)
 	}

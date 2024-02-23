@@ -1867,9 +1867,9 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 	var eventsBuf = make([]string, 0)
 	var signer string
 	var fee string
-	var from string
-	var to string
-	var amount string
+	// var from string
+	// var to string
+	// var amount string
 	var ok bool
 	var name string
 	var preExtName string
@@ -1919,17 +1919,23 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 				eventsBuf = append(eventsBuf, e.Name)
 				if e.Name == event.TransactionPaymentTransactionFeePaid {
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
-
 				}
 				if e.Name == event.BalancesTransfer {
 					fmt.Println("find transfer event")
-					from, to, amount, _ = parseTransferInfoFromEvent(e)
-					transferInfo = append(transferInfo, event.TransferInfo{
-						From:   from,
-						To:     to,
-						Amount: amount,
-						Result: true,
-					})
+					// from, to, amount, _ = parseTransferInfoFromEvent(e)
+					// transferInfo = append(transferInfo, event.TransferInfo{
+					// 	From:   from,
+					// 	To:     to,
+					// 	Amount: amount,
+					// 	Result: true,
+					// })
+					transfers, err := c.parseTransferInfoFromBlock(blockhash)
+					if err != nil {
+						return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
+					}
+					if len(transfers) > 0 {
+						transferInfo = append(transferInfo, transfers...)
+					}
 				}
 			}
 		} else {
@@ -2041,6 +2047,37 @@ func Explicit(v reflect.Value, depth int) string {
 	return fee
 }
 
+func (c *chainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]event.TransferInfo, error) {
+	var transferEvents = make([]event.TransferInfo, 0)
+	var data types.StorageDataRaw
+	ok, err := c.GetSubstrateAPI().RPC.State.GetStorage(c.GetKeyEvents(), &data, blockhash)
+	if err != nil {
+		return transferEvents, err
+	}
+	var from string
+	var to string
+	if ok {
+		events := event.EventRecords{}
+		err = types.EventRecordsRaw(data).DecodeEventRecords(c.GetMetadata(), &events)
+		if err != nil {
+			return transferEvents, err
+		}
+		for _, e := range events.Balances_Transfer {
+			fmt.Printf("Balances:Transfer:: (phase=%#v)\n", e.Phase)
+			fmt.Printf("\t%v, %v, %v\n", e.From, e.To, e.Value)
+			from, _ = utils.EncodePublicKeyAsCessAccount(e.From[:])
+			to, _ = utils.EncodePublicKeyAsCessAccount(e.To[:])
+			transferEvents = append(transferEvents, event.TransferInfo{
+				From:   from,
+				To:     to,
+				Amount: e.Value.String(),
+				Result: true,
+			})
+		}
+	}
+	return transferEvents, nil
+}
+
 func parseTransferInfoFromEvent(e *parser.Event) (string, string, string, error) {
 	if e == nil {
 		return "", "", "", errors.New("event is nil")
@@ -2052,10 +2089,11 @@ func parseTransferInfoFromEvent(e *parser.Event) (string, string, string, error)
 	var to string
 	var amount string
 	for _, v := range e.Fields {
+		k := reflect.TypeOf(v.Value).Kind()
 		val := reflect.ValueOf(v.Value)
-		fmt.Println("reflect.TypeOf(v.Value).Kind() : ", reflect.TypeOf(v.Value).Kind())
+		fmt.Println("k: ", k)
 		fmt.Println("v.Name: ", v.Name)
-		if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+		if k == reflect.Slice {
 			if strings.Contains(v.Name, "from") {
 				from = parseAccount(val)
 			}
@@ -2063,11 +2101,12 @@ func parseTransferInfoFromEvent(e *parser.Event) (string, string, string, error)
 				to = parseAccount(val)
 			}
 		}
-		if reflect.TypeOf(v.Value).Kind() == reflect.Struct {
+		if k == reflect.Struct {
 			if v.Name == "amount" {
 				amount = Explicit(val, 0)
 			}
 		}
 	}
+	fmt.Println("amount: ", amount)
 	return from, to, amount, nil
 }
