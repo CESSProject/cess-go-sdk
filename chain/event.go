@@ -2063,8 +2063,6 @@ func (c *chainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]event.
 			return transferEvents, err
 		}
 		for _, e := range events.Balances_Transfer {
-			fmt.Printf("Balances:Transfer:: (phase=%#v)\n", e.Phase)
-			fmt.Printf("\t%v, %v, %v\n", e.From, e.To, e.Value)
 			from, _ = utils.EncodePublicKeyAsCessAccount(e.From[:])
 			to, _ = utils.EncodePublicKeyAsCessAccount(e.To[:])
 			transferEvents = append(transferEvents, event.TransferInfo{

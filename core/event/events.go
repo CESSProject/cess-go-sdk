@@ -65,10 +65,9 @@ type Event_SubmitServiceVerifyResult struct {
 
 // ------------------------Sminer------------------------
 type Event_Registered struct {
-	Phase      types.Phase
-	Acc        types.AccountID
-	StakingVal types.U128
-	Topics     []types.Hash
+	Phase  types.Phase
+	Acc    types.AccountID
+	Topics []types.Hash
 }
 
 type Event_RegisterPoisKey struct {
