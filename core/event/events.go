@@ -417,6 +417,44 @@ type Event_ElectionFinalized struct {
 	Topics  []types.Hash
 }
 
+type Event_ServiceFeePaid struct {
+	Phase       types.Phase
+	Who         types.AccountID
+	ActualFee   types.U128
+	ExpectedFee types.U128
+	Topics      []types.Hash
+}
+
+type Event_CallDone struct {
+	Phase      types.Phase
+	Who        types.AccountID
+	CallResult Result
+	Topics     []types.Hash
+}
+
+type Result struct {
+	Index    types.U8
+	ResultOk ResultOk
+}
+
+type ResultOk struct {
+	ActualWeight types.Option[ActualWeightType]
+	PaysFee      types.U8
+}
+
+type ActualWeightType struct {
+	RefTime   types.U64
+	ProofSize types.U64
+}
+
+type Event_TransactionFeePaid struct {
+	Phase     types.Phase
+	Who       types.AccountID
+	ActualFee types.U128
+	Tip       types.U128
+	Topics    []types.Hash
+}
+
 // *******************************************************
 type ElectionScore struct {
 	/// The minimal winner, in terms of total backing stake.
@@ -520,7 +558,9 @@ type EventRecords struct {
 
 	// system
 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
-
+	EvmAccountMapping_ServiceFeePaid             []Event_ServiceFeePaid
+	EvmAccountMapping_CallDone                   []Event_CallDone
+	EvmAccountMapping_TransactionFeePaid         []Event_TransactionFeePaid
 	// system-gsrpc
 	types.EventRecords
 }
