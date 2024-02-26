@@ -8,6 +8,7 @@
 package chain
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -16,8 +17,10 @@ import (
 	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
+	"github.com/vedhavyas/go-subkey/scale"
 )
 
 func (c *chainClient) DecodeEventNameFromBlock(block uint64) ([]string, error) {
@@ -946,8 +949,8 @@ func (c *chainClient) RetrieveEvent_FileBank_CalculateReport(blockhash types.Has
 	return result, errors.Errorf("failed: no %s event found", event.FileBankCalculateReport)
 }
 
-func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdataIp, error) {
-	var result event.Event_UpdataIp
+func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Sminer_UpdatePeerId, error) {
+	var result event.Sminer_UpdatePeerId
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
@@ -1842,4 +1845,266 @@ func (c *chainClient) RetrieveAllEventFromBlock(blockhash types.Hash) ([]string,
 		}
 	}
 	return systemEvents, extrinsicsEvents, nil
+}
+
+func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error) {
+	var timeUnixMilli int64
+	var systemEvents = make([]string, 0)
+	var extrinsicsInfo = make([]event.ExtrinsicsInfo, 0)
+	var transferInfo = make([]event.TransferInfo, 0)
+	blockhash, err := c.GetSubstrateAPI().RPC.Chain.GetBlockHash(blocknumber)
+	if err != nil {
+		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
+	}
+	block, err := c.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
+	if err != nil {
+		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
+	}
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
+	}
+	var eventsBuf = make([]string, 0)
+	var signer string
+	var fee string
+	// var from string
+	// var to string
+	// var amount string
+	var ok bool
+	var name string
+	var preExtName string
+	var result bool
+	for _, e := range events {
+		if e.Phase.IsApplyExtrinsic {
+			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+				if name == ExtName_Timestamp_set {
+					timeDecoder := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args))
+					timestamp, err := timeDecoder.DecodeUintCompact()
+					if err != nil {
+						return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
+					}
+					timeUnixMilli = timestamp.Int64()
+					extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+						Name:   name,
+						Events: []string{e.Name},
+						Result: true,
+					})
+					preExtName = name
+					continue
+				}
+				if e.Name == event.BalancesWithdraw {
+					if len(eventsBuf) > 0 {
+						result = false
+						for i := 0; i < len(eventsBuf); i++ {
+							if eventsBuf[i] == event.SystemExtrinsicSuccess {
+								result = true
+								break
+							}
+							if eventsBuf[i] == event.SystemExtrinsicFailed {
+								result = false
+								break
+							}
+						}
+						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+							Name:    preExtName,
+							Signer:  signer,
+							FeePaid: fee,
+							Result:  result,
+							Events:  append(make([]string, 0), eventsBuf...),
+						})
+						preExtName = name
+						eventsBuf = make([]string, 0)
+					}
+				}
+				eventsBuf = append(eventsBuf, e.Name)
+				if e.Name == event.TransactionPaymentTransactionFeePaid {
+					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
+				}
+				if e.Name == event.BalancesTransfer {
+					// fmt.Println("find transfer event")
+					// from, to, amount, _ = parseTransferInfoFromEvent(e)
+					// transferInfo = append(transferInfo, event.TransferInfo{
+					// 	From:   from,
+					// 	To:     to,
+					// 	Amount: amount,
+					// 	Result: true,
+					// })
+					transfers, err := c.parseTransferInfoFromBlock(blockhash)
+					if err != nil {
+						return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
+					}
+					if len(transfers) > 0 {
+						transferInfo = append(transferInfo, transfers...)
+					}
+				}
+			}
+		} else {
+			systemEvents = append(systemEvents, e.Name)
+		}
+	}
+	if len(eventsBuf) > 0 {
+		result = false
+		for i := 0; i < len(eventsBuf); i++ {
+			if eventsBuf[i] == event.SystemExtrinsicSuccess {
+				result = true
+				break
+			}
+			if eventsBuf[i] == event.SystemExtrinsicFailed {
+				result = false
+				break
+			}
+		}
+		extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+			Name:    name,
+			Signer:  signer,
+			FeePaid: fee,
+			Result:  result,
+			Events:  append(make([]string, 0), eventsBuf...),
+		})
+	}
+	return systemEvents, extrinsicsInfo, transferInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
+}
+
+func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
+	if e == nil {
+		return "", "", errors.New("event is nil")
+	}
+	if e.Name != event.TransactionPaymentTransactionFeePaid {
+		return "", "", fmt.Errorf("event is not %s", event.TransactionPaymentTransactionFeePaid)
+	}
+	var signAcc string
+	var fee string
+	for _, v := range e.Fields {
+		val := reflect.ValueOf(v.Value)
+		if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+			signAcc = parseAccount(val)
+		}
+		if reflect.TypeOf(v.Value).Kind() == reflect.Struct {
+			if v.Name == "actual_fee" {
+				fee = Explicit(val, 0)
+			}
+		}
+	}
+	return signAcc, fee, nil
+}
+
+func parseAccount(v reflect.Value) string {
+	var acc string
+	if v.Len() > 0 {
+		allValue := fmt.Sprintf("%v", v.Index(0))
+		temp := strings.Split(allValue, "] ")
+		puk := make([]byte, types.AccountIDLen)
+		for _, v := range temp {
+			if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+				subValue := strings.TrimPrefix(v, "[")
+				ids := strings.Split(subValue, " ")
+				if len(ids) != types.AccountIDLen {
+					continue
+				}
+				for kk, vv := range ids {
+					intv, _ := strconv.Atoi(vv)
+					puk[kk] = byte(intv)
+				}
+			}
+		}
+		acc, _ = utils.EncodePublicKeyAsCessAccount(puk)
+	}
+	return acc
+}
+
+func Explicit(v reflect.Value, depth int) string {
+	var fee string
+	if v.CanInterface() {
+		t := v.Type()
+		switch v.Kind() {
+		case reflect.Ptr:
+			fee = Explicit(v.Elem(), depth)
+		case reflect.Struct:
+			//fmt.Printf(strings.Repeat("\t", depth)+"%v %v {\n", t.Name(), t.Kind())
+			for i := 0; i < v.NumField(); i++ {
+				f := v.Field(i)
+				if f.Kind() == reflect.Struct || f.Kind() == reflect.Ptr {
+					//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : \n", t.Field(i).Name, f.Type())
+					fee = Explicit(f, depth+2)
+				} else {
+					if f.CanInterface() {
+						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f.Interface())
+					} else {
+						if t.Field(i).Name == "abs" {
+							val := fmt.Sprintf("%v", f)
+							return val[1 : len(val)-1]
+						}
+						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f)
+					}
+				}
+			}
+			//fmt.Println(strings.Repeat("\t", depth) + "}")
+		}
+	}
+	// else {
+	// 	  fmt.Printf(strings.Repeat("\t", depth)+"%+v\n", v)
+	// }
+	return fee
+}
+
+func (c *chainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]event.TransferInfo, error) {
+	var transferEvents = make([]event.TransferInfo, 0)
+	var data types.StorageDataRaw
+	ok, err := c.GetSubstrateAPI().RPC.State.GetStorage(c.GetKeyEvents(), &data, blockhash)
+	if err != nil {
+		return transferEvents, err
+	}
+	var from string
+	var to string
+	if ok {
+		events := event.EventRecords{}
+		err = types.EventRecordsRaw(data).DecodeEventRecords(c.GetMetadata(), &events)
+		if err != nil {
+			return transferEvents, err
+		}
+		for _, e := range events.Balances_Transfer {
+			from, _ = utils.EncodePublicKeyAsCessAccount(e.From[:])
+			to, _ = utils.EncodePublicKeyAsCessAccount(e.To[:])
+			transferEvents = append(transferEvents, event.TransferInfo{
+				From:   from,
+				To:     to,
+				Amount: e.Value.String(),
+				Result: true,
+			})
+		}
+	}
+	return transferEvents, nil
+}
+
+func parseTransferInfoFromEvent(e *parser.Event) (string, string, string, error) {
+	if e == nil {
+		return "", "", "", errors.New("event is nil")
+	}
+	if e.Name != event.BalancesTransfer {
+		return "", "", "", fmt.Errorf("event is not %s", event.BalancesTransfer)
+	}
+	var from string
+	var to string
+	var amount string
+	for _, v := range e.Fields {
+		k := reflect.TypeOf(v.Value).Kind()
+		val := reflect.ValueOf(v.Value)
+		fmt.Println("k: ", k)
+		fmt.Println("v.Name: ", v.Name)
+		if k == reflect.Slice {
+			if strings.Contains(v.Name, "from") {
+				from = parseAccount(val)
+			}
+			if strings.Contains(v.Name, "to") {
+				to = parseAccount(val)
+			}
+		}
+		if k == reflect.Struct {
+			if v.Name == "amount" {
+				amount = Explicit(val, 0)
+			}
+		}
+	}
+	fmt.Println("amount: ", amount)
+	return from, to, amount, nil
 }

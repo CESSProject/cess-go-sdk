@@ -393,7 +393,7 @@ type SDK interface {
 	//
 	RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (event.Event_RegisterPoisKey, error)
 	//
-	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdataIp, error)
+	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Sminer_UpdatePeerId, error)
 	//
 	RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (event.Event_UpdataBeneficiary, error)
 	//
@@ -426,7 +426,8 @@ type SDK interface {
 	//RetrieveAllEvent(blockhash types.Hash) ([]string, []string, error)
 	//
 	RetrieveAllEventFromBlock(blockhash types.Hash) ([]string, map[string][]string, error)
-
+	//
+	RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
 	//
 	InitExtrinsicsName() error
 }

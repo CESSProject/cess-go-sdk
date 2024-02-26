@@ -65,10 +65,9 @@ type Event_SubmitServiceVerifyResult struct {
 
 // ------------------------Sminer------------------------
 type Event_Registered struct {
-	Phase      types.Phase
-	Acc        types.AccountID
-	StakingVal types.U128
-	Topics     []types.Hash
+	Phase  types.Phase
+	Acc    types.AccountID
+	Topics []types.Hash
 }
 
 type Event_RegisterPoisKey struct {
@@ -132,7 +131,7 @@ type Event_UpdataBeneficiary struct {
 	Topics []types.Hash
 }
 
-type Event_UpdataIp struct {
+type Sminer_UpdatePeerId struct {
 	Phase  types.Phase
 	Acc    types.AccountID
 	Old    pattern.PeerId
@@ -332,12 +331,18 @@ type Event_MasterKeyLaunched struct {
 	Topics []types.Hash
 }
 
-type Event_KeyfairyAdded struct {
+type Event_WorkerAdded struct {
 	Phase               types.Phase
 	Pubkey              pattern.WorkerPublicKey
 	AttestationProvider types.Option[types.U8]
 	ConfidenceLevel     types.U8
 	Topics              []types.Hash
+}
+
+type Event_KeyfairyAdded struct {
+	Phase  types.Phase
+	Pubkey pattern.WorkerPublicKey
+	Topics []types.Hash
 }
 
 type Event_WorkerUpdated struct {
@@ -410,6 +415,44 @@ type Event_ElectionFinalized struct {
 	Compute types.U8
 	Score   ElectionScore
 	Topics  []types.Hash
+}
+
+type Event_ServiceFeePaid struct {
+	Phase       types.Phase
+	Who         types.AccountID
+	ActualFee   types.U128
+	ExpectedFee types.U128
+	Topics      []types.Hash
+}
+
+type Event_CallDone struct {
+	Phase      types.Phase
+	Who        types.AccountID
+	CallResult Result
+	Topics     []types.Hash
+}
+
+type Result struct {
+	Index    types.U8
+	ResultOk ResultOk
+}
+
+type ResultOk struct {
+	ActualWeight types.Option[ActualWeightType]
+	PaysFee      types.U8
+}
+
+type ActualWeightType struct {
+	RefTime   types.U64
+	ProofSize types.U64
+}
+
+type Event_TransactionFeePaid struct {
+	Phase     types.Phase
+	Who       types.AccountID
+	ActualFee types.U128
+	Tip       types.U128
+	Topics    []types.Hash
 }
 
 // *******************************************************
@@ -490,7 +533,7 @@ type EventRecords struct {
 	Sminer_IncreaseCollateral       []Event_IncreaseCollateral
 	Sminer_Deposit                  []Event_Deposit
 	Sminer_UpdataBeneficiary        []Event_UpdataBeneficiary
-	Sminer_UpdataIp                 []Event_UpdataIp
+	Sminer_UpdatePeerId             []Sminer_UpdatePeerId
 	Sminer_Receive                  []Event_Receive
 	Sminer_MinerExitPrep            []Event_MinerExitPrep
 	Sminer_Withdraw                 []Event_Withdraw
@@ -506,6 +549,7 @@ type EventRecords struct {
 	// TeeWorker
 	TeeWorker_Exit                          []Event_Exit
 	TeeWorker_MasterKeyLaunched             []Event_MasterKeyLaunched
+	TeeWorker_WorkerAdded                   []Event_WorkerAdded
 	TeeWorker_KeyfairyAdded                 []Event_KeyfairyAdded
 	TeeWorker_WorkerUpdated                 []Event_WorkerUpdated
 	TeeWorker_MasterKeyRotated              []Event_MasterKeyRotated
@@ -514,7 +558,24 @@ type EventRecords struct {
 
 	// system
 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
-
+	EvmAccountMapping_ServiceFeePaid             []Event_ServiceFeePaid
+	EvmAccountMapping_CallDone                   []Event_CallDone
+	EvmAccountMapping_TransactionFeePaid         []Event_TransactionFeePaid
 	// system-gsrpc
 	types.EventRecords
+}
+
+type ExtrinsicsInfo struct {
+	Name    string
+	Signer  string
+	FeePaid string
+	Result  bool
+	Events  []string
+}
+
+type TransferInfo struct {
+	From   string
+	To     string
+	Amount string
+	Result bool
 }
