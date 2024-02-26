@@ -393,7 +393,7 @@ type SDK interface {
 	//
 	RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (event.Event_RegisterPoisKey, error)
 	//
-	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdataPeerId, error)
+	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Sminer_UpdatePeerId, error)
 	//
 	RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (event.Event_UpdataBeneficiary, error)
 	//

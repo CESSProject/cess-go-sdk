@@ -949,8 +949,8 @@ func (c *chainClient) RetrieveEvent_FileBank_CalculateReport(blockhash types.Has
 	return result, errors.Errorf("failed: no %s event found", event.FileBankCalculateReport)
 }
 
-func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdataPeerId, error) {
-	var result event.Event_UpdataPeerId
+func (c *chainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Sminer_UpdatePeerId, error) {
+	var result event.Sminer_UpdatePeerId
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
