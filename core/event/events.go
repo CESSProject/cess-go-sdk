@@ -455,6 +455,18 @@ type Event_TransactionFeePaid struct {
 	Topics    []types.Hash
 }
 
+type Event_ValidatorPrefsSet struct {
+	Phase  types.Phase
+	Stash  types.AccountID
+	Prefs  ValidatorPrefs
+	Topics []types.Hash
+}
+
+type ValidatorPrefs struct {
+	Commission types.U32
+	Blocked    types.Bool
+}
+
 // *******************************************************
 type ElectionScore struct {
 	/// The minimal winner, in terms of total backing stake.
@@ -556,11 +568,17 @@ type EventRecords struct {
 	TeeWorker_MasterKeyRotationFailed       []Event_MasterKeyRotationFailed
 	TeeWorker_MinimumCesealVersionChangedTo []Event_MinimumCesealVersionChangedTo
 
-	// system
+	// system - EvmAccountMapping
+	EvmAccountMapping_ServiceFeePaid     []Event_ServiceFeePaid
+	EvmAccountMapping_CallDone           []Event_CallDone
+	EvmAccountMapping_TransactionFeePaid []Event_TransactionFeePaid
+
+	// system - Staking
+	Staking_ValidatorPrefsSet []Event_ValidatorPrefsSet
+
+	// system - ElectionProviderMultiPhase
 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
-	EvmAccountMapping_ServiceFeePaid             []Event_ServiceFeePaid
-	EvmAccountMapping_CallDone                   []Event_CallDone
-	EvmAccountMapping_TransactionFeePaid         []Event_TransactionFeePaid
+
 	// system-gsrpc
 	types.EventRecords
 }

@@ -1867,13 +1867,9 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 	var eventsBuf = make([]string, 0)
 	var signer string
 	var fee string
-	// var from string
-	// var to string
-	// var amount string
 	var ok bool
 	var name string
-	var preExtName string
-	var result bool
+	var parsedBalancesTransfer = true
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
 			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
@@ -1889,39 +1885,13 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 						Events: []string{e.Name},
 						Result: true,
 					})
-					preExtName = name
 					continue
-				}
-				if e.Name == event.BalancesWithdraw {
-					if len(eventsBuf) > 0 {
-						result = false
-						for i := 0; i < len(eventsBuf); i++ {
-							if eventsBuf[i] == event.SystemExtrinsicSuccess {
-								result = true
-								break
-							}
-							if eventsBuf[i] == event.SystemExtrinsicFailed {
-								result = false
-								break
-							}
-						}
-						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
-							Name:    preExtName,
-							Signer:  signer,
-							FeePaid: fee,
-							Result:  result,
-							Events:  append(make([]string, 0), eventsBuf...),
-						})
-						preExtName = name
-						eventsBuf = make([]string, 0)
-					}
 				}
 				eventsBuf = append(eventsBuf, e.Name)
 				if e.Name == event.TransactionPaymentTransactionFeePaid {
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
-				}
-				if e.Name == event.BalancesTransfer {
-					// fmt.Println("find transfer event")
+				} else if e.Name == event.BalancesTransfer && parsedBalancesTransfer {
+					parsedBalancesTransfer = false
 					// from, to, amount, _ = parseTransferInfoFromEvent(e)
 					// transferInfo = append(transferInfo, event.TransferInfo{
 					// 	From:   from,
@@ -1936,31 +1906,33 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 					if len(transfers) > 0 {
 						transferInfo = append(transferInfo, transfers...)
 					}
+				} else if e.Name == event.SystemExtrinsicSuccess {
+					if len(eventsBuf) > 0 {
+						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+							Name:    name,
+							Signer:  signer,
+							FeePaid: fee,
+							Result:  true,
+							Events:  append(make([]string, 0), eventsBuf...),
+						})
+						eventsBuf = make([]string, 0)
+					}
+				} else if e.Name == event.SystemExtrinsicFailed {
+					if len(eventsBuf) > 0 {
+						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+							Name:    name,
+							Signer:  signer,
+							FeePaid: fee,
+							Result:  false,
+							Events:  append(make([]string, 0), eventsBuf...),
+						})
+						eventsBuf = make([]string, 0)
+					}
 				}
 			}
 		} else {
 			systemEvents = append(systemEvents, e.Name)
 		}
-	}
-	if len(eventsBuf) > 0 {
-		result = false
-		for i := 0; i < len(eventsBuf); i++ {
-			if eventsBuf[i] == event.SystemExtrinsicSuccess {
-				result = true
-				break
-			}
-			if eventsBuf[i] == event.SystemExtrinsicFailed {
-				result = false
-				break
-			}
-		}
-		extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
-			Name:    name,
-			Signer:  signer,
-			FeePaid: fee,
-			Result:  result,
-			Events:  append(make([]string, 0), eventsBuf...),
-		})
 	}
 	return systemEvents, extrinsicsInfo, transferInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
 }
@@ -2076,7 +2048,7 @@ func (c *chainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]event.
 	return transferEvents, nil
 }
 
-func parseTransferInfoFromEvent(e *parser.Event) (string, string, string, error) {
+func ParseTransferInfoFromEvent(e *parser.Event) (string, string, string, error) {
 	if e == nil {
 		return "", "", "", errors.New("event is nil")
 	}

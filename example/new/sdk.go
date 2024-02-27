@@ -52,7 +52,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	fmt.Println(sdk.RetrieveAllEventFromBlock(blockhash))
-	return
+
 	// header, err := sdk.GetSubstrateAPI().RPC.Chain.GetHeader(blockhash)
 	// if err != nil {
 	// 	log.Fatalln(err)
