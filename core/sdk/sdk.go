@@ -429,5 +429,7 @@ type SDK interface {
 	//
 	RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
 	//
+	RetrieveBlockTest(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
+	//
 	InitExtrinsicsName() error
 }

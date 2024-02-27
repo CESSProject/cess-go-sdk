@@ -200,10 +200,10 @@ type Event_DeleteBucket struct {
 }
 
 type Event_TransferReport struct {
-	Phase       types.Phase
-	Acc         types.AccountID
-	Failed_list []pattern.FileHash
-	Topics      []types.Hash
+	Phase    types.Phase
+	Acc      types.AccountID
+	DealHash pattern.FileHash
+	Topics   []types.Hash
 }
 
 type Event_ReplaceFiller struct {
