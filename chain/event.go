@@ -1860,6 +1860,9 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 	if err != nil {
 		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
 	}
+	if blocknumber == 0 {
+		return systemEvents, extrinsicsInfo, transferInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), 0, nil
+	}
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
