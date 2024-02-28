@@ -393,9 +393,9 @@ type SDK interface {
 	//
 	RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (event.Event_RegisterPoisKey, error)
 	//
-	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Sminer_UpdatePeerId, error)
+	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdatePeerId, error)
 	//
-	RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (event.Event_UpdataBeneficiary, error)
+	RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (event.Event_UpdateBeneficiary, error)
 	//
 	RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (event.Event_MinerExitPrep, error)
 	//

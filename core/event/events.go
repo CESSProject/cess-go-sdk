@@ -124,14 +124,14 @@ type Event_Deposit struct {
 	Topics  []types.Hash
 }
 
-type Event_UpdataBeneficiary struct {
+type Event_UpdateBeneficiary struct {
 	Phase  types.Phase
 	Acc    types.AccountID
 	New    types.AccountID
 	Topics []types.Hash
 }
 
-type Sminer_UpdatePeerId struct {
+type Event_UpdatePeerId struct {
 	Phase  types.Phase
 	Acc    types.AccountID
 	Old    pattern.PeerId
@@ -544,8 +544,8 @@ type EventRecords struct {
 	Sminer_AlreadyFrozen            []Event_AlreadyFrozen
 	Sminer_IncreaseCollateral       []Event_IncreaseCollateral
 	Sminer_Deposit                  []Event_Deposit
-	Sminer_UpdataBeneficiary        []Event_UpdataBeneficiary
-	Sminer_UpdatePeerId             []Sminer_UpdatePeerId
+	Sminer_UpdateBeneficiary        []Event_UpdateBeneficiary
+	Sminer_UpdatePeerId             []Event_UpdatePeerId
 	Sminer_Receive                  []Event_Receive
 	Sminer_MinerExitPrep            []Event_MinerExitPrep
 	Sminer_Withdraw                 []Event_Withdraw
