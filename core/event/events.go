@@ -417,6 +417,13 @@ type Event_ElectionFinalized struct {
 	Topics  []types.Hash
 }
 
+type Event_Locked struct {
+	Phase  types.Phase
+	Who    types.AccountID
+	Amount types.U128
+	Topics []types.Hash
+}
+
 type Event_ServiceFeePaid struct {
 	Phase       types.Phase
 	Who         types.AccountID
@@ -567,6 +574,9 @@ type EventRecords struct {
 	TeeWorker_MasterKeyRotated              []Event_MasterKeyRotated
 	TeeWorker_MasterKeyRotationFailed       []Event_MasterKeyRotationFailed
 	TeeWorker_MinimumCesealVersionChangedTo []Event_MinimumCesealVersionChangedTo
+
+	// system - Staking
+	Balances_Locked []Event_Locked
 
 	// system - EvmAccountMapping
 	EvmAccountMapping_ServiceFeePaid     []Event_ServiceFeePaid
