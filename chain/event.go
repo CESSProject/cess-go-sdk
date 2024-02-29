@@ -1891,7 +1891,8 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 					continue
 				}
 				eventsBuf = append(eventsBuf, e.Name)
-				if e.Name == event.TransactionPaymentTransactionFeePaid {
+				if e.Name == event.TransactionPaymentTransactionFeePaid ||
+					e.Name == event.EvmAccountMappingTransactionFeePaid {
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
 				} else if e.Name == event.BalancesTransfer && parsedBalancesTransfer {
 					parsedBalancesTransfer = false
@@ -1944,8 +1945,9 @@ func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
 	if e == nil {
 		return "", "", errors.New("event is nil")
 	}
-	if e.Name != event.TransactionPaymentTransactionFeePaid {
-		return "", "", fmt.Errorf("event is not %s", event.TransactionPaymentTransactionFeePaid)
+	if e.Name != event.TransactionPaymentTransactionFeePaid &&
+		e.Name != event.EvmAccountMappingTransactionFeePaid {
+		return "", "", fmt.Errorf("event is not %s or %s", event.TransactionPaymentTransactionFeePaid, event.EvmAccountMappingTransactionFeePaid)
 	}
 	var signAcc string
 	var fee string
@@ -1953,17 +1955,10 @@ func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
 		val := reflect.ValueOf(v.Value)
 		if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 			signAcc = parseAccount(val)
-			fmt.Println("signer: ", signAcc)
 		}
 		if reflect.TypeOf(v.Value).Kind() == reflect.Struct {
-			if v.Name == "actual_fee" {
-				fee = Explicit(val, 0)
-			}
 			if strings.Contains(v.Name, "actual") {
-				fmt.Println("actualFee: ", Explicit(val, 0))
-			}
-			if v.Name == "tip" {
-				fmt.Println("tip: ", Explicit(val, 0))
+				fee = Explicit(val, 0)
 			}
 		}
 	}
@@ -2002,25 +1997,25 @@ func Explicit(v reflect.Value, depth int) string {
 		case reflect.Ptr:
 			fee = Explicit(v.Elem(), depth)
 		case reflect.Struct:
-			fmt.Printf(strings.Repeat("\t", depth)+"%v %v {\n", t.Name(), t.Kind())
+			//fmt.Printf(strings.Repeat("\t", depth)+"%v %v {\n", t.Name(), t.Kind())
 			for i := 0; i < v.NumField(); i++ {
 				f := v.Field(i)
 				if f.Kind() == reflect.Struct || f.Kind() == reflect.Ptr {
-					fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : \n", t.Field(i).Name, f.Type())
+					//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : \n", t.Field(i).Name, f.Type())
 					fee = Explicit(f, depth+2)
 				} else {
 					if f.CanInterface() {
-						fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f.Interface())
+						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f.Interface())
 					} else {
-						// if t.Field(i).Name == "abs" {
-						// 	val := fmt.Sprintf("%v", f)
-						// 	return val[1 : len(val)-1]
-						// }
-						fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f)
+						if t.Field(i).Name == "abs" {
+							val := fmt.Sprintf("%v", f)
+							return val[1 : len(val)-1]
+						}
+						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f)
 					}
 				}
 			}
-			fmt.Println(strings.Repeat("\t", depth) + "}")
+			//fmt.Println(strings.Repeat("\t", depth) + "}")
 		}
 	}
 	// else {

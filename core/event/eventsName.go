@@ -76,6 +76,8 @@ const (
 	//
 	TransactionPaymentTransactionFeePaid = "TransactionPayment.TransactionFeePaid"
 	//
+	EvmAccountMappingTransactionFeePaid = "EvmAccountMapping.TransactionFeePaid"
+	//
 	BalancesWithdraw = "Balances.Withdraw"
 	BalancesTransfer = "Balances.Transfer"
 	//
