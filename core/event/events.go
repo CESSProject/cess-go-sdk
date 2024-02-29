@@ -417,6 +417,29 @@ type Event_ElectionFinalized struct {
 	Topics  []types.Hash
 }
 
+type Event_PhaseTransitioned struct {
+	Phase  types.Phase
+	From   Signed
+	To     Unsigneds
+	Round  types.U32
+	Topics []types.Hash
+}
+
+type Signed struct {
+	Index types.U8
+	Value types.U32
+}
+
+type Unsigneds struct {
+	Index         types.U8
+	UnsignedValue []UnsignedValue
+}
+
+type UnsignedValue struct {
+	Bool types.Bool
+	Bn   types.U32
+}
+
 type Event_Locked struct {
 	Phase  types.Phase
 	Who    types.AccountID
@@ -588,7 +611,7 @@ type EventRecords struct {
 
 	// system - ElectionProviderMultiPhase
 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
-
+	ElectionProviderMultiPhase_PhaseTransitioned []Event_PhaseTransitioned
 	// system-gsrpc
 	types.EventRecords
 }
