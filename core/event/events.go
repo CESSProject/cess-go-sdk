@@ -124,14 +124,14 @@ type Event_Deposit struct {
 	Topics  []types.Hash
 }
 
-type Event_UpdataBeneficiary struct {
+type Event_UpdateBeneficiary struct {
 	Phase  types.Phase
 	Acc    types.AccountID
 	New    types.AccountID
 	Topics []types.Hash
 }
 
-type Sminer_UpdatePeerId struct {
+type Event_UpdatePeerId struct {
 	Phase  types.Phase
 	Acc    types.AccountID
 	Old    pattern.PeerId
@@ -200,10 +200,10 @@ type Event_DeleteBucket struct {
 }
 
 type Event_TransferReport struct {
-	Phase       types.Phase
-	Acc         types.AccountID
-	Failed_list []pattern.FileHash
-	Topics      []types.Hash
+	Phase    types.Phase
+	Acc      types.AccountID
+	DealHash pattern.FileHash
+	Topics   []types.Hash
 }
 
 type Event_ReplaceFiller struct {
@@ -417,6 +417,49 @@ type Event_ElectionFinalized struct {
 	Topics  []types.Hash
 }
 
+type Event_PhaseTransitioned struct {
+	Phase  types.Phase
+	From   Signed
+	To     Unsigneds
+	Round  types.U32
+	Topics []types.Hash
+}
+
+type Signed struct {
+	Index types.U8
+	Value types.U32
+}
+
+type Unsigneds struct {
+	Index         types.U8
+	UnsignedValue []UnsignedValue
+}
+
+type UnsignedValue struct {
+	Bool types.Bool
+	Bn   types.U32
+}
+
+type Event_SolutionStored struct {
+	Phase       types.Phase
+	Compute     ElectionCompute
+	Origin      types.Option[types.AccountID]
+	PrevEjected types.Bool
+	Topics      []types.Hash
+}
+
+type ElectionCompute struct {
+	Index types.U8
+	Value types.U8
+}
+
+type Event_Locked struct {
+	Phase  types.Phase
+	Who    types.AccountID
+	Amount types.U128
+	Topics []types.Hash
+}
+
 type Event_ServiceFeePaid struct {
 	Phase       types.Phase
 	Who         types.AccountID
@@ -453,6 +496,18 @@ type Event_TransactionFeePaid struct {
 	ActualFee types.U128
 	Tip       types.U128
 	Topics    []types.Hash
+}
+
+type Event_ValidatorPrefsSet struct {
+	Phase  types.Phase
+	Stash  types.AccountID
+	Prefs  ValidatorPrefs
+	Topics []types.Hash
+}
+
+type ValidatorPrefs struct {
+	Commission types.U32
+	Blocked    types.Bool
 }
 
 // *******************************************************
@@ -532,8 +587,8 @@ type EventRecords struct {
 	Sminer_AlreadyFrozen            []Event_AlreadyFrozen
 	Sminer_IncreaseCollateral       []Event_IncreaseCollateral
 	Sminer_Deposit                  []Event_Deposit
-	Sminer_UpdataBeneficiary        []Event_UpdataBeneficiary
-	Sminer_UpdatePeerId             []Sminer_UpdatePeerId
+	Sminer_UpdateBeneficiary        []Event_UpdateBeneficiary
+	Sminer_UpdatePeerId             []Event_UpdatePeerId
 	Sminer_Receive                  []Event_Receive
 	Sminer_MinerExitPrep            []Event_MinerExitPrep
 	Sminer_Withdraw                 []Event_Withdraw
@@ -556,11 +611,22 @@ type EventRecords struct {
 	TeeWorker_MasterKeyRotationFailed       []Event_MasterKeyRotationFailed
 	TeeWorker_MinimumCesealVersionChangedTo []Event_MinimumCesealVersionChangedTo
 
-	// system
+	// system - Staking
+	Balances_Locked []Event_Locked
+
+	// system - EvmAccountMapping
+	EvmAccountMapping_ServiceFeePaid     []Event_ServiceFeePaid
+	EvmAccountMapping_CallDone           []Event_CallDone
+	EvmAccountMapping_TransactionFeePaid []Event_TransactionFeePaid
+
+	// system - Staking
+	Staking_ValidatorPrefsSet []Event_ValidatorPrefsSet
+
+	// system - ElectionProviderMultiPhase
 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
-	EvmAccountMapping_ServiceFeePaid             []Event_ServiceFeePaid
-	EvmAccountMapping_CallDone                   []Event_CallDone
-	EvmAccountMapping_TransactionFeePaid         []Event_TransactionFeePaid
+	ElectionProviderMultiPhase_PhaseTransitioned []Event_PhaseTransitioned
+	ElectionProviderMultiPhase_SolutionStored    []Event_SolutionStored
+
 	// system-gsrpc
 	types.EventRecords
 }
