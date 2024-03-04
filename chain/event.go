@@ -10,6 +10,7 @@ package chain
 import (
 	"bytes"
 	"fmt"
+	"math/big"
 	"reflect"
 	"strconv"
 	"strings"
@@ -1872,7 +1873,7 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 	var fee string
 	var ok bool
 	var name string
-	var parsedBalancesTransfer = true
+	//var parsedBalancesTransfer = true
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
 			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
@@ -1894,22 +1895,22 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 				if e.Name == event.TransactionPaymentTransactionFeePaid ||
 					e.Name == event.EvmAccountMappingTransactionFeePaid {
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
-				} else if e.Name == event.BalancesTransfer && parsedBalancesTransfer {
-					parsedBalancesTransfer = false
-					// from, to, amount, _ = parseTransferInfoFromEvent(e)
-					// transferInfo = append(transferInfo, event.TransferInfo{
-					// 	From:   from,
-					// 	To:     to,
-					// 	Amount: amount,
-					// 	Result: true,
-					// })
-					transfers, err := c.parseTransferInfoFromBlock(blockhash)
-					if err != nil {
-						return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
-					}
-					if len(transfers) > 0 {
-						transferInfo = append(transferInfo, transfers...)
-					}
+				} else if e.Name == event.BalancesTransfer {
+					//parsedBalancesTransfer = false
+					from, to, amount, _ := ParseTransferInfoFromEvent(e)
+					transferInfo = append(transferInfo, event.TransferInfo{
+						From:   from,
+						To:     to,
+						Amount: amount,
+						Result: true,
+					})
+					// transfers, err := c.parseTransferInfoFromBlock(blockhash)
+					// if err != nil {
+					// 	return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
+					// }
+					// if len(transfers) > 0 {
+					// 	transferInfo = append(transferInfo, transfers...)
+					// }
 				} else if e.Name == event.SystemExtrinsicSuccess {
 					if len(eventsBuf) > 0 {
 						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
@@ -1958,7 +1959,7 @@ func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
 		}
 		if reflect.TypeOf(v.Value).Kind() == reflect.Struct {
 			if strings.Contains(v.Name, "actual") {
-				fee = Explicit(val, 0)
+				fee = ExplicitBigInt(val, 0)
 			}
 		}
 	}
@@ -1989,27 +1990,33 @@ func parseAccount(v reflect.Value) string {
 	return acc
 }
 
-func Explicit(v reflect.Value, depth int) string {
+func ExplicitBigInt(v reflect.Value, depth int) string {
 	var fee string
 	if v.CanInterface() {
+		value, ok := v.Interface().(big.Int)
+		if ok {
+			return value.String()
+		}
 		t := v.Type()
 		switch v.Kind() {
 		case reflect.Ptr:
-			fee = Explicit(v.Elem(), depth)
+			fee = ExplicitBigInt(v.Elem(), depth)
 		case reflect.Struct:
 			//fmt.Printf(strings.Repeat("\t", depth)+"%v %v {\n", t.Name(), t.Kind())
 			for i := 0; i < v.NumField(); i++ {
 				f := v.Field(i)
 				if f.Kind() == reflect.Struct || f.Kind() == reflect.Ptr {
 					//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : \n", t.Field(i).Name, f.Type())
-					fee = Explicit(f, depth+2)
+					fee = ExplicitBigInt(f, depth+2)
 				} else {
 					if f.CanInterface() {
 						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f.Interface())
 					} else {
 						if t.Field(i).Name == "abs" {
 							val := fmt.Sprintf("%v", f)
-							return val[1 : len(val)-1]
+							val = strings.TrimPrefix(val, "[")
+							val = strings.TrimSuffix(val, "]")
+							return val
 						}
 						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f)
 					}
@@ -2057,68 +2064,29 @@ func ParseTransferInfoFromEvent(e *parser.Event) (string, string, string, error)
 	if e == nil {
 		return "", "", "", errors.New("event is nil")
 	}
-	//if e.Name != event.BalancesTransfer {
-	//return "", "", "", fmt.Errorf("event is not %s", event.BalancesTransfer)
-	//}
+	if e.Name != event.BalancesTransfer {
+		return "", "", "", fmt.Errorf("event is not %s", event.BalancesTransfer)
+	}
 	var from string
 	var to string
 	var amount string
 	for _, v := range e.Fields {
 		k := reflect.TypeOf(v.Value).Kind()
-
 		val := reflect.ValueOf(v.Value)
-		if e.Name == "System.ExtrinsicSuccess" {
-			fmt.Println("k: ", k, " v.Name: ", v.Name)
-		}
 		if k == reflect.Slice {
 			if strings.Contains(v.Name, "from") {
-				fmt.Println("from: ", parseAccount(val))
+				from = parseAccount(val)
 			}
 			if strings.Contains(v.Name, "to") {
-				fmt.Println("to: ", parseAccount(val))
-			}
-			if strings.Contains(v.Name, "who") {
-				fmt.Println("who: ", parseAccount(val))
-			}
-			if strings.Contains(v.Name, "acc") {
-				fmt.Println("acc: ", parseAccount(val))
-			}
-			if strings.Contains(v.Name, "dispatch") {
-				fmt.Println("dispatchInfo: ", parsestruct(val))
-			}
-			if strings.Contains(v.Name, "actual") {
-				fmt.Println("actualFee: ", Explicit(val, 0))
-			}
-			if v.Name == "tip" {
-				fmt.Println("tip: ", Explicit(val, 0))
+				to = parseAccount(val)
 			}
 		}
 		if k == reflect.Struct {
 			if v.Name == "amount" {
-				fmt.Println("amount: ", Explicit(val, 0))
-			}
-			if v.Name == "value" {
-				fmt.Println("value: ", Explicit(val, 0))
-			}
-
-			if strings.Contains(v.Name, "dispatch") {
-				fmt.Println("dispatchInfo: ", Explicit(val, 0))
-			}
-			if strings.Contains(v.Name, "weight") {
-				fmt.Println("weight: ", Explicit(val, 0))
-			}
-			if strings.Contains(v.Name, "proof") {
-				fmt.Println("proofSize: ", Explicit(val, 0))
-			}
-			if strings.Contains(v.Name, "class") {
-				fmt.Println("class: ", Explicit(val, 0))
-			}
-			if strings.Contains(v.Name, "pays") {
-				fmt.Println("paysFee: ", Explicit(val, 0))
+				amount = ExplicitBigInt(val, 0)
 			}
 		}
 	}
-	//fmt.Println("amount: ", amount)
 	return from, to, amount, nil
 }
 
@@ -2170,7 +2138,7 @@ func (c *chainClient) RetrieveBlockTest(blocknumber uint64) ([]string, []event.E
 					fmt.Println("transactionPayment.TransactionFeePaid:")
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
 				} else if e.Name == event.BalancesTransfer {
-					fmt.Println(e.Name + ":")
+					fmt.Println(e.Name + "---:")
 					from, to, amount, _ := ParseTransferInfoFromEvent(e)
 					transferInfo = append(transferInfo, event.TransferInfo{
 						From:   from,
@@ -2260,15 +2228,15 @@ func parsestruct(v reflect.Value) string {
 		allValue0 := fmt.Sprintf("%v", v.Index(0))
 		fmt.Println("v.Index(0): ", allValue0)
 		fmt.Println("v.Index(0).Kind: ", v.Index(0).Kind())
-		Explicit(v.Index(0), 0)
+		ExplicitBigInt(v.Index(0), 0)
 		allValue1 := fmt.Sprintf("%v", v.Index(1))
 		fmt.Println("v.Index(1): ", allValue1)
 		fmt.Println("v.Index(1).Kind: ", v.Index(1).Kind())
-		Explicit(v.Index(1), 0)
+		ExplicitBigInt(v.Index(1), 0)
 		allValue2 := fmt.Sprintf("%v", v.Index(2))
 		fmt.Println("v.Index(2): ", allValue2)
 		fmt.Println("v.Index(2).Kind: ", v.Index(2).Kind())
-		Explicit(v.Index(2), 0)
+		ExplicitBigInt(v.Index(2), 0)
 	}
 
 	return ""

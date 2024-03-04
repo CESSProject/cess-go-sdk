@@ -440,6 +440,19 @@ type UnsignedValue struct {
 	Bn   types.U32
 }
 
+type Event_SolutionStored struct {
+	Phase       types.Phase
+	Compute     ElectionCompute
+	Origin      types.Option[types.AccountID]
+	PrevEjected types.Bool
+	Topics      []types.Hash
+}
+
+type ElectionCompute struct {
+	Index types.U8
+	Value types.U8
+}
+
 type Event_Locked struct {
 	Phase  types.Phase
 	Who    types.AccountID
@@ -612,6 +625,8 @@ type EventRecords struct {
 	// system - ElectionProviderMultiPhase
 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
 	ElectionProviderMultiPhase_PhaseTransitioned []Event_PhaseTransitioned
+	ElectionProviderMultiPhase_SolutionStored    []Event_SolutionStored
+
 	// system-gsrpc
 	types.EventRecords
 }

@@ -30,6 +30,12 @@ type MyEvent struct {
 }
 
 func main() {
+	// fmt.Println(time.Now().UTC().Truncate(24 * time.Hour).Add(time.Second).UnixMilli())
+	// fmt.Println(time.UnixMilli(1706699208000).UTC().Truncate(24 * time.Hour).Add(time.Hour * 24).UnixMilli())
+	// fmt.Println(time.Now().UTC())
+	// fmt.Println(time.Now().UTC().Hour())
+	// fmt.Println(time.Now().UTC().Minute())
+	// return
 	sdk, err := cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),
@@ -39,6 +45,17 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// fmeta, err := sdk.QueryFileMetadataByBlock("bf7e61cf8abe365dc30e525be5058fd3f502245322300d76fe169c9292c6ba48", 2)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// for _, segment := range fmeta.SegmentList {
+	// 	for _, fragment := range segment.FragmentList {
+	// 		fmt.Println(utils.EncodePublicKeyAsCessAccount(fragment.Miner[:]))
+	// 	}
+	// }
+	// return
 	sdk.InitExtrinsicsName()
 
 	// RetrieveEvent_FileBank_CalculateReport
@@ -70,12 +87,13 @@ func main() {
 	// }
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
-	fmt.Println(" --------- ")
+
 	sysEvents, extrinsics, transferInfo, blockhash, preHash, extHash, stHash, t, err := sdk.RetrieveBlock(11921)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("system events: ", sysEvents)
+	fmt.Println(" --------- ")
+
 	fmt.Println("extrinsics:")
 	for k, v := range extrinsics {
 		fmt.Println("  ", k, ": ", v.Name)
@@ -83,6 +101,7 @@ func main() {
 		fmt.Println("    FeePaid: ", v.FeePaid)
 		fmt.Println("    Events: ", v.Events)
 	}
+	fmt.Println("system events: ", sysEvents)
 	fmt.Println("transfer info: ", transferInfo)
 	fmt.Println("blockhash: ", blockhash)
 	fmt.Println("preHash: ", preHash)
