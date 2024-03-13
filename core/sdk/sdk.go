@@ -134,6 +134,9 @@ type SDK interface {
 	QueryStorageMinerByBlock(puk []byte, block int32) (pattern.MinerInfo, error)
 	// QueryAllSminerAccount queries the accounts of all storage miners.
 	QueryAllSminerAccount() ([]types.AccountID, error)
+	// QueryAllSminerAccountByBlock queries accounts of all storage miners in specified block.
+	//   - if block < 0, then query the latest block
+	QueryAllSminerAccountByBlock(block int32) ([]types.AccountID, error)
 	// QueryRewardsMap queries rewardsMap for accountID
 	//   Tip: accountID can only be a storage node account
 	QueryRewardsMap(accountID []byte) (pattern.MinerReward, error)

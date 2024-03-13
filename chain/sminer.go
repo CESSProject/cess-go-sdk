@@ -203,6 +203,58 @@ func (c *chainClient) QueryAllSminerAccount() ([]types.AccountID, error) {
 	return data, nil
 }
 
+func (c *chainClient) QueryAllSminerAccountByBlock(block int32) ([]types.AccountID, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data []types.AccountID
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.ALLMINER)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.ALLMINER, err)
+		c.SetChainState(false)
+		return nil, err
+	}
+
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.ALLMINER, err)
+			c.SetChainState(false)
+			return nil, err
+		}
+		if !ok {
+			return nil, pattern.ERR_RPC_EMPTY_VALUE
+		}
+	}
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.ALLMINER, err)
+		c.SetChainState(false)
+		return data, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.ALLMINER, err)
+		c.SetChainState(false)
+		return data, err
+	}
+	if !ok {
+		return data, pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	return data, nil
+}
+
 func (c *chainClient) QueryRewardsMap(puk []byte) (pattern.MinerReward, error) {
 	defer func() {
 		if err := recover(); err != nil {
