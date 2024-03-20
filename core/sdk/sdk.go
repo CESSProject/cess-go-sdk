@@ -129,8 +129,14 @@ type SDK interface {
 	QueryExpenders() (pattern.ExpendersInfo, error)
 	// QueryStorageMiner queries storage node information.
 	QueryStorageMiner(accountID []byte) (pattern.MinerInfo, error)
+	// QueryStorageMinerByBlock queries storage node information in specified block
+	//   - if block < 0, then query the latest block
+	QueryStorageMinerByBlock(puk []byte, block int32) (pattern.MinerInfo, error)
 	// QueryAllSminerAccount queries the accounts of all storage miners.
 	QueryAllSminerAccount() ([]types.AccountID, error)
+	// QueryAllSminerAccountByBlock queries accounts of all storage miners in specified block.
+	//   - if block < 0, then query the latest block
+	QueryAllSminerAccountByBlock(block int32) ([]types.AccountID, error)
 	// QueryRewardsMap queries rewardsMap for accountID
 	//   Tip: accountID can only be a storage node account
 	QueryRewardsMap(accountID []byte) (pattern.MinerReward, error)
@@ -430,6 +436,8 @@ type SDK interface {
 	RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
 	//
 	RetrieveBlockTest(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
+	//
+	RetrieveBlockAndAll(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, []string, string, string, string, string, int64, error)
 	//
 	InitExtrinsicsName() error
 }
