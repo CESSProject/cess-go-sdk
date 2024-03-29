@@ -44,9 +44,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer sdk.GetSubstrateAPI().Client.Close()
+
 	fmt.Println(sdk.ChainVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
-	//return
+	fmt.Println(sdk.QueryTotalIssuance(821398))
+	return
+
 	blockhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(180)
 	if err != nil {
 		log.Fatalln(err)

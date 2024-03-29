@@ -48,6 +48,8 @@ const (
 	STAKING = "Staking"
 	// SMINER is a module about storage miners
 	STORAGEHANDLER = "StorageHandler"
+	// BALANCES is a module about the balances
+	BALANCES = "Balances"
 	// SYSTEM is a module about the system
 	SYSTEM = "System"
 )
@@ -98,6 +100,9 @@ const (
 	TOTALIDLESPACE    = "TotalIdleSpace"
 	TOTALSERVICESPACE = "TotalServiceSpace"
 	PURCHASEDSPACE    = "PurchasedSpace"
+
+	// BALANCES
+	TOTALISSUANCE = "TotalIssuance"
 
 	// SYSTEM
 	ACCOUNT = "Account"
@@ -166,8 +171,6 @@ const (
 	//Net
 	RPC_NET_Listening = "net_listening"
 )
-
-const DirMode = 0644
 
 const (
 	Active = iota

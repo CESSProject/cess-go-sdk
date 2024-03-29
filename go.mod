@@ -7,6 +7,8 @@ require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/cbergoon/merkletree v0.2.0
 	github.com/centrifuge/go-substrate-rpc-client/v4 v4.2.1
+	github.com/decred/base58 v1.0.4
+	github.com/ethereum/go-ethereum v1.10.20
 	github.com/google/uuid v1.5.0
 	github.com/joho/godotenv v1.5.1
 	github.com/klauspost/reedsolomon v1.12.0
@@ -25,9 +27,7 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
-	github.com/decred/base58 v1.0.4 // indirect
 	github.com/decred/dcrd/crypto/blake256 v1.0.0 // indirect
-	github.com/ethereum/go-ethereum v1.10.20 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
