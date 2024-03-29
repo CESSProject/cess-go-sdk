@@ -88,7 +88,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	sysEvents, extrinsics, transferInfo, minerReg, newAccounts, blockhash, preHash, extHash, stHash, allGasFee, t, err := sdk.RetrieveBlockAndAll(120000)
+	sysEvents, extrinsics, transferInfo, minerReg, newAccounts, blockhash, preHash, extHash, stHash, allGasFee, t, err := sdk.RetrieveBlockAndAll(351)
 	if err != nil {
 		panic(err)
 	}

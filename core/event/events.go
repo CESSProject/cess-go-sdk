@@ -636,13 +636,17 @@ type ExtrinsicsInfo struct {
 	Signer  string
 	Hash    string
 	FeePaid string
+	From    string
+	To      string
 	Result  bool
 	Events  []string
 }
 
 type TransferInfo struct {
-	From   string
-	To     string
-	Amount string
-	Result bool
+	ExtrinsicName string
+	ExtrinsicHash string
+	From          string
+	To            string
+	Amount        string
+	Result        bool
 }

@@ -1983,10 +1983,12 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 	var fee string
 	var ok bool
 	var name string
+	var extInfo event.ExtrinsicsInfo
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
 			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
 				if name == ExtName_Timestamp_set {
+					extInfo = event.ExtrinsicsInfo{}
 					timeDecoder := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args))
 					timestamp, err := timeDecoder.DecodeUintCompact()
 					if err != nil {
@@ -2011,18 +2013,14 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 				} else if e.Name == event.BalancesTransfer {
 					from, to, amount, _ := ParseTransferInfoFromEvent(e)
 					transferInfo = append(transferInfo, event.TransferInfo{
-						From:   from,
-						To:     to,
-						Amount: amount,
-						Result: true,
+						ExtrinsicName: name,
+						From:          from,
+						To:            to,
+						Amount:        amount,
+						Result:        true,
 					})
-					// transfers, err := c.parseTransferInfoFromBlock(blockhash)
-					// if err != nil {
-					// 	return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
-					// }
-					// if len(transfers) > 0 {
-					// 	transferInfo = append(transferInfo, transfers...)
-					// }
+					extInfo.From = from
+					extInfo.To = to
 				} else if e.Name == event.SminerRegistered {
 					acc, err := ParseAccountFromEvent(e)
 					if err == nil {
@@ -2035,26 +2033,26 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 					}
 				} else if e.Name == event.SystemExtrinsicSuccess {
 					if len(eventsBuf) > 0 {
-						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
-							Name:    name,
-							Signer:  signer,
-							FeePaid: fee,
-							Result:  true,
-							Events:  append(make([]string, 0), eventsBuf...),
-						})
+						extInfo.Name = name
+						extInfo.Signer = signer
+						extInfo.FeePaid = fee
+						extInfo.Result = true
+						extInfo.Events = append(make([]string, 0), eventsBuf...)
+						extrinsicsInfo = append(extrinsicsInfo, extInfo)
 						eventsBuf = make([]string, 0)
 					}
+					extInfo = event.ExtrinsicsInfo{}
 				} else if e.Name == event.SystemExtrinsicFailed {
 					if len(eventsBuf) > 0 {
-						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
-							Name:    name,
-							Signer:  signer,
-							FeePaid: fee,
-							Result:  false,
-							Events:  append(make([]string, 0), eventsBuf...),
-						})
+						extInfo.Name = name
+						extInfo.Signer = signer
+						extInfo.FeePaid = fee
+						extInfo.Result = false
+						extInfo.Events = append(make([]string, 0), eventsBuf...)
+						extrinsicsInfo = append(extrinsicsInfo, extInfo)
 						eventsBuf = make([]string, 0)
 					}
+					extInfo = event.ExtrinsicsInfo{}
 				}
 			}
 		} else {
@@ -2067,6 +2065,23 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 	for i := 0; i < len(allExtrinsicsHash); i++ {
 		extrinsicsInfo[i].Hash = allExtrinsicsHash[i]
 	}
+
+	for i := 0; i < len(extrinsicsInfo); i++ {
+		for j := 0; j < len(transferInfo); j++ {
+			if extrinsicsInfo[i].Name == transferInfo[j].ExtrinsicName {
+				if transferInfo[j].ExtrinsicName == ExtName_Sminer_faucet {
+					if extrinsicsInfo[i].From == transferInfo[j].From &&
+						extrinsicsInfo[i].To == transferInfo[j].To {
+						transferInfo[j].ExtrinsicHash = extrinsicsInfo[i].Hash
+					}
+				}
+				if extrinsicsInfo[i].Signer == transferInfo[j].From {
+					transferInfo[j].ExtrinsicHash = extrinsicsInfo[i].Hash
+				}
+			}
+		}
+	}
+
 	return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), allGasFee.String(), timeUnixMilli, nil
 }
 
