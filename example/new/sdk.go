@@ -48,11 +48,7 @@ func main() {
 
 	fmt.Println(sdk.ChainVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
-	accounts, err := sdk.QueryAllAccountInfoFromBlock(73)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("len(accounts):", len(accounts))
+	fmt.Println(sdk.QueryTotalIssuance(821398))
 	return
 
 	blockhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(180)

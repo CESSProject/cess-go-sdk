@@ -251,6 +251,8 @@ type SDK interface {
 	DecodeEventNameFromBlockhash(blockhash types.Hash) ([]string, error)
 	//
 	QueryAllAccountInfoFromBlock(block int) ([]types.AccountInfo, error)
+	//
+	QueryTotalIssuance(block int) (string, error)
 
 	// TransferToken to dest.
 	//
