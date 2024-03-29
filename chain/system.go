@@ -8,6 +8,7 @@
 package chain
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -99,6 +100,96 @@ func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 	if !ok {
 		return data, pattern.ERR_RPC_EMPTY_VALUE
 	}
+	return data, nil
+}
+
+// QueryAllAccountInfoFromBlock
+func (c *chainClient) QueryAllAccountInfoFromBlock(block int) ([]types.AccountInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data []types.AccountInfo
+
+	if !c.GetChainState() {
+		return data, pattern.ERR_RPC_CONNECTION
+	}
+
+	key := createPrefixedKey(pattern.SYSTEM, pattern.ACCOUNT)
+
+	if block < 0 {
+		keys, err := c.api.RPC.State.GetKeysLatest(key)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.SYSTEM, pattern.ACCOUNT, err)
+			c.SetChainState(false)
+			return nil, err
+		}
+		set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.SYSTEM, pattern.ACCOUNT, err)
+			c.SetChainState(false)
+			return nil, err
+		}
+		for _, elem := range set {
+			for _, change := range elem.Changes {
+				var val types.AccountInfo
+				if err := codec.Decode(change.StorageData, &val); err != nil {
+					fmt.Println("Decode StorageData:", err)
+					continue
+				}
+				var kkey types.AccountID
+				if err := codec.Decode(change.StorageKey, &kkey); err != nil {
+					fmt.Println("Decode StorageKey:", err)
+					continue
+				}
+				fmt.Println(utils.EncodePublicKeyAsCessAccount(kkey[:]))
+				data = append(data, val)
+			}
+		}
+		return data, nil
+	}
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), pattern.SYSTEM, pattern.ACCOUNT, err)
+		c.SetChainState(false)
+		return data, err
+	}
+
+	fmt.Println(">>>>>")
+	keys, err := c.api.RPC.State.GetKeys(key, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeys: %v", c.GetCurrentRpcAddr(), pattern.SYSTEM, pattern.ACCOUNT, err)
+		c.SetChainState(false)
+		return nil, err
+	}
+	set, err := c.api.RPC.State.QueryStorageAt(keys, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAt: %v", c.GetCurrentRpcAddr(), pattern.SYSTEM, pattern.ACCOUNT, err)
+		c.SetChainState(false)
+		return nil, err
+	}
+	for _, elem := range set {
+		for _, change := range elem.Changes {
+			if change.HasStorageData {
+				var val types.AccountInfo
+
+				var kkey types.AccountID
+				if err := codec.Decode(change.StorageKey, &kkey); err != nil {
+					fmt.Println("Decode StorageKey:", err)
+					continue
+				}
+				if err := codec.Decode(change.StorageData, &val); err != nil {
+					fmt.Println("Decode StorageData:", err)
+					continue
+				}
+				fmt.Println(utils.EncodePublicKeyAsCessAccount(kkey[:]))
+				data = append(data, val)
+			}
+		}
+	}
+
 	return data, nil
 }
 

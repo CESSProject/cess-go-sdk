@@ -634,6 +634,7 @@ type EventRecords struct {
 type ExtrinsicsInfo struct {
 	Name    string
 	Signer  string
+	Hash    string
 	FeePaid string
 	Result  bool
 	Events  []string

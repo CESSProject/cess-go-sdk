@@ -167,8 +167,6 @@ const (
 	RPC_NET_Listening = "net_listening"
 )
 
-const DirMode = 0644
-
 const (
 	Active = iota
 	Calculate

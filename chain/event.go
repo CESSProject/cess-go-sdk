@@ -20,8 +20,11 @@ import (
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	"github.com/vedhavyas/go-subkey/scale"
+	"golang.org/x/crypto/blake2b"
 )
 
 func (c *chainClient) DecodeEventNameFromBlock(block uint64) ([]string, error) {
@@ -1942,26 +1945,38 @@ func (c *chainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 	return systemEvents, extrinsicsInfo, transferInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
 }
 
-func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, []string, string, string, string, string, int64, error) {
+func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, []string, []string, string, string, string, string, string, int64, error) {
 	var timeUnixMilli int64
 	var systemEvents = make([]string, 0)
 	var extrinsicsInfo = make([]event.ExtrinsicsInfo, 0)
 	var transferInfo = make([]event.TransferInfo, 0)
 	var sminerRegInfo = make([]string, 0)
+	var newAccounts = make([]string, 0)
+	var allGasFee = new(big.Int)
+	var allExtrinsicsHash = make([]string, 0)
 	blockhash, err := c.GetSubstrateAPI().RPC.Chain.GetBlockHash(blocknumber)
 	if err != nil {
-		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, "", "", "", "", "", 0, err
 	}
 	block, err := c.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
 	if err != nil {
-		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, "", "", "", "", "", 0, err
+	}
+	for _, v := range block.Block.Extrinsics {
+		extBytes, err := codec.Encode(v)
+		if err != nil {
+			fmt.Println("codec.Encode(Extrinsics): ", err)
+			continue
+		}
+		h := blake2b.Sum256(extBytes)
+		allExtrinsicsHash = append(allExtrinsicsHash, hexutil.Encode(h[:]))
 	}
 	if blocknumber == 0 {
-		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), 0, nil
+		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), "", 0, nil
 	}
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
-		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, "", "", "", "", 0, err
+		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, "", "", "", "", "", 0, err
 	}
 	var eventsBuf = make([]string, 0)
 	var signer string
@@ -1975,7 +1990,7 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 					timeDecoder := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args))
 					timestamp, err := timeDecoder.DecodeUintCompact()
 					if err != nil {
-						return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, "", "", "", "", 0, err
+						return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, "", "", "", "", "", 0, err
 					}
 					timeUnixMilli = timestamp.Int64()
 					extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
@@ -1989,6 +2004,10 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 				if e.Name == event.TransactionPaymentTransactionFeePaid ||
 					e.Name == event.EvmAccountMappingTransactionFeePaid {
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
+					tmp, ok := new(big.Int).SetString(fee, 10)
+					if ok {
+						allGasFee = allGasFee.Add(allGasFee, tmp)
+					}
 				} else if e.Name == event.BalancesTransfer {
 					from, to, amount, _ := ParseTransferInfoFromEvent(e)
 					transferInfo = append(transferInfo, event.TransferInfo{
@@ -2008,6 +2027,11 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 					acc, err := ParseAccountFromEvent(e)
 					if err == nil {
 						sminerRegInfo = append(sminerRegInfo, acc)
+					}
+				} else if e.Name == event.SystemNewAccount {
+					acc, err := ParseAccountFromEvent(e)
+					if err == nil {
+						newAccounts = append(newAccounts, acc)
 					}
 				} else if e.Name == event.SystemExtrinsicSuccess {
 					if len(eventsBuf) > 0 {
@@ -2037,7 +2061,13 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 			systemEvents = append(systemEvents, e.Name)
 		}
 	}
-	return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
+	if len(allExtrinsicsHash) != len(extrinsicsInfo) {
+		return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, "", "", "", "", "", 0, errors.New("The number of transaction hashes does not equal the number of transactions")
+	}
+	for i := 0; i < len(allExtrinsicsHash); i++ {
+		extrinsicsInfo[i].Hash = allExtrinsicsHash[i]
+	}
+	return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), allGasFee.String(), timeUnixMilli, nil
 }
 
 func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
@@ -2197,7 +2227,8 @@ func ParseAccountFromEvent(e *parser.Event) (string, error) {
 		k := reflect.TypeOf(v.Value).Kind()
 		val := reflect.ValueOf(v.Value)
 		if k == reflect.Slice {
-			if strings.Contains(v.Name, "acc") {
+			if strings.Contains(v.Name, "acc") ||
+				strings.Contains(v.Name, "account") {
 				acc = parseAccount(val)
 			}
 		}

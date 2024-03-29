@@ -249,6 +249,8 @@ type SDK interface {
 	DecodeEventNameFromBlock(block uint64) ([]string, error)
 	//
 	DecodeEventNameFromBlockhash(blockhash types.Hash) ([]string, error)
+	//
+	QueryAllAccountInfoFromBlock(block int) ([]types.AccountInfo, error)
 
 	// TransferToken to dest.
 	//
@@ -437,7 +439,7 @@ type SDK interface {
 	//
 	RetrieveBlockTest(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
 	//
-	RetrieveBlockAndAll(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, []string, string, string, string, string, int64, error)
+	RetrieveBlockAndAll(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, []string, []string, string, string, string, string, string, int64, error)
 	//
 	InitExtrinsicsName() error
 }

@@ -88,7 +88,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	sysEvents, extrinsics, transferInfo, blockhash, preHash, extHash, stHash, t, err := sdk.RetrieveBlock(11921)
+	sysEvents, extrinsics, transferInfo, minerReg, newAccounts, blockhash, preHash, extHash, stHash, allGasFee, t, err := sdk.RetrieveBlockAndAll(120000)
 	if err != nil {
 		panic(err)
 	}
@@ -98,15 +98,19 @@ func main() {
 	for k, v := range extrinsics {
 		fmt.Println("  ", k, ": ", v.Name)
 		fmt.Println("    Singer: ", v.Signer)
+		fmt.Println("    Hash: ", v.Hash)
 		fmt.Println("    FeePaid: ", v.FeePaid)
 		fmt.Println("    Events: ", v.Events)
 	}
 	fmt.Println("system events: ", sysEvents)
 	fmt.Println("transfer info: ", transferInfo)
+	fmt.Println("minerReg info: ", minerReg)
+	fmt.Println("newAccounts info: ", newAccounts)
 	fmt.Println("blockhash: ", blockhash)
 	fmt.Println("preHash: ", preHash)
 	fmt.Println("extHash: ", extHash)
 	fmt.Println("stHash: ", stHash)
 	fmt.Println("timpstamp: ", t)
+	fmt.Println("allGasFee: ", allGasFee)
 	//fmt.Println(sdk.RetrieveEvent_FileBank_CalculateReport(bhash))
 }
