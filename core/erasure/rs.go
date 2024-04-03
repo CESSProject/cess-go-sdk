@@ -9,6 +9,7 @@ package erasure
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -38,10 +39,9 @@ func ReedSolomon(path string) ([]string, error) {
 		return nil, errors.New("invalid size")
 	}
 
-	datashards, parshards := pattern.DataShards, pattern.ParShards
 	basedir := filepath.Dir(path)
 
-	enc, err := reedsolomon.New(datashards, parshards)
+	enc, err := reedsolomon.New(pattern.DataShards, pattern.ParShards)
 	if err != nil {
 		return shardspath, err
 	}
@@ -70,7 +70,7 @@ func ReedSolomon(path string) ([]string, error) {
 		newpath := filepath.Join(basedir, hash)
 		_, err = os.Stat(newpath)
 		if err != nil {
-			err = os.WriteFile(newpath, shard, os.ModePerm)
+			err = os.WriteFile(newpath, shard, 0755)
 			if err != nil {
 				return shardspath, err
 			}
@@ -94,15 +94,13 @@ func RSRestore(outpath string, shardspath []string) error {
 		return nil
 	}
 
-	datashards, parshards := pattern.DataShards, pattern.ParShards
-
-	enc, err := reedsolomon.New(datashards, parshards)
+	enc, err := reedsolomon.New(pattern.DataShards, pattern.ParShards)
 	if err != nil {
 		return err
 	}
-	shards := make([][]byte, datashards+parshards)
+
+	shards := make([][]byte, pattern.DataShards+pattern.ParShards)
 	for k, v := range shardspath {
-		//infn := fmt.Sprintf("%s.00%d", outfn, i)
 		shards[k], err = os.ReadFile(v)
 		if err != nil {
 			shards[k] = nil
@@ -117,16 +115,20 @@ func RSRestore(outpath string, shardspath []string) error {
 			return err
 		}
 		ok, err = enc.Verify(shards)
-		if !ok {
+		if err != nil {
 			return err
 		}
+		if !ok {
+			return fmt.Errorf("invalid shards")
+		}
 	}
+
 	f, err := os.Create(outpath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	err = enc.Join(f, shards, len(shards[0])*datashards)
+	err = enc.Join(f, shards, len(shards[0])*pattern.DataShards)
 	return err
 }
 
