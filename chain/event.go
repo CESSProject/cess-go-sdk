@@ -2301,6 +2301,9 @@ func (c *chainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 			}
 		} else {
 			blockdata.SysEvents = append(blockdata.SysEvents, e.Name)
+			if e.Name == event.StakingStakersElected {
+				blockdata.IsNewEra = true
+			}
 		}
 	}
 	blockdata.AllGasFee = allGasFee.String()

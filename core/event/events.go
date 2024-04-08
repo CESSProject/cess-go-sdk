@@ -632,13 +632,14 @@ type EventRecords struct {
 }
 
 type BlockData struct {
-	BlockId          uint32
 	BlockHash        string
 	PreHash          string
 	ExtHash          string
 	StHash           string
 	AllGasFee        string
 	Timestamp        int64
+	BlockId          uint32
+	IsNewEra         bool
 	SysEvents        []string
 	NewAccounts      []string
 	MinerReg         []MinerRegInfo

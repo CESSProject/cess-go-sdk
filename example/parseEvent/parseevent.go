@@ -89,7 +89,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	blockData, err := sdk.ParseBlockData(73489)
+	blockData, err := sdk.ParseBlockData(2969)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -132,6 +132,7 @@ func main() {
 	fmt.Println("stHash: ", blockData.StHash)
 	fmt.Println("timpstamp: ", blockData.Timestamp)
 	fmt.Println("allGasFee: ", blockData.AllGasFee)
+	fmt.Println("IsNewEra: ", blockData.IsNewEra)
 	return
 	sysEvents, extrinsics, transferInfo, minerReg, newAccounts, blockhash, preHash, extHash, stHash, allGasFee, t, err := sdk.RetrieveBlockAndAll(351)
 	if err != nil {
