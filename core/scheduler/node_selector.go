@@ -14,6 +14,7 @@ package scheduler
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"strings"
 	"sync"
@@ -171,6 +172,7 @@ func (c *NodeChan) insertNode(info NodeInfo, maxNum int) {
 	}
 	copy(c.queue[i+1+1:], c.queue[i+1:c.count-1])
 	c.queue[i+1] = info
+	log.Println("node queue:", c.queue)
 }
 
 func (s *NodeSelector) FlushPeerNodes(pingTimeout time.Duration, peers ...peer.AddrInfo) {
