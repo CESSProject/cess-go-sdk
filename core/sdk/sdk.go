@@ -299,6 +299,8 @@ type SDK interface {
 	VerifyPolkaSignatureWithJS(account, msg, signature string) (bool, error)
 	// Verify Polka Signature With Base58
 	VerifyPolkaSignatureWithBase58(account, msg, signature string) (bool, error)
+	//
+	Close()
 
 	// Upload file to CESS gateway.
 	//
@@ -442,6 +444,8 @@ type SDK interface {
 	RetrieveBlockTest(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
 	//
 	RetrieveBlockAndAll(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, []string, []string, string, string, string, string, string, int64, error)
+	//
+	ParseBlockData(blocknumber uint64) (event.BlockData, error)
 	//
 	InitExtrinsicsName() error
 }

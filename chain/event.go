@@ -2019,8 +2019,8 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 						Amount:        amount,
 						Result:        true,
 					})
-					extInfo.From = from
-					extInfo.To = to
+					// extInfo.From = from
+					// extInfo.To = to
 				} else if e.Name == event.SminerRegistered {
 					acc, err := ParseAccountFromEvent(e)
 					if err == nil {
@@ -2066,23 +2066,245 @@ func (c *chainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 		extrinsicsInfo[i].Hash = allExtrinsicsHash[i]
 	}
 
-	for i := 0; i < len(extrinsicsInfo); i++ {
-		for j := 0; j < len(transferInfo); j++ {
-			if extrinsicsInfo[i].Name == transferInfo[j].ExtrinsicName {
-				if transferInfo[j].ExtrinsicName == ExtName_Sminer_faucet {
-					if extrinsicsInfo[i].From == transferInfo[j].From &&
-						extrinsicsInfo[i].To == transferInfo[j].To {
-						transferInfo[j].ExtrinsicHash = extrinsicsInfo[i].Hash
-					}
-				}
-				if extrinsicsInfo[i].Signer == transferInfo[j].From {
-					transferInfo[j].ExtrinsicHash = extrinsicsInfo[i].Hash
-				}
-			}
-		}
-	}
+	// for i := 0; i < len(extrinsicsInfo); i++ {
+	// 	for j := 0; j < len(transferInfo); j++ {
+	// 		if extrinsicsInfo[i].Name == transferInfo[j].ExtrinsicName {
+	// 			if transferInfo[j].ExtrinsicName == ExtName_Sminer_faucet {
+	// 				if extrinsicsInfo[i].From == transferInfo[j].From &&
+	// 					extrinsicsInfo[i].To == transferInfo[j].To {
+	// 					transferInfo[j].ExtrinsicHash = extrinsicsInfo[i].Hash
+	// 				}
+	// 			}
+	// 			if extrinsicsInfo[i].Signer == transferInfo[j].From {
+	// 				transferInfo[j].ExtrinsicHash = extrinsicsInfo[i].Hash
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), allGasFee.String(), timeUnixMilli, nil
+}
+
+func (c *chainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error) {
+	var (
+		ok             bool
+		name           string
+		err            error
+		extBytes       []byte
+		extrinsicIndex int
+		blockdata      event.BlockData
+		extInfo        event.ExtrinsicsInfo
+		allGasFee      = new(big.Int)
+	)
+
+	blockdata.BlockId = uint32(blocknumber)
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(blocknumber)
+	if err != nil {
+		return blockdata, err
+	}
+	blockdata.BlockHash = blockhash.Hex()
+
+	block, err := c.api.RPC.Chain.GetBlock(blockhash)
+	if err != nil {
+		return blockdata, err
+	}
+	blockdata.PreHash = block.Block.Header.ParentHash.Hex()
+	blockdata.ExtHash = block.Block.Header.ExtrinsicsRoot.Hex()
+	blockdata.StHash = block.Block.Header.StateRoot.Hex()
+
+	blockdata.Extrinsics = make([]event.ExtrinsicsInfo, len(block.Block.Extrinsics))
+	for k, v := range block.Block.Extrinsics {
+		extBytes, err = codec.Encode(v)
+		if err != nil {
+			return blockdata, err
+		}
+		h := blake2b.Sum256(extBytes)
+		blockdata.Extrinsics[k].Hash = hexutil.Encode(h[:])
+	}
+
+	if blocknumber == 0 {
+		return blockdata, nil
+	}
+
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return blockdata, err
+	}
+
+	var eventsBuf = make([]string, 0)
+	var signer string
+	var fee string
+
+	for _, e := range events {
+		if e.Phase.IsApplyExtrinsic {
+			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+				if extrinsicIndex >= len(blockdata.Extrinsics) {
+					return blockdata, errors.New("The number of extrinsics hashes does not equal the number of extrinsics")
+				}
+				if name == ExtName_Timestamp_set {
+					extInfo = event.ExtrinsicsInfo{}
+					timestamp, err := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args)).DecodeUintCompact()
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.Timestamp = timestamp.Int64()
+					blockdata.Extrinsics[extrinsicIndex].Name = name
+					blockdata.Extrinsics[extrinsicIndex].Events = []string{e.Name}
+					blockdata.Extrinsics[extrinsicIndex].Result = true
+					extrinsicIndex++
+					continue
+				}
+				eventsBuf = append(eventsBuf, e.Name)
+				if e.Name == event.TransactionPaymentTransactionFeePaid ||
+					e.Name == event.EvmAccountMappingTransactionFeePaid {
+					signer, fee, err = parseSignerAndFeePaidFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					tmp, ok := new(big.Int).SetString(fee, 10)
+					if ok {
+						allGasFee = allGasFee.Add(allGasFee, tmp)
+					}
+				} else if e.Name == event.BalancesTransfer {
+					from, to, amount, err := ParseTransferInfoFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.TransferInfo = append(blockdata.TransferInfo, event.TransferInfo{
+						ExtrinsicName: name,
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						From:          from,
+						To:            to,
+						Amount:        amount,
+						Result:        true,
+					})
+				} else if e.Name == event.SminerRegistered {
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.MinerReg = append(blockdata.MinerReg, event.MinerRegInfo{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						Account:       acc,
+					})
+				} else if e.Name == event.SystemNewAccount {
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.NewAccounts = append(blockdata.NewAccounts, acc)
+				} else if e.Name == event.FileBankUploadDeclaration {
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					fid, err := ParseStringFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.UploadDecInfo = append(blockdata.UploadDecInfo, event.UploadDecInfo{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						Owner:         acc,
+						Fid:           fid,
+					})
+				} else if e.Name == event.FileBankDeleteFile {
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					fid, err := ParseStringFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo, event.DeleteFileInfo{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						Owner:         acc,
+						Fid:           fid,
+					})
+				} else if e.Name == event.FileBankCreateBucket {
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					bucketname, err := ParseStringFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo, event.CreateBucketInfo{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						Owner:         acc,
+						BucketName:    bucketname,
+					})
+				} else if e.Name == event.FileBankDeleteBucket {
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					bucketname, err := ParseStringFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo, event.DeleteBucketInfo{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						Owner:         acc,
+						BucketName:    bucketname,
+					})
+				} else if e.Name == event.SystemExtrinsicSuccess {
+					extInfo.Events = append(make([]string, 0), eventsBuf...)
+					extInfo.Name = name
+					extInfo.Signer = signer
+					extInfo.FeePaid = fee
+					extInfo.Result = true
+					extInfo.Hash = blockdata.Extrinsics[extrinsicIndex].Hash
+					blockdata.Extrinsics[extrinsicIndex] = extInfo
+					eventsBuf = make([]string, 0)
+					extInfo = event.ExtrinsicsInfo{}
+					extrinsicIndex++
+				} else if e.Name == event.SystemExtrinsicFailed {
+					for m := 0; m < len(blockdata.UploadDecInfo); m++ {
+						if blockdata.UploadDecInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							blockdata.UploadDecInfo = append(blockdata.UploadDecInfo[:extrinsicIndex], blockdata.UploadDecInfo[extrinsicIndex+1:]...)
+						}
+					}
+					for m := 0; m < len(blockdata.DeleteFileInfo); m++ {
+						if blockdata.DeleteFileInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo[:extrinsicIndex], blockdata.DeleteFileInfo[extrinsicIndex+1:]...)
+						}
+					}
+					for m := 0; m < len(blockdata.MinerReg); m++ {
+						if blockdata.MinerReg[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							blockdata.MinerReg = append(blockdata.MinerReg[:extrinsicIndex], blockdata.MinerReg[extrinsicIndex+1:]...)
+						}
+					}
+					for m := 0; m < len(blockdata.CreateBucketInfo); m++ {
+						if blockdata.CreateBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo[:extrinsicIndex], blockdata.CreateBucketInfo[extrinsicIndex+1:]...)
+						}
+					}
+					for m := 0; m < len(blockdata.DeleteBucketInfo); m++ {
+						if blockdata.DeleteBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo[:extrinsicIndex], blockdata.DeleteBucketInfo[extrinsicIndex+1:]...)
+						}
+					}
+					extInfo.Events = append(make([]string, 0), eventsBuf...)
+					extInfo.Name = name
+					extInfo.Signer = signer
+					extInfo.FeePaid = fee
+					extInfo.Result = false
+					extInfo.Hash = blockdata.Extrinsics[extrinsicIndex].Hash
+					blockdata.Extrinsics[extrinsicIndex] = extInfo
+					eventsBuf = make([]string, 0)
+					extInfo = event.ExtrinsicsInfo{}
+					extrinsicIndex++
+				}
+			}
+		} else {
+			blockdata.SysEvents = append(blockdata.SysEvents, e.Name)
+		}
+	}
+	blockdata.AllGasFee = allGasFee.String()
+	return blockdata, nil
 }
 
 func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
@@ -2105,6 +2327,9 @@ func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
 				fee = ExplicitBigInt(val, 0)
 			}
 		}
+	}
+	if signAcc == "" {
+		return signAcc, fee, fmt.Errorf("failed to parse transaction signer")
 	}
 	return signAcc, fee, nil
 }
@@ -2133,6 +2358,39 @@ func parseAccount(v reflect.Value) string {
 	return acc
 }
 
+func parseFidString(v reflect.Value) string {
+	if v.Len() > 0 {
+		allValue := fmt.Sprintf("%v", v.Index(0))
+		fmt.Println("allvalue: ", allValue)
+		temp := strings.Split(allValue, "] ")
+		puk := make([]byte, pattern.FileHashLen)
+		for _, v := range temp {
+			if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
+				subValue := strings.TrimPrefix(v, "[")
+				ids := strings.Split(subValue, " ")
+				if len(ids) != pattern.FileHashLen {
+					continue
+				}
+				for kk, vv := range ids {
+					intv, _ := strconv.Atoi(vv)
+					puk[kk] = byte(intv)
+				}
+			}
+		}
+		return string(puk)
+	}
+	return ""
+}
+
+func parseBucketNameString(v reflect.Value) string {
+	var value []byte
+	for i := 0; i < v.Len(); i++ {
+		intv, _ := strconv.Atoi(fmt.Sprintf("%v", v.Index(i)))
+		value = append(value, byte(intv))
+	}
+	return string(value)
+}
+
 func ExplicitBigInt(v reflect.Value, depth int) string {
 	var fee string
 	if v.CanInterface() {
@@ -2155,13 +2413,13 @@ func ExplicitBigInt(v reflect.Value, depth int) string {
 					if f.CanInterface() {
 						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f.Interface())
 					} else {
+						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f)
 						if t.Field(i).Name == "abs" {
 							val := fmt.Sprintf("%v", f)
 							val = strings.TrimPrefix(val, "[")
 							val = strings.TrimSuffix(val, "]")
 							return val
 						}
-						//fmt.Printf(strings.Repeat("\t", depth+1)+"%s %s : %v \n", t.Field(i).Name, f.Type(), f)
 					}
 				}
 			}
@@ -2230,6 +2488,10 @@ func ParseTransferInfoFromEvent(e *parser.Event) (string, string, string, error)
 			}
 		}
 	}
+	if from == "" || to == "" {
+		return from, to, amount, fmt.Errorf("failed to parse from or to in transfer transactions")
+	}
+
 	return from, to, amount, nil
 }
 
@@ -2243,12 +2505,41 @@ func ParseAccountFromEvent(e *parser.Event) (string, error) {
 		val := reflect.ValueOf(v.Value)
 		if k == reflect.Slice {
 			if strings.Contains(v.Name, "acc") ||
-				strings.Contains(v.Name, "account") {
+				strings.Contains(v.Name, "account") ||
+				strings.Contains(v.Name, "owner") {
 				acc = parseAccount(val)
 			}
 		}
 	}
+	if acc == "" {
+		return acc, fmt.Errorf("failed to parse owner from file storage order transaction")
+	}
 	return acc, nil
+}
+
+func ParseStringFromEvent(e *parser.Event) (string, error) {
+	if e == nil {
+		return "", fmt.Errorf("ParseFidFromEvent: event is nil")
+	}
+	var value string
+	for _, v := range e.Fields {
+		k := reflect.TypeOf(v.Value).Kind()
+		val := reflect.ValueOf(v.Value)
+		fmt.Println("k: ", k)
+		fmt.Println("name: ", v.Name)
+		if k == reflect.Slice {
+			if strings.Contains(v.Name, "hash") {
+				value = parseFidString(val)
+			}
+			if strings.Contains(v.Name, "bucket") {
+				value = parseBucketNameString(val)
+			}
+		}
+	}
+	if value == "" {
+		return value, fmt.Errorf("failed to parse string")
+	}
+	return value, nil
 }
 
 func (c *chainClient) RetrieveBlockTest(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error) {
