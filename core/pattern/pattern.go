@@ -215,8 +215,8 @@ const (
 )
 
 const (
-	SegmentSize  = 64 * SIZE_1MiB
-	FragmentSize = 16 * SIZE_1MiB
+	SegmentSize  = 32 * SIZE_1MiB
+	FragmentSize = 8 * SIZE_1MiB
 	DataShards   = 4
 	ParShards    = 8
 )
