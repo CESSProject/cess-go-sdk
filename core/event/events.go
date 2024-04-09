@@ -631,13 +631,31 @@ type EventRecords struct {
 	types.EventRecords
 }
 
+type BlockData struct {
+	BlockHash        string
+	PreHash          string
+	ExtHash          string
+	StHash           string
+	AllGasFee        string
+	Timestamp        int64
+	BlockId          uint32
+	IsNewEra         bool
+	SysEvents        []string
+	NewAccounts      []string
+	MinerReg         []MinerRegInfo
+	Extrinsics       []ExtrinsicsInfo
+	TransferInfo     []TransferInfo
+	UploadDecInfo    []UploadDecInfo
+	DeleteFileInfo   []DeleteFileInfo
+	CreateBucketInfo []CreateBucketInfo
+	DeleteBucketInfo []DeleteBucketInfo
+}
+
 type ExtrinsicsInfo struct {
 	Name    string
 	Signer  string
 	Hash    string
 	FeePaid string
-	From    string
-	To      string
 	Result  bool
 	Events  []string
 }
@@ -649,4 +667,33 @@ type TransferInfo struct {
 	To            string
 	Amount        string
 	Result        bool
+}
+
+type UploadDecInfo struct {
+	ExtrinsicHash string
+	Owner         string
+	Fid           string
+}
+
+type DeleteFileInfo struct {
+	ExtrinsicHash string
+	Owner         string
+	Fid           string
+}
+
+type MinerRegInfo struct {
+	ExtrinsicHash string
+	Account       string
+}
+
+type CreateBucketInfo struct {
+	ExtrinsicHash string
+	Owner         string
+	BucketName    string
+}
+
+type DeleteBucketInfo struct {
+	ExtrinsicHash string
+	Owner         string
+	BucketName    string
 }

@@ -84,4 +84,6 @@ const (
 	SystemExtrinsicSuccess = "System.ExtrinsicSuccess"
 	SystemExtrinsicFailed  = "System.ExtrinsicFailed"
 	SystemNewAccount       = "System.NewAccount"
+	//
+	StakingStakersElected = "Staking.StakersElected"
 )
