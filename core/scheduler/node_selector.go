@@ -19,6 +19,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/utils"
@@ -44,6 +45,7 @@ type Selector interface {
 	NewPeersIterator(minNum int) (Iterator, error)
 	Feedback(id string, isWork bool)
 	FlushPeerNodes(pingTimeout time.Duration, peers ...peer.AddrInfo)
+	GetPeersNumber() int
 	//FlushlistedPeerNodes(pingTimeout time.Duration, discoverer Discoverer)
 }
 
@@ -87,6 +89,7 @@ type NodeSelector struct {
 	blackList   *bloom.BloomFilter
 	activePeers *sync.Map
 	config      SelectorConfig
+	peerNum     *atomic.Int32
 }
 
 func NewNodeSelectorWithConfig(config SelectorConfig) (Selector, error) {
@@ -149,6 +152,7 @@ func NewNodeSelector(strategy, nodeFilePath string, maxNodeNum int, maxTTL, flus
 	}
 	selector.blackList = bloom.NewWithEstimates(100000, 0.01)
 	selector.listPeers = &sync.Map{}
+	selector.peerNum = &atomic.Int32{}
 
 	for _, peer := range nodeList.DisallowedPeers {
 		selector.blackList.AddString(peer)
@@ -156,6 +160,7 @@ func NewNodeSelector(strategy, nodeFilePath string, maxNodeNum int, maxTTL, flus
 
 	for _, p := range nodeList.AllowedPeers {
 		selector.listPeers.Store(p, NodeInfo{})
+		selector.peerNum.Add(1)
 	}
 
 	switch strategy {
@@ -230,9 +235,14 @@ func (s *NodeSelector) FlushlistedPeerNodes(pingTimeout time.Duration, discovere
 }
 
 func (s *NodeSelector) FlushPeerNodes(pingTimeout time.Duration, peers ...peer.AddrInfo) {
-	for _, peer := range peers {
-		key := peer.ID.String()
 
+	for _, peer := range peers {
+
+		if s.peerNum.Load() >= int32(s.config.MaxNodeNum) {
+			return
+		}
+
+		key := peer.ID.String()
 		if s.blackList.TestString(key) {
 			continue
 		}
@@ -243,27 +253,33 @@ func (s *NodeSelector) FlushPeerNodes(pingTimeout time.Duration, peers ...peer.A
 		point := s.activePeers
 		if value, ok := s.listPeers.Load(key); ok {
 			v := value.(NodeInfo)
-			if v.Available &&
-				time.Since(v.FlushTime) < time.Duration(s.config.FlushInterval) {
+			if (!v.Available && time.Since(v.FlushTime) < time.Hour) ||
+				(v.Available && time.Since(v.FlushTime) < time.Duration(s.config.FlushInterval)) {
 				continue
 			}
 			info.NePoints = v.NePoints
 			point = s.listPeers
 		} else if value, ok := s.activePeers.Load(key); ok {
 			v := value.(NodeInfo)
-			if v.Available &&
-				time.Since(v.FlushTime) < time.Duration(s.config.FlushInterval) {
+			if (!v.Available && time.Since(v.FlushTime) < time.Hour) ||
+				(v.Available && time.Since(v.FlushTime) < time.Duration(s.config.FlushInterval)) {
 				continue
 			}
 			info.NePoints = v.NePoints
+		} else {
+			s.peerNum.Add(1)
 		}
 		info.TTL = GetConnectTTL(peer.Addrs, pingTimeout)
 		if info.TTL > 0 && info.TTL < time.Duration(s.config.MaxTTL) {
 			info.Available = true
 		}
-		log.Println("save", info)
+		log.Println("save", key, info.Available, info.TTL)
 		point.Store(key, info)
 	}
+}
+
+func (s *NodeSelector) GetPeersNumber() int {
+	return int(s.peerNum.Load())
 }
 
 func (s *NodeSelector) NewPeersIterator(minNum int) (Iterator, error) {
@@ -278,7 +294,6 @@ func (s *NodeSelector) NewPeersIterator(minNum int) (Iterator, error) {
 		if !v.Available {
 			return true
 		}
-		log.Println("inert node to queue", v.AddrInfo.ID.String())
 		nodeCh.insertNode(v, s.config.MaxNodeNum)
 		return true
 	}
@@ -337,6 +352,7 @@ func (s *NodeSelector) removePeer(id string) {
 		}
 		s.activePeers.Delete(id)
 		s.blackList.AddString(id)
+		s.peerNum.Add(-1)
 	}
 }
 

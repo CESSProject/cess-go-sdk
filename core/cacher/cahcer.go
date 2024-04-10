@@ -2,8 +2,10 @@ package cacher
 
 import (
 	"io"
+	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -55,6 +57,22 @@ func NewCacher(exp time.Duration, maxSpace int64, cacheDir string) FileCache {
 			return
 		}
 		cacher.removeFile(fpath)
+	})
+
+	// restore cache record
+	filepath.WalkDir(cacheDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		if info.Size() <= 0 || info.IsDir() {
+			return nil
+		}
+		cacher.cacher.Add(d.Name(), cacher.exp, path)
+		return nil
 	})
 	return cacher
 }
