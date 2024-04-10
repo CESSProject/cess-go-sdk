@@ -352,6 +352,8 @@ func (c *chainClient) VerifyPolkaSignatureWithBase58(account, msg, signature str
 	return ok, nil
 }
 
-func subkeytest() {
-
+func (c *chainClient) Close() {
+	if c.api.Client != nil {
+		c.api.Client.Close()
+	}
 }

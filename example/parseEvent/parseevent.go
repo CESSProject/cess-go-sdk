@@ -17,11 +17,12 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//devnet
-	//"wss://devnet-rpc.cess.cloud/ws/",
+	"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
-	"wss://testnet-rpc0.cess.cloud/ws/",
-	"wss://testnet-rpc1.cess.cloud/ws/",
-	"wss://testnet-rpc2.cess.cloud/ws/",
+	// "wss://testnet-rpc0.cess.cloud/ws/",
+	// "wss://testnet-rpc1.cess.cloud/ws/",
+	// "wss://testnet-rpc2.cess.cloud/ws/",
+	// "wss://testnet-rpc3.cess.cloud/ws/",
 }
 
 type MyEvent struct {
@@ -88,6 +89,51 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
+	blockData, err := sdk.ParseBlockData(2969)
+	if err != nil {
+		fmt.Println("ERR: ", err)
+		return
+	}
+	fmt.Println("extrinsics:")
+	for k, v := range blockData.Extrinsics {
+		fmt.Println("  ", k, ": ", v.Name)
+		fmt.Println("    Singer: ", v.Signer)
+		fmt.Println("    Hash: ", v.Hash)
+		fmt.Println("    FeePaid: ", v.FeePaid)
+		fmt.Println("    Events: ", v.Events)
+	}
+	fmt.Println("uploadDecInfo:")
+	for _, v := range blockData.UploadDecInfo {
+		fmt.Println("    Owner: ", v.Owner)
+		fmt.Println("    Fid: ", v.Fid)
+	}
+	fmt.Println("deleteFileInfo:")
+	for _, v := range blockData.DeleteFileInfo {
+		fmt.Println("    Owner: ", v.Owner)
+		fmt.Println("    Fid: ", v.Fid)
+	}
+	fmt.Println("createBucketInfo:")
+	for _, v := range blockData.CreateBucketInfo {
+		fmt.Println("    Owner: ", v.Owner)
+		fmt.Println("    BucketName: ", v.BucketName)
+	}
+	fmt.Println("DeleteBucketInfo:")
+	for _, v := range blockData.DeleteBucketInfo {
+		fmt.Println("    Owner: ", v.Owner)
+		fmt.Println("    BucketName: ", v.BucketName)
+	}
+	fmt.Println("system events: ", blockData.SysEvents)
+	fmt.Println("transfer info: ", blockData.TransferInfo)
+	fmt.Println("minerReg info: ", blockData.MinerReg)
+	fmt.Println("newAccounts info: ", blockData.NewAccounts)
+	fmt.Println("blockhash: ", blockData.BlockHash)
+	fmt.Println("preHash: ", blockData.PreHash)
+	fmt.Println("extHash: ", blockData.ExtHash)
+	fmt.Println("stHash: ", blockData.StHash)
+	fmt.Println("timpstamp: ", blockData.Timestamp)
+	fmt.Println("allGasFee: ", blockData.AllGasFee)
+	fmt.Println("IsNewEra: ", blockData.IsNewEra)
+	return
 	sysEvents, extrinsics, transferInfo, minerReg, newAccounts, blockhash, preHash, extHash, stHash, allGasFee, t, err := sdk.RetrieveBlockAndAll(351)
 	if err != nil {
 		panic(err)
