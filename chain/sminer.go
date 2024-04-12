@@ -22,7 +22,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryExpenders() (pattern.ExpendersInfo, error) {
+func (c *ChainClient) QueryExpenders() (pattern.ExpendersInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -54,7 +54,7 @@ func (c *chainClient) QueryExpenders() (pattern.ExpendersInfo, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
+func (c *ChainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -86,7 +86,7 @@ func (c *chainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryStorageMinerByBlock(puk []byte, block int32) (pattern.MinerInfo, error) {
+func (c *ChainClient) QueryStorageMinerByBlock(puk []byte, block int32) (pattern.MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -139,7 +139,7 @@ func (c *chainClient) QueryStorageMinerByBlock(puk []byte, block int32) (pattern
 	return data, nil
 }
 
-func (c *chainClient) QueryStorageMinerStakingStartBlock(puk []byte) (types.U32, error) {
+func (c *ChainClient) QueryStorageMinerStakingStartBlock(puk []byte) (types.U32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -171,7 +171,7 @@ func (c *chainClient) QueryStorageMinerStakingStartBlock(puk []byte) (types.U32,
 	return data, nil
 }
 
-func (c *chainClient) QueryAllSminerAccount() ([]types.AccountID, error) {
+func (c *ChainClient) QueryAllSminerAccount() ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -203,7 +203,7 @@ func (c *chainClient) QueryAllSminerAccount() ([]types.AccountID, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryAllSminerAccountByBlock(block int32) ([]types.AccountID, error) {
+func (c *ChainClient) QueryAllSminerAccountByBlock(block int32) ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -255,7 +255,7 @@ func (c *chainClient) QueryAllSminerAccountByBlock(block int32) ([]types.Account
 	return data, nil
 }
 
-func (c *chainClient) QueryRewardsMap(puk []byte) (pattern.MinerReward, error) {
+func (c *ChainClient) QueryRewardsMap(puk []byte) (pattern.MinerReward, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -287,7 +287,7 @@ func (c *chainClient) QueryRewardsMap(puk []byte) (pattern.MinerReward, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryRewards(puk []byte) (pattern.RewardsType, error) {
+func (c *ChainClient) QueryRewards(puk []byte) (pattern.RewardsType, error) {
 	var reward pattern.RewardsType
 	rewards, err := c.QueryRewardsMap(puk)
 	if err != nil {
@@ -300,7 +300,7 @@ func (c *chainClient) QueryRewards(puk []byte) (pattern.RewardsType, error) {
 	return reward, nil
 }
 
-func (c *chainClient) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error) {
+func (c *ChainClient) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -339,7 +339,7 @@ func (c *chainClient) QueryRestoralTargetList() ([]pattern.RestoralTargetInfo, e
 	return result, nil
 }
 
-func (c *chainClient) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, error) {
+func (c *ChainClient) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -381,7 +381,7 @@ func (c *chainClient) QueryRestoralTarget(puk []byte) (pattern.RestoralTargetInf
 	return data, nil
 }
 
-func (c *chainClient) QueryPendingReplacements(puk []byte) (types.U128, error) {
+func (c *ChainClient) QueryPendingReplacements(puk []byte) (types.U128, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -423,7 +423,7 @@ func (c *chainClient) QueryPendingReplacements(puk []byte) (types.U128, error) {
 	return data, nil
 }
 
-func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) {
+func (c *ChainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -527,7 +527,7 @@ func (c *chainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) 
 	}
 }
 
-func (c *chainClient) ExitSminer(miner string) (string, error) {
+func (c *ChainClient) ExitSminer(miner string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -645,7 +645,7 @@ func (c *chainClient) ExitSminer(miner string) (string, error) {
 	}
 }
 
-func (c *chainClient) UpdateEarningsAccount(earnings string) (string, error) {
+func (c *ChainClient) UpdateEarningsAccount(earnings string) (string, error) {
 	puk, err := utils.ParsingPublickey(earnings)
 	if err != nil {
 		return "", err
@@ -653,7 +653,7 @@ func (c *chainClient) UpdateEarningsAccount(earnings string) (string, error) {
 	return c.UpdateEarningsAcc(puk)
 }
 
-func (c *chainClient) UpdateEarningsAcc(puk []byte) (string, error) {
+func (c *ChainClient) UpdateEarningsAcc(puk []byte) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -764,7 +764,7 @@ func (c *chainClient) UpdateEarningsAcc(puk []byte) (string, error) {
 	}
 }
 
-func (c *chainClient) IncreaseStorageNodeStakingAmount(miner string, token string) (string, error) {
+func (c *ChainClient) IncreaseStorageNodeStakingAmount(miner string, token string) (string, error) {
 	tokens, ok := new(big.Int).SetString(token+pattern.TokenPrecision_CESS, 10)
 	if !ok {
 		return "", fmt.Errorf("invalid tokens: %s", token)
@@ -772,7 +772,7 @@ func (c *chainClient) IncreaseStorageNodeStakingAmount(miner string, token strin
 	return c.IncreaseStakingAmount(miner, tokens)
 }
 
-func (c *chainClient) IncreaseStakingAmount(miner string, tokens *big.Int) (string, error) {
+func (c *ChainClient) IncreaseStakingAmount(miner string, tokens *big.Int) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -887,7 +887,7 @@ func (c *chainClient) IncreaseStakingAmount(miner string, tokens *big.Int) (stri
 	}
 }
 
-func (c *chainClient) ClaimRewards() (string, error) {
+func (c *ChainClient) ClaimRewards() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -993,7 +993,7 @@ func (c *chainClient) ClaimRewards() (string, error) {
 	}
 }
 
-func (c *chainClient) Withdraw() (string, error) {
+func (c *ChainClient) Withdraw() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1099,7 +1099,7 @@ func (c *chainClient) Withdraw() (string, error) {
 	}
 }
 
-func (c *chainClient) RegisterSminer(earnings string, peerId []byte, pledge uint64, tib_count uint32) (string, error) {
+func (c *ChainClient) RegisterSminer(earnings string, peerId []byte, pledge uint64, tib_count uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1236,7 +1236,7 @@ func (c *chainClient) RegisterSminer(earnings string, peerId []byte, pledge uint
 	}
 }
 
-func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId []byte, stakingAcc string, tib_count uint32) (string, error) {
+func (c *ChainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId []byte, stakingAcc string, tib_count uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1383,7 +1383,7 @@ func (c *chainClient) RegisterSminerAssignStaking(beneficiaryAcc string, peerId 
 	}
 }
 
-func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *ChainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1497,7 +1497,7 @@ func (c *chainClient) RegisterSminerPOISKey(poisKey pattern.PoISKeyInfo, teeSign
 	}
 }
 
-func (c *chainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) {
+func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

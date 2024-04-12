@@ -22,7 +22,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryBucketInfo(accountID []byte, bucketname string) (pattern.BucketInfo, error) {
+func (c *ChainClient) QueryBucketInfo(accountID []byte, bucketname string) (pattern.BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -69,7 +69,7 @@ func (c *chainClient) QueryBucketInfo(accountID []byte, bucketname string) (patt
 	return data, nil
 }
 
-func (c *chainClient) QueryAllBucket(accountID []byte) ([]types.Bytes, error) {
+func (c *ChainClient) QueryAllBucket(accountID []byte) ([]types.Bytes, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -111,7 +111,7 @@ func (c *chainClient) QueryAllBucket(accountID []byte) ([]types.Bytes, error) {
 	return data, nil
 }
 
-func (c *chainClient) QueryAllBucketString(accountID []byte) ([]string, error) {
+func (c *ChainClient) QueryAllBucketString(accountID []byte) ([]string, error) {
 	bucketlist, err := c.QueryAllBucket(accountID)
 	if err != nil {
 		if err.Error() != pattern.ERR_Empty {
@@ -125,7 +125,7 @@ func (c *chainClient) QueryAllBucketString(accountID []byte) ([]string, error) {
 	return buckets, nil
 }
 
-func (c *chainClient) QueryFileMetadata(fid string) (pattern.FileMetadata, error) {
+func (c *ChainClient) QueryFileMetadata(fid string) (pattern.FileMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -173,7 +173,7 @@ func (c *chainClient) QueryFileMetadata(fid string) (pattern.FileMetadata, error
 	return data, nil
 }
 
-func (c *chainClient) QueryFileMetadataByBlock(fid string, block uint64) (pattern.FileMetadata, error) {
+func (c *ChainClient) QueryFileMetadataByBlock(fid string, block uint64) (pattern.FileMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -228,7 +228,7 @@ func (c *chainClient) QueryFileMetadataByBlock(fid string, block uint64) (patter
 	return data, nil
 }
 
-func (c *chainClient) QueryStorageOrder(fid string) (pattern.StorageOrder, error) {
+func (c *ChainClient) QueryStorageOrder(fid string) (pattern.StorageOrder, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -276,7 +276,7 @@ func (c *chainClient) QueryStorageOrder(fid string) (pattern.StorageOrder, error
 	return data, nil
 }
 
-func (c *chainClient) QueryRestoralOrder(fragmentHash string) (pattern.RestoralOrderInfo, error) {
+func (c *ChainClient) QueryRestoralOrder(fragmentHash string) (pattern.RestoralOrderInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -324,7 +324,7 @@ func (c *chainClient) QueryRestoralOrder(fragmentHash string) (pattern.RestoralO
 	return data, nil
 }
 
-func (c *chainClient) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error) {
+func (c *ChainClient) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -363,7 +363,7 @@ func (c *chainClient) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, err
 	return result, nil
 }
 
-func (c *chainClient) GenerateStorageOrder(
+func (c *ChainClient) GenerateStorageOrder(
 	roothash string,
 	segment []pattern.SegmentDataInfo,
 	owner []byte,
@@ -399,7 +399,7 @@ func (c *chainClient) GenerateStorageOrder(
 	return c.UploadDeclaration(roothash, segmentList, user, filesize)
 }
 
-func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error) {
+func (c *ChainClient) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -520,7 +520,7 @@ func (c *chainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 	}
 }
 
-func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, error) {
+func (c *ChainClient) CreateBucket(owner_pkey []byte, name string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -630,7 +630,7 @@ func (c *chainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 	}
 }
 
-func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, error) {
+func (c *ChainClient) DeleteBucket(owner_pkey []byte, name string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -727,7 +727,7 @@ func (c *chainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	}
 }
 
-func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []pattern.FileHash, error) {
+func (c *ChainClient) DeleteFile(puk []byte, filehash []string) (string, []pattern.FileHash, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -849,7 +849,7 @@ func (c *chainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 	}
 }
 
-func (c *chainClient) ReportFile(index uint8, roothash string) (string, error) {
+func (c *ChainClient) ReportFile(index uint8, roothash string) (string, error) {
 	var hashs pattern.FileHash
 
 	for j := 0; j < len(roothash); j++ {
@@ -858,7 +858,7 @@ func (c *chainClient) ReportFile(index uint8, roothash string) (string, error) {
 	return c.SubmitFileReport(types.U8(index), hashs)
 }
 
-func (c *chainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash) (string, error) {
+func (c *ChainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -968,7 +968,7 @@ func (c *chainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash
 	}
 }
 
-func (c *chainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (string, error) {
+func (c *ChainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1079,7 +1079,7 @@ func (c *chainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (stri
 	}
 }
 
-func (c *chainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
+func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1195,7 +1195,7 @@ func (c *chainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	}
 }
 
-func (c *chainClient) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragmentHash string) (string, error) {
+func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1323,7 +1323,7 @@ func (c *chainClient) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFr
 	}
 }
 
-func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, error) {
+func (c *ChainClient) RestoralComplete(restoralFragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1437,7 +1437,7 @@ func (c *chainClient) RestoralComplete(restoralFragmentHash string) (string, err
 	}
 }
 
-func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *ChainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1541,7 +1541,7 @@ func (c *chainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign
 	}
 }
 
-func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *ChainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1645,7 +1645,7 @@ func (c *chainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeS
 	}
 }
 
-func (c *chainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern.TagSigInfo) (string, error) {
+func (c *ChainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern.TagSigInfo) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

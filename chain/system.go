@@ -20,7 +20,7 @@ import (
 )
 
 // QueryNodeSynchronizationSt
-func (c *chainClient) QueryNodeSynchronizationSt() (bool, error) {
+func (c *ChainClient) QueryNodeSynchronizationSt() (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -38,7 +38,7 @@ func (c *chainClient) QueryNodeSynchronizationSt() (bool, error) {
 }
 
 // QueryBlockHeight
-func (c *chainClient) QueryBlockHeight(hash string) (uint32, error) {
+func (c *ChainClient) QueryBlockHeight(hash string) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -66,7 +66,7 @@ func (c *chainClient) QueryBlockHeight(hash string) (uint32, error) {
 }
 
 // QueryAccountInfo
-func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
+func (c *ChainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -104,7 +104,7 @@ func (c *chainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 }
 
 // QueryAllAccountInfoFromBlock
-func (c *chainClient) QueryAllAccountInfoFromBlock(block int) ([]types.AccountInfo, error) {
+func (c *ChainClient) QueryAllAccountInfoFromBlock(block int) ([]types.AccountInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -194,7 +194,7 @@ func (c *chainClient) QueryAllAccountInfoFromBlock(block int) ([]types.AccountIn
 }
 
 // QueryTotalIssuance
-func (c *chainClient) QueryTotalIssuance(block int) (string, error) {
+func (c *ChainClient) QueryTotalIssuance(block int) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -245,7 +245,7 @@ func (c *chainClient) QueryTotalIssuance(block int) (string, error) {
 	return data.String(), nil
 }
 
-func (c *chainClient) SysProperties() (pattern.SysProperties, error) {
+func (c *ChainClient) SysProperties() (pattern.SysProperties, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -259,7 +259,7 @@ func (c *chainClient) SysProperties() (pattern.SysProperties, error) {
 	return data, err
 }
 
-func (c *chainClient) SysChain() (string, error) {
+func (c *ChainClient) SysChain() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -273,7 +273,7 @@ func (c *chainClient) SysChain() (string, error) {
 	return string(data), err
 }
 
-func (c *chainClient) SyncState() (pattern.SysSyncState, error) {
+func (c *ChainClient) SyncState() (pattern.SysSyncState, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -287,7 +287,7 @@ func (c *chainClient) SyncState() (pattern.SysSyncState, error) {
 	return data, err
 }
 
-func (c *chainClient) ChainVersion() (string, error) {
+func (c *ChainClient) ChainVersion() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -301,7 +301,7 @@ func (c *chainClient) ChainVersion() (string, error) {
 	return string(data), err
 }
 
-func (c *chainClient) NetListening() (bool, error) {
+func (c *ChainClient) NetListening() (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -315,7 +315,7 @@ func (c *chainClient) NetListening() (bool, error) {
 	return bool(data), err
 }
 
-func (c *chainClient) TransferToken(dest string, amount uint64) (string, string, error) {
+func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryValidatorCount() (uint32, error) {
+func (c *ChainClient) QueryValidatorCount() (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))

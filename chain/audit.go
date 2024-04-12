@@ -19,7 +19,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryChallengeVerifyExpiration() (uint32, error) {
+func (c *ChainClient) QueryChallengeVerifyExpiration() (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -50,7 +50,7 @@ func (c *chainClient) QueryChallengeVerifyExpiration() (uint32, error) {
 	return uint32(data), nil
 }
 
-func (c *chainClient) QueryChallengeInfo(accountID []byte) (bool, pattern.ChallengeInfo, error) {
+func (c *ChainClient) QueryChallengeInfo(accountID []byte) (bool, pattern.ChallengeInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -80,7 +80,7 @@ func (c *chainClient) QueryChallengeInfo(accountID []byte) (bool, pattern.Challe
 	return ok, data, nil
 }
 
-func (c *chainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
+func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -184,7 +184,7 @@ func (c *chainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	}
 }
 
-func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error) {
+func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -288,7 +288,7 @@ func (c *chainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	}
 }
 
-func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, sig types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *ChainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, rear types.U64, accumulator pattern.Accumulator, result types.Bool, sig types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -392,7 +392,7 @@ func (c *chainClient) SubmitIdleProofResult(totalProofHash []types.U8, front, re
 	}
 }
 
-func (c *chainClient) SubmitServiceProofResult(result types.Bool, sign types.Bytes, bloomFilter pattern.BloomFilter, teePuk pattern.WorkerPublicKey) (string, error) {
+func (c *ChainClient) SubmitServiceProofResult(result types.Bool, sign types.Bytes, bloomFilter pattern.BloomFilter, teePuk pattern.WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

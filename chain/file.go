@@ -23,7 +23,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) StoreFile(url, file, bucket string) (string, error) {
+func (c *ChainClient) StoreFile(url, file, bucket string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
 
@@ -105,7 +105,7 @@ func (c *chainClient) StoreFile(url, file, bucket string) (string, error) {
 	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
 }
 
-func (c *chainClient) StoreObject(url string, reader io.Reader, bucket string) (string, error) {
+func (c *ChainClient) StoreObject(url string, reader io.Reader, bucket string) (string, error) {
 	if !utils.CheckBucketName(bucket) {
 		return "", errors.New("invalid bucket name")
 	}
@@ -150,7 +150,7 @@ func (c *chainClient) StoreObject(url string, reader io.Reader, bucket string) (
 	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
 }
 
-func (c *chainClient) RetrieveFile(url, fid, savepath string) error {
+func (c *ChainClient) RetrieveFile(url, fid, savepath string) error {
 	fstat, err := os.Stat(savepath)
 	if err == nil {
 		if fstat.IsDir() {
@@ -211,7 +211,7 @@ func (c *chainClient) RetrieveFile(url, fid, savepath string) error {
 	return nil
 }
 
-func (c *chainClient) RetrieveObject(url, fid string) (io.ReadCloser, error) {
+func (c *ChainClient) RetrieveObject(url, fid string) (io.ReadCloser, error) {
 	if url == "" {
 		return nil, errors.New("empty url")
 	}
