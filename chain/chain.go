@@ -60,6 +60,10 @@ var globalTransport = &http.Transport{
 	DisableKeepAlives: true,
 }
 
+func NewEmptyChainClient() *ChainClient {
+	return &ChainClient{}
+}
+
 func NewChainClient(
 	ctx context.Context,
 	serviceName string,
