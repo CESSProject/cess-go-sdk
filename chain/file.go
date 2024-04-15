@@ -251,7 +251,7 @@ func (c *ChainClient) RetrieveObject(url, fid string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func (c *chainClient) SplitFile(fpath, chunksDir string, chunkSize int64, filling bool) (int64, int, error) {
+func (c *ChainClient) SplitFile(fpath, chunksDir string, chunkSize int64, filling bool) (int64, int, error) {
 	fstat, err := os.Stat(fpath)
 	if err != nil {
 		return 0, 0, err
@@ -301,11 +301,11 @@ func (c *chainClient) SplitFile(fpath, chunksDir string, chunkSize int64, fillin
 	return size, int(count), nil
 }
 
-func (c *chainClient) SplitFileWithstandardSize(fpath, chunksDir string) (int64, int, error) {
+func (c *ChainClient) SplitFileWithstandardSize(fpath, chunksDir string) (int64, int, error) {
 	return c.SplitFile(fpath, chunksDir, pattern.SegmentSize, true)
 }
 
-func (c *chainClient) UploadFileChunks(url, chunksDir, bucket, fname string, chunksNum int, totalSize int64) (string, error) {
+func (c *ChainClient) UploadFileChunks(url, chunksDir, bucket, fname string, chunksNum int, totalSize int64) (string, error) {
 	entries, err := os.ReadDir(chunksDir)
 	if err != nil {
 		return "", errors.Wrap(err, "upload file chunk error")
@@ -327,7 +327,7 @@ func (c *chainClient) UploadFileChunks(url, chunksDir, bucket, fname string, chu
 	return res, nil
 }
 
-func (c *chainClient) UploadFileChunk(url, chunksDir, bucket, fname string, chunksNum, chunksId int, totalSize int64) (string, error) {
+func (c *ChainClient) UploadFileChunk(url, chunksDir, bucket, fname string, chunksNum, chunksId int, totalSize int64) (string, error) {
 
 	file := filepath.Join(chunksDir, fmt.Sprintf("chunk-%d", chunksId))
 	fstat, err := os.Stat(file)
