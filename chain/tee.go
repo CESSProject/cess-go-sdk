@@ -18,7 +18,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryTeeWorker(puk pattern.WorkerPublicKey) (pattern.TeeWorkerInfo, error) {
+func (c *ChainClient) QueryTeeWorker(puk pattern.WorkerPublicKey) (pattern.TeeWorkerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -54,7 +54,7 @@ func (c *chainClient) QueryTeeWorker(puk pattern.WorkerPublicKey) (pattern.TeeWo
 	return data, nil
 }
 
-func (c *chainClient) QueryTeeInfo(puk pattern.WorkerPublicKey) (pattern.TeeInfo, error) {
+func (c *ChainClient) QueryTeeInfo(puk pattern.WorkerPublicKey) (pattern.TeeInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -90,7 +90,7 @@ func (c *chainClient) QueryTeeInfo(puk pattern.WorkerPublicKey) (pattern.TeeInfo
 	return data, nil
 }
 
-func (c *chainClient) QueryMasterPublicKey() ([]byte, error) {
+func (c *ChainClient) QueryMasterPublicKey() ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -121,7 +121,7 @@ func (c *chainClient) QueryMasterPublicKey() ([]byte, error) {
 	return []byte(string(data[:])), nil
 }
 
-func (c *chainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
+func (c *ChainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -160,7 +160,7 @@ func (c *chainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
 	return list, nil
 }
 
-func (c *chainClient) QueryAllTeeInfo() ([]pattern.TeeInfo, error) {
+func (c *ChainClient) QueryAllTeeInfo() ([]pattern.TeeInfo, error) {
 	teelist, err := c.QueryAllTeeWorkerMap()
 	if err != nil {
 		return nil, err
@@ -191,7 +191,7 @@ func (c *chainClient) QueryAllTeeInfo() ([]pattern.TeeInfo, error) {
 	return results, nil
 }
 
-func (c *chainClient) QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (string, error) {
+func (c *ChainClient) QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -226,7 +226,7 @@ func (c *chainClient) QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (str
 	return string(data), nil
 }
 
-func (c *chainClient) QueryWorkerAddedAt(workPuk pattern.WorkerPublicKey) (types.U32, error) {
+func (c *ChainClient) QueryWorkerAddedAt(workPuk pattern.WorkerPublicKey) (types.U32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))

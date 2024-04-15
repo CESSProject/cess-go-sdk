@@ -20,7 +20,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QuerySpacePricePerGib() (string, error) {
+func (c *ChainClient) QuerySpacePricePerGib() (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -53,7 +53,7 @@ func (c *chainClient) QuerySpacePricePerGib() (string, error) {
 	return fmt.Sprintf("%v", data), nil
 }
 
-func (c *chainClient) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error) {
+func (c *ChainClient) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -95,7 +95,7 @@ func (c *chainClient) QueryUserSpaceInfo(puk []byte) (pattern.UserSpaceInfo, err
 	return data, nil
 }
 
-func (c *chainClient) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
+func (c *ChainClient) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) {
 	var userSpaceSt pattern.UserSpaceSt
 	spaceinfo, err := c.QueryUserSpaceInfo(puk)
 	if err != nil {
@@ -111,7 +111,7 @@ func (c *chainClient) QueryUserSpaceSt(puk []byte) (pattern.UserSpaceSt, error) 
 	return userSpaceSt, nil
 }
 
-func (c *chainClient) QueryTotalIdleSpace() (uint64, error) {
+func (c *ChainClient) QueryTotalIdleSpace() (uint64, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -143,7 +143,7 @@ func (c *chainClient) QueryTotalIdleSpace() (uint64, error) {
 	return data.Uint64(), nil
 }
 
-func (c *chainClient) QueryTotalServiceSpace() (uint64, error) {
+func (c *ChainClient) QueryTotalServiceSpace() (uint64, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -175,7 +175,7 @@ func (c *chainClient) QueryTotalServiceSpace() (uint64, error) {
 	return data.Uint64(), nil
 }
 
-func (c *chainClient) QueryPurchasedSpace() (uint64, error) {
+func (c *ChainClient) QueryPurchasedSpace() (uint64, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -207,7 +207,7 @@ func (c *chainClient) QueryPurchasedSpace() (uint64, error) {
 	return data.Uint64(), nil
 }
 
-func (c *chainClient) BuySpace(count uint32) (string, error) {
+func (c *ChainClient) BuySpace(count uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -317,7 +317,7 @@ func (c *chainClient) BuySpace(count uint32) (string, error) {
 	}
 }
 
-func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
+func (c *ChainClient) ExpansionSpace(count uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -427,7 +427,7 @@ func (c *chainClient) ExpansionSpace(count uint32) (string, error) {
 	}
 }
 
-func (c *chainClient) RenewalSpace(days uint32) (string, error) {
+func (c *ChainClient) RenewalSpace(days uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()

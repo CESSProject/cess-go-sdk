@@ -127,6 +127,8 @@ type SDK interface {
 
 	// QueryExpenders queries expenders information
 	QueryExpenders() (pattern.ExpendersInfo, error)
+	// // QueryStorageMinerByAccount queries storage node information by account.
+	QueryStorageMinerByAccount(account string) (pattern.MinerInfo, error)
 	// QueryStorageMiner queries storage node information.
 	QueryStorageMiner(accountID []byte) (pattern.MinerInfo, error)
 	// QueryStorageMinerByBlock queries storage node information in specified block
@@ -231,7 +233,9 @@ type SDK interface {
 	QueryBlockHeight(blockhash string) (uint32, error)
 	// QueryNodeSynchronizationSt returns the synchronization status of the current node.
 	QueryNodeSynchronizationSt() (bool, error)
-	// QueryAccountInfo query account information.
+	// QueryAccountInfoByAccount query account information by account.
+	QueryAccountInfoByAccount(acc string) (types.AccountInfo, error)
+	// QueryAccountInfo query account information by public key.
 	QueryAccountInfo(puk []byte) (types.AccountInfo, error)
 	// GetTokenSymbol returns the token symbol
 	GetTokenSymbol() string

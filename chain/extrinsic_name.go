@@ -348,7 +348,7 @@ const (
 	ExtName_VoterList_rebag                 = "VoterList.rebag"
 )
 
-func (c *chainClient) InitExtrinsicsName() error {
+func (c *ChainClient) InitExtrinsicsName() error {
 	ExtrinsicsName = make(map[types.CallIndex]string, 0)
 	// Assets
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Assets_approve_transfer); err == nil {

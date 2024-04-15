@@ -33,7 +33,7 @@ import (
 	"github.com/vedhavyas/go-subkey/sr25519"
 )
 
-type chainClient struct {
+type ChainClient struct {
 	lock           *sync.Mutex
 	chainStLock    *sync.Mutex
 	txTicker       *time.Ticker
@@ -54,10 +54,14 @@ type chainClient struct {
 	chainState     bool
 }
 
-var _ sdk.SDK = (*chainClient)(nil)
+var _ sdk.SDK = (*ChainClient)(nil)
 
 var globalTransport = &http.Transport{
 	DisableKeepAlives: true,
+}
+
+func NewEmptyChainClient() *ChainClient {
+	return &ChainClient{}
 }
 
 func NewChainClient(
@@ -66,10 +70,10 @@ func NewChainClient(
 	rpcs []string,
 	mnemonic string,
 	t time.Duration,
-) (*chainClient, error) {
+) (*ChainClient, error) {
 	var (
 		err         error
-		chainClient = &chainClient{
+		chainClient = &ChainClient{
 			lock:        new(sync.Mutex),
 			chainStLock: new(sync.Mutex),
 			txTicker:    time.NewTicker(pattern.BlockInterval),
@@ -142,7 +146,7 @@ func NewChainClient(
 	return chainClient, nil
 }
 
-func (c *chainClient) ReconnectRPC() error {
+func (c *ChainClient) ReconnectRPC() error {
 	var err error
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -170,68 +174,68 @@ func (c *chainClient) ReconnectRPC() error {
 	return nil
 }
 
-func (c *chainClient) GetSDKName() string {
+func (c *ChainClient) GetSDKName() string {
 	return c.name
 }
 
-func (c *chainClient) GetCurrentRpcAddr() string {
+func (c *ChainClient) GetCurrentRpcAddr() string {
 	return c.currentRpcAddr
 }
 
-func (c *chainClient) SetSDKName(name string) {
+func (c *ChainClient) SetSDKName(name string) {
 	c.name = name
 }
 
-func (c *chainClient) SetChainState(state bool) {
+func (c *ChainClient) SetChainState(state bool) {
 	c.chainStLock.Lock()
 	c.chainState = state
 	c.chainStLock.Unlock()
 }
 
-func (c *chainClient) GetChainState() bool {
+func (c *ChainClient) GetChainState() bool {
 	c.chainStLock.Lock()
 	st := c.chainState
 	c.chainStLock.Unlock()
 	return st
 }
 
-func (c *chainClient) GetSignatureAcc() string {
+func (c *ChainClient) GetSignatureAcc() string {
 	return c.signatureAcc
 }
 
-func (c *chainClient) GetKeyEvents() types.StorageKey {
+func (c *ChainClient) GetKeyEvents() types.StorageKey {
 	return c.keyEvents
 }
 
-func (c *chainClient) GetSignatureAccPulickey() []byte {
+func (c *ChainClient) GetSignatureAccPulickey() []byte {
 	return c.keyring.PublicKey
 }
 
-func (c *chainClient) GetSubstrateAPI() *gsrpc.SubstrateAPI {
+func (c *ChainClient) GetSubstrateAPI() *gsrpc.SubstrateAPI {
 	return c.api
 }
 
-func (c *chainClient) GetMetadata() *types.Metadata {
+func (c *ChainClient) GetMetadata() *types.Metadata {
 	return c.metadata
 }
 
-func (c *chainClient) GetTokenSymbol() string {
+func (c *ChainClient) GetTokenSymbol() string {
 	return c.tokenSymbol
 }
 
-func (c *chainClient) GetNetworkEnv() string {
+func (c *ChainClient) GetNetworkEnv() string {
 	return c.networkEnv
 }
 
-func (c *chainClient) GetURI() string {
+func (c *ChainClient) GetURI() string {
 	return c.keyring.URI
 }
 
-func (c *chainClient) Sign(msg []byte) ([]byte, error) {
+func (c *ChainClient) Sign(msg []byte) ([]byte, error) {
 	return signature.Sign(msg, c.keyring.URI)
 }
 
-func (c *chainClient) Verify(msg []byte, sig []byte) (bool, error) {
+func (c *ChainClient) Verify(msg []byte, sig []byte) (bool, error) {
 	return signature.Verify(msg, sig, c.keyring.URI)
 }
 
@@ -304,7 +308,7 @@ func createPrefixedKey(pallet, method string) []byte {
 	return append(xxhash.New128([]byte(pallet)).Sum(nil), xxhash.New128([]byte(method)).Sum(nil)...)
 }
 
-func (c *chainClient) VerifyPolkaSignatureWithJS(account, msg, signature string) (bool, error) {
+func (c *ChainClient) VerifyPolkaSignatureWithJS(account, msg, signature string) (bool, error) {
 	if len(msg) == 0 {
 		return false, errors.New("msg is empty")
 	}
@@ -328,7 +332,7 @@ func (c *chainClient) VerifyPolkaSignatureWithJS(account, msg, signature string)
 	return ok, nil
 }
 
-func (c *chainClient) VerifyPolkaSignatureWithBase58(account, msg, signature string) (bool, error) {
+func (c *ChainClient) VerifyPolkaSignatureWithBase58(account, msg, signature string) (bool, error) {
 	if len(msg) == 0 {
 		return false, errors.New("msg is empty")
 	}
@@ -352,7 +356,7 @@ func (c *chainClient) VerifyPolkaSignatureWithBase58(account, msg, signature str
 	return ok, nil
 }
 
-func (c *chainClient) Close() {
+func (c *ChainClient) Close() {
 	if c.api.Client != nil {
 		c.api.Client.Close()
 	}

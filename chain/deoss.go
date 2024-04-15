@@ -21,7 +21,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *chainClient) QueryDeOSSInfo(accountID []byte) (pattern.OssInfo, error) {
+func (c *ChainClient) QueryDeOSSInfo(accountID []byte) (pattern.OssInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -52,7 +52,7 @@ func (c *chainClient) QueryDeOSSInfo(accountID []byte) (pattern.OssInfo, error) 
 	return data, nil
 }
 
-func (c *chainClient) QueryAllDeOSSInfo() ([]pattern.OssInfo, error) {
+func (c *ChainClient) QueryAllDeOSSInfo() ([]pattern.OssInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -91,7 +91,7 @@ func (c *chainClient) QueryAllDeOSSInfo() ([]pattern.OssInfo, error) {
 	return result, nil
 }
 
-func (c *chainClient) QueryAllDeOSSPeerId() ([]string, error) {
+func (c *ChainClient) QueryAllDeOSSPeerId() ([]string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -130,7 +130,7 @@ func (c *chainClient) QueryAllDeOSSPeerId() ([]string, error) {
 	return result, nil
 }
 
-func (c *chainClient) QueryAuthorizedAccountIDs(accountID []byte) ([]types.AccountID, error) {
+func (c *ChainClient) QueryAuthorizedAccountIDs(accountID []byte) ([]types.AccountID, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -161,7 +161,7 @@ func (c *chainClient) QueryAuthorizedAccountIDs(accountID []byte) ([]types.Accou
 	return data, nil
 }
 
-func (c *chainClient) QueryAuthorizedAccounts(accountID []byte) ([]string, error) {
+func (c *ChainClient) QueryAuthorizedAccounts(accountID []byte) ([]string, error) {
 	acc, err := c.QueryAuthorizedAccountIDs(accountID)
 	if err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (c *chainClient) QueryAuthorizedAccounts(accountID []byte) ([]string, error
 	return result, nil
 }
 
-func (c *chainClient) RegisterDeOSS(peerId []byte, domain string) (string, error) {
+func (c *ChainClient) RegisterDeOSS(peerId []byte, domain string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -302,7 +302,7 @@ func (c *chainClient) RegisterDeOSS(peerId []byte, domain string) (string, error
 	}
 }
 
-func (c *chainClient) UpdateDeOSS(peerId string, domain string) (string, error) {
+func (c *ChainClient) UpdateDeOSS(peerId string, domain string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -424,7 +424,7 @@ func (c *chainClient) UpdateDeOSS(peerId string, domain string) (string, error) 
 	}
 }
 
-func (c *chainClient) ExitDeOSS() (string, error) {
+func (c *ChainClient) ExitDeOSS() (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -533,7 +533,7 @@ func (c *chainClient) ExitDeOSS() (string, error) {
 	}
 }
 
-func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
+func (c *ChainClient) AuthorizeSpace(ossAccount string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -662,7 +662,7 @@ func (c *chainClient) AuthorizeSpace(ossAccount string) (string, error) {
 	}
 }
 
-func (c *chainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
+func (c *ChainClient) UnAuthorizeSpace(oss_acc string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
