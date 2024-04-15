@@ -8,6 +8,7 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -15,6 +16,9 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/go-ping/ping"
+	"github.com/pixelbender/go-traceroute/traceroute"
 )
 
 var regstr = `\d+\.\d+\.\d+\.\d+`
@@ -115,4 +119,54 @@ func CheckDomain(name string) error {
 		return fmt.Errorf("domain's top level domain '%s' at offset %d begins with a digit", name[l:], l)
 	}
 	return nil
+}
+
+// PingNode be used to ping target node by ICMP protocol, It returns the TTL from target node.
+// Requires root privileges to use.
+func PingNode(addr string, timeout time.Duration) (time.Duration, error) {
+	pinger, err := ping.NewPinger(addr)
+	if err != nil {
+		return 0, err
+	}
+	pinger.Count = 4
+	pinger.Timeout = timeout
+	err = pinger.Run()
+	if err != nil {
+		return 0, err
+	}
+	stats := pinger.Statistics()
+	return stats.AvgRtt, nil
+}
+
+// TraceRoute be used to trace route to target node by ICMP protocol, It returns the distance and TTL from target node.
+// Requires root privileges to use
+func TraceRoute(ip string, timeout time.Duration) (int, time.Duration, error) {
+	t := &traceroute.Tracer{
+		Config: traceroute.Config{
+			Delay:    50 * time.Millisecond,
+			Timeout:  timeout,
+			MaxHops:  20,
+			Count:    3,
+			Networks: []string{"ip4:icmp", "ip4:ip"},
+		},
+	}
+	defer t.Close()
+	var (
+		avgDist int
+		avgRtt  time.Duration
+		count   int
+	)
+	err := t.Trace(context.Background(), net.ParseIP(ip), func(reply *traceroute.Reply) {
+		count++
+		avgDist += reply.Hops
+		avgRtt += reply.RTT
+	})
+
+	if err != nil {
+		return 0, 0, err
+	}
+	if count > 0 {
+		return avgDist / count, avgRtt / time.Duration(count), nil
+	}
+	return 0, 0, errors.New("network unreachable")
 }

@@ -366,6 +366,59 @@ type SDK interface {
 	//   - error: error message.
 	RetrieveObject(url, fid string) (io.ReadCloser, error)
 
+	// Split File into Chunks.
+	//
+	// Receive parameter:
+	//   - fpath: the path of the file to be split.
+	//   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+	//   - chunkSize: the size of each chunk, it does not exceed the file size
+	// Return parameter:
+	//   - int64: chunks total size (byte).
+	//   - int: number of file chunks.
+	//   - error: error message.
+	SplitFile(fpath, chunksDir string, chunkSize int64, filling bool) (int64, int, error)
+
+	// Split File into Chunks with standard size.
+	// It split file into chunks of the default size and fills the last chunk that does not meet the size.
+	//
+	// Receive parameter:
+	//   - fpath: the path of the file to be split.
+	//   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+	// Return parameter:
+	//   - int64: chunks total size (byte).
+	//   - int: number of file chunks.
+	//   - error: error message.
+	SplitFileWithstandardSize(fpath, chunksDir string) (int64, int, error)
+
+	// Upload chunk of file to the gateway
+	//
+	// Receive parameter:
+	//   - url: the address of the gateway.
+	//   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+	//   - bucket: the bucket name to store user data.
+	//   - fname: the name of the file.
+	//   - chunksNum: total number of file chunks.
+	//   - chunksId: index of the current chunk to be uploaded ([0,chunksNum)).
+	//   - totalSize: chunks total size (byte), can be obtained from the first return value of SplitFile
+	// Return parameter:
+	//   - Reader: number of file chunks.
+	//   - error: error message.
+	UploadFileChunk(url, chunksDir, bucket, fname string, chunksNum, chunksId int, totalSize int64) (string, error)
+
+	// Upload file chunks in the directory to the gateway as much as possible, chunks will be removed after being uploaded, if the chunks are not transferred successfuly, jus
+	//
+	// Receive parameter:
+	//   - url: the address of the gateway.
+	//   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+	//   - bucket: the bucket name to store user data.
+	//   - fname: the name of the file.
+	//   - chunksNum: total number of file chunks.
+	//   - totalSize: chunks total size (byte), can be obtained from the first return value of SplitFile
+	// Return parameter:
+	//   - Reader: number of file chunks.
+	//   - error: error message.
+	UploadFileChunks(url, chunksDir, bucket, fname string, chunksNum int, totalSize int64) (string, error)
+
 	// retrieve event
 
 	//
