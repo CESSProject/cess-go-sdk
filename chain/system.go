@@ -66,6 +66,15 @@ func (c *ChainClient) QueryBlockHeight(hash string) (uint32, error) {
 }
 
 // QueryAccountInfo
+func (c *ChainClient) QueryAccountInfoByAccount(acc string) (types.AccountInfo, error) {
+	puk, err := utils.ParsingPublickey(acc)
+	if err != nil {
+		return types.AccountInfo{}, err
+	}
+	return c.QueryAccountInfo(puk)
+}
+
+// QueryAccountInfo
 func (c *ChainClient) QueryAccountInfo(puk []byte) (types.AccountInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {

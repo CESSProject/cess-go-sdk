@@ -54,6 +54,13 @@ func (c *ChainClient) QueryExpenders() (pattern.ExpendersInfo, error) {
 	return data, nil
 }
 
+func (c *ChainClient) QueryStorageMinerByAccount(account string) (pattern.MinerInfo, error) {
+	publickey, err := utils.ParsingPublickey(account)
+	if err != nil {
+		return pattern.MinerInfo{}, err
+	}
+	return c.QueryStorageMiner(publickey)
+}
 func (c *ChainClient) QueryStorageMiner(puk []byte) (pattern.MinerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
