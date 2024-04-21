@@ -93,6 +93,16 @@ const (
 
 	// STAKING
 	COUNTERFORVALIDATORS = "CounterForValidators"
+	CounterForNominators = "CounterForNominators"
+	ErasTotalStake       = "ErasTotalStake"
+	CurrentEra           = "CurrentEra"
+	ErasStakers          = "ErasStakers"
+	ErasRewardPoints     = "ErasRewardPoints"
+	Nominators           = "Nominators"
+	Bonded               = "Bonded"
+	Validators           = "Validators"
+	ErasValidatorReward  = "ErasValidatorReward"
+	ValidatorCount       = "ValidatorCount"
 
 	// STORAGE_HANDLER
 	USERSPACEINFO     = "UserOwnedSpace"
@@ -477,6 +487,38 @@ type TagSigInfo struct {
 type DigestInfo struct {
 	Fragment  FileHash
 	TeePubkey WorkerPublicKey
+}
+
+type StakingExposure struct {
+	Total  types.U128
+	Own    types.U128
+	Others []OtherStakingExposure
+}
+
+type OtherStakingExposure struct {
+	Who   types.AccountID
+	Value types.U128
+}
+
+type StakingEraRewardPoints struct {
+	Total      types.U32
+	Individual []Individual
+}
+
+type Individual struct {
+	Acc    types.AccountID
+	Reward types.U32
+}
+
+type StakingNominations struct {
+	Targets     []types.AccountID
+	SubmittedIn types.U32
+	Suppressed  types.Bool
+}
+
+type StakingValidatorPrefs struct {
+	Commission types.U32
+	Blocked    types.Bool
 }
 
 // --------------------customer-----------------

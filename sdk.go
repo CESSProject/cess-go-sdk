@@ -10,8 +10,8 @@ package sdkgo
 import (
 	"context"
 
+	"github.com/CESSProject/cess-go-sdk/chain"
 	"github.com/CESSProject/cess-go-sdk/config"
-	"github.com/CESSProject/cess-go-sdk/core/sdk"
 )
 
 // Config describes a set of settings for the sdk.
@@ -35,7 +35,7 @@ type Option = config.Option
 //	cess-bucket (cess storage service) must be set to bucket
 //	DeOSS (cess decentralized object storage service) must be set to deoss
 //	cess-cli (cess client) must be set to client
-func New(ctx context.Context, opts ...Option) (sdk.SDK, error) {
+func New(ctx context.Context, opts ...Option) (*chain.ChainClient, error) {
 	return NewWithoutDefaults(ctx, append(opts, FallbackDefaults)...)
 }
 
@@ -45,7 +45,7 @@ func New(ctx context.Context, opts ...Option) (sdk.SDK, error) {
 // Warning: This function should not be considered a stable interface. We may
 // choose to add required services at any time and, by using this function, you
 // opt-out of any defaults we may provide.
-func NewWithoutDefaults(ctx context.Context, opts ...Option) (sdk.SDK, error) {
+func NewWithoutDefaults(ctx context.Context, opts ...Option) (*chain.ChainClient, error) {
 	var cfg Config
 	if err := cfg.Apply(opts...); err != nil {
 		return nil, err

@@ -183,8 +183,28 @@ type SDK interface {
 
 	// Staking-State
 
-	// QueryValidatorCount queries the count of all validator
-	QueryValidatorCount() (uint32, error)
+	// QueryAllValidatorCount queries all the validator count
+	QueryAllValidatorCount(block int) (uint32, error)
+	//
+	QueryValidatorsCount(block int) (uint32, error)
+	//
+	QueryNominatorCount(block int) (uint32, error)
+	//
+	QueryErasTotalStake(era uint32) (string, error)
+	//
+	QueryCurrentEra() (uint32, error)
+	//
+	//QueryeErasStakers(era uint32) ([]pattern.StakingExposure, error)
+	//
+	QueryStakingEraRewardPoints(era uint32) (pattern.StakingEraRewardPoints, error)
+	//
+	QueryNominatorsLatest() ([]pattern.StakingNominations, error)
+	//
+	QueryBondedList(block int32) ([]types.AccountID, error)
+	//
+	QueryValidatorCommission(account string, block int) (uint8, error)
+	//
+	QueryReasValidatorReward(era uint32) (string, error)
 
 	// StorageHandler-State
 
