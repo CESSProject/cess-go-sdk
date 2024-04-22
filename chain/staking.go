@@ -193,7 +193,7 @@ func (c *ChainClient) QueryErasTotalStake(era uint32) (string, error) {
 	return data.String(), nil
 }
 
-func (c *ChainClient) QueryCurrentEra() (uint32, error) {
+func (c *ChainClient) QueryCurrentEra(block int) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -213,7 +213,25 @@ func (c *ChainClient) QueryCurrentEra() (uint32, error) {
 		return 0, err
 	}
 
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STAKING, pattern.CurrentEra, err)
+			c.SetChainState(false)
+			return 0, err
+		}
+		if !ok {
+			return 0, pattern.ERR_RPC_EMPTY_VALUE
+		}
+		return uint32(data), nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), pattern.STAKING, pattern.CurrentEra, err)
+		c.SetChainState(false)
+		return uint32(data), err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STAKING, pattern.CurrentEra, err)
 		c.SetChainState(false)
@@ -510,7 +528,7 @@ func (c *ChainClient) QueryValidatorCommission(account string, block int) (uint8
 	return uint8(uint32(result.Commission-2) / uint32(40000000)), nil
 }
 
-func (c *ChainClient) QueryReasValidatorReward(era uint32) (string, error) {
+func (c *ChainClient) QueryEraValidatorReward(era uint32) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
