@@ -29,7 +29,7 @@ var RPC_ADDRS = []string{
 	//devnet
 	//"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
-	"wss://testnet-rpc0.cess.cloud/ws/",
+	//"wss://testnet-rpc0.cess.cloud/ws/",
 	"wss://testnet-rpc1.cess.cloud/ws/",
 	"wss://testnet-rpc2.cess.cloud/ws/",
 }
@@ -50,6 +50,7 @@ func main() {
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
 	//
+	fmt.Println(sdk.QueryErasTotalStake(0, 0))
 	return
 
 	blockhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(180)

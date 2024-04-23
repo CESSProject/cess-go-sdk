@@ -190,7 +190,7 @@ type SDK interface {
 	//
 	QueryNominatorCount(block int) (uint32, error)
 	//
-	QueryErasTotalStake(era uint32) (string, error)
+	QueryErasTotalStake(era uint32, block int) (string, error)
 	//
 	QueryCurrentEra(block int) (uint32, error)
 	//

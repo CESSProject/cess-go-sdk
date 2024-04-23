@@ -156,7 +156,7 @@ func (c *ChainClient) QueryNominatorCount(block int) (uint32, error) {
 	return uint32(data), nil
 }
 
-func (c *ChainClient) QueryErasTotalStake(era uint32) (string, error) {
+func (c *ChainClient) QueryErasTotalStake(era uint32, block int) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -181,9 +181,27 @@ func (c *ChainClient) QueryErasTotalStake(era uint32) (string, error) {
 		return "", err
 	}
 
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STAKING, pattern.ErasTotalStake, err)
+			c.SetChainState(false)
+			return "", err
+		}
+		if !ok {
+			return "", pattern.ERR_RPC_EMPTY_VALUE
+		}
+		return data.String(), nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.STAKING, pattern.ErasTotalStake, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), pattern.STAKING, pattern.ErasTotalStake, err)
+		c.SetChainState(false)
+		return data.String(), err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), pattern.STAKING, pattern.ErasTotalStake, err)
 		c.SetChainState(false)
 		return "", err
 	}
