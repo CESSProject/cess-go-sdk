@@ -632,23 +632,28 @@ type EventRecords struct {
 }
 
 type BlockData struct {
-	BlockHash        string
-	PreHash          string
-	ExtHash          string
-	StHash           string
-	AllGasFee        string
-	Timestamp        int64
-	BlockId          uint32
-	IsNewEra         bool
-	SysEvents        []string
-	NewAccounts      []string
-	MinerReg         []MinerRegInfo
-	Extrinsics       []ExtrinsicsInfo
-	TransferInfo     []TransferInfo
-	UploadDecInfo    []UploadDecInfo
-	DeleteFileInfo   []DeleteFileInfo
-	CreateBucketInfo []CreateBucketInfo
-	DeleteBucketInfo []DeleteBucketInfo
+	BlockHash           string
+	PreHash             string
+	ExtHash             string
+	StHash              string
+	AllGasFee           string
+	Timestamp           int64
+	BlockId             uint32
+	IsNewEra            bool
+	SysEvents           []string
+	NewAccounts         []string
+	GenChallenge        []string
+	MinerReg            []MinerRegInfo
+	Extrinsics          []ExtrinsicsInfo
+	TransferInfo        []TransferInfo
+	UploadDecInfo       []UploadDecInfo
+	DeleteFileInfo      []DeleteFileInfo
+	CreateBucketInfo    []CreateBucketInfo
+	DeleteBucketInfo    []DeleteBucketInfo
+	SubmitIdleProve     []SubmitIdleProve
+	SubmitServiceProve  []SubmitServiceProve
+	SubmitIdleResult    []SubmitIdleResult
+	SubmitServiceResult []SubmitServiceResult
 }
 
 type ExtrinsicsInfo struct {
@@ -696,4 +701,26 @@ type DeleteBucketInfo struct {
 	ExtrinsicHash string
 	Owner         string
 	BucketName    string
+}
+
+type SubmitIdleProve struct {
+	ExtrinsicHash string
+	Miner         string
+}
+
+type SubmitServiceProve struct {
+	ExtrinsicHash string
+	Miner         string
+}
+
+type SubmitIdleResult struct {
+	ExtrinsicHash string
+	Miner         string
+	Result        bool
+}
+
+type SubmitServiceResult struct {
+	ExtrinsicHash string
+	Miner         string
+	Result        bool
 }

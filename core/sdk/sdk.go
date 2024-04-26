@@ -190,9 +190,9 @@ type SDK interface {
 	//
 	QueryNominatorCount(block int) (uint32, error)
 	//
-	QueryErasTotalStake(era uint32) (string, error)
+	QueryErasTotalStake(era uint32, block int) (string, error)
 	//
-	QueryCurrentEra() (uint32, error)
+	QueryCurrentEra(block int) (uint32, error)
 	//
 	//QueryeErasStakers(era uint32) ([]pattern.StakingExposure, error)
 	//
@@ -204,7 +204,7 @@ type SDK interface {
 	//
 	QueryValidatorCommission(account string, block int) (uint8, error)
 	//
-	QueryReasValidatorReward(era uint32) (string, error)
+	QueryEraValidatorReward(era uint32) (string, error)
 
 	// StorageHandler-State
 
@@ -517,8 +517,6 @@ type SDK interface {
 	RetrieveAllEventFromBlock(blockhash types.Hash) ([]string, map[string][]string, error)
 	//
 	RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
-	//
-	RetrieveBlockTest(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error)
 	//
 	RetrieveBlockAndAll(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, []string, []string, string, string, string, string, string, int64, error)
 	//
