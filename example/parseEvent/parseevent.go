@@ -47,6 +47,7 @@ func main() {
 		panic(err)
 	}
 
+	defer sdk.Close()
 	// fmeta, err := sdk.QueryFileMetadataByBlock("bf7e61cf8abe365dc30e525be5058fd3f502245322300d76fe169c9292c6ba48", 2)
 	// if err != nil {
 	// 	log.Fatal(err)
@@ -89,7 +90,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	blockData, err := sdk.ParseBlockData(2969)
+	blockData, err := sdk.ParseBlockData(12975)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -121,6 +122,28 @@ func main() {
 	for _, v := range blockData.DeleteBucketInfo {
 		fmt.Println("    Owner: ", v.Owner)
 		fmt.Println("    BucketName: ", v.BucketName)
+	}
+	fmt.Println("GenChallenge:")
+	for _, v := range blockData.GenChallenge {
+		fmt.Println("    GenChallenge miner: ", v)
+	}
+	fmt.Println("SubmitIdleProve:")
+	for _, v := range blockData.SubmitIdleProve {
+		fmt.Println("    SubmitIdleProve miner: ", v)
+	}
+	fmt.Println("SubmitServiceProve:")
+	for _, v := range blockData.SubmitServiceProve {
+		fmt.Println("    SubmitServiceProve miner: ", v)
+	}
+	fmt.Println("SubmitIdleResult:")
+	for _, v := range blockData.SubmitIdleResult {
+		fmt.Println("    SubmitIdleResult miner: ", v.Miner)
+		fmt.Println("    SubmitIdleResult miner result: ", v.Result)
+	}
+	fmt.Println("SubmitServiceResult:")
+	for _, v := range blockData.SubmitServiceResult {
+		fmt.Println("    SubmitServiceResult miner: ", v.Miner)
+		fmt.Println("    SubmitServiceResult miner result: ", v.Result)
 	}
 	fmt.Println("system events: ", blockData.SysEvents)
 	fmt.Println("transfer info: ", blockData.TransferInfo)

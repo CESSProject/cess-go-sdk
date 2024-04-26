@@ -16,7 +16,7 @@ import (
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/core/sdk"
+	"github.com/CESSProject/cess-go-sdk/chain"
 )
 
 // Substrate well-known mnemonic:
@@ -90,7 +90,7 @@ func main() {
 	fmt.Println(string(data))
 }
 
-func NewSDK() (sdk.SDK, error) {
+func NewSDK() (*chain.ChainClient, error) {
 	return cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),
