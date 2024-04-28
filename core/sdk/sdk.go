@@ -25,7 +25,7 @@ type SDK interface {
 	QueryChallengeVerifyExpiration() (uint32, error)
 	// QueryChallengeInfo queries accountID's challenge information
 	//   Tip: accountID can only be a storage node account
-	QueryChallengeInfo(accountID []byte) (bool, pattern.ChallengeInfo, error)
+	QueryChallengeInfo(accountID []byte, block int32) (bool, pattern.ChallengeInfo, error)
 
 	// Audit-Extrinsics
 
