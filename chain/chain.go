@@ -50,6 +50,7 @@ type ChainClient struct {
 	tokenSymbol    string
 	networkEnv     string
 	signatureAcc   string
+	treasuryAcc    string
 	name           string
 	chainState     bool
 }
@@ -143,6 +144,14 @@ func NewChainClient(
 		return nil, err
 	}
 
+	if strings.Contains(chainClient.networkEnv, "test") {
+		chainClient.treasuryAcc = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
+	} else if strings.Contains(chainClient.networkEnv, "main") {
+		chainClient.treasuryAcc = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
+	} else {
+		chainClient.treasuryAcc = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
+	}
+
 	return chainClient, nil
 }
 
@@ -229,6 +238,10 @@ func (c *ChainClient) GetNetworkEnv() string {
 
 func (c *ChainClient) GetURI() string {
 	return c.keyring.URI
+}
+
+func (c *ChainClient) GetTreasuryAccount() string {
+	return c.treasuryAcc
 }
 
 func (c *ChainClient) Sign(msg []byte) ([]byte, error) {

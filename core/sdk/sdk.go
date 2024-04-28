@@ -315,6 +315,8 @@ type SDK interface {
 	GetKeyEvents() types.StorageKey
 	// GetURI returns URI.
 	GetURI() string
+	// GetTreasuryAccount returns the treasury account
+	GetTreasuryAccount() string
 	// Sign returns the signature of the msg with the private key of the signing account.
 	Sign(msg []byte) ([]byte, error)
 	// Verify the signature of the msg with the public key of the signing account.
