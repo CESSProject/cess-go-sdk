@@ -155,6 +155,8 @@ type SDK interface {
 	// QueryPendingReplacements queries the amount of idle data that can be replaced
 	//   Tip: accountID can only be a storage node account
 	QueryPendingReplacements(accountID []byte) (types.U128, error)
+	//
+	QueryCompleteSnapShot(era uint32, block int32) (uint32, uint64, error)
 
 	// Sminer-Extrinsics
 
@@ -277,6 +279,9 @@ type SDK interface {
 	QueryAllAccountInfoFromBlock(block int) ([]types.AccountInfo, error)
 	//
 	QueryTotalIssuance(block int) (string, error)
+
+	// CessTreasury
+	QueryRoundReward(era uint32, block int32) (string, error)
 
 	// TransferToken to dest.
 	//
