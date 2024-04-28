@@ -52,6 +52,8 @@ const (
 	BALANCES = "Balances"
 	// SYSTEM is a module about the system
 	SYSTEM = "System"
+	//
+	CessTreasury = "CessTreasury"
 )
 
 // Chain state
@@ -75,6 +77,7 @@ const (
 	EXPENDERS          = "Expenders"
 	RESTORALTARGETINFO = "RestoralTarget"
 	STAKINGSTARTBLOCK  = "StakingStartBlock"
+	CompleteSnapShot   = "CompleteSnapShot"
 
 	// TEEWORKER
 	TEEWorkers       = "Workers"
@@ -117,6 +120,9 @@ const (
 	// SYSTEM
 	ACCOUNT = "Account"
 	EVENTS  = "Events"
+
+	// CessTreasury
+	RoundReward = "RoundReward"
 )
 
 // Extrinsics
@@ -519,6 +525,16 @@ type StakingNominations struct {
 type StakingValidatorPrefs struct {
 	Commission types.U32
 	Blocked    types.Bool
+}
+
+type CompleteSnapShotType struct {
+	MinerCount types.U32
+	TotalPower types.U128
+}
+
+type RoundRewardType struct {
+	TotalReward types.U128
+	OtherReward types.U128
 }
 
 // --------------------customer-----------------

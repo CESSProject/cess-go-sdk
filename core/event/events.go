@@ -654,6 +654,7 @@ type BlockData struct {
 	SubmitServiceProve  []SubmitServiceProve
 	SubmitIdleResult    []SubmitIdleResult
 	SubmitServiceResult []SubmitServiceResult
+	Punishment          []Punishment
 }
 
 type ExtrinsicsInfo struct {
@@ -723,4 +724,11 @@ type SubmitServiceResult struct {
 	ExtrinsicHash string
 	Miner         string
 	Result        bool
+}
+
+type Punishment struct {
+	ExtrinsicHash string
+	From          string
+	To            string
+	Amount        string
 }

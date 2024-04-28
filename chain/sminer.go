@@ -430,6 +430,64 @@ func (c *ChainClient) QueryPendingReplacements(puk []byte) (types.U128, error) {
 	return data, nil
 }
 
+func (c *ChainClient) QueryCompleteSnapShot(era uint32, block int32) (uint32, uint64, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data pattern.CompleteSnapShotType
+
+	if !c.GetChainState() {
+		return 0, 0, pattern.ERR_RPC_CONNECTION
+	}
+
+	param, err := codec.Encode(era)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, pattern.SMINER, pattern.CompleteSnapShot, param)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.CompleteSnapShot, err)
+		c.SetChainState(false)
+		return 0, 0, err
+	}
+
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.CompleteSnapShot, err)
+			c.SetChainState(false)
+			return 0, 0, err
+		}
+		if !ok {
+			return 0, 0, pattern.ERR_RPC_EMPTY_VALUE
+		}
+		return uint32(data.MinerCount), data.TotalPower.Uint64(), nil
+	}
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.CompleteSnapShot, err)
+		c.SetChainState(false)
+		return 0, 0, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), pattern.SMINER, pattern.CompleteSnapShot, err)
+		c.SetChainState(false)
+		return 0, 0, err
+	}
+	if !ok {
+		return 0, 0, pattern.ERR_RPC_EMPTY_VALUE
+	}
+
+	return uint32(data.MinerCount), data.TotalPower.Uint64(), nil
+}
+
 func (c *ChainClient) UpdateSminerPeerId(peerid pattern.PeerId) (string, error) {
 	c.lock.Lock()
 	defer func() {
