@@ -50,7 +50,7 @@ func (c *ChainClient) QueryChallengeVerifyExpiration() (uint32, error) {
 	return uint32(data), nil
 }
 
-func (c *ChainClient) QueryChallengeInfo(accountID []byte) (bool, pattern.ChallengeInfo, error) {
+func (c *ChainClient) QueryChallengeInfo(accountID []byte, block int32) (bool, pattern.ChallengeInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -70,13 +70,26 @@ func (c *ChainClient) QueryChallengeInfo(accountID []byte) (bool, pattern.Challe
 		return false, data, err
 	}
 
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.AUDIT, pattern.CHALLENGESNAPSHOT, err)
+			c.SetChainState(false)
+			return false, data, err
+		}
+		return ok, data, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		return false, data, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.AUDIT, pattern.CHALLENGESNAPSHOT, err)
 		c.SetChainState(false)
 		return false, data, err
 	}
-
 	return ok, data, nil
 }
 

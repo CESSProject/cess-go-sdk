@@ -2170,6 +2170,14 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					if err != nil {
 						return blockdata, err
 					}
+					if to == c.treasuryAcc {
+						blockdata.Punishment = append(blockdata.Punishment, event.Punishment{
+							ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+							From:          from,
+							To:            to,
+							Amount:        amount,
+						})
+					}
 					blockdata.TransferInfo = append(blockdata.TransferInfo, event.TransferInfo{
 						ExtrinsicName: name,
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
@@ -2301,55 +2309,101 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 				} else if e.Name == event.SystemExtrinsicFailed {
 					for m := 0; m < len(blockdata.UploadDecInfo); m++ {
 						if blockdata.UploadDecInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.UploadDecInfo = append(blockdata.UploadDecInfo[:extrinsicIndex], blockdata.UploadDecInfo[extrinsicIndex+1:]...)
+							if len(blockdata.UploadDecInfo) == 1 {
+								blockdata.UploadDecInfo = nil
+							} else {
+								blockdata.UploadDecInfo = append(blockdata.UploadDecInfo[:m], blockdata.UploadDecInfo[m+1:]...)
+							}
 							break
 						}
 					}
 					for m := 0; m < len(blockdata.DeleteFileInfo); m++ {
 						if blockdata.DeleteFileInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo[:extrinsicIndex], blockdata.DeleteFileInfo[extrinsicIndex+1:]...)
+							if len(blockdata.DeleteFileInfo) == 1 {
+								blockdata.DeleteFileInfo = nil
+							} else {
+								blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo[:m], blockdata.DeleteFileInfo[m+1:]...)
+							}
 							break
 						}
 					}
 					for m := 0; m < len(blockdata.MinerReg); m++ {
 						if blockdata.MinerReg[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.MinerReg = append(blockdata.MinerReg[:extrinsicIndex], blockdata.MinerReg[extrinsicIndex+1:]...)
+							if len(blockdata.MinerReg) == 1 {
+								blockdata.MinerReg = nil
+							} else {
+								blockdata.MinerReg = append(blockdata.MinerReg[:m], blockdata.MinerReg[m+1:]...)
+							}
 							break
 						}
 					}
 					for m := 0; m < len(blockdata.CreateBucketInfo); m++ {
 						if blockdata.CreateBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo[:extrinsicIndex], blockdata.CreateBucketInfo[extrinsicIndex+1:]...)
+							if len(blockdata.CreateBucketInfo) == 1 {
+								blockdata.CreateBucketInfo = nil
+							} else {
+								blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo[:m], blockdata.CreateBucketInfo[m+1:]...)
+							}
 							break
 						}
 					}
 					for m := 0; m < len(blockdata.DeleteBucketInfo); m++ {
 						if blockdata.DeleteBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo[:extrinsicIndex], blockdata.DeleteBucketInfo[extrinsicIndex+1:]...)
+							if len(blockdata.DeleteBucketInfo) == 1 {
+								blockdata.DeleteBucketInfo = nil
+							} else {
+								blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo[:m], blockdata.DeleteBucketInfo[m+1:]...)
+							}
 							break
 						}
 					}
 					for m := 0; m < len(blockdata.SubmitIdleProve); m++ {
 						if blockdata.SubmitIdleProve[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.SubmitIdleProve = append(blockdata.SubmitIdleProve[:extrinsicIndex], blockdata.SubmitIdleProve[extrinsicIndex+1:]...)
+							if len(blockdata.SubmitIdleProve) == 1 {
+								blockdata.SubmitIdleProve = nil
+							} else {
+								blockdata.SubmitIdleProve = append(blockdata.SubmitIdleProve[:m], blockdata.SubmitIdleProve[m+1:]...)
+							}
 							break
 						}
 					}
 					for m := 0; m < len(blockdata.SubmitServiceProve); m++ {
 						if blockdata.SubmitServiceProve[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.SubmitServiceProve = append(blockdata.SubmitServiceProve[:extrinsicIndex], blockdata.SubmitServiceProve[extrinsicIndex+1:]...)
+							if len(blockdata.SubmitServiceProve) == 1 {
+								blockdata.SubmitServiceProve = nil
+							} else {
+								blockdata.SubmitServiceProve = append(blockdata.SubmitServiceProve[:m], blockdata.SubmitServiceProve[m+1:]...)
+							}
 							break
 						}
 					}
 					for m := 0; m < len(blockdata.SubmitIdleResult); m++ {
 						if blockdata.SubmitIdleResult[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.SubmitIdleResult = append(blockdata.SubmitIdleResult[:extrinsicIndex], blockdata.SubmitIdleResult[extrinsicIndex+1:]...)
+							if len(blockdata.SubmitIdleResult) == 1 {
+								blockdata.SubmitIdleResult = nil
+							} else {
+								blockdata.SubmitIdleResult = append(blockdata.SubmitIdleResult[:m], blockdata.SubmitIdleResult[m+1:]...)
+							}
 							break
 						}
 					}
 					for m := 0; m < len(blockdata.SubmitServiceResult); m++ {
 						if blockdata.SubmitServiceResult[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							blockdata.SubmitServiceResult = append(blockdata.SubmitServiceResult[:extrinsicIndex], blockdata.SubmitServiceResult[extrinsicIndex+1:]...)
+							if len(blockdata.SubmitServiceResult) == 1 {
+								blockdata.SubmitServiceResult = nil
+							} else {
+								blockdata.SubmitServiceResult = append(blockdata.SubmitServiceResult[:m], blockdata.SubmitServiceResult[m+1:]...)
+							}
+							break
+						}
+					}
+					for m := 0; m < len(blockdata.Punishment); m++ {
+						if blockdata.Punishment[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							if len(blockdata.Punishment) == 1 {
+								blockdata.Punishment = nil
+							} else {
+								blockdata.Punishment = append(blockdata.Punishment[:m], blockdata.Punishment[m+1:]...)
+							}
 							break
 						}
 					}

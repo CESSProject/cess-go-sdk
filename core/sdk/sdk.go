@@ -25,7 +25,7 @@ type SDK interface {
 	QueryChallengeVerifyExpiration() (uint32, error)
 	// QueryChallengeInfo queries accountID's challenge information
 	//   Tip: accountID can only be a storage node account
-	QueryChallengeInfo(accountID []byte) (bool, pattern.ChallengeInfo, error)
+	QueryChallengeInfo(accountID []byte, block int32) (bool, pattern.ChallengeInfo, error)
 
 	// Audit-Extrinsics
 
@@ -155,6 +155,8 @@ type SDK interface {
 	// QueryPendingReplacements queries the amount of idle data that can be replaced
 	//   Tip: accountID can only be a storage node account
 	QueryPendingReplacements(accountID []byte) (types.U128, error)
+	//
+	QueryCompleteSnapShot(era uint32, block int32) (uint32, uint64, error)
 
 	// Sminer-Extrinsics
 
@@ -278,6 +280,9 @@ type SDK interface {
 	//
 	QueryTotalIssuance(block int) (string, error)
 
+	// CessTreasury
+	QueryRoundReward(era uint32, block int32) (string, error)
+
 	// TransferToken to dest.
 	//
 	// Receive parameter:
@@ -315,6 +320,8 @@ type SDK interface {
 	GetKeyEvents() types.StorageKey
 	// GetURI returns URI.
 	GetURI() string
+	// GetTreasuryAccount returns the treasury account
+	GetTreasuryAccount() string
 	// Sign returns the signature of the msg with the private key of the signing account.
 	Sign(msg []byte) ([]byte, error)
 	// Verify the signature of the msg with the public key of the signing account.
