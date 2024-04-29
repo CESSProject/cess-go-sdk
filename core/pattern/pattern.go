@@ -52,6 +52,8 @@ const (
 	BALANCES = "Balances"
 	// SYSTEM is a module about the system
 	SYSTEM = "System"
+	// EVM is a module about the evm contract
+	EVM = "EVM"
 )
 
 // Chain state
@@ -168,6 +170,9 @@ const (
 
 	// BALANCES
 	TX_BALANCES_FORCETRANSFER = "Balances" + DOT + "transfer"
+
+	// EVM
+	TX_EVM_CALL = EVM + DOT + "call"
 )
 
 // RPC Call
@@ -581,4 +586,9 @@ type UserInfo struct {
 	FileName    string
 	BucketName  string
 	FileSize    uint64
+}
+
+type AccessInfo struct {
+	r types.H160
+	c []types.H160
 }
