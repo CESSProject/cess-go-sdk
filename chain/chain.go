@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
-	"github.com/CESSProject/cess-go-sdk/core/sdk"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/retriever"
@@ -55,7 +54,7 @@ type ChainClient struct {
 	chainState     bool
 }
 
-var _ sdk.SDK = (*ChainClient)(nil)
+// var _ sdk.SDK = (*ChainClient)(nil)
 
 var globalTransport = &http.Transport{
 	DisableKeepAlives: true,
