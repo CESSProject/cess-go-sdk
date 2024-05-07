@@ -50,7 +50,7 @@ func main() {
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
 	//
-	fmt.Println(sdk.QueryRoundReward(0, -1))
+	//fmt.Println(sdk.QueryRoundReward(0, -1))
 	return
 
 	blockhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(180)

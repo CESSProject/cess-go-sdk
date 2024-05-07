@@ -27,10 +27,7 @@ type Option func(cfg *Config) error
 
 // default service name
 const (
-	CharacterName_Default = "sdk"
-	CharacterName_Client  = "client"
-	CharacterName_Bucket  = "bucket"
-	CharacterName_Deoss   = "deoss"
+	CharacterName_Default = "cess-sdk-go"
 )
 
 // NewSDK constructs a new client from the Config.

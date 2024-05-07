@@ -30,11 +30,6 @@ type Option = config.Option
 // timeout: time.Duration(time.Second * 6)
 //
 // - The serviceName is used to specify the name of your service
-// Warning:
-//
-//	cess-bucket (cess storage service) must be set to bucket
-//	DeOSS (cess decentralized object storage service) must be set to deoss
-//	cess-cli (cess client) must be set to client
 func New(ctx context.Context, opts ...Option) (*chain.ChainClient, error) {
 	return NewWithoutDefaults(ctx, append(opts, FallbackDefaults)...)
 }

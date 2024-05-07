@@ -727,7 +727,7 @@ func (c *ChainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	}
 }
 
-func (c *ChainClient) DeleteFile(puk []byte, filehash []string) (string, []pattern.FileHash, error) {
+func (c *ChainClient) DeleteFile(puk []byte, filehash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -739,32 +739,31 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 	var (
 		txhash      string
 		accountInfo types.AccountInfo
-		hashs       = make([]pattern.FileHash, len(filehash))
 	)
 
 	if !c.GetChainState() {
-		return txhash, hashs, pattern.ERR_RPC_CONNECTION
+		return txhash, pattern.ERR_RPC_CONNECTION
 	}
 
-	for j := 0; j < len(filehash); j++ {
-		if len(filehash[j]) != len(hashs[j]) {
-			return txhash, hashs, errors.New("invalid filehash")
-		}
-		for i := 0; i < len(hashs[j]); i++ {
-			hashs[j][i] = types.U8(filehash[j][i])
-		}
+	if len(filehash) != pattern.FileHashLen {
+		return "", errors.New("invalid fid")
 	}
 
 	acc, err := types.NewAccountID(puk)
 	if err != nil {
-		return txhash, hashs, errors.Wrap(err, "[NewAccountID]")
+		return txhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_DELFILE, *acc, hashs)
+	var fhash pattern.FileHash
+	for i := 0; i < len(filehash); i++ {
+		fhash[i] = types.U8(filehash[i])
+	}
+
+	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_DELFILE, *acc, fhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
 		c.SetChainState(false)
-		return txhash, hashs, err
+		return txhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
@@ -773,17 +772,17 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
 		c.SetChainState(false)
-		return txhash, hashs, err
+		return txhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
 		c.SetChainState(false)
-		return txhash, hashs, err
+		return txhash, err
 	}
 	if !ok {
-		return txhash, hashs, pattern.ERR_RPC_EMPTY_VALUE
+		return txhash, pattern.ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -801,7 +800,7 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
 		c.SetChainState(false)
-		return txhash, hashs, err
+		return txhash, err
 	}
 
 	<-c.txTicker.C
@@ -813,18 +812,18 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, hashs, errors.Wrap(err, "[Sign]")
+				return txhash, errors.Wrap(err, "[Sign]")
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
 				c.SetChainState(false)
-				return txhash, hashs, err
+				return txhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
 			c.SetChainState(false)
-			return txhash, hashs, err
+			return txhash, err
 		}
 	}
 
@@ -839,12 +838,12 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash []string) (string, []patte
 			if status.IsInBlock {
 				txhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_DeleteFile(status.AsInBlock)
-				return txhash, nil, err
+				return txhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, hashs, errors.Wrap(err, "[sub]")
+			return txhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, hashs, pattern.ERR_RPC_TIMEOUT
+			return txhash, pattern.ERR_RPC_TIMEOUT
 		}
 	}
 }

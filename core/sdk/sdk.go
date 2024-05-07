@@ -24,7 +24,8 @@ type SDK interface {
 	// QueryChallengeVerifyExpiration Query Challenge Expiration Block High
 	QueryChallengeVerifyExpiration() (uint32, error)
 	// QueryChallengeInfo queries accountID's challenge information
-	//   Tip: accountID can only be a storage node account
+	//   - accountID: signature account of the storage node
+	//   - block: block number, less than 0 indicates the latest block
 	QueryChallengeInfo(accountID []byte, block int32) (bool, pattern.ChallengeInfo, error)
 
 	// Audit-Extrinsics
@@ -68,13 +69,13 @@ type SDK interface {
 	ClaimRestoralOrder(fragmentHash string) (string, error)
 	// CreateBucket creates a bucket for accountID
 	//   For details on bucket naming rules, see:
-	// https://app.gitbook.com/o/kiTNX10jBU59sjnYZbiH/s/G1ekWsjn9OlGH381wiK2/get-started/deoss-gateway/step-1-create-a-bucket#naming-conventions-for-a-bucket
+	// https://docs.cess.cloud/deoss/get-started/deoss-gateway/step-1-create-a-bucket#naming-conventions-for-a-bucket
 	CreateBucket(accountID []byte, bucketName string) (string, error)
 	// DeleteBucket deletes buckets for accountID
 	//   Tip: Only empty buckets can be deleted
 	DeleteBucket(accountID []byte, bucketName string) (string, error)
 	// DeleteFile deletes files for accountID
-	DeleteFile(accountID []byte, fid []string) (string, []pattern.FileHash, error)
+	DeleteFile(puk []byte, filehash string) (string, error)
 	// GenerateRestoralOrder generates data for restoration orders.
 	GenerateRestoralOrder(fid, fragmentHash string) (string, error)
 	// RestoralComplete reports order recovery completion.
