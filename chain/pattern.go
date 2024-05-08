@@ -32,24 +32,24 @@ const MaxSubmitedIdleFileMeta = 30
 const PublicDeoss = "http://deoss-pub-gateway.cess.cloud/"
 const PublicDeossAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 
-// Pallets
+// pallet names
 const (
-	//
+	// Audit
 	Audit = "Audit"
 	// OSS is a module about DeOSS
-	OSS = "Oss"
+	Oss = "Oss"
 	// FILEBANK is a module about data metadata, bucket info, etc.
-	FILEBANK = "FileBank"
+	FileBank = "FileBank"
 	// TEEWOEKER is a module about TEE
-	TEEWORKER = "TeeWorker"
+	TeeWorker = "TeeWorker"
 	// SMINER is a module about storage miners
-	SMINER = "Sminer"
+	Sminer = "Sminer"
 	// STAKING is a module about staking
-	STAKING = "Staking"
+	Staking = "Staking"
 	// SMINER is a module about storage miners
-	STORAGEHANDLER = "StorageHandler"
+	StorageHandler = "StorageHandler"
 	// BALANCES is a module about the balances
-	BALANCES = "Balances"
+	Balances = "Balances"
 	// SYSTEM is a module about the system
 	System = "System"
 	// EVM is a module about the evm contract
@@ -58,9 +58,9 @@ const (
 	CessTreasury = "CessTreasury"
 )
 
-// Chain state
+// chain state
 const (
-	//AUDIT
+	// Audit
 	ChallengeSlip        = "ChallengeSlip"
 	ChallengeSnapShot    = "ChallengeSnapShot"
 	CountedClear         = "CountedClear"
@@ -69,16 +69,16 @@ const (
 
 	// OSS
 	// OSS
-	AUTHORITYLIST = "AuthorityList"
+	AuthorityList = "AuthorityList"
 
 	// SMINER
-	ALLMINER           = "AllMiner"
-	MINERITEMS         = "MinerItems"
-	REWARDMAP          = "RewardMap"
-	EXPENDERS          = "Expenders"
-	RESTORALTARGETINFO = "RestoralTarget"
-	STAKINGSTARTBLOCK  = "StakingStartBlock"
-	CompleteSnapShot   = "CompleteSnapShot"
+	AllMiner          = "AllMiner"
+	MinerItems        = "MinerItems"
+	RewardMap         = "RewardMap"
+	Expenders         = "Expenders"
+	RestoralTarget    = "RestoralTarget"
+	StakingStartBlock = "StakingStartBlock"
+	CompleteSnapShot  = "CompleteSnapShot"
 
 	// TEEWORKER
 	TEEWorkers       = "Workers"
@@ -109,18 +109,19 @@ const (
 	ValidatorCount       = "ValidatorCount"
 
 	// STORAGE_HANDLER
-	USERSPACEINFO     = "UserOwnedSpace"
-	UNITPRICE         = "UnitPrice"
-	TOTALIDLESPACE    = "TotalIdleSpace"
-	TOTALSERVICESPACE = "TotalServiceSpace"
-	PURCHASEDSPACE    = "PurchasedSpace"
+	UserOwnedSpace    = "UserOwnedSpace"
+	UnitPrice         = "UnitPrice"
+	TotalIdleSpace    = "TotalIdleSpace"
+	TotalServiceSpace = "TotalServiceSpace"
+	PurchasedSpace    = "PurchasedSpace"
 
 	// BALANCES
-	TOTALISSUANCE = "TotalIssuance"
+	TotalIssuance    = "TotalIssuance"
+	InactiveIssuance = "InactiveIssuance"
 
 	// SYSTEM
 	Account = "Account"
-	EVENTS  = "Events"
+	Events  = "Events"
 
 	// CessTreasury
 	RoundReward = "RoundReward"

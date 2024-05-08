@@ -202,58 +202,6 @@ func (c *ChainClient) QueryAllAccountInfoFromBlock(block int) ([]types.AccountIn
 	return data, nil
 }
 
-// QueryTotalIssuance
-func (c *ChainClient) QueryTotalIssuance(block int) (string, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-	var data types.U128
-
-	if !c.GetChainState() {
-		return "", pattern.ERR_RPC_CONNECTION
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.BALANCES, pattern.TOTALISSUANCE)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.BALANCES, pattern.TOTALISSUANCE, err)
-		c.SetChainState(false)
-		return "", err
-	}
-
-	if block < 0 {
-		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.BALANCES, pattern.TOTALISSUANCE, err)
-			c.SetChainState(false)
-			return "", err
-		}
-		if !ok {
-			return "", pattern.ERR_RPC_EMPTY_VALUE
-		}
-		return data.String(), nil
-	}
-
-	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), pattern.BALANCES, pattern.TOTALISSUANCE, err)
-		c.SetChainState(false)
-		return "", err
-	}
-
-	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), pattern.BALANCES, pattern.TOTALISSUANCE, err)
-		c.SetChainState(false)
-		return "", err
-	}
-	if !ok {
-		return "", pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data.String(), nil
-}
-
 func (c *ChainClient) SysProperties() (pattern.SysProperties, error) {
 	defer func() {
 		if err := recover(); err != nil {

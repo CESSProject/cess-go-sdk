@@ -19,7 +19,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/retriever"
@@ -76,7 +75,7 @@ func NewChainClient(
 		chainClient = &ChainClient{
 			lock:        new(sync.Mutex),
 			chainStLock: new(sync.Mutex),
-			txTicker:    time.NewTicker(pattern.BlockInterval),
+			txTicker:    time.NewTicker(BlockInterval),
 			rpcAddr:     rpcs,
 			packingTime: t,
 			name:        serviceName,
@@ -97,7 +96,7 @@ func NewChainClient(
 	}
 
 	if chainClient.api == nil {
-		return nil, pattern.ERR_RPC_CONNECTION
+		return nil, ERR_RPC_CONNECTION
 	}
 
 	chainClient.SetChainState(true)
@@ -114,7 +113,7 @@ func NewChainClient(
 	if err != nil {
 		return nil, err
 	}
-	chainClient.keyEvents, err = types.CreateStorageKey(chainClient.metadata, pattern.SYSTEM, pattern.EVENTS, nil)
+	chainClient.keyEvents, err = types.CreateStorageKey(chainClient.metadata, System, Events, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +284,7 @@ func reconnectChainSDK(oldRpc string, rpcs []string) (
 		rpcAddr = rpcaddrs[i]
 	}
 	if api == nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	var metadata *types.Metadata
 	var runtimeVer *types.RuntimeVersion
@@ -295,23 +294,23 @@ func reconnectChainSDK(oldRpc string, rpcs []string) (
 
 	metadata, err = api.RPC.State.GetMetadataLatest()
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	genesisHash, err = api.RPC.Chain.GetBlockHash(0)
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	runtimeVer, err = api.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
-	keyEvents, err = types.CreateStorageKey(metadata, pattern.SYSTEM, pattern.EVENTS, nil)
+	keyEvents, err = types.CreateStorageKey(metadata, System, Events, nil)
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	eventRetriever, err = retriever.NewDefaultEventRetriever(state.NewEventProvider(api.RPC.State), api.RPC.State)
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, pattern.ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	return api, metadata, runtimeVer, keyEvents, eventRetriever, genesisHash, rpcAddr, err
 }
