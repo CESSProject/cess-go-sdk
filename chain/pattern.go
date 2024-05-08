@@ -115,7 +115,7 @@ const (
 	TotalServiceSpace = "TotalServiceSpace"
 	PurchasedSpace    = "PurchasedSpace"
 
-	// BALANCES
+	// Balances
 	TotalIssuance    = "TotalIssuance"
 	InactiveIssuance = "InactiveIssuance"
 
@@ -124,7 +124,10 @@ const (
 	Events  = "Events"
 
 	// CessTreasury
-	RoundReward = "RoundReward"
+	CurrencyReward = "CurrencyReward"
+	EraReward      = "EraReward"
+	ReserveReward  = "ReserveReward"
+	RoundReward    = "RoundReward"
 )
 
 // Extrinsics
@@ -174,7 +177,7 @@ const (
 	TX_STORAGE_RENEWALSPACE   = STORAGEHANDLER + DOT + "renewal_space"
 
 	// BALANCES
-	TX_BALANCES_FORCETRANSFER = "Balances" + DOT + "transfer"
+	TX_Balances_Transfer = "Balances" + DOT + "transfer"
 
 	// EVM
 	TX_EVM_CALL = EVM + DOT + "call"
