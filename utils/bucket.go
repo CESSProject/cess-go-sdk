@@ -11,13 +11,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
+	"github.com/CESSProject/cess-go-sdk/config"
 )
 
 var re = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
 func CheckBucketName(name string) bool {
-	if len(name) < pattern.MinBucketNameLength || len(name) > pattern.MaxBucketNameLength {
+	if len(name) < config.MinBucketNameLength || len(name) > config.MaxBucketNameLength {
 		return false
 	}
 

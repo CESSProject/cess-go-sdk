@@ -11,14 +11,7 @@ import (
 	"context"
 
 	"github.com/CESSProject/cess-go-sdk/chain"
-	"github.com/CESSProject/cess-go-sdk/config"
 )
-
-// Config describes a set of settings for the sdk.
-type Config = config.Config
-
-// Option is a client config option that can be given to the client constructor
-type Option = config.Option
 
 // New constructs a new sdk client with the given options, falling back on
 // reasonable defaults. The defaults are:

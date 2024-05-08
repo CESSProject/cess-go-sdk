@@ -12,10 +12,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/CESSProject/cess-go-sdk/chain"
+	"github.com/CESSProject/cess-go-sdk/config"
 	"github.com/CESSProject/cess-go-sdk/core/crypte"
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
 	"github.com/CESSProject/cess-go-sdk/core/hashtree"
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/pkg/errors"
 )
@@ -29,7 +30,7 @@ import (
 //   - segmentDataInfo: segment and fragment information of the file.
 //   - string: [fid] unique identifier for the file.
 //   - error: error message.
-func ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error) {
+func ProcessingData(file string) ([]chain.SegmentDataInfo, string, error) {
 	segmentPath, err := cutfile(file)
 	if err != nil {
 		if segmentPath != nil {
@@ -40,7 +41,7 @@ func ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error) {
 		return nil, "", errors.Wrapf(err, "[cutfile]")
 	}
 
-	var segmentDataInfo = make([]pattern.SegmentDataInfo, len(segmentPath))
+	var segmentDataInfo = make([]chain.SegmentDataInfo, len(segmentPath))
 
 	for i := 0; i < len(segmentPath); i++ {
 		segmentDataInfo[i].SegmentHash = segmentPath[i]
@@ -78,7 +79,7 @@ func ProcessingData(file string) ([]pattern.SegmentDataInfo, string, error) {
 //   - segmentDataInfo: segment and fragment information of the file.
 //   - string: [fid] unique identifier for the file.
 //   - error: error message.
-func ShardedEncryptionProcessing(file string, cipher string) ([]pattern.SegmentDataInfo, string, error) {
+func ShardedEncryptionProcessing(file string, cipher string) ([]chain.SegmentDataInfo, string, error) {
 	var err error
 	var segmentPath []string
 	if cipher != "" {
@@ -112,7 +113,7 @@ func ShardedEncryptionProcessing(file string, cipher string) ([]pattern.SegmentD
 		}
 	}
 
-	var segmentDataInfo = make([]pattern.SegmentDataInfo, len(segmentPath))
+	var segmentDataInfo = make([]chain.SegmentDataInfo, len(segmentPath))
 
 	for i := 0; i < len(segmentPath); i++ {
 		segmentDataInfo[i].SegmentHash = segmentPath[i]
@@ -152,13 +153,13 @@ func cutfile(file string) ([]string, error) {
 		return nil, errors.New("empty file")
 	}
 	baseDir := filepath.Dir(file)
-	segmentCount := fstat.Size() / pattern.SegmentSize
-	if fstat.Size()%int64(pattern.SegmentSize) != 0 {
+	segmentCount := fstat.Size() / config.SegmentSize
+	if fstat.Size()%int64(config.SegmentSize) != 0 {
 		segmentCount++
 	}
 
 	segment := make([]string, segmentCount)
-	buf := make([]byte, pattern.SegmentSize)
+	buf := make([]byte, config.SegmentSize)
 	f, err := os.Open(file)
 	if err != nil {
 		return segment, err
@@ -167,7 +168,7 @@ func cutfile(file string) ([]string, error) {
 
 	var num int
 	for i := int64(0); i < segmentCount; i++ {
-		f.Seek(pattern.SegmentSize*i, 0)
+		f.Seek(config.SegmentSize*i, 0)
 		num, err = f.Read(buf)
 		if err != nil && err != io.EOF {
 			return segment, err
@@ -175,11 +176,11 @@ func cutfile(file string) ([]string, error) {
 		if num == 0 {
 			return segment, errors.New("read file is empty")
 		}
-		if num < pattern.SegmentSize {
+		if num < config.SegmentSize {
 			if i+1 != segmentCount {
 				return segment, errors.New("read file err")
 			}
-			copy(buf[num:], make([]byte, pattern.SegmentSize-num, pattern.SegmentSize-num))
+			copy(buf[num:], make([]byte, config.SegmentSize-num, config.SegmentSize-num))
 		}
 
 		hash, err := utils.CalcSHA256(buf)
@@ -208,7 +209,7 @@ func cutFileWithEncryption(file string) ([]string, error) {
 		return nil, errors.New("empty file")
 	}
 	baseDir := filepath.Dir(file)
-	segmentSize := pattern.SegmentSize - 16
+	segmentSize := config.SegmentSize - 16
 	segmentCount := fstat.Size() / int64(segmentSize)
 	if fstat.Size()%int64(segmentSize) != 0 {
 		segmentCount++

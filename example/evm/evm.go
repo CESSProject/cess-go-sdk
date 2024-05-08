@@ -10,7 +10,6 @@ import (
 
 	cess "github.com/CESSProject/cess-go-sdk"
 	"github.com/CESSProject/cess-go-sdk/chain"
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
@@ -42,7 +41,7 @@ func main() {
 		value        types.U256
 		gasLimit     types.U64
 		maxFeePerGas types.U256
-		accessList   []pattern.AccessInfo
+		accessList   []chain.AccessInfo
 	)
 
 	s_h160, err := hex.DecodeString("1e3e1c69dfbd27d398e92da4844a9abdc2786ac0")

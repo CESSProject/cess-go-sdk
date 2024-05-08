@@ -10,7 +10,7 @@ package sdkgo
 import (
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
+	"github.com/CESSProject/cess-go-sdk/chain"
 )
 
 // ConnectRpcAddrs configuration rpc address
@@ -32,8 +32,8 @@ func Mnemonic(mnemonic string) Option {
 // TransactionTimeout configures the waiting timeout for a transaction
 func TransactionTimeout(timeout time.Duration) Option {
 	return func(cfg *Config) error {
-		if timeout < pattern.BlockInterval {
-			cfg.Timeout = pattern.BlockInterval
+		if timeout < chain.BlockInterval {
+			cfg.Timeout = chain.BlockInterval
 		} else {
 			cfg.Timeout = timeout
 		}

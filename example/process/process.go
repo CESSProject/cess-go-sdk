@@ -11,13 +11,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
+	"github.com/CESSProject/cess-go-sdk/chain"
 	"github.com/CESSProject/cess-go-sdk/core/process"
 )
 
 type result struct {
 	Fid         string
-	SegmentData []pattern.SegmentDataInfo
+	SegmentData []chain.SegmentDataInfo
 }
 
 func main() {

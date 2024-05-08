@@ -224,27 +224,6 @@ const (
 	ERR_Empty   = "empty"
 )
 
-const (
-	MinBucketNameLength = 3
-	MaxBucketNameLength = 63
-	MaxDomainNameLength = 50
-)
-
-// byte size
-const (
-	SIZE_1KiB = 1024
-	SIZE_1MiB = 1024 * SIZE_1KiB
-	SIZE_1GiB = 1024 * SIZE_1MiB
-	SIZE_1TiB = 1024 * SIZE_1GiB
-)
-
-const (
-	SegmentSize  = 32 * SIZE_1MiB
-	FragmentSize = 8 * SIZE_1MiB
-	DataShards   = 4
-	ParShards    = 8
-)
-
 var (
 	ERR_RPC_CONNECTION     = errors.New("rpc err: connection failed")
 	ERR_RPC_IP_FORMAT      = errors.New("unsupported ip format")
