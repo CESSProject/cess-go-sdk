@@ -249,6 +249,9 @@ func (c *ChainClient) QueryRoundReward(era uint32, block int32) (string, error) 
 		if !ok {
 			return "0", ERR_RPC_EMPTY_VALUE
 		}
+		if data.TotalReward.String() == "" {
+			return "0", nil
+		}
 		return data.TotalReward.String(), nil
 	}
 

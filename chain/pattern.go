@@ -87,13 +87,14 @@ const (
 	TEEWorkerAddedAt = "WorkerAddedAt"
 
 	// FILEBANK
-	FILE           = "File"
-	BUCKET         = "Bucket"
-	BUCKETLIST     = "UserBucketList"
-	DEALMAP        = "DealMap"
-	FILLERMAP      = "FillerMap"
-	PENDINGREPLACE = "PendingReplacements"
-	RESTORALORDER  = "RestoralOrder"
+	File                = "File"
+	Bucket              = "Bucket"
+	DealMap             = "DealMap"
+	FillerMap           = "FillerMap"
+	PendingReplacements = "PendingReplacements"
+	RestoralOrder       = "RestoralOrder"
+	UserBucketList      = "UserBucketList"
+	UserHoldFileList    = "UserHoldFileList"
 
 	// STAKING
 	COUNTERFORVALIDATORS = "CounterForValidators"
@@ -157,19 +158,19 @@ const (
 	TX_SMINER_REGISTERPOISKEY       = SMINER + DOT + "register_pois_key"
 	TX_SMINER_INCREASEDECSPACE      = SMINER + DOT + "increase_declaration_space"
 
-	// FILEBANK
-	TX_FILEBANK_PUTBUCKET         = FILEBANK + DOT + "create_bucket"
-	TX_FILEBANK_DELBUCKET         = FILEBANK + DOT + "delete_bucket"
-	TX_FILEBANK_DELFILE           = FILEBANK + DOT + "delete_file"
-	TX_FILEBANK_UPLOADDEC         = FILEBANK + DOT + "upload_declaration"
-	TX_FILEBANK_FILEREPORT        = FILEBANK + DOT + "transfer_report"
-	TX_FILEBANK_GENRESTOREORDER   = FILEBANK + DOT + "generate_restoral_order"
-	TX_FILEBANK_CLAIMRESTOREORDER = FILEBANK + DOT + "claim_restoral_order"
-	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"
-	TX_FILEBANK_RESTORALCOMPLETE  = FILEBANK + DOT + "restoral_order_complete"
-	TX_FILEBANK_CERTIDLESPACE     = FILEBANK + DOT + "cert_idle_space"
-	TX_FILEBANK_REPLACEIDLESPACE  = FILEBANK + DOT + "replace_idle_space"
-	TX_FILEBANK_CALCULATEREPORT   = FILEBANK + DOT + "calculate_report"
+	// FileBank
+	TX_FileBank_CreateBucket              = FileBank + DOT + "create_bucket"
+	TX_FileBank_DeleteBucket              = FileBank + DOT + "delete_bucket"
+	TX_FileBank_DeleteFile                = FileBank + DOT + "delete_file"
+	TX_FileBank_UploadDeclaration         = FileBank + DOT + "upload_declaration"
+	TX_FileBank_TransferReport            = FileBank + DOT + "transfer_report"
+	TX_FileBank_GenerateRestoralOrder     = FileBank + DOT + "generate_restoral_order"
+	TX_FileBank_ClaimRestoralOrder        = FileBank + DOT + "claim_restoral_order"
+	TX_FileBank_ClaimRestoralNoexistOrder = FileBank + DOT + "claim_restoral_noexist_order"
+	TX_FileBank_RestoralOrderComplete     = FileBank + DOT + "restoral_order_complete"
+	TX_FileBank_CertIdleSpace             = FileBank + DOT + "cert_idle_space"
+	TX_FileBank_ReplaceIdleSpace          = FileBank + DOT + "replace_idle_space"
+	TX_FileBank_CalculateReport           = FileBank + DOT + "calculate_report"
 
 	// STORAGE_HANDLER
 	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
@@ -180,7 +181,7 @@ const (
 	TX_Balances_Transfer = "Balances" + DOT + "transfer"
 
 	// EVM
-	TX_EVM_CALL = EVM + DOT + "call"
+	TX_EVM_Call = EVM + DOT + "call"
 )
 
 // RPC Call
@@ -291,6 +292,58 @@ type ChallengeInfo struct {
 	ProveInfo        ProveInfo
 }
 
+// Oss
+type BucketInfo struct {
+	FileList  []FileHash
+	Authority []types.AccountID
+}
+
+// FileBank
+type StorageOrder struct {
+	FileSize     types.U128
+	SegmentList  []SegmentList
+	User         UserBrief
+	CompleteList []CompleteInfo
+}
+
+type FileMetadata struct {
+	SegmentList []SegmentInfo
+	Owner       []UserBrief
+	FileSize    types.U128
+	Completion  types.U32
+	State       types.U8
+}
+
+type RestoralOrderInfo struct {
+	Count        types.U32
+	Miner        types.AccountID
+	OriginMiner  types.AccountID
+	FragmentHash FileHash
+	FileHash     FileHash
+	GenBlock     types.U32
+	Deadline     types.U32
+}
+
+type RestoralTargetInfo struct {
+	Miner         types.AccountID
+	ServiceSpace  types.U128
+	RestoredSpace types.U128
+	CoolingBlock  types.U32
+}
+
+type UserFileSliceInfo struct {
+	Filehash FileHash
+	Filesize types.U128
+}
+
+type SpaceProofInfo struct {
+	Miner       types.AccountID
+	Front       types.U64
+	Rear        types.U64
+	PoisKey     PoISKeyInfo
+	Accumulator Accumulator
+}
+
 type SysProperties struct {
 	Ss58Format    types.Bytes
 	TokenDecimals types.U8
@@ -309,11 +362,6 @@ type OssInfo struct {
 	Domain types.Bytes
 }
 
-type BucketInfo struct {
-	ObjectsList []FileHash
-	Authority   []types.AccountID
-}
-
 type MinerInfo struct {
 	BeneficiaryAccount types.AccountID
 	StakingAccount     types.AccountID
@@ -330,14 +378,6 @@ type MinerInfo struct {
 	TeeSig             TeeSig
 }
 
-type SpaceProofInfo struct {
-	Miner       types.AccountID
-	Front       types.U64
-	Rear        types.U64
-	PoisKey     PoISKeyInfo
-	Accumulator Accumulator
-}
-
 type MinerReward struct {
 	TotalReward  types.U128
 	RewardIssued types.U128
@@ -351,14 +391,6 @@ type RewardOrder struct {
 	OrderReward      types.U128
 	EachAmount       types.U128
 	LastReceiveBlock types.U32
-}
-
-type FileMetadata struct {
-	SegmentList []SegmentInfo
-	Owner       []UserBrief
-	FileSize    types.U128
-	Completion  types.U32
-	State       types.U8
 }
 
 type SegmentInfo struct {
@@ -377,13 +409,6 @@ type FragmentInfo struct {
 	Avail types.Bool
 	Tag   types.Option[types.U32]
 	Miner types.AccountID
-}
-
-type StorageOrder struct {
-	FileSize     types.U128
-	SegmentList  []SegmentList
-	User         UserBrief
-	CompleteList []CompleteInfo
 }
 
 type SegmentList struct {
@@ -456,23 +481,6 @@ type TeeWorkerInfo struct {
 	ConfidenceLevel     types.U8
 	Features            []types.U32
 	Role                types.U8 // 0:Full 1:Verifier 2:Marker
-}
-
-type RestoralOrderInfo struct {
-	Count        types.U32
-	Miner        types.AccountID
-	OriginMiner  types.AccountID
-	FragmentHash FileHash
-	FileHash     FileHash
-	GenBlock     types.U32
-	Deadline     types.U32
-}
-
-type RestoralTargetInfo struct {
-	Miner         types.AccountID
-	ServiceSpace  types.U128
-	RestoredSpace types.U128
-	CoolingBlock  types.U32
 }
 
 type ExpendersInfo struct {

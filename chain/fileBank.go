@@ -15,24 +15,31 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
-func (c *ChainClient) QueryBucketInfo(accountID []byte, bucketname string) (pattern.BucketInfo, error) {
+// QueryBucket query user's bucket information
+//   - accountID: user account
+//   - bucketName: bucket name
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - BucketInfo: bucket info
+//   - error: error message
+func (c *ChainClient) QueryBucket(accountID []byte, bucketName string, block int32) (BucketInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data pattern.BucketInfo
+	var data BucketInfo
 
 	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
+		return data, ERR_RPC_CONNECTION
 	}
 
 	acc, err := types.NewAccountID(accountID)
@@ -45,190 +52,52 @@ func (c *ChainClient) QueryBucketInfo(accountID []byte, bucketname string) (patt
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	name, err := codec.Encode(bucketname)
+	name, err := codec.Encode(bucketName)
 	if err != nil {
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.BUCKET, owner, name)
+	key, err := types.CreateStorageKey(c.metadata, FileBank, Bucket, owner, name)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.BUCKET, err)
-		c.SetChainState(false)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), FileBank, Bucket, err)
 		return data, err
 	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.BUCKET, err)
-		c.SetChainState(false)
-		return data, err
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
-func (c *ChainClient) QueryAllBucket(accountID []byte) ([]types.Bytes, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), FileBank, Bucket, err)
+			c.SetChainState(false)
+			return data, err
 		}
-	}()
-
-	var data []types.Bytes
-
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	acc, err := types.NewAccountID(accountID)
-	if err != nil {
-		return data, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	owner, err := codec.Encode(*acc)
-	if err != nil {
-		return data, errors.Wrap(err, "[EncodeToBytes]")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.BUCKETLIST, owner)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.BUCKETLIST, err)
-		c.SetChainState(false)
-		return data, err
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.BUCKETLIST, err)
-		c.SetChainState(false)
-		return data, err
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
-func (c *ChainClient) QueryAllBucketString(accountID []byte) ([]string, error) {
-	bucketlist, err := c.QueryAllBucket(accountID)
-	if err != nil {
-		if err.Error() != pattern.ERR_Empty {
-			return nil, err
+		if !ok {
+			return data, ERR_RPC_EMPTY_VALUE
 		}
+		return data, nil
 	}
-	var buckets = make([]string, len(bucketlist))
-	for i := 0; i < len(bucketlist); i++ {
-		buckets[i] = string(bucketlist[i])
-	}
-	return buckets, nil
-}
-
-func (c *ChainClient) QueryFileMetadata(fid string) (pattern.FileMetadata, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var (
-		data pattern.FileMetadata
-		hash pattern.FileHash
-	)
-
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	if len(hash) != len(fid) {
-		return data, errors.New("invalid filehash")
-	}
-
-	for i := 0; i < len(hash); i++ {
-		hash[i] = types.U8(fid[i])
-	}
-
-	b, err := codec.Encode(hash)
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		return data, errors.Wrap(err, "[Encode]")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.FILE, b)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.FILE, err)
-		c.SetChainState(false)
 		return data, err
 	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.FILE, err)
-		c.SetChainState(false)
-		return data, err
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-	return data, nil
-}
-
-func (c *ChainClient) QueryFileMetadataByBlock(fid string, block uint64) (pattern.FileMetadata, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var (
-		data pattern.FileMetadata
-		hash pattern.FileHash
-	)
-
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
-	}
-
-	if len(hash) != len(fid) {
-		return data, errors.New("invalid filehash")
-	}
-
-	for i := 0; i < len(hash); i++ {
-		hash[i] = types.U8(fid[i])
-	}
-
-	b, err := codec.Encode(hash)
-	if err != nil {
-		return data, errors.Wrap(err, "[Encode]")
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.FILE, b)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.FILE, err)
-		c.SetChainState(false)
-		return data, err
-	}
-
-	blockhash, err := c.api.RPC.Chain.GetBlockHash(block)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.FILE, err)
-		c.SetChainState(false)
-		return data, err
-	}
-
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.FILE, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), FileBank, Bucket, err)
 		c.SetChainState(false)
 		return data, err
 	}
 	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
+		return data, ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }
 
-func (c *ChainClient) QueryStorageOrder(fid string) (pattern.StorageOrder, error) {
+// QueryDealMap query file storage order
+//   - fid: file identification
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - StorageOrder: file storage order
+//   - error: error message
+func (c *ChainClient) QueryDealMap(fid string, block int32) (StorageOrder, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -236,11 +105,11 @@ func (c *ChainClient) QueryStorageOrder(fid string) (pattern.StorageOrder, error
 	}()
 
 	var (
-		data pattern.StorageOrder
-		hash pattern.FileHash
+		data StorageOrder
+		hash FileHash
 	)
 
-	if len(hash) != len(fid) {
+	if len(fid) != FileHashLen {
 		return data, errors.New("invalid filehash")
 	}
 
@@ -248,35 +117,58 @@ func (c *ChainClient) QueryStorageOrder(fid string) (pattern.StorageOrder, error
 		hash[i] = types.U8(fid[i])
 	}
 
-	b, err := codec.Encode(hash)
+	param_hash, err := codec.Encode(hash)
 	if err != nil {
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
 	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
+		return data, ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.DEALMAP, b)
+	key, err := types.CreateStorageKey(c.metadata, FileBank, DealMap, param_hash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.DEALMAP, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+		return data, err
+	}
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+			c.SetChainState(false)
+			return data, err
+		}
+		if !ok {
+			return data, ERR_RPC_EMPTY_VALUE
+		}
+		return data, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
 		c.SetChainState(false)
 		return data, err
 	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.DEALMAP, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
 		c.SetChainState(false)
 		return data, err
 	}
 	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
+		return data, ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }
 
-func (c *ChainClient) QueryRestoralOrder(fragmentHash string) (pattern.RestoralOrderInfo, error) {
+// QueryFile query file metadata
+//   - fid: file identification
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - FileMetadata: file metadata
+//   - error: error message
+func (c *ChainClient) QueryFile(fid string, block int32) (FileMetadata, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -284,76 +176,184 @@ func (c *ChainClient) QueryRestoralOrder(fragmentHash string) (pattern.RestoralO
 	}()
 
 	var (
-		data pattern.RestoralOrderInfo
-		hash pattern.FileHash
+		data FileMetadata
+		hash FileHash
 	)
 
 	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
+		return data, ERR_RPC_CONNECTION
 	}
 
-	if len(hash) != len(fragmentHash) {
-		return data, errors.New("invalid root hash")
+	if len(fid) != FileHashLen {
+		return data, errors.New("invalid filehash")
+	}
+
+	for i := 0; i < len(hash); i++ {
+		hash[i] = types.U8(fid[i])
+	}
+
+	param_hash, err := codec.Encode(hash)
+	if err != nil {
+		return data, errors.Wrap(err, "[Encode]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, FileBank, File, param_hash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), FileBank, File, err)
+		return data, err
+	}
+
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), FileBank, File, err)
+			c.SetChainState(false)
+			return data, err
+		}
+		if !ok {
+			return data, ERR_RPC_EMPTY_VALUE
+		}
+		return data, nil
+	}
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), FileBank, File, err)
+		c.SetChainState(false)
+		return data, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), FileBank, File, err)
+		c.SetChainState(false)
+		return data, err
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
+// QueryRestoralOrder query file restoral order
+//   - fragmentHash: fragment hash
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - RestoralOrderInfo: restoral order info
+//   - error: error message
+func (c *ChainClient) QueryRestoralOrder(fragmentHash string, block int32) (RestoralOrderInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		data RestoralOrderInfo
+		hash FileHash
+	)
+
+	if !c.GetChainState() {
+		return data, ERR_RPC_CONNECTION
+	}
+
+	if len(fragmentHash) != FileHashLen {
+		return data, errors.New("invalid fragment hash")
 	}
 
 	for i := 0; i < len(hash); i++ {
 		hash[i] = types.U8(fragmentHash[i])
 	}
 
-	b, err := codec.Encode(hash)
+	param_hash, err := codec.Encode(hash)
 	if err != nil {
 		return data, errors.Wrap(err, "[Encode]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.FILEBANK, pattern.RESTORALORDER, b)
+	key, err := types.CreateStorageKey(c.metadata, FileBank, RestoralOrder, param_hash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.RESTORALORDER, err)
-		c.SetChainState(false)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, err)
 		return data, err
 	}
 
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, err)
+			c.SetChainState(false)
+			return data, err
+		}
+		if !ok {
+			return data, ERR_RPC_EMPTY_VALUE
+		}
+		return data, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.RESTORALORDER, err)
+		c.SetChainState(false)
+		return data, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, err)
 		c.SetChainState(false)
 		return data, err
 	}
 	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
+		return data, ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
 }
 
-func (c *ChainClient) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, error) {
+// QueryAllRestoralOrder query all file restoral order
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - []RestoralOrderInfo: all restoral order info
+//   - error: error message
+func (c *ChainClient) QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var result []pattern.RestoralOrderInfo
+	var result []RestoralOrderInfo
 
 	if !c.GetChainState() {
-		return nil, pattern.ERR_RPC_CONNECTION
+		return nil, ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(pattern.FILEBANK, pattern.RESTORALORDER)
+	key := createPrefixedKey(FileBank, RestoralOrder)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.RESTORALORDER, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, err)
 		c.SetChainState(false)
 		return nil, err
 	}
-
-	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.FILEBANK, pattern.RESTORALORDER, err)
-		c.SetChainState(false)
-		return nil, err
+	var set []types.StorageChangeSet
+	if block < 0 {
+		set, err = c.api.RPC.State.QueryStorageAtLatest(keys)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, err)
+			c.SetChainState(false)
+			return nil, err
+		}
+	} else {
+		blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+		if err != nil {
+			return nil, err
+		}
+		set, err = c.api.RPC.State.QueryStorageAt(keys, blockhash)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAt: %v", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, err)
+			c.SetChainState(false)
+			return nil, err
+		}
 	}
 
 	for _, elem := range set {
 		for _, change := range elem.Changes {
-			var data pattern.RestoralOrderInfo
+			var data RestoralOrderInfo
 			if err := codec.Decode(change.StorageData, &data); err != nil {
 				continue
 			}
@@ -363,24 +363,170 @@ func (c *ChainClient) QueryRestoralOrderList() ([]pattern.RestoralOrderInfo, err
 	return result, nil
 }
 
-func (c *ChainClient) GenerateStorageOrder(
-	roothash string,
-	segment []pattern.SegmentDataInfo,
-	owner []byte,
-	filename string,
-	buckname string,
-	filesize uint64,
-) (string, error) {
+// QueryAllBucketName query user's all bucket names
+//   - accountID: user account
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - []string: all bucket names
+//   - error: error message
+func (c *ChainClient) QueryAllBucketName(accountID []byte, block int32) ([]string, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data []types.Bytes
+	var value []string
+
+	if !c.GetChainState() {
+		return nil, ERR_RPC_CONNECTION
+	}
+
+	acc, err := types.NewAccountID(accountID)
+	if err != nil {
+		return nil, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return nil, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, FileBank, UserBucketList, owner)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), FileBank, UserBucketList, err)
+		return nil, err
+	}
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), FileBank, UserBucketList, err)
+			c.SetChainState(false)
+			return nil, err
+		}
+		if !ok {
+			return []string{}, ERR_RPC_EMPTY_VALUE
+		}
+		for i := 0; i < len(data); i++ {
+			value[i] = string(data[i])
+		}
+		return value, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		c.SetChainState(false)
+		return nil, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), FileBank, UserBucketList, err)
+		c.SetChainState(false)
+		return nil, err
+	}
+	if !ok {
+		return []string{}, ERR_RPC_EMPTY_VALUE
+	}
+	for i := 0; i < len(data); i++ {
+		value[i] = string(data[i])
+	}
+	return value, nil
+}
+
+// QueryAllUserFiles query user's all files
+//   - accountID: user account
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - []string: all file identification
+//   - error: error message
+func (c *ChainClient) QueryAllUserFiles(accountID []byte, block int32) ([]string, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data []UserFileSliceInfo
+	var value []string
+
+	if !c.GetChainState() {
+		return nil, ERR_RPC_CONNECTION
+	}
+
+	acc, err := types.NewAccountID(accountID)
+	if err != nil {
+		return nil, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	owner, err := codec.Encode(*acc)
+	if err != nil {
+		return nil, errors.Wrap(err, "[EncodeToBytes]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, FileBank, UserHoldFileList, owner)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), FileBank, UserHoldFileList, err)
+		return nil, err
+	}
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), FileBank, UserHoldFileList, err)
+			c.SetChainState(false)
+			return nil, err
+		}
+		if !ok {
+			return []string{}, ERR_RPC_EMPTY_VALUE
+		}
+		for i := 0; i < len(data); i++ {
+			value[i] = string(data[i].Filehash[:])
+		}
+		return value, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		c.SetChainState(false)
+		return nil, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), FileBank, UserHoldFileList, err)
+		c.SetChainState(false)
+		return nil, err
+	}
+	if !ok {
+		return []string{}, ERR_RPC_EMPTY_VALUE
+	}
+	for i := 0; i < len(data); i++ {
+		value[i] = string(data[i].Filehash[:])
+	}
+	return value, nil
+}
+
+// GenerateStorageOrder generate a file storage order
+//   - fid: file identification
+//   - segment: segment info
+//   - owner: account of the file owner
+//   - filename: file name
+//   - buckname: bucket to store the file
+//   - filesize: file size
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+func (c *ChainClient) GenerateStorageOrder(fid string, segment []SegmentDataInfo, owner []byte, filename string, buckname string, filesize uint64) (string, error) {
 	var err error
-	var segmentList = make([]pattern.SegmentList, len(segment))
-	var user pattern.UserBrief
+	var segmentList = make([]SegmentList, len(segment))
+	var user UserBrief
 
 	for i := 0; i < len(segment); i++ {
 		hash := filepath.Base(segment[i].SegmentHash)
 		for k := 0; k < len(hash); k++ {
 			segmentList[i].SegmentHash[k] = types.U8(hash[k])
 		}
-		segmentList[i].FragmentHash = make([]pattern.FileHash, len(segment[i].FragmentHash))
+		segmentList[i].FragmentHash = make([]FileHash, len(segment[i].FragmentHash))
 		for j := 0; j < len(segment[i].FragmentHash); j++ {
 			hash := filepath.Base(segment[i].FragmentHash[j])
 			for k := 0; k < len(hash); k++ {
@@ -396,10 +542,20 @@ func (c *ChainClient) GenerateStorageOrder(
 	user.User = *acc
 	user.BucketName = types.NewBytes([]byte(buckname))
 	user.FileName = types.NewBytes([]byte(filename))
-	return c.UploadDeclaration(roothash, segmentList, user, filesize)
+	return c.UploadDeclaration(fid, segmentList, user, filesize)
 }
 
-func (c *ChainClient) UploadDeclaration(filehash string, dealinfo []pattern.SegmentList, user pattern.UserBrief, filesize uint64) (string, error) {
+// GenerateStorageOrder generate a file storage order
+//   - fid: file identification
+//   - segment: segment info
+//   - user: UserBrief
+//   - filename: file name
+//   - filesize: file size
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user UserBrief, filesize uint64) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -409,52 +565,50 @@ func (c *ChainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 	}()
 
 	var (
-		txhash      string
-		hash        pattern.FileHash
+		blockhash   string
+		hash        FileHash
 		accountInfo types.AccountInfo
 	)
-	if len(filehash) != len(hash) {
-		return txhash, errors.New("invalid filehash")
+	if len(fid) != FileHashLen {
+		return blockhash, errors.New("invalid filehash")
 	}
 	if filesize <= 0 {
-		return txhash, errors.New("invalid filesize")
+		return blockhash, errors.New("invalid filesize")
 	}
 	for i := 0; i < len(hash); i++ {
-		hash[i] = types.U8(filehash[i])
+		hash[i] = types.U8(fid[i])
 	}
 
 	if !c.GetChainState() {
-		return txhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetChainState(): %v", pattern.ERR_RPC_CONNECTION)
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_UPLOADDEC, hash, dealinfo, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
+	call, err := types.NewCall(c.metadata, TX_FileBank_UploadDeclaration, hash, segment, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_UPLOADDEC, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_UPLOADDEC, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_UPLOADDEC, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
 		keyStr, _ := utils.NumsToByteStr(key, map[string]bool{})
-		return txhash, fmt.Errorf(
+		return blockhash, fmt.Errorf(
 			"chain rpc.state.GetStorageLatest[%v]: %v",
 			keyStr,
-			pattern.ERR_RPC_EMPTY_VALUE,
+			ERR_RPC_EMPTY_VALUE,
 		)
 	}
 
@@ -471,9 +625,9 @@ func (c *ChainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_UPLOADDEC, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	<-c.txTicker.C
@@ -481,22 +635,23 @@ func (c *ChainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
+				return blockhash, errors.Wrap(err, "[Sign]")
 			}
+			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_UPLOADDEC, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
 				c.SetChainState(false)
-				return txhash, err
+				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_UPLOADDEC, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
 			c.SetChainState(false)
-			return txhash, err
+			return blockhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -508,19 +663,30 @@ func (c *ChainClient) UploadDeclaration(filehash string, dealinfo []pattern.Segm
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_UploadDeclaration(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) CreateBucket(owner_pkey []byte, name string) (string, error) {
+// CreateBucket create a bucket for owner
+//   - owner: bucket owner account
+//   - bucketName: bucket name
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - cannot create a bucket that already exists
+//   - if you are not the owner, the owner account must be authorised to you
+func (c *ChainClient) CreateBucket(owner []byte, bucketName string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -530,56 +696,41 @@ func (c *ChainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	buckets, err := c.QueryAllBucket(owner_pkey)
+	acc, err := types.NewAccountID(owner)
 	if err != nil {
-		if err.Error() != pattern.ERR_Empty {
-			return txhash, errors.Wrap(err, "[QueryBucketList]")
-		}
-	} else {
-		for _, v := range buckets {
-			if utils.CompareSlice(v, []byte(name)) {
-				return "", nil
-			}
-		}
+		return blockhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	acc, err := types.NewAccountID(owner_pkey)
+	call, err := types.NewCall(c.metadata, TX_FileBank_CreateBucket, *acc, types.NewBytes([]byte(bucketName)))
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_PUTBUCKET, *acc, types.NewBytes([]byte(name)))
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_PUTBUCKET, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_PUTBUCKET, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_PUTBUCKET, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -595,9 +746,9 @@ func (c *ChainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_PUTBUCKET, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	<-c.txTicker.C
@@ -605,9 +756,9 @@ func (c *ChainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_PUTBUCKET, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	defer sub.Unsubscribe()
 
@@ -618,19 +769,29 @@ func (c *ChainClient) CreateBucket(owner_pkey []byte, name string) (string, erro
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_CreateBucket(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) DeleteBucket(owner_pkey []byte, name string) (string, error) {
+// DeleteBucket delete a bucket for owner
+//   - owner: bucket owner account
+//   - bucketName: bucket name
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - if you are not the owner, the owner account must be authorised to you
+func (c *ChainClient) DeleteBucket(owner []byte, bucketName string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -640,43 +801,41 @@ func (c *ChainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	acc, err := types.NewAccountID(owner_pkey)
+	acc, err := types.NewAccountID(owner)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
+		return blockhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_DELBUCKET, *acc, types.NewBytes([]byte(name)))
+	call, err := types.NewCall(c.metadata, TX_FileBank_DeleteBucket, *acc, types.NewBytes([]byte(bucketName)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELBUCKET, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELBUCKET, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELBUCKET, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -692,9 +851,9 @@ func (c *ChainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELBUCKET, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	<-c.txTicker.C
@@ -702,9 +861,9 @@ func (c *ChainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELBUCKET, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	defer sub.Unsubscribe()
 
@@ -715,19 +874,29 @@ func (c *ChainClient) DeleteBucket(owner_pkey []byte, name string) (string, erro
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_DeleteBucket(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) DeleteFile(puk []byte, filehash string) (string, error) {
+// DeleteFile delete a bucket for owner
+//   - owner: file owner account
+//   - fid: file identification
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - if you are not the owner, the owner account must be authorised to you
+func (c *ChainClient) DeleteFile(owner []byte, fid string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -737,52 +906,50 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash string) (string, error) {
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	if len(filehash) != pattern.FileHashLen {
+	if len(fid) != FileHashLen {
 		return "", errors.New("invalid fid")
 	}
 
-	acc, err := types.NewAccountID(puk)
+	acc, err := types.NewAccountID(owner)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
+		return blockhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	var fhash pattern.FileHash
-	for i := 0; i < len(filehash); i++ {
-		fhash[i] = types.U8(filehash[i])
+	var fhash FileHash
+	for i := 0; i < len(fid); i++ {
+		fhash[i] = types.U8(fid[i])
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_DELFILE, *acc, fhash)
+	call, err := types.NewCall(c.metadata, TX_FileBank_DeleteFile, *acc, fhash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -798,9 +965,9 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	<-c.txTicker.C
@@ -808,22 +975,23 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
+				return blockhash, errors.Wrap(err, "[Sign]")
 			}
+			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
 				c.SetChainState(false)
-				return txhash, err
+				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_DELFILE, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
 			c.SetChainState(false)
-			return txhash, err
+			return blockhash, err
 		}
 	}
 
@@ -836,28 +1004,29 @@ func (c *ChainClient) DeleteFile(puk []byte, filehash string) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_DeleteFile(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) ReportFile(index uint8, roothash string) (string, error) {
-	var hashs pattern.FileHash
-
-	for j := 0; j < len(roothash); j++ {
-		hashs[j] = types.U8(roothash[j])
-	}
-	return c.SubmitFileReport(types.U8(index), hashs)
-}
-
-func (c *ChainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash) (string, error) {
+// TransferReport is used by miners to report that a file has been transferred
+//   - index: index of the file fragment
+//   - fid: file identification
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - for storage miner use only
+func (c *ChainClient) TransferReport(index uint8, fid string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -867,42 +1036,46 @@ func (c *ChainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
-	if index == 0 || int(index) > (pattern.DataShards+pattern.ParShards) {
+	if !c.GetChainState() {
+		return blockhash, ERR_RPC_CONNECTION
+	}
+
+	if index <= 0 || int(index) > (DataShards+ParShards) {
 		return "", errors.New("invalid index")
 	}
 
-	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+	var fhash FileHash
+
+	for j := 0; j < len(fid); j++ {
+		fhash[j] = types.U8(fid[j])
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_FILEREPORT, index, roothash)
+	call, err := types.NewCall(c.metadata, TX_FileBank_TransferReport, types.NewU8(index), fhash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_FILEREPORT, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_FILEREPORT, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_FILEREPORT, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -918,9 +1091,9 @@ func (c *ChainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_FILEREPORT, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	<-c.txTicker.C
@@ -928,22 +1101,23 @@ func (c *ChainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
+				return blockhash, errors.Wrap(err, "[Sign]")
 			}
+			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_FILEREPORT, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
 				c.SetChainState(false)
-				return txhash, err
+				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_FILEREPORT, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
 			c.SetChainState(false)
-			return txhash, err
+			return blockhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -955,19 +1129,29 @@ func (c *ChainClient) SubmitFileReport(index types.U8, roothash pattern.FileHash
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_TransferReport(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (string, error) {
+// GenerateRestoralOrder generate restoral orders for file fragment
+//   - fid: file identification
+//   - fragmentHash: fragment hash
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - for storage miner use only
+func (c *ChainClient) GenerateRestoralOrder(fid, fragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -977,57 +1161,55 @@ func (c *ChainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (stri
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	var rooth pattern.FileHash
-	var fragh pattern.FileHash
+	var rooth FileHash
+	var fragh FileHash
 
-	if len(rootHash) != len(rooth) {
-		return txhash, errors.New("invalid root hash")
+	if len(fid) != FileHashLen {
+		return blockhash, errors.New("invalid file hash")
 	}
 
-	if len(fragmentHash) != len(fragh) {
-		return txhash, errors.New("invalid fragment hash")
+	if len(fragmentHash) != FileHashLen {
+		return blockhash, errors.New("invalid fragment hash")
 	}
 
-	for i := 0; i < len(rootHash); i++ {
-		rooth[i] = types.U8(rootHash[i])
+	for i := 0; i < len(fid); i++ {
+		rooth[i] = types.U8(fid[i])
 	}
 
 	for i := 0; i < len(fragmentHash); i++ {
 		fragh[i] = types.U8(fragmentHash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_GENRESTOREORDER, rooth, fragh)
+	call, err := types.NewCall(c.metadata, TX_FileBank_GenerateRestoralOrder, rooth, fragh)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_GENRESTOREORDER, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_GENRESTOREORDER, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_GENRESTOREORDER, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -1043,9 +1225,9 @@ func (c *ChainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (stri
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_GENRESTOREORDER, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	<-c.txTicker.C
@@ -1053,9 +1235,9 @@ func (c *ChainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (stri
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_GENRESTOREORDER, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	defer sub.Unsubscribe()
 
@@ -1066,18 +1248,27 @@ func (c *ChainClient) GenerateRestoralOrder(rootHash, fragmentHash string) (stri
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_GenRestoralOrder(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
+// ClaimRestoralOrder claim a restoral order
+//   - fragmentHash: fragment hash
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - for storage miner use only
 func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
@@ -1088,48 +1279,185 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	var fragh pattern.FileHash
+	if len(fragmentHash) != FileHashLen {
+		return blockhash, errors.New("invalid fragment hash")
+	}
 
-	if len(fragmentHash) != len(fragh) {
-		return txhash, errors.New("invalid fragment hash")
+	var fragh FileHash
+	for i := 0; i < len(fragmentHash); i++ {
+		fragh[i] = types.U8(fragmentHash[i])
+	}
+
+	call, err := types.NewCall(c.metadata, TX_FileBank_ClaimRestoralOrder, fragh)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+		return blockhash, err
+	}
+
+	ext := types.NewExtrinsic(call)
+
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+		return blockhash, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+		c.SetChainState(false)
+		return blockhash, err
+	}
+	if !ok {
+		return blockhash, ERR_RPC_EMPTY_VALUE
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	// Sign the transaction
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+		c.SetChainState(false)
+		return blockhash, err
+	}
+
+	<-c.txTicker.C
+
+	// Do the transfer and track the actual status
+	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+			err = ext.Sign(c.keyring, o)
+			if err != nil {
+				return blockhash, errors.Wrap(err, "[Sign]")
+			}
+			<-c.txTicker.C
+			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+			if err != nil {
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+				c.SetChainState(false)
+				return blockhash, err
+			}
+		} else {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+			c.SetChainState(false)
+			return blockhash, err
+		}
+	}
+	defer sub.Unsubscribe()
+
+	timeout := time.NewTimer(c.packingTime)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case status := <-sub.Chan():
+			if status.IsInBlock {
+				blockhash = status.AsInBlock.Hex()
+				_, err = c.RetrieveEvent_FileBank_ClaimRestoralOrder(status.AsInBlock)
+				return blockhash, err
+			}
+		case err = <-sub.Err():
+			return blockhash, errors.Wrap(err, "[sub]")
+		case <-timeout.C:
+			return blockhash, ERR_RPC_TIMEOUT
+		}
+	}
+}
+
+// ClaimRestoralNoExistOrder claim the restoral order of an exited storage miner
+//   - puk: storage miner account
+//   - fid: file identification
+//   - fragmentHash: fragment hash
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - for storage miner use only
+func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, fid, fragmentHash string) (string, error) {
+	c.lock.Lock()
+	defer func() {
+		c.lock.Unlock()
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		blockhash   string
+		accountInfo types.AccountInfo
+	)
+
+	if !c.GetChainState() {
+		return blockhash, ERR_RPC_CONNECTION
+	}
+
+	acc, err := types.NewAccountID(puk)
+	if err != nil {
+		return blockhash, errors.Wrap(err, "[NewAccountID]")
+	}
+
+	var rooth FileHash
+	var fragh FileHash
+
+	if len(fid) != FileHashLen {
+		return blockhash, errors.New("invalid file hash")
+	}
+
+	if len(fragmentHash) != FileHashLen {
+		return blockhash, errors.New("invalid fragment hash")
+	}
+
+	for i := 0; i < len(fid); i++ {
+		rooth[i] = types.U8(fid[i])
 	}
 
 	for i := 0; i < len(fragmentHash); i++ {
 		fragh[i] = types.U8(fragmentHash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CLAIMRESTOREORDER, fragh)
+	call, err := types.NewCall(c.metadata, TX_FileBank_ClaimRestoralNoexistOrder, *acc, rooth, fragh)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMRESTOREORDER, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMRESTOREORDER, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMRESTOREORDER, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -1145,9 +1473,7 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMRESTOREORDER, err)
-		c.SetChainState(false)
-		return txhash, err
+		return blockhash, errors.Wrap(err, "[Sign]")
 	}
 
 	<-c.txTicker.C
@@ -1155,22 +1481,23 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
+				return blockhash, errors.Wrap(err, "[Sign]")
 			}
+			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMRESTOREORDER, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
 				c.SetChainState(false)
-				return txhash, err
+				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMRESTOREORDER, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
 			c.SetChainState(false)
-			return txhash, err
+			return blockhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -1182,19 +1509,28 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_ClaimRestoralOrder(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFragmentHash string) (string, error) {
+// RestoralOrderComplete submits the restored completed order
+//   - fragmentHash: fragment hash
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - for storage miner use only
+func (c *ChainClient) RestoralOrderComplete(fragmentHash string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1204,174 +1540,44 @@ func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, rootHash, restoralFr
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	acc, err := types.NewAccountID(puk)
+	var fragh FileHash
+
+	if len(fragmentHash) != FileHashLen {
+		return blockhash, errors.New("invalid fragment hash")
+	}
+
+	for i := 0; i < len(fragmentHash); i++ {
+		fragh[i] = types.U8(fragmentHash[i])
+	}
+
+	call, err := types.NewCall(c.metadata, TX_FileBank_RestoralOrderComplete, fragh)
 	if err != nil {
-		return txhash, errors.Wrap(err, "[NewAccountID]")
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
+		return blockhash, err
 	}
 
-	var rooth pattern.FileHash
-	var fragh pattern.FileHash
-
-	if len(rootHash) != len(rooth) {
-		return txhash, errors.New("invalid root hash")
-	}
-
-	if len(restoralFragmentHash) != len(fragh) {
-		return txhash, errors.New("invalid fragment hash")
-	}
-
-	for i := 0; i < len(rootHash); i++ {
-		rooth[i] = types.U8(rootHash[i])
-	}
-
-	for i := 0; i < len(restoralFragmentHash); i++ {
-		fragh[i] = types.U8(restoralFragmentHash[i])
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CLAIMNOEXISTORDER, *acc, rooth, fragh)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMNOEXISTORDER, err)
-		c.SetChainState(false)
-		return txhash, err
-	}
-
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMNOEXISTORDER, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMNOEXISTORDER, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		return txhash, errors.Wrap(err, "[Sign]")
-	}
-
-	<-c.txTicker.C
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMNOEXISTORDER, err)
-				c.SetChainState(false)
-				return txhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CLAIMNOEXISTORDER, err)
-			c.SetChainState(false)
-			return txhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_ClaimRestoralOrder(status.AsInBlock)
-				return txhash, err
-			}
-		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
-		}
-	}
-}
-
-func (c *ChainClient) RestoralComplete(restoralFragmentHash string) (string, error) {
-	c.lock.Lock()
-	defer func() {
-		c.lock.Unlock()
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var (
-		txhash      string
-		accountInfo types.AccountInfo
-	)
-
-	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
-	}
-
-	var fragh pattern.FileHash
-
-	if len(restoralFragmentHash) != len(fragh) {
-		return txhash, errors.New("invalid fragment hash")
-	}
-
-	for i := 0; i < len(restoralFragmentHash); i++ {
-		fragh[i] = types.U8(restoralFragmentHash[i])
-	}
-
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_RESTORALCOMPLETE, fragh)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_RESTORALCOMPLETE, err)
-		c.SetChainState(false)
-		return txhash, err
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_RESTORALCOMPLETE, err)
-		c.SetChainState(false)
-		return txhash, err
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_RESTORALCOMPLETE, err)
-		c.SetChainState(false)
-		return txhash, err
-	}
-	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -1389,30 +1595,30 @@ func (c *ChainClient) RestoralComplete(restoralFragmentHash string) (string, err
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_RESTORALCOMPLETE, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
+				return blockhash, errors.Wrap(err, "[Sign]")
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_RESTORALCOMPLETE, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
 				c.SetChainState(false)
-				return txhash, err
+				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_RESTORALCOMPLETE, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
 			c.SetChainState(false)
-			return txhash, err
+			return blockhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -1424,19 +1630,31 @@ func (c *ChainClient) RestoralComplete(restoralFragmentHash string) (string, err
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_RecoveryCompleted(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
+// CertIdleSpace authenticates idle file to the chain
+//   - spaceProofInfo: space proof info
+//   - teeSignWithAcc: tee sign with account
+//   - teeSign: tee sign
+//   - teePuk: tee work public key
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - for storage miner use only
+func (c *ChainClient) CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1446,36 +1664,34 @@ func (c *ChainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CERTIDLESPACE, idleSignInfo, teeSignWithAcc, teeSign, teePuk)
+	call, err := types.NewCall(c.metadata, TX_FileBank_CertIdleSpace, spaceProofInfo, teeSignWithAcc, teeSign, teePuk)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
+		return blockhash, err
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -1493,30 +1709,30 @@ func (c *ChainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
+				return blockhash, errors.Wrap(err, "[Sign]")
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
 				c.SetChainState(false)
-				return txhash, err
+				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CERTIDLESPACE, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
 			c.SetChainState(false)
-			return txhash, err
+			return blockhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -1528,19 +1744,31 @@ func (c *ChainClient) CertIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSign
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_IdleSpaceCert(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk pattern.WorkerPublicKey) (string, error) {
+// ReplaceIdleSpace replaces idle files with service files
+//   - spaceProofInfo: space proof info
+//   - teeSignWithAcc: tee sign with account
+//   - teeSign: tee sign
+//   - teePuk: tee work public key
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - for storage miner use only
+func (c *ChainClient) ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1550,36 +1778,34 @@ func (c *ChainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeS
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_REPLACEIDLESPACE, idleSignInfo, teeSignWithAcc, teeSign, teePuk)
+	call, err := types.NewCall(c.metadata, TX_FileBank_ReplaceIdleSpace, spaceProofInfo, teeSignWithAcc, teeSign, teePuk)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
+		return blockhash, err
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -1597,30 +1823,30 @@ func (c *ChainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeS
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
+				return blockhash, errors.Wrap(err, "[Sign]")
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
 				c.SetChainState(false)
-				return txhash, err
+				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_REPLACEIDLESPACE, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
 			c.SetChainState(false)
-			return txhash, err
+			return blockhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -1632,19 +1858,29 @@ func (c *ChainClient) ReplaceIdleSpace(idleSignInfo pattern.SpaceProofInfo, teeS
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
+				blockhash = status.AsInBlock.Hex()
 				_, err = c.RetrieveEvent_FileBank_ReplaceIdleSpace(status.AsInBlock)
-				return txhash, err
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
 
-func (c *ChainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern.TagSigInfo) (string, error) {
+// CalculateReport report file tag calculation completed
+//   - teeSig: tee sign
+//   - tagSigInfo: tag sig info
+//
+// Return:
+//   - string: block hash
+//   - error: error message
+//
+// Note:
+//   - for storage miner use only
+func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1654,38 +1890,36 @@ func (c *ChainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern
 	}()
 
 	var (
-		txhash      string
+		blockhash   string
 		accountInfo types.AccountInfo
 	)
 
 	if !c.GetChainState() {
-		return txhash, pattern.ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, pattern.TX_FILEBANK_CALCULATEREPORT, teeSig, tagSigInfo)
+	call, err := types.NewCall(c.metadata, TX_FileBank_CalculateReport, teeSig, tagSigInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.SYSTEM, pattern.ACCOUNT, c.keyring.PublicKey)
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
-		c.SetChainState(false)
-		return txhash, err
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 	if !ok {
-		return txhash, pattern.ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -1701,9 +1935,9 @@ func (c *ChainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
 		c.SetChainState(false)
-		return txhash, err
+		return blockhash, err
 	}
 
 	<-c.txTicker.C
@@ -1711,22 +1945,23 @@ func (c *ChainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), pattern.ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
-				return txhash, errors.Wrap(err, "[Sign]")
+				return blockhash, errors.Wrap(err, "[Sign]")
 			}
+			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
 				c.SetChainState(false)
-				return txhash, err
+				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), pattern.TX_FILEBANK_CALCULATEREPORT, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
 			c.SetChainState(false)
-			return txhash, err
+			return blockhash, err
 		}
 	}
 	defer sub.Unsubscribe()
@@ -1738,15 +1973,14 @@ func (c *ChainClient) ReportTagCalculated(teeSig types.Bytes, tagSigInfo pattern
 		select {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
-				txhash = status.AsInBlock.Hex()
-				blockhash := status.AsInBlock
-				_, err = c.RetrieveEvent_FileBank_CalculateReport(blockhash)
-				return txhash, err
+				blockhash = status.AsInBlock.Hex()
+				_, err = c.RetrieveEvent_FileBank_CalculateReport(status.AsInBlock)
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return txhash, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return txhash, pattern.ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
