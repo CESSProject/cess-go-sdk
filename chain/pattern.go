@@ -72,13 +72,14 @@ const (
 	AuthorityList = "AuthorityList"
 
 	// Sminer
-	AllMiner          = "AllMiner"
-	MinerItems        = "MinerItems"
-	RewardMap         = "RewardMap"
-	Expenders         = "Expenders"
-	RestoralTarget    = "RestoralTarget"
-	StakingStartBlock = "StakingStartBlock"
-	CompleteSnapShot  = "CompleteSnapShot"
+	AllMiner             = "AllMiner"
+	CounterForMinerItems = "CounterForMinerItems"
+	MinerItems           = "MinerItems"
+	RewardMap            = "RewardMap"
+	Expenders            = "Expenders"
+	RestoralTarget       = "RestoralTarget"
+	StakingStartBlock    = "StakingStartBlock"
+	CompleteSnapShot     = "CompleteSnapShot"
 
 	// TEEWORKER
 	TEEWorkers       = "Workers"
@@ -146,17 +147,17 @@ const (
 	TX_Oss_Authorize       = Oss + DOT + "authorize"
 	TX_Oss_CancelAuthorize = Oss + DOT + "cancel_authorize"
 
-	// SMINER
-	TX_SMINER_REGISTER              = SMINER + DOT + "regnstk"
-	TX_SMINER_REGISTERASSIGNSTAKING = SMINER + DOT + "regnstk_assign_staking"
-	TX_SMINER_INCREASESTAKES        = SMINER + DOT + "increase_collateral"
-	TX_SMINER_UPDATEPEERID          = SMINER + DOT + "update_peer_id"
-	TX_SMINER_UPDATEINCOME          = SMINER + DOT + "update_beneficiary"
-	TX_SMINER_CLAIMREWARD           = SMINER + DOT + "receive_reward"
-	TX_SMINER_MINEREXITPREP         = SMINER + DOT + "miner_exit_prep"
-	TX_SMINER_WITHDRAW              = SMINER + DOT + "miner_withdraw"
-	TX_SMINER_REGISTERPOISKEY       = SMINER + DOT + "register_pois_key"
-	TX_SMINER_INCREASEDECSPACE      = SMINER + DOT + "increase_declaration_space"
+	// Sminer
+	TX_Sminer_Regnstk                  = Sminer + DOT + "regnstk"
+	TX_Sminer_RegnstkAssignStaking     = Sminer + DOT + "regnstk_assign_staking"
+	TX_Sminer_IncreaseCollateral       = Sminer + DOT + "increase_collateral"
+	TX_Sminer_UpdatePeerId             = Sminer + DOT + "update_peer_id"
+	TX_Sminer_UpdateBeneficiary        = Sminer + DOT + "update_beneficiary"
+	TX_Sminer_ReceiveReward            = Sminer + DOT + "receive_reward"
+	TX_Sminer_MinerExitPrep            = Sminer + DOT + "miner_exit_prep"
+	TX_Sminer_MinerWithdraw            = Sminer + DOT + "miner_withdraw"
+	TX_Sminer_RegisterPoisKey          = Sminer + DOT + "register_pois_key"
+	TX_Sminer_IncreaseDeclarationSpace = Sminer + DOT + "increase_declaration_space"
 
 	// FileBank
 	TX_FileBank_CreateBucket              = FileBank + DOT + "create_bucket"
@@ -341,17 +342,7 @@ type OssInfo struct {
 	Domain types.Bytes
 }
 
-// StorageHandler
-type UserSpaceInfo struct {
-	TotalSpace     types.U128
-	UsedSpace      types.U128
-	LockedSpace    types.U128
-	RemainingSpace types.U128
-	Start          types.U32
-	Deadline       types.U32
-	State          types.Bytes
-}
-
+// Sminer
 type MinerInfo struct {
 	BeneficiaryAccount types.AccountID
 	StakingAccount     types.AccountID
@@ -381,6 +372,17 @@ type RewardOrder struct {
 	OrderReward      types.U128
 	EachAmount       types.U128
 	LastReceiveBlock types.U32
+}
+
+// StorageHandler
+type UserSpaceInfo struct {
+	TotalSpace     types.U128
+	UsedSpace      types.U128
+	LockedSpace    types.U128
+	RemainingSpace types.U128
+	Start          types.U32
+	Deadline       types.U32
+	State          types.Bytes
 }
 
 type SegmentInfo struct {
