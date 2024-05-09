@@ -133,18 +133,18 @@ const (
 
 // Extrinsics
 const (
-	//AUDIT
+	// Audit
 	TX_Audit_SubmitIdleProof           = Audit + DOT + "submit_idle_proof"
 	TX_Audit_SubmitServiceProof        = Audit + DOT + "submit_service_proof"
 	TX_Audit_SubmitVerifyIdleResult    = Audit + DOT + "submit_verify_idle_result"
 	TX_Audit_SubmitVerifyServiceResult = Audit + DOT + "submit_verify_service_result"
 
-	// OSS
-	TX_OSS_REGISTER    = OSS + DOT + "register"
-	TX_OSS_UPDATE      = OSS + DOT + "update"
-	TX_OSS_DESTROY     = OSS + DOT + "destroy"
-	TX_OSS_AUTHORIZE   = OSS + DOT + "authorize"
-	TX_OSS_UNAUTHORIZE = OSS + DOT + "cancel_authorize"
+	// Oss
+	TX_Oss_Register        = Oss + DOT + "register"
+	TX_Oss_Update          = Oss + DOT + "update"
+	TX_Oss_Destroy         = Oss + DOT + "destroy"
+	TX_Oss_Authorize       = Oss + DOT + "authorize"
+	TX_Oss_CancelAuthorize = Oss + DOT + "cancel_authorize"
 
 	// SMINER
 	TX_SMINER_REGISTER              = SMINER + DOT + "regnstk"

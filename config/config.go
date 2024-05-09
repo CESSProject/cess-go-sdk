@@ -22,7 +22,7 @@ const (
 const (
 	MinBucketNameLength = 3
 	MaxBucketNameLength = 63
-	MaxDomainNameLength = 50
+	MaxDomainNameLength = 100
 )
 
 // default name

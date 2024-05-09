@@ -15,7 +15,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/CESSProject/cess-go-sdk/core/event"
 	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
@@ -57,14 +56,14 @@ func (c *ChainClient) DecodeEventNameFromBlockhash(blockhash types.Hash) ([]stri
 	return result, nil
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_ClaimRestoralOrder(blockhash types.Hash) (event.Event_ClaimRestoralOrder, error) {
-	var result event.Event_ClaimRestoralOrder
+func (c *ChainClient) RetrieveEvent_FileBank_ClaimRestoralOrder(blockhash types.Hash) (Event_ClaimRestoralOrder, error) {
+	var result Event_ClaimRestoralOrder
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankClaimRestoralOrder {
+		if e.Name == FileBankClaimRestoralOrder {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -102,17 +101,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_ClaimRestoralOrder(blockhash types.
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankClaimRestoralOrder)
+	return result, errors.Errorf("failed: no %s event found", FileBankClaimRestoralOrder)
 }
 
-func (c *ChainClient) RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) (event.Event_SubmitIdleProof, error) {
-	var result event.Event_SubmitIdleProof
+func (c *ChainClient) RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) (Event_SubmitIdleProof, error) {
+	var result Event_SubmitIdleProof
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.AuditSubmitIdleProof {
+		if e.Name == AuditSubmitIdleProof {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -150,17 +149,17 @@ func (c *ChainClient) RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) 
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.AuditSubmitIdleProof)
+	return result, errors.Errorf("failed: no %s event found", AuditSubmitIdleProof)
 }
 
-func (c *ChainClient) RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Hash) (event.Event_SubmitServiceProof, error) {
-	var result event.Event_SubmitServiceProof
+func (c *ChainClient) RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Hash) (Event_SubmitServiceProof, error) {
+	var result Event_SubmitServiceProof
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.AuditSubmitServiceProof {
+		if e.Name == AuditSubmitServiceProof {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -198,17 +197,17 @@ func (c *ChainClient) RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Has
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.AuditSubmitServiceProof)
+	return result, errors.Errorf("failed: no %s event found", AuditSubmitServiceProof)
 }
 
-func (c *ChainClient) RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types.Hash) (event.Event_SubmitIdleVerifyResult, error) {
-	var result event.Event_SubmitIdleVerifyResult
+func (c *ChainClient) RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types.Hash) (Event_SubmitIdleVerifyResult, error) {
+	var result Event_SubmitIdleVerifyResult
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.AuditSubmitIdleVerifyResult {
+		if e.Name == AuditSubmitIdleVerifyResult {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -245,17 +244,17 @@ func (c *ChainClient) RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.AuditSubmitIdleVerifyResult)
+	return result, errors.Errorf("failed: no %s event found", AuditSubmitIdleVerifyResult)
 }
 
-func (c *ChainClient) RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash types.Hash) (event.Event_SubmitServiceVerifyResult, error) {
-	var result event.Event_SubmitServiceVerifyResult
+func (c *ChainClient) RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash types.Hash) (Event_SubmitServiceVerifyResult, error) {
+	var result Event_SubmitServiceVerifyResult
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.AuditSubmitServiceVerifyResult {
+		if e.Name == AuditSubmitServiceVerifyResult {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -292,17 +291,17 @@ func (c *ChainClient) RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash ty
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.AuditSubmitServiceVerifyResult)
+	return result, errors.Errorf("failed: no %s event found", AuditSubmitServiceVerifyResult)
 }
 
-func (c *ChainClient) RetrieveEvent_Oss_OssUpdate(blockhash types.Hash) (event.Event_OssUpdate, error) {
-	var result event.Event_OssUpdate
+func (c *ChainClient) RetrieveEvent_Oss_OssUpdate(blockhash types.Hash) (Event_OssUpdate, error) {
+	var result Event_OssUpdate
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.OssOssUpdate {
+		if e.Name == OssOssUpdate {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -339,17 +338,17 @@ func (c *ChainClient) RetrieveEvent_Oss_OssUpdate(blockhash types.Hash) (event.E
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.OssOssUpdate)
+	return result, errors.Errorf("failed: no %s event found", OssOssUpdate)
 }
 
-func (c *ChainClient) RetrieveEvent_Oss_OssRegister(blockhash types.Hash) (event.Event_OssRegister, error) {
-	var result event.Event_OssRegister
+func (c *ChainClient) RetrieveEvent_Oss_OssRegister(blockhash types.Hash) (Event_OssRegister, error) {
+	var result Event_OssRegister
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.OssOssRegister {
+		if e.Name == OssOssRegister {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -386,17 +385,17 @@ func (c *ChainClient) RetrieveEvent_Oss_OssRegister(blockhash types.Hash) (event
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.OssOssRegister)
+	return result, errors.Errorf("failed: no %s event found", OssOssRegister)
 }
 
-func (c *ChainClient) RetrieveEvent_Oss_OssDestroy(blockhash types.Hash) (event.Event_OssDestroy, error) {
-	var result event.Event_OssDestroy
+func (c *ChainClient) RetrieveEvent_Oss_OssDestroy(blockhash types.Hash) (Event_OssDestroy, error) {
+	var result Event_OssDestroy
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.OssOssDestroy {
+		if e.Name == OssOssDestroy {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -433,17 +432,17 @@ func (c *ChainClient) RetrieveEvent_Oss_OssDestroy(blockhash types.Hash) (event.
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.OssOssDestroy)
+	return result, errors.Errorf("failed: no %s event found", OssOssDestroy)
 }
 
-func (c *ChainClient) RetrieveEvent_Oss_Authorize(blockhash types.Hash) (event.Event_Authorize, error) {
-	var result event.Event_Authorize
+func (c *ChainClient) RetrieveEvent_Oss_Authorize(blockhash types.Hash) (Event_Authorize, error) {
+	var result Event_Authorize
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.OssAuthorize {
+		if e.Name == OssAuthorize {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -480,17 +479,17 @@ func (c *ChainClient) RetrieveEvent_Oss_Authorize(blockhash types.Hash) (event.E
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.OssAuthorize)
+	return result, errors.Errorf("failed: no %s event found", OssAuthorize)
 }
 
-func (c *ChainClient) RetrieveEvent_Oss_CancelAuthorize(blockhash types.Hash) (event.Event_CancelAuthorize, error) {
-	var result event.Event_CancelAuthorize
+func (c *ChainClient) RetrieveEvent_Oss_CancelAuthorize(blockhash types.Hash) (Event_CancelAuthorize, error) {
+	var result Event_CancelAuthorize
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.OssCancelAuthorize {
+		if e.Name == OssCancelAuthorize {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -527,17 +526,17 @@ func (c *ChainClient) RetrieveEvent_Oss_CancelAuthorize(blockhash types.Hash) (e
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.OssCancelAuthorize)
+	return result, errors.Errorf("failed: no %s event found", OssCancelAuthorize)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_UploadDeclaration(blockhash types.Hash) (event.Event_UploadDeclaration, error) {
-	var result event.Event_UploadDeclaration
+func (c *ChainClient) RetrieveEvent_FileBank_UploadDeclaration(blockhash types.Hash) (Event_UploadDeclaration, error) {
+	var result Event_UploadDeclaration
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankUploadDeclaration {
+		if e.Name == FileBankUploadDeclaration {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -574,17 +573,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_UploadDeclaration(blockhash types.H
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankUploadDeclaration)
+	return result, errors.Errorf("failed: no %s event found", FileBankUploadDeclaration)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) (event.Event_CreateBucket, error) {
-	var result event.Event_CreateBucket
+func (c *ChainClient) RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) (Event_CreateBucket, error) {
+	var result Event_CreateBucket
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankCreateBucket {
+		if e.Name == FileBankCreateBucket {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -621,17 +620,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) 
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankCreateBucket)
+	return result, errors.Errorf("failed: no %s event found", FileBankCreateBucket)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_DeleteBucket(blockhash types.Hash) (event.Event_DeleteBucket, error) {
-	var result event.Event_DeleteBucket
+func (c *ChainClient) RetrieveEvent_FileBank_DeleteBucket(blockhash types.Hash) (Event_DeleteBucket, error) {
+	var result Event_DeleteBucket
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankDeleteBucket {
+		if e.Name == FileBankDeleteBucket {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -668,17 +667,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_DeleteBucket(blockhash types.Hash) 
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankDeleteBucket)
+	return result, errors.Errorf("failed: no %s event found", FileBankDeleteBucket)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_DeleteFile(blockhash types.Hash) (event.Event_DeleteFile, error) {
-	var result event.Event_DeleteFile
+func (c *ChainClient) RetrieveEvent_FileBank_DeleteFile(blockhash types.Hash) (Event_DeleteFile, error) {
+	var result Event_DeleteFile
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankDeleteFile {
+		if e.Name == FileBankDeleteFile {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -715,17 +714,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_DeleteFile(blockhash types.Hash) (e
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankDeleteFile)
+	return result, errors.Errorf("failed: no %s event found", FileBankDeleteFile)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_TransferReport(blockhash types.Hash) (event.Event_TransferReport, error) {
-	var result event.Event_TransferReport
+func (c *ChainClient) RetrieveEvent_FileBank_TransferReport(blockhash types.Hash) (Event_TransferReport, error) {
+	var result Event_TransferReport
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankTransferReport {
+		if e.Name == FileBankTransferReport {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -762,17 +761,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_TransferReport(blockhash types.Hash
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankTransferReport)
+	return result, errors.Errorf("failed: no %s event found", FileBankTransferReport)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_RecoveryCompleted(blockhash types.Hash) (event.Event_RecoveryCompleted, error) {
-	var result event.Event_RecoveryCompleted
+func (c *ChainClient) RetrieveEvent_FileBank_RecoveryCompleted(blockhash types.Hash) (Event_RecoveryCompleted, error) {
+	var result Event_RecoveryCompleted
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankRecoveryCompleted {
+		if e.Name == FileBankRecoveryCompleted {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -809,17 +808,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_RecoveryCompleted(blockhash types.H
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankRecoveryCompleted)
+	return result, errors.Errorf("failed: no %s event found", FileBankRecoveryCompleted)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_IdleSpaceCert(blockhash types.Hash) (event.Event_IdleSpaceCert, error) {
-	var result event.Event_IdleSpaceCert
+func (c *ChainClient) RetrieveEvent_FileBank_IdleSpaceCert(blockhash types.Hash) (Event_IdleSpaceCert, error) {
+	var result Event_IdleSpaceCert
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankIdleSpaceCert {
+		if e.Name == FileBankIdleSpaceCert {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -856,17 +855,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_IdleSpaceCert(blockhash types.Hash)
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankIdleSpaceCert)
+	return result, errors.Errorf("failed: no %s event found", FileBankIdleSpaceCert)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Hash) (event.Event_ReplaceIdleSpace, error) {
-	var result event.Event_ReplaceIdleSpace
+func (c *ChainClient) RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Hash) (Event_ReplaceIdleSpace, error) {
+	var result Event_ReplaceIdleSpace
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankReplaceIdleSpace {
+		if e.Name == FileBankReplaceIdleSpace {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -903,17 +902,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Ha
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankReplaceIdleSpace)
+	return result, errors.Errorf("failed: no %s event found", FileBankReplaceIdleSpace)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_CalculateReport(blockhash types.Hash) (event.Event_CalculateReport, error) {
-	var result event.Event_CalculateReport
+func (c *ChainClient) RetrieveEvent_FileBank_CalculateReport(blockhash types.Hash) (Event_CalculateReport, error) {
+	var result Event_CalculateReport
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankCalculateReport {
+		if e.Name == FileBankCalculateReport {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -950,17 +949,17 @@ func (c *ChainClient) RetrieveEvent_FileBank_CalculateReport(blockhash types.Has
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankCalculateReport)
+	return result, errors.Errorf("failed: no %s event found", FileBankCalculateReport)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event.Event_UpdatePeerId, error) {
-	var result event.Event_UpdatePeerId
+func (c *ChainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (Event_UpdatePeerId, error) {
+	var result Event_UpdatePeerId
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerUpdatePeerId {
+		if e.Name == SminerUpdatePeerId {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -997,17 +996,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (event
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerUpdatePeerId)
+	return result, errors.Errorf("failed: no %s event found", SminerUpdatePeerId)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (event.Event_UpdateBeneficiary, error) {
-	var result event.Event_UpdateBeneficiary
+func (c *ChainClient) RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (Event_UpdateBeneficiary, error) {
+	var result Event_UpdateBeneficiary
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerUpdateBeneficiary {
+		if e.Name == SminerUpdateBeneficiary {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1044,17 +1043,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Has
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerUpdateBeneficiary)
+	return result, errors.Errorf("failed: no %s event found", SminerUpdateBeneficiary)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_Registered(blockhash types.Hash) (event.Event_Registered, error) {
-	var result event.Event_Registered
+func (c *ChainClient) RetrieveEvent_Sminer_Registered(blockhash types.Hash) (Event_Registered, error) {
+	var result Event_Registered
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerRegistered {
+		if e.Name == SminerRegistered {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1091,17 +1090,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_Registered(blockhash types.Hash) (eve
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerRegistered)
+	return result, errors.Errorf("failed: no %s event found", SminerRegistered)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (event.Event_RegisterPoisKey, error) {
-	var result event.Event_RegisterPoisKey
+func (c *ChainClient) RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (Event_RegisterPoisKey, error) {
+	var result Event_RegisterPoisKey
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerRegisterPoisKey {
+		if e.Name == SminerRegisterPoisKey {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1138,17 +1137,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash)
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerRegisterPoisKey)
+	return result, errors.Errorf("failed: no %s event found", SminerRegisterPoisKey)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (event.Event_MinerExitPrep, error) {
-	var result event.Event_MinerExitPrep
+func (c *ChainClient) RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (Event_MinerExitPrep, error) {
+	var result Event_MinerExitPrep
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerMinerExitPrep {
+		if e.Name == SminerMinerExitPrep {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1185,17 +1184,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerMinerExitPrep)
+	return result, errors.Errorf("failed: no %s event found", SminerMinerExitPrep)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_IncreaseCollateral(blockhash types.Hash) (event.Event_IncreaseCollateral, error) {
-	var result event.Event_IncreaseCollateral
+func (c *ChainClient) RetrieveEvent_Sminer_IncreaseCollateral(blockhash types.Hash) (Event_IncreaseCollateral, error) {
+	var result Event_IncreaseCollateral
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerIncreaseCollateral {
+		if e.Name == SminerIncreaseCollateral {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1232,17 +1231,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_IncreaseCollateral(blockhash types.Ha
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerIncreaseCollateral)
+	return result, errors.Errorf("failed: no %s event found", SminerIncreaseCollateral)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_IncreaseDeclarationSpace(blockhash types.Hash) (event.Event_IncreaseDeclarationSpace, error) {
-	var result event.Event_IncreaseDeclarationSpace
+func (c *ChainClient) RetrieveEvent_Sminer_IncreaseDeclarationSpace(blockhash types.Hash) (Event_IncreaseDeclarationSpace, error) {
+	var result Event_IncreaseDeclarationSpace
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerIncreaseDeclarationSpace {
+		if e.Name == SminerIncreaseDeclarationSpace {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1279,17 +1278,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_IncreaseDeclarationSpace(blockhash ty
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerIncreaseDeclarationSpace)
+	return result, errors.Errorf("failed: no %s event found", SminerIncreaseDeclarationSpace)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (event.Event_Receive, error) {
-	var result event.Event_Receive
+func (c *ChainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (Event_Receive, error) {
+	var result Event_Receive
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerReceive {
+		if e.Name == SminerReceive {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1326,17 +1325,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (event.
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerReceive)
+	return result, errors.Errorf("failed: no %s event found", SminerReceive)
 }
 
-func (c *ChainClient) RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (event.Event_Withdraw, error) {
-	var result event.Event_Withdraw
+func (c *ChainClient) RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (Event_Withdraw, error) {
+	var result Event_Withdraw
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.SminerWithdraw {
+		if e.Name == SminerWithdraw {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1373,17 +1372,17 @@ func (c *ChainClient) RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (event
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.SminerWithdraw)
+	return result, errors.Errorf("failed: no %s event found", SminerWithdraw)
 }
 
-func (c *ChainClient) RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash) (event.Event_BuySpace, error) {
-	var result event.Event_BuySpace
+func (c *ChainClient) RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash) (Event_BuySpace, error) {
+	var result Event_BuySpace
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.StorageHandlerBuySpace {
+		if e.Name == StorageHandlerBuySpace {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1420,17 +1419,17 @@ func (c *ChainClient) RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.StorageHandlerBuySpace)
+	return result, errors.Errorf("failed: no %s event found", StorageHandlerBuySpace)
 }
 
-func (c *ChainClient) RetrieveEvent_StorageHandler_ExpansionSpace(blockhash types.Hash) (event.Event_ExpansionSpace, error) {
-	var result event.Event_ExpansionSpace
+func (c *ChainClient) RetrieveEvent_StorageHandler_ExpansionSpace(blockhash types.Hash) (Event_ExpansionSpace, error) {
+	var result Event_ExpansionSpace
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.StorageHandlerExpansionSpace {
+		if e.Name == StorageHandlerExpansionSpace {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1467,17 +1466,17 @@ func (c *ChainClient) RetrieveEvent_StorageHandler_ExpansionSpace(blockhash type
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.StorageHandlerExpansionSpace)
+	return result, errors.Errorf("failed: no %s event found", StorageHandlerExpansionSpace)
 }
 
-func (c *ChainClient) RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.Hash) (event.Event_RenewalSpace, error) {
-	var result event.Event_RenewalSpace
+func (c *ChainClient) RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.Hash) (Event_RenewalSpace, error) {
+	var result Event_RenewalSpace
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.StorageHandlerRenewalSpace {
+		if e.Name == StorageHandlerRenewalSpace {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1514,7 +1513,7 @@ func (c *ChainClient) RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.StorageHandlerRenewalSpace)
+	return result, errors.Errorf("failed: no %s event found", StorageHandlerRenewalSpace)
 }
 
 func (c *ChainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (types.EventBalancesTransfer, error) {
@@ -1524,7 +1523,7 @@ func (c *ChainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (typ
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.BalanceTransfer {
+		if e.Name == BalanceTransfer {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1561,17 +1560,17 @@ func (c *ChainClient) RetrieveEvent_Balances_Transfer(blockhash types.Hash) (typ
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.BalanceTransfer)
+	return result, errors.Errorf("failed: no %s event found", BalanceTransfer)
 }
 
-func (c *ChainClient) RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Hash) (event.Event_GenerateRestoralOrder, error) {
-	var result event.Event_GenerateRestoralOrder
+func (c *ChainClient) RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Hash) (Event_GenerateRestoralOrder, error) {
+	var result Event_GenerateRestoralOrder
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankGenerateRestoralOrder {
+		if e.Name == FileBankGenerateRestoralOrder {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1608,19 +1607,19 @@ func (c *ChainClient) RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Ha
 			}
 		}
 	}
-	return result, errors.Errorf("failed: no %s event found", event.FileBankGenerateRestoralOrder)
+	return result, errors.Errorf("failed: no %s event found", FileBankGenerateRestoralOrder)
 }
 
-func (c *ChainClient) RetrieveAllEvent_FileBank_UploadDeclaration(blockhash types.Hash) ([]event.AllUploadDeclarationEvent, error) {
-	var result = make([]event.AllUploadDeclarationEvent, 0)
+func (c *ChainClient) RetrieveAllEvent_FileBank_UploadDeclaration(blockhash types.Hash) ([]AllUploadDeclarationEvent, error) {
+	var result = make([]AllUploadDeclarationEvent, 0)
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 
 	for _, e := range events {
-		if e.Name == event.FileBankUploadDeclaration {
-			var ele event.AllUploadDeclarationEvent
+		if e.Name == FileBankUploadDeclaration {
+			var ele AllUploadDeclarationEvent
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1694,7 +1693,7 @@ func (c *ChainClient) RetrieveAllEvent_FileBank_StorageCompleted(blockhash types
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankStorageCompleted {
+		if e.Name == FileBankStorageCompleted {
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1726,15 +1725,15 @@ func (c *ChainClient) RetrieveAllEvent_FileBank_StorageCompleted(blockhash types
 	return result, nil
 }
 
-func (c *ChainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]event.AllDeleteFileEvent, error) {
-	var result = make([]event.AllDeleteFileEvent, 0)
+func (c *ChainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]AllDeleteFileEvent, error) {
+	var result = make([]AllDeleteFileEvent, 0)
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 	for _, e := range events {
-		if e.Name == event.FileBankDeleteFile {
-			var ele event.AllDeleteFileEvent
+		if e.Name == FileBankDeleteFile {
+			var ele AllDeleteFileEvent
 			for _, v := range e.Fields {
 				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
 					vf := reflect.ValueOf(v.Value)
@@ -1851,11 +1850,11 @@ func (c *ChainClient) RetrieveAllEventFromBlock(blockhash types.Hash) ([]string,
 	return systemEvents, extrinsicsEvents, nil
 }
 
-func (c *ChainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, string, string, string, string, int64, error) {
+func (c *ChainClient) RetrieveBlock(blocknumber uint64) ([]string, []ExtrinsicsInfo, []TransferInfo, string, string, string, string, int64, error) {
 	var timeUnixMilli int64
 	var systemEvents = make([]string, 0)
-	var extrinsicsInfo = make([]event.ExtrinsicsInfo, 0)
-	var transferInfo = make([]event.TransferInfo, 0)
+	var extrinsicsInfo = make([]ExtrinsicsInfo, 0)
+	var transferInfo = make([]TransferInfo, 0)
 	blockhash, err := c.GetSubstrateAPI().RPC.Chain.GetBlockHash(blocknumber)
 	if err != nil {
 		return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
@@ -1887,7 +1886,7 @@ func (c *ChainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 						return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
 					}
 					timeUnixMilli = timestamp.Int64()
-					extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+					extrinsicsInfo = append(extrinsicsInfo, ExtrinsicsInfo{
 						Name:   name,
 						Events: []string{e.Name},
 						Result: true,
@@ -1895,13 +1894,13 @@ func (c *ChainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 					continue
 				}
 				eventsBuf = append(eventsBuf, e.Name)
-				if e.Name == event.TransactionPaymentTransactionFeePaid ||
-					e.Name == event.EvmAccountMappingTransactionFeePaid {
+				if e.Name == TransactionPaymentTransactionFeePaid ||
+					e.Name == EvmAccountMappingTransactionFeePaid {
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
-				} else if e.Name == event.BalancesTransfer {
+				} else if e.Name == BalancesTransfer {
 					//parsedBalancesTransfer = false
 					from, to, amount, _ := ParseTransferInfoFromEvent(e)
-					transferInfo = append(transferInfo, event.TransferInfo{
+					transferInfo = append(transferInfo, TransferInfo{
 						From:   from,
 						To:     to,
 						Amount: amount,
@@ -1914,9 +1913,9 @@ func (c *ChainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 					// if len(transfers) > 0 {
 					// 	transferInfo = append(transferInfo, transfers...)
 					// }
-				} else if e.Name == event.SystemExtrinsicSuccess {
+				} else if e.Name == SystemExtrinsicSuccess {
 					if len(eventsBuf) > 0 {
-						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+						extrinsicsInfo = append(extrinsicsInfo, ExtrinsicsInfo{
 							Name:    name,
 							Signer:  signer,
 							FeePaid: fee,
@@ -1925,9 +1924,9 @@ func (c *ChainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 						})
 						eventsBuf = make([]string, 0)
 					}
-				} else if e.Name == event.SystemExtrinsicFailed {
+				} else if e.Name == SystemExtrinsicFailed {
 					if len(eventsBuf) > 0 {
-						extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+						extrinsicsInfo = append(extrinsicsInfo, ExtrinsicsInfo{
 							Name:    name,
 							Signer:  signer,
 							FeePaid: fee,
@@ -1945,11 +1944,11 @@ func (c *ChainClient) RetrieveBlock(blocknumber uint64) ([]string, []event.Extri
 	return systemEvents, extrinsicsInfo, transferInfo, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), timeUnixMilli, nil
 }
 
-func (c *ChainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event.ExtrinsicsInfo, []event.TransferInfo, []string, []string, string, string, string, string, string, int64, error) {
+func (c *ChainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []ExtrinsicsInfo, []TransferInfo, []string, []string, string, string, string, string, string, int64, error) {
 	var timeUnixMilli int64
 	var systemEvents = make([]string, 0)
-	var extrinsicsInfo = make([]event.ExtrinsicsInfo, 0)
-	var transferInfo = make([]event.TransferInfo, 0)
+	var extrinsicsInfo = make([]ExtrinsicsInfo, 0)
+	var transferInfo = make([]TransferInfo, 0)
 	var sminerRegInfo = make([]string, 0)
 	var newAccounts = make([]string, 0)
 	var allGasFee = new(big.Int)
@@ -1982,19 +1981,19 @@ func (c *ChainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 	var fee string
 	var ok bool
 	var name string
-	var extInfo event.ExtrinsicsInfo
+	var extInfo ExtrinsicsInfo
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
 			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
 				if name == ExtName_Timestamp_set {
-					extInfo = event.ExtrinsicsInfo{}
+					extInfo = ExtrinsicsInfo{}
 					timeDecoder := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args))
 					timestamp, err := timeDecoder.DecodeUintCompact()
 					if err != nil {
 						return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, "", "", "", "", "", 0, err
 					}
 					timeUnixMilli = timestamp.Int64()
-					extrinsicsInfo = append(extrinsicsInfo, event.ExtrinsicsInfo{
+					extrinsicsInfo = append(extrinsicsInfo, ExtrinsicsInfo{
 						Name:   name,
 						Events: []string{e.Name},
 						Result: true,
@@ -2002,16 +2001,16 @@ func (c *ChainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 					continue
 				}
 				eventsBuf = append(eventsBuf, e.Name)
-				if e.Name == event.TransactionPaymentTransactionFeePaid ||
-					e.Name == event.EvmAccountMappingTransactionFeePaid {
+				if e.Name == TransactionPaymentTransactionFeePaid ||
+					e.Name == EvmAccountMappingTransactionFeePaid {
 					signer, fee, _ = parseSignerAndFeePaidFromEvent(e)
 					tmp, ok := new(big.Int).SetString(fee, 10)
 					if ok {
 						allGasFee = allGasFee.Add(allGasFee, tmp)
 					}
-				} else if e.Name == event.BalancesTransfer {
+				} else if e.Name == BalancesTransfer {
 					from, to, amount, _ := ParseTransferInfoFromEvent(e)
-					transferInfo = append(transferInfo, event.TransferInfo{
+					transferInfo = append(transferInfo, TransferInfo{
 						ExtrinsicName: name,
 						From:          from,
 						To:            to,
@@ -2020,17 +2019,17 @@ func (c *ChainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 					})
 					// extInfo.From = from
 					// extInfo.To = to
-				} else if e.Name == event.SminerRegistered {
+				} else if e.Name == SminerRegistered {
 					acc, err := ParseAccountFromEvent(e)
 					if err == nil {
 						sminerRegInfo = append(sminerRegInfo, acc)
 					}
-				} else if e.Name == event.SystemNewAccount {
+				} else if e.Name == SystemNewAccount {
 					acc, err := ParseAccountFromEvent(e)
 					if err == nil {
 						newAccounts = append(newAccounts, acc)
 					}
-				} else if e.Name == event.SystemExtrinsicSuccess {
+				} else if e.Name == SystemExtrinsicSuccess {
 					if len(eventsBuf) > 0 {
 						extInfo.Name = name
 						extInfo.Signer = signer
@@ -2040,8 +2039,8 @@ func (c *ChainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 						extrinsicsInfo = append(extrinsicsInfo, extInfo)
 						eventsBuf = make([]string, 0)
 					}
-					extInfo = event.ExtrinsicsInfo{}
-				} else if e.Name == event.SystemExtrinsicFailed {
+					extInfo = ExtrinsicsInfo{}
+				} else if e.Name == SystemExtrinsicFailed {
 					if len(eventsBuf) > 0 {
 						extInfo.Name = name
 						extInfo.Signer = signer
@@ -2051,7 +2050,7 @@ func (c *ChainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 						extrinsicsInfo = append(extrinsicsInfo, extInfo)
 						eventsBuf = make([]string, 0)
 					}
-					extInfo = event.ExtrinsicsInfo{}
+					extInfo = ExtrinsicsInfo{}
 				}
 			}
 		} else {
@@ -2084,15 +2083,15 @@ func (c *ChainClient) RetrieveBlockAndAll(blocknumber uint64) ([]string, []event
 	return systemEvents, extrinsicsInfo, transferInfo, sminerRegInfo, newAccounts, blockhash.Hex(), block.Block.Header.ParentHash.Hex(), block.Block.Header.ExtrinsicsRoot.Hex(), block.Block.Header.StateRoot.Hex(), allGasFee.String(), timeUnixMilli, nil
 }
 
-func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error) {
+func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 	var (
 		ok             bool
 		name           string
 		err            error
 		extBytes       []byte
 		extrinsicIndex int
-		blockdata      event.BlockData
-		extInfo        event.ExtrinsicsInfo
+		blockdata      BlockData
+		extInfo        ExtrinsicsInfo
 		allGasFee      = new(big.Int)
 	)
 
@@ -2112,7 +2111,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 	blockdata.ExtHash = block.Block.Header.ExtrinsicsRoot.Hex()
 	blockdata.StHash = block.Block.Header.StateRoot.Hex()
 
-	blockdata.Extrinsics = make([]event.ExtrinsicsInfo, len(block.Block.Extrinsics))
+	blockdata.Extrinsics = make([]ExtrinsicsInfo, len(block.Block.Extrinsics))
 	for k, v := range block.Block.Extrinsics {
 		extBytes, err = codec.Encode(v)
 		if err != nil {
@@ -2142,7 +2141,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					return blockdata, errors.New("The number of extrinsics hashes does not equal the number of extrinsics")
 				}
 				if name == ExtName_Timestamp_set {
-					extInfo = event.ExtrinsicsInfo{}
+					extInfo = ExtrinsicsInfo{}
 					timestamp, err := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args)).DecodeUintCompact()
 					if err != nil {
 						return blockdata, err
@@ -2155,8 +2154,8 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					continue
 				}
 				eventsBuf = append(eventsBuf, e.Name)
-				if e.Name == event.TransactionPaymentTransactionFeePaid ||
-					e.Name == event.EvmAccountMappingTransactionFeePaid {
+				if e.Name == TransactionPaymentTransactionFeePaid ||
+					e.Name == EvmAccountMappingTransactionFeePaid {
 					signer, fee, err = parseSignerAndFeePaidFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -2165,20 +2164,20 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					if ok {
 						allGasFee = allGasFee.Add(allGasFee, tmp)
 					}
-				} else if e.Name == event.BalancesTransfer {
+				} else if e.Name == BalancesTransfer {
 					from, to, amount, err := ParseTransferInfoFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
 					if to == c.treasuryAcc {
-						blockdata.Punishment = append(blockdata.Punishment, event.Punishment{
+						blockdata.Punishment = append(blockdata.Punishment, Punishment{
 							ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 							From:          from,
 							To:            to,
 							Amount:        amount,
 						})
 					}
-					blockdata.TransferInfo = append(blockdata.TransferInfo, event.TransferInfo{
+					blockdata.TransferInfo = append(blockdata.TransferInfo, TransferInfo{
 						ExtrinsicName: name,
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						From:          from,
@@ -2186,22 +2185,22 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 						Amount:        amount,
 						Result:        true,
 					})
-				} else if e.Name == event.SminerRegistered {
+				} else if e.Name == SminerRegistered {
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.MinerReg = append(blockdata.MinerReg, event.MinerRegInfo{
+					blockdata.MinerReg = append(blockdata.MinerReg, MinerRegInfo{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Account:       acc,
 					})
-				} else if e.Name == event.SystemNewAccount {
+				} else if e.Name == SystemNewAccount {
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
 					blockdata.NewAccounts = append(blockdata.NewAccounts, acc)
-				} else if e.Name == event.FileBankUploadDeclaration {
+				} else if e.Name == FileBankUploadDeclaration {
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -2210,12 +2209,12 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.UploadDecInfo = append(blockdata.UploadDecInfo, event.UploadDecInfo{
+					blockdata.UploadDecInfo = append(blockdata.UploadDecInfo, UploadDecInfo{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Owner:         acc,
 						Fid:           fid,
 					})
-				} else if e.Name == event.FileBankDeleteFile {
+				} else if e.Name == FileBankDeleteFile {
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -2224,12 +2223,12 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo, event.DeleteFileInfo{
+					blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo, DeleteFileInfo{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Owner:         acc,
 						Fid:           fid,
 					})
-				} else if e.Name == event.FileBankCreateBucket {
+				} else if e.Name == FileBankCreateBucket {
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -2238,12 +2237,12 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo, event.CreateBucketInfo{
+					blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo, CreateBucketInfo{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Owner:         acc,
 						BucketName:    bucketname,
 					})
-				} else if e.Name == event.FileBankDeleteBucket {
+				} else if e.Name == FileBankDeleteBucket {
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -2252,50 +2251,50 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo, event.DeleteBucketInfo{
+					blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo, DeleteBucketInfo{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Owner:         acc,
 						BucketName:    bucketname,
 					})
-				} else if e.Name == event.AuditSubmitIdleProof {
+				} else if e.Name == AuditSubmitIdleProof {
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.SubmitIdleProve = append(blockdata.SubmitIdleProve, event.SubmitIdleProve{
+					blockdata.SubmitIdleProve = append(blockdata.SubmitIdleProve, SubmitIdleProve{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Miner:         acc,
 					})
-				} else if e.Name == event.AuditSubmitServiceProof {
+				} else if e.Name == AuditSubmitServiceProof {
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.SubmitServiceProve = append(blockdata.SubmitServiceProve, event.SubmitServiceProve{
+					blockdata.SubmitServiceProve = append(blockdata.SubmitServiceProve, SubmitServiceProve{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Miner:         acc,
 					})
-				} else if e.Name == event.AuditSubmitIdleVerifyResult {
+				} else if e.Name == AuditSubmitIdleVerifyResult {
 					acc, result, err := ParseChallResultFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.SubmitIdleResult = append(blockdata.SubmitIdleResult, event.SubmitIdleResult{
+					blockdata.SubmitIdleResult = append(blockdata.SubmitIdleResult, SubmitIdleResult{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Miner:         acc,
 						Result:        result,
 					})
-				} else if e.Name == event.AuditSubmitServiceVerifyResult {
+				} else if e.Name == AuditSubmitServiceVerifyResult {
 					acc, result, err := ParseChallResultFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
-					blockdata.SubmitServiceResult = append(blockdata.SubmitServiceResult, event.SubmitServiceResult{
+					blockdata.SubmitServiceResult = append(blockdata.SubmitServiceResult, SubmitServiceResult{
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Miner:         acc,
 						Result:        result,
 					})
-				} else if e.Name == event.SystemExtrinsicSuccess {
+				} else if e.Name == SystemExtrinsicSuccess {
 					extInfo.Events = append(make([]string, 0), eventsBuf...)
 					extInfo.Name = name
 					extInfo.Signer = signer
@@ -2304,9 +2303,9 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					extInfo.Hash = blockdata.Extrinsics[extrinsicIndex].Hash
 					blockdata.Extrinsics[extrinsicIndex] = extInfo
 					eventsBuf = make([]string, 0)
-					extInfo = event.ExtrinsicsInfo{}
+					extInfo = ExtrinsicsInfo{}
 					extrinsicIndex++
-				} else if e.Name == event.SystemExtrinsicFailed {
+				} else if e.Name == SystemExtrinsicFailed {
 					for m := 0; m < len(blockdata.UploadDecInfo); m++ {
 						if blockdata.UploadDecInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
 							if len(blockdata.UploadDecInfo) == 1 {
@@ -2415,16 +2414,16 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (event.BlockData, error
 					extInfo.Hash = blockdata.Extrinsics[extrinsicIndex].Hash
 					blockdata.Extrinsics[extrinsicIndex] = extInfo
 					eventsBuf = make([]string, 0)
-					extInfo = event.ExtrinsicsInfo{}
+					extInfo = ExtrinsicsInfo{}
 					extrinsicIndex++
 				}
 			}
 		} else {
 			blockdata.SysEvents = append(blockdata.SysEvents, e.Name)
-			if e.Name == event.StakingStakersElected {
+			if e.Name == StakingStakersElected {
 				blockdata.IsNewEra = true
 			}
-			if e.Name == event.AuditGenerateChallenge {
+			if e.Name == AuditGenerateChallenge {
 				acc, err := ParseAccountFromEvent(e)
 				if err != nil {
 					return blockdata, err
@@ -2441,9 +2440,9 @@ func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
 	if e == nil {
 		return "", "", errors.New("event is nil")
 	}
-	if e.Name != event.TransactionPaymentTransactionFeePaid &&
-		e.Name != event.EvmAccountMappingTransactionFeePaid {
-		return "", "", fmt.Errorf("event is not %s or %s", event.TransactionPaymentTransactionFeePaid, event.EvmAccountMappingTransactionFeePaid)
+	if e.Name != TransactionPaymentTransactionFeePaid &&
+		e.Name != EvmAccountMappingTransactionFeePaid {
+		return "", "", fmt.Errorf("event is not %s or %s", TransactionPaymentTransactionFeePaid, EvmAccountMappingTransactionFeePaid)
 	}
 	var signAcc string
 	var fee string
@@ -2561,8 +2560,8 @@ func ExplicitBigInt(v reflect.Value, depth int) string {
 	return fee
 }
 
-func (c *ChainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]event.TransferInfo, error) {
-	var transferEvents = make([]event.TransferInfo, 0)
+func (c *ChainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]TransferInfo, error) {
+	var transferEvents = make([]TransferInfo, 0)
 	var data types.StorageDataRaw
 	ok, err := c.GetSubstrateAPI().RPC.State.GetStorage(c.GetKeyEvents(), &data, blockhash)
 	if err != nil {
@@ -2571,7 +2570,7 @@ func (c *ChainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]event.
 	var from string
 	var to string
 	if ok {
-		events := event.EventRecords{}
+		events := EventRecords{}
 		err = types.EventRecordsRaw(data).DecodeEventRecords(c.GetMetadata(), &events)
 		if err != nil {
 			return transferEvents, err
@@ -2579,7 +2578,7 @@ func (c *ChainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]event.
 		for _, e := range events.Balances_Transfer {
 			from, _ = utils.EncodePublicKeyAsCessAccount(e.From[:])
 			to, _ = utils.EncodePublicKeyAsCessAccount(e.To[:])
-			transferEvents = append(transferEvents, event.TransferInfo{
+			transferEvents = append(transferEvents, TransferInfo{
 				From:   from,
 				To:     to,
 				Amount: e.Value.String(),
@@ -2594,8 +2593,8 @@ func ParseTransferInfoFromEvent(e *parser.Event) (string, string, string, error)
 	if e == nil {
 		return "", "", "", errors.New("event is nil")
 	}
-	if e.Name != event.BalancesTransfer {
-		return "", "", "", fmt.Errorf("event is not %s", event.BalancesTransfer)
+	if e.Name != BalancesTransfer {
+		return "", "", "", fmt.Errorf("event is not %s", BalancesTransfer)
 	}
 	var from string
 	var to string
