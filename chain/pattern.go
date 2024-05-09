@@ -67,11 +67,11 @@ const (
 	CountedServiceFailed = "CountedServiceFailed"
 	VerifySlip           = "VerifySlip"
 
-	// OSS
-	// OSS
+	// Oss
+	// Oss
 	AuthorityList = "AuthorityList"
 
-	// SMINER
+	// Sminer
 	AllMiner          = "AllMiner"
 	MinerItems        = "MinerItems"
 	RewardMap         = "RewardMap"
@@ -86,7 +86,7 @@ const (
 	TEEEndpoints     = "Endpoints"
 	TEEWorkerAddedAt = "WorkerAddedAt"
 
-	// FILEBANK
+	// FileBank
 	File                = "File"
 	Bucket              = "Bucket"
 	DealMap             = "DealMap"
@@ -96,7 +96,7 @@ const (
 	UserBucketList      = "UserBucketList"
 	UserHoldFileList    = "UserHoldFileList"
 
-	// STAKING
+	// Staking
 	COUNTERFORVALIDATORS = "CounterForValidators"
 	CounterForNominators = "CounterForNominators"
 	ErasTotalStake       = "ErasTotalStake"
@@ -109,7 +109,7 @@ const (
 	ErasValidatorReward  = "ErasValidatorReward"
 	ValidatorCount       = "ValidatorCount"
 
-	// STORAGE_HANDLER
+	// StorageHandler
 	UserOwnedSpace    = "UserOwnedSpace"
 	UnitPrice         = "UnitPrice"
 	TotalIdleSpace    = "TotalIdleSpace"
@@ -120,7 +120,7 @@ const (
 	TotalIssuance    = "TotalIssuance"
 	InactiveIssuance = "InactiveIssuance"
 
-	// SYSTEM
+	// System
 	Account = "Account"
 	Events  = "Events"
 
@@ -172,10 +172,10 @@ const (
 	TX_FileBank_ReplaceIdleSpace          = FileBank + DOT + "replace_idle_space"
 	TX_FileBank_CalculateReport           = FileBank + DOT + "calculate_report"
 
-	// STORAGE_HANDLER
-	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
-	TX_STORAGE_EXPANSIONSPACE = STORAGEHANDLER + DOT + "expansion_space"
-	TX_STORAGE_RENEWALSPACE   = STORAGEHANDLER + DOT + "renewal_space"
+	// StorageHandler
+	TX_StorageHandler_BuySpace       = StorageHandler + DOT + "buy_space"
+	TX_StorageHandler_ExpansionSpace = StorageHandler + DOT + "expansion_space"
+	TX_StorageHandler_RenewalSpace   = StorageHandler + DOT + "renewal_space"
 
 	// BALANCES
 	TX_Balances_Transfer = "Balances" + DOT + "transfer"
@@ -341,6 +341,17 @@ type OssInfo struct {
 	Domain types.Bytes
 }
 
+// StorageHandler
+type UserSpaceInfo struct {
+	TotalSpace     types.U128
+	UsedSpace      types.U128
+	LockedSpace    types.U128
+	RemainingSpace types.U128
+	Start          types.U32
+	Deadline       types.U32
+	State          types.Bytes
+}
+
 type MinerInfo struct {
 	BeneficiaryAccount types.AccountID
 	StakingAccount     types.AccountID
@@ -398,16 +409,6 @@ type SegmentList struct {
 type CompleteInfo struct {
 	Index types.U8
 	Miner types.AccountID
-}
-
-type UserSpaceInfo struct {
-	TotalSpace     types.U128
-	UsedSpace      types.U128
-	LockedSpace    types.U128
-	RemainingSpace types.U128
-	Start          types.U32
-	Deadline       types.U32
-	State          types.Bytes
 }
 
 type ProveInfo struct {

@@ -15,7 +15,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
@@ -1662,13 +1661,13 @@ func (c *ChainClient) RetrieveAllEvent_FileBank_UploadDeclaration(blockhash type
 						} else if strings.Contains(v.Name, "deal_hash") {
 							temp := strings.Split(allValue, "] ")
 							for _, v := range temp {
-								if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
+								if strings.Count(v, " ") == (FileHashLen - 1) {
 									subValue := strings.TrimPrefix(v, "[")
 									ids := strings.Split(subValue, " ")
-									if len(ids) != pattern.FileHashLen {
+									if len(ids) != FileHashLen {
 										continue
 									}
-									var fhash pattern.FileHash
+									var fhash FileHash
 									for kk, vv := range ids {
 										intv, _ := strconv.Atoi(vv)
 										fhash[kk] = types.U8(intv)
@@ -1702,13 +1701,13 @@ func (c *ChainClient) RetrieveAllEvent_FileBank_StorageCompleted(blockhash types
 						if strings.Contains(v.Name, "file_hash") {
 							temp := strings.Split(allValue, "] ")
 							for _, v := range temp {
-								if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
+								if strings.Count(v, " ") == (FileHashLen - 1) {
 									subValue := strings.TrimPrefix(v, "[")
 									ids := strings.Split(subValue, " ")
-									if len(ids) != pattern.FileHashLen {
+									if len(ids) != FileHashLen {
 										continue
 									}
-									var fhash pattern.FileHash
+									var fhash FileHash
 									for kk, vv := range ids {
 										intv, _ := strconv.Atoi(vv)
 										fhash[kk] = types.U8(intv)
@@ -1778,13 +1777,13 @@ func (c *ChainClient) RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash)
 							allValue := fmt.Sprintf("%v", vf.Index(0))
 							temp := strings.Split(allValue, "] ")
 							for _, v := range temp {
-								if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
+								if strings.Count(v, " ") == (FileHashLen - 1) {
 									subValue := strings.TrimPrefix(v, "[")
 									ids := strings.Split(subValue, " ")
-									if len(ids) != pattern.FileHashLen {
+									if len(ids) != FileHashLen {
 										continue
 									}
-									var fhash pattern.FileHash
+									var fhash FileHash
 									for kk, vv := range ids {
 										intv, _ := strconv.Atoi(vv)
 										fhash[kk] = types.U8(intv)
@@ -2491,12 +2490,12 @@ func parseFidString(v reflect.Value) string {
 	if v.Len() > 0 {
 		allValue := fmt.Sprintf("%v", v.Index(0))
 		temp := strings.Split(allValue, "] ")
-		puk := make([]byte, pattern.FileHashLen)
+		puk := make([]byte, FileHashLen)
 		for _, v := range temp {
-			if strings.Count(v, " ") == (pattern.FileHashLen - 1) {
+			if strings.Count(v, " ") == (FileHashLen - 1) {
 				subValue := strings.TrimPrefix(v, "[")
 				ids := strings.Split(subValue, " ")
-				if len(ids) != pattern.FileHashLen {
+				if len(ids) != FileHashLen {
 					continue
 				}
 				for kk, vv := range ids {

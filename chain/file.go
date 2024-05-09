@@ -18,7 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
+	"github.com/CESSProject/cess-go-sdk/config"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	keyring "github.com/CESSProject/go-keyring"
 	"github.com/btcsuite/btcutil/base58"
@@ -302,7 +302,7 @@ func (c *ChainClient) SplitFile(fpath, chunksDir string, chunkSize int64, fillin
 }
 
 func (c *ChainClient) SplitFileWithstandardSize(fpath, chunksDir string) (int64, int, error) {
-	return c.SplitFile(fpath, chunksDir, pattern.SegmentSize, true)
+	return c.SplitFile(fpath, chunksDir, config.SegmentSize, true)
 }
 
 func (c *ChainClient) UploadFileChunks(url, chunksDir, bucket, fname string, chunksNum int, totalSize int64) (string, error) {

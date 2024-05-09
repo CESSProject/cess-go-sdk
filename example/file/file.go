@@ -17,6 +17,7 @@ import (
 
 	cess "github.com/CESSProject/cess-go-sdk"
 	"github.com/CESSProject/cess-go-sdk/chain"
+	"github.com/CESSProject/cess-go-sdk/utils"
 )
 
 // Substrate well-known mnemonic:
@@ -52,7 +53,11 @@ func main() {
 	}
 
 	// 3. authorize space to deoss
-	_, err = sdk.AuthorizeSpace(PublicGatewayAccount)
+	pub, err := utils.ParsingPublickey(PublicGatewayAccount)
+	if err != nil {
+		panic(err)
+	}
+	_, err = sdk.Authorize(pub)
 	if err != nil {
 		panic(err)
 	}

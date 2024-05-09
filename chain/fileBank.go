@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/CESSProject/cess-go-sdk/config"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
@@ -1044,7 +1045,7 @@ func (c *ChainClient) TransferReport(index uint8, fid string) (string, error) {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	if index <= 0 || int(index) > (DataShards+ParShards) {
+	if index <= 0 || int(index) > (config.DataShards+config.ParShards) {
 		return "", errors.New("invalid index")
 	}
 
