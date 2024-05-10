@@ -81,11 +81,11 @@ const (
 	StakingStartBlock    = "StakingStartBlock"
 	CompleteSnapShot     = "CompleteSnapShot"
 
-	// TEEWORKER
-	TEEWorkers       = "Workers"
-	TEEMasterPubkey  = "MasterPubkey"
-	TEEEndpoints     = "Endpoints"
-	TEEWorkerAddedAt = "WorkerAddedAt"
+	// TeeWorker
+	Workers       = "Workers"
+	MasterPubkey  = "MasterPubkey"
+	Endpoints     = "Endpoints"
+	WorkerAddedAt = "WorkerAddedAt"
 
 	// FileBank
 	File                = "File"
@@ -396,6 +396,19 @@ type Individual struct {
 	Reward types.U32
 }
 
+// TeeWorker
+type WorkerInfo struct {
+	Pubkey              WorkerPublicKey
+	EcdhPubkey          EcdhPublicKey
+	Version             types.U32
+	LastUpdated         types.U64
+	StashAccount        types.Option[types.AccountID]
+	AttestationProvider types.Option[types.U8]
+	ConfidenceLevel     types.U8
+	Features            []types.U32
+	Role                types.U8 // 0:Full 1:Verifier 2:Marker
+}
+
 type SegmentInfo struct {
 	Hash         FileHash
 	FragmentList []FragmentInfo
@@ -462,18 +475,6 @@ type ServiceProveInfo struct {
 	TeePubkey    WorkerPublicKey
 	ServiceProve types.Bytes
 	VerifyResult types.Option[bool]
-}
-
-type TeeWorkerInfo struct {
-	Pubkey              WorkerPublicKey
-	EcdhPubkey          EcdhPublicKey
-	Version             types.U32
-	LastUpdated         types.U64
-	StashAccount        types.Option[types.AccountID]
-	AttestationProvider types.Option[types.U8]
-	ConfidenceLevel     types.U8
-	Features            []types.U32
-	Role                types.U8 // 0:Full 1:Verifier 2:Marker
 }
 
 type ExpendersInfo struct {
