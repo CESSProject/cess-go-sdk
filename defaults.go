@@ -7,7 +7,9 @@
 
 package sdkgo
 
-import "github.com/CESSProject/cess-go-sdk/chain"
+import (
+	"time"
+)
 
 // DefaultRpcAddrs configures the default rpc address
 var DefaultRpcAddrs = func(cfg *Config) error {
@@ -21,7 +23,7 @@ var DefaultRpcAddrs = func(cfg *Config) error {
 
 // DefaultTimeout configures the default transaction waiting timeout
 var DefaultTimeout = func(cfg *Config) error {
-	return cfg.Apply(TransactionTimeout(chain.BlockInterval))
+	return cfg.Apply(TransactionTimeout(time.Second * 30))
 }
 
 // Complete list of default options and when to fallback on them.

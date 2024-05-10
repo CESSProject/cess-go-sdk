@@ -32,8 +32,8 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
-		return blockhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetChainState(): %v", ERR_RPC_CONNECTION)
+	if !c.GetRpcState() {
+		return blockhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetRpcState(): %v", ERR_RPC_CONNECTION)
 	}
 
 	var nonce types.Option[types.U256]
@@ -59,7 +59,7 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 
@@ -99,12 +99,12 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}

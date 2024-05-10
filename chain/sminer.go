@@ -36,7 +36,7 @@ func (c *ChainClient) QueryExpenders(block int32) (ExpendersInfo, error) {
 
 	var data ExpendersInfo
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return data, ERR_RPC_CONNECTION
 	}
 
@@ -50,7 +50,7 @@ func (c *ChainClient) QueryExpenders(block int32) (ExpendersInfo, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, Expenders, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return data, err
 		}
 		if !ok {
@@ -60,13 +60,12 @@ func (c *ChainClient) QueryExpenders(block int32) (ExpendersInfo, error) {
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return data, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, Expenders, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return data, err
 	}
 	if !ok {
@@ -91,7 +90,7 @@ func (c *ChainClient) QueryMinerItems(accountID []byte, block int32) (MinerInfo,
 
 	var data MinerInfo
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return data, ERR_RPC_CONNECTION
 	}
 
@@ -105,7 +104,7 @@ func (c *ChainClient) QueryMinerItems(accountID []byte, block int32) (MinerInfo,
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return data, err
 		}
 		if !ok {
@@ -116,13 +115,12 @@ func (c *ChainClient) QueryMinerItems(accountID []byte, block int32) (MinerInfo,
 
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return data, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return data, err
 	}
 	if !ok {
@@ -147,7 +145,7 @@ func (c *ChainClient) QueryStakingStartBlock(accountID []byte, block int32) (uin
 
 	var data types.U32
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return 0, ERR_RPC_CONNECTION
 	}
 
@@ -161,7 +159,7 @@ func (c *ChainClient) QueryStakingStartBlock(accountID []byte, block int32) (uin
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, StakingStartBlock, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return 0, err
 		}
 		if !ok {
@@ -171,13 +169,12 @@ func (c *ChainClient) QueryStakingStartBlock(accountID []byte, block int32) (uin
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return 0, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, StakingStartBlock, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return 0, err
 	}
 	if !ok {
@@ -202,7 +199,7 @@ func (c *ChainClient) QueryAllMiner(block int32) ([]types.AccountID, error) {
 
 	var data []types.AccountID
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return data, ERR_RPC_CONNECTION
 	}
 
@@ -216,7 +213,7 @@ func (c *ChainClient) QueryAllMiner(block int32) ([]types.AccountID, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, AllMiner, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return nil, err
 		}
 		if !ok {
@@ -226,13 +223,12 @@ func (c *ChainClient) QueryAllMiner(block int32) ([]types.AccountID, error) {
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return data, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, AllMiner, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return nil, err
 	}
 	if !ok {
@@ -256,7 +252,7 @@ func (c *ChainClient) QueryCounterForMinerItems(block int32) (uint32, error) {
 
 	var data types.U32
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return 0, ERR_RPC_CONNECTION
 	}
 
@@ -270,7 +266,7 @@ func (c *ChainClient) QueryCounterForMinerItems(block int32) (uint32, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, CounterForMinerItems, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return 0, err
 		}
 		if !ok {
@@ -280,13 +276,12 @@ func (c *ChainClient) QueryCounterForMinerItems(block int32) (uint32, error) {
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return 0, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, CounterForMinerItems, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return 0, err
 	}
 	if !ok {
@@ -310,7 +305,7 @@ func (c *ChainClient) QueryRewardMap(accountID []byte, block int32) (MinerReward
 
 	var data MinerReward
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return data, ERR_RPC_CONNECTION
 	}
 
@@ -324,7 +319,7 @@ func (c *ChainClient) QueryRewardMap(accountID []byte, block int32) (MinerReward
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, RewardMap, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return data, err
 		}
 		if !ok {
@@ -334,13 +329,12 @@ func (c *ChainClient) QueryRewardMap(accountID []byte, block int32) (MinerReward
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return data, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, RewardMap, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return data, err
 	}
 	if !ok {
@@ -365,7 +359,7 @@ func (c *ChainClient) QueryRestoralTarget(accountID []byte, block int32) (Restor
 
 	var data RestoralTargetInfo
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return data, ERR_RPC_CONNECTION
 	}
 
@@ -388,7 +382,7 @@ func (c *ChainClient) QueryRestoralTarget(accountID []byte, block int32) (Restor
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return data, err
 		}
 		if !ok {
@@ -398,13 +392,12 @@ func (c *ChainClient) QueryRestoralTarget(accountID []byte, block int32) (Restor
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return data, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return data, err
 	}
 	if !ok {
@@ -427,7 +420,7 @@ func (c *ChainClient) QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo,
 	}()
 	var result []RestoralTargetInfo
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return nil, ERR_RPC_CONNECTION
 	}
 
@@ -435,7 +428,7 @@ func (c *ChainClient) QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo,
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return nil, err
 	}
 	var set []types.StorageChangeSet
@@ -443,19 +436,18 @@ func (c *ChainClient) QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo,
 		set, err = c.api.RPC.State.QueryStorageAtLatest(keys)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return nil, err
 		}
 	} else {
 		blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 		if err != nil {
-			c.SetChainState(false)
 			return nil, err
 		}
 		set, err = c.api.RPC.State.QueryStorageAt(keys, blockhash)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAt: %v", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return nil, err
 		}
 	}
@@ -497,7 +489,7 @@ func (c *ChainClient) QueryPendingReplacements(accountID []byte, block int32) (t
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return data, ERR_RPC_CONNECTION
 	}
 
@@ -511,7 +503,7 @@ func (c *ChainClient) QueryPendingReplacements(accountID []byte, block int32) (t
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, PendingReplacements, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return data, err
 		}
 		if !ok {
@@ -521,13 +513,12 @@ func (c *ChainClient) QueryPendingReplacements(accountID []byte, block int32) (t
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return data, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, PendingReplacements, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return data, err
 	}
 	if !ok {
@@ -553,7 +544,7 @@ func (c *ChainClient) QueryCompleteSnapShot(era uint32, block int32) (uint32, ui
 
 	var data CompleteSnapShotType
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return 0, 0, ERR_RPC_CONNECTION
 	}
 
@@ -572,7 +563,7 @@ func (c *ChainClient) QueryCompleteSnapShot(era uint32, block int32) (uint32, ui
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, CompleteSnapShot, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return 0, 0, err
 		}
 		if !ok {
@@ -584,14 +575,13 @@ func (c *ChainClient) QueryCompleteSnapShot(era uint32, block int32) (uint32, ui
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), Sminer, CompleteSnapShot, err)
-		c.SetChainState(false)
 		return 0, 0, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, CompleteSnapShot, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return 0, 0, err
 	}
 	if !ok {
@@ -626,7 +616,7 @@ func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -657,7 +647,7 @@ func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string
 	ok, err = c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_IncreaseCollateral, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -696,12 +686,12 @@ func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_IncreaseCollateral, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_IncreaseCollateral, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -750,7 +740,7 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -771,7 +761,7 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_IncreaseDeclarationSpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -792,7 +782,6 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Sminer_IncreaseDeclarationSpace, err)
-		c.SetChainState(false)
 		return blockhash, err
 	}
 
@@ -807,15 +796,16 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
+			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_IncreaseDeclarationSpace, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_IncreaseDeclarationSpace, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -865,7 +855,7 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
 
@@ -891,7 +881,7 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_MinerExitPrep, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return txhash, err
 	}
 
@@ -913,7 +903,6 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Sminer_MinerExitPrep, err)
-		c.SetChainState(false)
 		return txhash, err
 	}
 
@@ -932,12 +921,12 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_MinerExitPrep, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return txhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_MinerExitPrep, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return txhash, err
 		}
 	}
@@ -985,7 +974,7 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return txhash, ERR_RPC_CONNECTION
 	}
 
@@ -1006,7 +995,7 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_MinerWithdraw, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return txhash, err
 	}
 	if !ok {
@@ -1045,12 +1034,12 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_MinerWithdraw, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return txhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_MinerWithdraw, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return txhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
 		}
 	}
@@ -1098,7 +1087,7 @@ func (c *ChainClient) ReceiveReward() (string, error) {
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -1119,7 +1108,7 @@ func (c *ChainClient) ReceiveReward() (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_ReceiveReward, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -1157,12 +1146,12 @@ func (c *ChainClient) ReceiveReward() (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_ReceiveReward, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_ReceiveReward, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -1215,7 +1204,7 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -1236,7 +1225,7 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_RegisterPoisKey, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 
@@ -1281,12 +1270,12 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_RegisterPoisKey, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_RegisterPoisKey, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -1336,7 +1325,7 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -1378,7 +1367,7 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 	ok, err = c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_Regnstk, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 
@@ -1405,7 +1394,6 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Sminer_Regnstk, err)
-		c.SetChainState(false)
 		return blockhash, err
 	}
 
@@ -1420,15 +1408,16 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
+			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_Regnstk, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_Regnstk, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -1479,7 +1468,7 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -1532,7 +1521,7 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_RegnstkAssignStaking, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 
@@ -1559,7 +1548,6 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Sminer_RegnstkAssignStaking, err)
-		c.SetChainState(false)
 		return blockhash, err
 	}
 
@@ -1578,12 +1566,12 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_RegnstkAssignStaking, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_RegnstkAssignStaking, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -1629,7 +1617,7 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -1660,7 +1648,7 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_UpdateBeneficiary, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -1699,12 +1687,12 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_UpdateBeneficiary, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_UpdateBeneficiary, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -1750,7 +1738,7 @@ func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -1771,7 +1759,7 @@ func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Sminer_UpdatePeerId, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -1810,12 +1798,12 @@ func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_UpdatePeerId, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Sminer_UpdatePeerId, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}

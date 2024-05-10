@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -39,7 +38,6 @@ type ChainClient struct {
 	metadata       *types.Metadata
 	runtimeVersion *types.RuntimeVersion
 	eventRetriever retriever.EventRetriever
-	keyEvents      types.StorageKey
 	genesisHash    types.Hash
 	keyring        signature.KeyringPair
 	rpcAddr        []string
@@ -48,28 +46,23 @@ type ChainClient struct {
 	tokenSymbol    string
 	networkEnv     string
 	signatureAcc   string
-	treasuryAcc    string
 	name           string
-	chainState     bool
+	rpcState       bool
 }
 
 // var _ sdk.SDK = (*ChainClient)(nil)
 
-var globalTransport = &http.Transport{
-	DisableKeepAlives: true,
-}
-
-func NewEmptyChainClient() *ChainClient {
-	return &ChainClient{}
-}
-
-func NewChainClient(
-	ctx context.Context,
-	serviceName string,
-	rpcs []string,
-	mnemonic string,
-	t time.Duration,
-) (*ChainClient, error) {
+// NewChainClient creates a chainclient
+//   - ctx: context
+//   - name: customised name, can be empty
+//   - rpcs: rpc addresses
+//   - mnemonic: account mnemonic, can be empty
+//   - t: waiting time for transaction packing, default is 30 seconds
+//
+// Return:
+//   - *ChainClient: chain client
+//   - error: error message
+func NewChainClient(ctx context.Context, name string, rpcs []string, mnemonic string, t time.Duration) (*ChainClient, error) {
 	var (
 		err         error
 		chainClient = &ChainClient{
@@ -78,7 +71,7 @@ func NewChainClient(
 			txTicker:    time.NewTicker(BlockInterval),
 			rpcAddr:     rpcs,
 			packingTime: t,
-			name:        serviceName,
+			name:        name,
 		}
 	)
 
@@ -99,7 +92,7 @@ func NewChainClient(
 		return nil, ERR_RPC_CONNECTION
 	}
 
-	chainClient.SetChainState(true)
+	chainClient.SetRpcState(true)
 
 	chainClient.metadata, err = chainClient.api.RPC.State.GetMetadataLatest()
 	if err != nil {
@@ -110,10 +103,6 @@ func NewChainClient(
 		return nil, err
 	}
 	chainClient.runtimeVersion, err = chainClient.api.RPC.State.GetRuntimeVersionLatest()
-	if err != nil {
-		return nil, err
-	}
-	chainClient.keyEvents, err = types.CreateStorageKey(chainClient.metadata, System, Events, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -131,33 +120,106 @@ func NewChainClient(
 			return nil, err
 		}
 	}
-	properties, err := chainClient.SysProperties()
+	properties, err := chainClient.SystemProperties()
 	if err != nil {
 		return nil, err
 	}
 	chainClient.tokenSymbol = string(properties.TokenSymbol)
 
-	chainClient.networkEnv, err = chainClient.SysChain()
+	chainClient.networkEnv, err = chainClient.SystemChain()
 	if err != nil {
 		return nil, err
-	}
-
-	if strings.Contains(chainClient.networkEnv, "test") {
-		chainClient.treasuryAcc = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
-	} else if strings.Contains(chainClient.networkEnv, "main") {
-		chainClient.treasuryAcc = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
-	} else {
-		chainClient.treasuryAcc = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
 	}
 
 	return chainClient, nil
 }
 
-func (c *ChainClient) ReconnectRPC() error {
+// GetSDKName get sdk name
+func (c *ChainClient) GetSDKName() string {
+	return c.name
+}
+
+// GetCurrentRpcAddr get the current rpc address being used
+func (c *ChainClient) GetCurrentRpcAddr() string {
+	return c.currentRpcAddr
+}
+
+// SetChainState set the rpc connection status flag,
+// when the rpc connection is normal, set it to true,
+// otherwise set it to false.
+func (c *ChainClient) SetRpcState(state bool) {
+	c.chainStLock.Lock()
+	c.rpcState = state
+	c.chainStLock.Unlock()
+}
+
+// GetRpcState get the rpc connection status flag
+//   - true: connection is normal
+//   - false: connection failed
+func (c *ChainClient) GetRpcState() bool {
+	c.chainStLock.Lock()
+	st := c.rpcState
+	c.chainStLock.Unlock()
+	return st
+}
+
+// GetSignatureAcc get your current account address
+//
+// Note:
+//   - make sure you fill in mnemonic when you create the chain client
+func (c *ChainClient) GetSignatureAcc() string {
+	return c.signatureAcc
+}
+
+// GetSignatureAccPulickey get your current account public key
+//
+// Note:
+//   - make sure you fill in mnemonic when you create the chain client
+func (c *ChainClient) GetSignatureAccPulickey() []byte {
+	return c.keyring.PublicKey
+}
+
+// GetSubstrateAPI get substrate api
+func (c *ChainClient) GetSubstrateAPI() *gsrpc.SubstrateAPI {
+	return c.api
+}
+
+// GetMetadata get chain metadata
+func (c *ChainClient) GetMetadata() *types.Metadata {
+	return c.metadata
+}
+
+// GetTokenSymbol get token symbol
+func (c *ChainClient) GetTokenSymbol() string {
+	return c.tokenSymbol
+}
+
+// GetNetworkEnv get network env
+func (c *ChainClient) GetNetworkEnv() string {
+	return c.networkEnv
+}
+
+// GetURI get the mnemonic for your current account
+func (c *ChainClient) GetURI() string {
+	return c.keyring.URI
+}
+
+// Sign with the mnemonic of your current account
+func (c *ChainClient) Sign(msg []byte) ([]byte, error) {
+	return signature.Sign(msg, c.keyring.URI)
+}
+
+// Verify the signature with your current account's mnemonic
+func (c *ChainClient) Verify(msg []byte, sig []byte) (bool, error) {
+	return signature.Verify(msg, sig, c.keyring.URI)
+}
+
+// ReconnectRpc reconnect rpc
+func (c *ChainClient) ReconnectRpc() error {
 	var err error
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	if c.GetChainState() {
+	if c.GetRpcState() {
 		return nil
 	}
 	if c.api != nil {
@@ -170,91 +232,20 @@ func (c *ChainClient) ReconnectRPC() error {
 	c.api,
 		c.metadata,
 		c.runtimeVersion,
-		c.keyEvents,
 		c.eventRetriever,
 		c.genesisHash,
-		c.currentRpcAddr, err = reconnectChainSDK(c.currentRpcAddr, c.rpcAddr)
+		c.currentRpcAddr, err = reconnectRpc(c.currentRpcAddr, c.rpcAddr)
 	if err != nil {
 		return err
 	}
-	c.SetChainState(true)
+	c.SetRpcState(true)
 	return nil
 }
 
-func (c *ChainClient) GetSDKName() string {
-	return c.name
-}
-
-func (c *ChainClient) GetCurrentRpcAddr() string {
-	return c.currentRpcAddr
-}
-
-func (c *ChainClient) SetSDKName(name string) {
-	c.name = name
-}
-
-func (c *ChainClient) SetChainState(state bool) {
-	c.chainStLock.Lock()
-	c.chainState = state
-	c.chainStLock.Unlock()
-}
-
-func (c *ChainClient) GetChainState() bool {
-	c.chainStLock.Lock()
-	st := c.chainState
-	c.chainStLock.Unlock()
-	return st
-}
-
-func (c *ChainClient) GetSignatureAcc() string {
-	return c.signatureAcc
-}
-
-func (c *ChainClient) GetKeyEvents() types.StorageKey {
-	return c.keyEvents
-}
-
-func (c *ChainClient) GetSignatureAccPulickey() []byte {
-	return c.keyring.PublicKey
-}
-
-func (c *ChainClient) GetSubstrateAPI() *gsrpc.SubstrateAPI {
-	return c.api
-}
-
-func (c *ChainClient) GetMetadata() *types.Metadata {
-	return c.metadata
-}
-
-func (c *ChainClient) GetTokenSymbol() string {
-	return c.tokenSymbol
-}
-
-func (c *ChainClient) GetNetworkEnv() string {
-	return c.networkEnv
-}
-
-func (c *ChainClient) GetURI() string {
-	return c.keyring.URI
-}
-
-func (c *ChainClient) GetTreasuryAccount() string {
-	return c.treasuryAcc
-}
-
-func (c *ChainClient) Sign(msg []byte) ([]byte, error) {
-	return signature.Sign(msg, c.keyring.URI)
-}
-
-func (c *ChainClient) Verify(msg []byte, sig []byte) (bool, error) {
-	return signature.Verify(msg, sig, c.keyring.URI)
-}
-
-func reconnectChainSDK(oldRpc string, rpcs []string) (
+func reconnectRpc(oldRpc string, rpcs []string) (
 	*gsrpc.SubstrateAPI,
 	*types.Metadata,
 	*types.RuntimeVersion,
-	types.StorageKey,
 	retriever.EventRetriever,
 	types.Hash,
 	string,
@@ -284,35 +275,30 @@ func reconnectChainSDK(oldRpc string, rpcs []string) (
 		rpcAddr = rpcaddrs[i]
 	}
 	if api == nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	var metadata *types.Metadata
 	var runtimeVer *types.RuntimeVersion
-	var keyEvents types.StorageKey
 	var genesisHash types.Hash
 	var eventRetriever retriever.EventRetriever
 
 	metadata, err = api.RPC.State.GetMetadataLatest()
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	genesisHash, err = api.RPC.Chain.GetBlockHash(0)
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	runtimeVer, err = api.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
-	}
-	keyEvents, err = types.CreateStorageKey(metadata, System, Events, nil)
-	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	eventRetriever, err = retriever.NewDefaultEventRetriever(state.NewEventProvider(api.RPC.State), api.RPC.State)
 	if err != nil {
-		return nil, nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
+		return nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
-	return api, metadata, runtimeVer, keyEvents, eventRetriever, genesisHash, rpcAddr, err
+	return api, metadata, runtimeVer, eventRetriever, genesisHash, rpcAddr, err
 }
 
 func createPrefixedKey(pallet, method string) []byte {
@@ -367,8 +353,12 @@ func (c *ChainClient) VerifyPolkaSignatureWithBase58(account, msg, signature str
 	return ok, nil
 }
 
+// close chain client
 func (c *ChainClient) Close() {
-	if c.api.Client != nil {
-		c.api.Client.Close()
+	if c.api != nil {
+		if c.api.Client != nil {
+			c.api.Client.Close()
+		}
+		c.api = nil
 	}
 }

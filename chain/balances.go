@@ -31,7 +31,7 @@ func (c *ChainClient) QueryTotalIssuance(block int) (string, error) {
 	}()
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return "", ERR_RPC_CONNECTION
 	}
 
@@ -45,7 +45,7 @@ func (c *ChainClient) QueryTotalIssuance(block int) (string, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Balances, TotalIssuance, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return "", err
 		}
 		if !ok {
@@ -57,14 +57,13 @@ func (c *ChainClient) QueryTotalIssuance(block int) (string, error) {
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), Balances, TotalIssuance, err)
-		c.SetChainState(false)
 		return "", err
 	}
 
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Balances, TotalIssuance, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return "", err
 	}
 	if !ok {
@@ -90,7 +89,7 @@ func (c *ChainClient) QueryInactiveIssuance(block int) (string, error) {
 	}()
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return "", ERR_RPC_CONNECTION
 	}
 
@@ -104,7 +103,7 @@ func (c *ChainClient) QueryInactiveIssuance(block int) (string, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Balances, InactiveIssuance, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return "", err
 		}
 		if !ok {
@@ -116,14 +115,13 @@ func (c *ChainClient) QueryInactiveIssuance(block int) (string, error) {
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), Balances, InactiveIssuance, err)
-		c.SetChainState(false)
 		return "", err
 	}
 
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Balances, InactiveIssuance, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return "", err
 	}
 	if !ok {
@@ -157,7 +155,7 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string,
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, "", ERR_RPC_CONNECTION
 	}
 
@@ -188,7 +186,7 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string,
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, "", err
 	}
 	if !ok {
@@ -218,7 +216,7 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string,
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, "", err
 	}
 	defer sub.Unsubscribe()

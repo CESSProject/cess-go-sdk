@@ -25,6 +25,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+var globalTransport = &http.Transport{
+	DisableKeepAlives: true,
+}
+
 func (c *ChainClient) StoreFile(url, file, bucket string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {

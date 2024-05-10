@@ -34,14 +34,14 @@ func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
 
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return "", ERR_RPC_CONNECTION
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, StorageHandler, UnitPrice)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), StorageHandler, UnitPrice, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return "", err
 	}
 
@@ -49,7 +49,7 @@ func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), StorageHandler, UnitPrice, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return "", err
 		}
 		if !ok {
@@ -60,13 +60,12 @@ func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return "", err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), StorageHandler, UnitPrice, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return "", err
 	}
 	if !ok {
@@ -92,7 +91,7 @@ func (c *ChainClient) QueryUserOwnedSpace(accountID []byte, block int32) (UserSp
 
 	var data UserSpaceInfo
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return data, ERR_RPC_CONNECTION
 	}
 
@@ -116,7 +115,7 @@ func (c *ChainClient) QueryUserOwnedSpace(accountID []byte, block int32) (UserSp
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), StorageHandler, UserOwnedSpace, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return data, err
 		}
 		if !ok {
@@ -126,13 +125,12 @@ func (c *ChainClient) QueryUserOwnedSpace(accountID []byte, block int32) (UserSp
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return data, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), StorageHandler, UserOwnedSpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return data, err
 	}
 	if !ok {
@@ -156,14 +154,14 @@ func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
 
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return 0, ERR_RPC_CONNECTION
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, StorageHandler, TotalIdleSpace)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), StorageHandler, TotalIdleSpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return 0, err
 	}
 
@@ -171,7 +169,7 @@ func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), StorageHandler, TotalIdleSpace, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return 0, err
 		}
 		if !ok {
@@ -181,13 +179,12 @@ func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return 0, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), StorageHandler, TotalIdleSpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return 0, err
 	}
 	if !ok {
@@ -211,14 +208,13 @@ func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
 
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return 0, ERR_RPC_CONNECTION
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, StorageHandler, TotalServiceSpace)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), StorageHandler, TotalServiceSpace, err)
-		c.SetChainState(false)
 		return 0, err
 	}
 
@@ -226,7 +222,7 @@ func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), StorageHandler, TotalServiceSpace, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return 0, err
 		}
 		if !ok {
@@ -236,13 +232,12 @@ func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return 0, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), StorageHandler, TotalServiceSpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return 0, err
 	}
 	if !ok {
@@ -266,7 +261,7 @@ func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
 
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return 0, ERR_RPC_CONNECTION
 	}
 
@@ -280,7 +275,7 @@ func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), StorageHandler, PurchasedSpace, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return 0, err
 		}
 		if !ok {
@@ -290,13 +285,12 @@ func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return 0, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), StorageHandler, PurchasedSpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return 0, err
 	}
 	if !ok {
@@ -333,7 +327,7 @@ func (c *ChainClient) BuySpace(count uint32) (string, error) {
 		return "", errors.New("[BuySpace] invalid count")
 	}
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -354,7 +348,7 @@ func (c *ChainClient) BuySpace(count uint32) (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuySpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -393,12 +387,12 @@ func (c *ChainClient) BuySpace(count uint32) (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuySpace, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuySpace, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -447,7 +441,7 @@ func (c *ChainClient) ExpansionSpace(count uint32) (string, error) {
 		return "", errors.New("[ExpansionSpace] space is 0")
 	}
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -468,7 +462,7 @@ func (c *ChainClient) ExpansionSpace(count uint32) (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpansionSpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -507,12 +501,12 @@ func (c *ChainClient) ExpansionSpace(count uint32) (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpansionSpace, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpansionSpace, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -561,7 +555,7 @@ func (c *ChainClient) RenewalSpace(days uint32) (string, error) {
 		return "", errors.New("[RenewalSpace] invalid days")
 	}
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -582,7 +576,7 @@ func (c *ChainClient) RenewalSpace(days uint32) (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalSpace, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -621,12 +615,12 @@ func (c *ChainClient) RenewalSpace(days uint32) (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalSpace, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalSpace, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}

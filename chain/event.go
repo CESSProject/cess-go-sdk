@@ -1905,13 +1905,6 @@ func (c *ChainClient) RetrieveBlock(blocknumber uint64) ([]string, []ExtrinsicsI
 						Amount: amount,
 						Result: true,
 					})
-					// transfers, err := c.parseTransferInfoFromBlock(blockhash)
-					// if err != nil {
-					// 	return systemEvents, extrinsicsInfo, transferInfo, "", "", "", "", 0, err
-					// }
-					// if len(transfers) > 0 {
-					// 	transferInfo = append(transferInfo, transfers...)
-					// }
 				} else if e.Name == SystemExtrinsicSuccess {
 					if len(eventsBuf) > 0 {
 						extrinsicsInfo = append(extrinsicsInfo, ExtrinsicsInfo{
@@ -2168,7 +2161,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					if err != nil {
 						return blockdata, err
 					}
-					if to == c.treasuryAcc {
+					if to == TreasuryAccount {
 						blockdata.Punishment = append(blockdata.Punishment, Punishment{
 							ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 							From:          from,
@@ -2557,35 +2550,6 @@ func ExplicitBigInt(v reflect.Value, depth int) string {
 	// 	  fmt.Printf(strings.Repeat("\t", depth)+"%+v\n", v)
 	// }
 	return fee
-}
-
-func (c *ChainClient) parseTransferInfoFromBlock(blockhash types.Hash) ([]TransferInfo, error) {
-	var transferEvents = make([]TransferInfo, 0)
-	var data types.StorageDataRaw
-	ok, err := c.GetSubstrateAPI().RPC.State.GetStorage(c.GetKeyEvents(), &data, blockhash)
-	if err != nil {
-		return transferEvents, err
-	}
-	var from string
-	var to string
-	if ok {
-		events := EventRecords{}
-		err = types.EventRecordsRaw(data).DecodeEventRecords(c.GetMetadata(), &events)
-		if err != nil {
-			return transferEvents, err
-		}
-		for _, e := range events.Balances_Transfer {
-			from, _ = utils.EncodePublicKeyAsCessAccount(e.From[:])
-			to, _ = utils.EncodePublicKeyAsCessAccount(e.To[:])
-			transferEvents = append(transferEvents, TransferInfo{
-				From:   from,
-				To:     to,
-				Amount: e.Value.String(),
-				Result: true,
-			})
-		}
-	}
-	return transferEvents, nil
 }
 
 func ParseTransferInfoFromEvent(e *parser.Event) (string, string, string, error) {

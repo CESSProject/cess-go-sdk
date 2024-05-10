@@ -307,8 +307,6 @@ type SDK interface {
 	// ReconnectRPC() error
 	// // GetMetadata returns the metadata of the chain.
 	// GetMetadata() *types.Metadata
-	// // GetKeyEvents returns the events storage key.
-	// GetKeyEvents() types.StorageKey
 	// // GetURI returns URI.
 	// GetURI() string
 	// // GetTreasuryAccount returns the treasury account

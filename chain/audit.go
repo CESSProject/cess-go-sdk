@@ -35,7 +35,7 @@ func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (boo
 
 	var data ChallengeInfo
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return false, data, ERR_RPC_CONNECTION
 	}
 
@@ -49,7 +49,7 @@ func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (boo
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Audit, ChallengeSnapShot, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return false, data, err
 		}
 		return ok, data, nil
@@ -61,7 +61,7 @@ func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (boo
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Audit, ChallengeSnapShot, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return false, data, err
 	}
 	return ok, data, nil
@@ -83,7 +83,7 @@ func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, e
 
 	var data types.U8
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return uint8(data), ERR_RPC_CONNECTION
 	}
 
@@ -97,7 +97,7 @@ func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, e
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Audit, CountedClear, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return uint8(data), err
 		}
 		if !ok {
@@ -112,7 +112,7 @@ func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, e
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Audit, CountedClear, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return uint8(data), err
 	}
 	if !ok {
@@ -136,14 +136,13 @@ func (c *ChainClient) QueryCountedServiceFailed(accountID []byte, block int32) (
 	}()
 	var data types.U32
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return uint32(data), ERR_RPC_CONNECTION
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, Audit, CountedServiceFailed, accountID)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), Audit, CountedServiceFailed, err)
-		c.SetChainState(false)
 		return uint32(data), err
 	}
 
@@ -151,7 +150,7 @@ func (c *ChainClient) QueryCountedServiceFailed(accountID []byte, block int32) (
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Audit, CountedServiceFailed, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return 0, err
 		}
 		if !ok {
@@ -166,7 +165,7 @@ func (c *ChainClient) QueryCountedServiceFailed(accountID []byte, block int32) (
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Audit, CountedServiceFailed, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return uint32(data), err
 	}
 	if !ok {
@@ -199,7 +198,7 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 		return blockhash, ERR_IdleProofIsEmpty
 	}
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -220,7 +219,7 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -241,7 +240,6 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
-		c.SetChainState(false)
 		return blockhash, err
 	}
 
@@ -260,12 +258,12 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -310,7 +308,7 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -331,7 +329,7 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -370,12 +368,12 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -426,7 +424,7 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -447,7 +445,7 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -486,12 +484,12 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}
@@ -539,7 +537,7 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
@@ -560,7 +558,7 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return blockhash, err
 	}
 	if !ok {
@@ -599,12 +597,12 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
-				c.SetChainState(false)
+				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return blockhash, err
 		}
 	}

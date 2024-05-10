@@ -32,6 +32,8 @@ const MaxSubmitedIdleFileMeta = 30
 const PublicDeoss = "http://deoss-pub-gateway.cess.cloud/"
 const PublicDeossAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 
+const TreasuryAccount = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
+
 // pallet names
 const (
 	// Audit
