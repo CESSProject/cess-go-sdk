@@ -98,7 +98,7 @@ const (
 	UserHoldFileList    = "UserHoldFileList"
 
 	// Staking
-	COUNTERFORVALIDATORS = "CounterForValidators"
+	CounterForValidators = "CounterForValidators"
 	CounterForNominators = "CounterForNominators"
 	ErasTotalStake       = "ErasTotalStake"
 	CurrentEra           = "CurrentEra"
@@ -385,6 +385,17 @@ type UserSpaceInfo struct {
 	State          types.Bytes
 }
 
+// Staking
+type StakingEraRewardPoints struct {
+	Total      types.U32
+	Individual []Individual
+}
+
+type Individual struct {
+	Acc    types.AccountID
+	Reward types.U32
+}
+
 type SegmentInfo struct {
 	Hash         FileHash
 	FragmentList []FragmentInfo
@@ -504,16 +515,6 @@ type StakingExposure struct {
 type OtherStakingExposure struct {
 	Who   types.AccountID
 	Value types.U128
-}
-
-type StakingEraRewardPoints struct {
-	Total      types.U32
-	Individual []Individual
-}
-
-type Individual struct {
-	Acc    types.AccountID
-	Reward types.U32
 }
 
 type StakingNominations struct {
