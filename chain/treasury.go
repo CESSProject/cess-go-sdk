@@ -31,7 +31,7 @@ func (c *ChainClient) QueryCurrencyReward(block int32) (string, error) {
 
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return "", ERR_RPC_CONNECTION
 	}
 
@@ -45,7 +45,7 @@ func (c *ChainClient) QueryCurrencyReward(block int32) (string, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), CessTreasury, CurrencyReward, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return "", err
 		}
 		if !ok {
@@ -60,14 +60,13 @@ func (c *ChainClient) QueryCurrencyReward(block int32) (string, error) {
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), CessTreasury, CurrencyReward, err)
-		c.SetChainState(false)
 		return "", err
 	}
 
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), CessTreasury, CurrencyReward, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return "", err
 	}
 	if !ok {
@@ -95,7 +94,7 @@ func (c *ChainClient) QueryEraReward(block int32) (string, error) {
 
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return "", ERR_RPC_CONNECTION
 	}
 
@@ -109,7 +108,7 @@ func (c *ChainClient) QueryEraReward(block int32) (string, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), CessTreasury, EraReward, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return "", err
 		}
 		if !ok {
@@ -124,14 +123,13 @@ func (c *ChainClient) QueryEraReward(block int32) (string, error) {
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), CessTreasury, EraReward, err)
-		c.SetChainState(false)
 		return "", err
 	}
 
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), CessTreasury, EraReward, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return "", err
 	}
 	if !ok {
@@ -159,7 +157,7 @@ func (c *ChainClient) QueryReserveReward(block int32) (string, error) {
 
 	var data types.U128
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return "", ERR_RPC_CONNECTION
 	}
 
@@ -173,7 +171,7 @@ func (c *ChainClient) QueryReserveReward(block int32) (string, error) {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), CessTreasury, ReserveReward, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return "", err
 		}
 		if !ok {
@@ -188,14 +186,13 @@ func (c *ChainClient) QueryReserveReward(block int32) (string, error) {
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), CessTreasury, ReserveReward, err)
-		c.SetChainState(false)
 		return "", err
 	}
 
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), CessTreasury, ReserveReward, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return "", err
 	}
 	if !ok {
@@ -224,7 +221,7 @@ func (c *ChainClient) QueryRoundReward(era uint32, block int32) (string, error) 
 
 	var data RoundRewardType
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return "", ERR_RPC_CONNECTION
 	}
 
@@ -243,7 +240,7 @@ func (c *ChainClient) QueryRoundReward(era uint32, block int32) (string, error) 
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), CessTreasury, RoundReward, err)
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			return "", err
 		}
 		if !ok {
@@ -258,14 +255,13 @@ func (c *ChainClient) QueryRoundReward(era uint32, block int32) (string, error) 
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), CessTreasury, RoundReward, err)
-		c.SetChainState(false)
 		return "", err
 	}
 
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), CessTreasury, RoundReward, err)
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		return "", err
 	}
 	if !ok {

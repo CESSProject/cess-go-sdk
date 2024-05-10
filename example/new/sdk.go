@@ -46,7 +46,7 @@ func main() {
 	}
 	defer sdk.GetSubstrateAPI().Client.Close()
 
-	fmt.Println(sdk.ChainVersion())
+	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
 	//

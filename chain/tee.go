@@ -32,7 +32,7 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 
 	var data MasterPublicKey
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return nil, ERR_RPC_CONNECTION
 	}
 
@@ -45,7 +45,7 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 	if block < 0 {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, err)
 			return nil, err
 		}
@@ -56,12 +56,11 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return nil, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, err)
 		return nil, err
 	}
@@ -87,7 +86,7 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 
 	var data WorkerInfo
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return data, ERR_RPC_CONNECTION
 	}
 
@@ -105,7 +104,7 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 	if block < 0 {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
 			return data, errors.Wrap(err, "[GetStorageLatest]")
 		}
@@ -116,12 +115,11 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return data, err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
 		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
@@ -146,7 +144,7 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 
 	var list []WorkerInfo
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return list, ERR_RPC_CONNECTION
 	}
 
@@ -160,19 +158,18 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 	if block < 0 {
 		set, err = c.api.RPC.State.QueryStorageAtLatest(keys)
 		if err != nil {
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
 			return list, err
 		}
 	} else {
 		blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 		if err != nil {
-			c.SetChainState(false)
 			return list, err
 		}
 		set, err = c.api.RPC.State.QueryStorageAt(keys, blockhash)
 		if err != nil {
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAt: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
 			return list, err
 		}
@@ -205,7 +202,7 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 
 	var data types.Text
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return "", ERR_RPC_CONNECTION
 	}
 
@@ -221,7 +218,7 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 	if block < 0 {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, err)
 			return "", errors.Wrap(err, "[GetStorageLatest]")
 		}
@@ -232,12 +229,11 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return string(data), err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, err)
 		return "", errors.Wrap(err, "[GetStorage]")
 	}
@@ -263,7 +259,7 @@ func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint
 
 	var data types.U32
 
-	if !c.GetChainState() {
+	if !c.GetRpcState() {
 		return uint32(data), ERR_RPC_CONNECTION
 	}
 
@@ -279,7 +275,7 @@ func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint
 	if block < 0 {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
-			c.SetChainState(false)
+			c.SetRpcState(false)
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, err)
 			return uint32(data), err
 		}
@@ -290,12 +286,11 @@ func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		c.SetChainState(false)
 		return uint32(data), err
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
-		c.SetChainState(false)
+		c.SetRpcState(false)
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, err)
 		return uint32(data), err
 	}
