@@ -44,7 +44,7 @@ type ChainClient struct {
 	rpcState       bool
 }
 
-// var _ sdk.SDK = (*ChainClient)(nil)
+var _ Chainer = (*ChainClient)(nil)
 
 // NewChainClient creates a chainclient
 //   - ctx: context

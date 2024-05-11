@@ -233,8 +233,7 @@ var (
 	ERR_RPC_TIMEOUT        = errors.New("timeout")
 	ERR_RPC_EMPTY_VALUE    = errors.New("empty")
 	ERR_RPC_PRIORITYTOOLOW = "Priority is too low"
-
-	ERR_IdleProofIsEmpty = errors.New("idle data proof is empty")
+	ERR_IdleProofIsEmpty   = errors.New("idle data proof is empty")
 )
 
 const (
