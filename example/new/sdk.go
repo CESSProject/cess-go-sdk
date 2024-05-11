@@ -22,7 +22,8 @@ import (
 
 // Substrate well-known mnemonic:
 //
-//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
+//   - cXgaee2N8E77JJv9gdsGAckv1Qsf3hqWYf7NL4q6ZuQzuAUtB
+//   - https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
 var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
 
 var RPC_ADDRS = []string{
@@ -38,18 +39,18 @@ func main() {
 	sdk, err := cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),
-		//cess.Mnemonic(MY_MNEMONIC),
+		cess.Mnemonic(MY_MNEMONIC),
 		cess.TransactionTimeout(time.Second*10),
 	)
 	if err != nil {
 		panic(err)
 	}
-	defer sdk.GetSubstrateAPI().Client.Close()
+	defer sdk.Close()
 
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
-	//
+
 	//fmt.Println(sdk.QueryRoundReward(0, -1))
 	return
 
