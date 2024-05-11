@@ -148,7 +148,7 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 		return list, ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(TeeWorker, Workers)
+	key := CreatePrefixedKey(TeeWorker, Workers)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)

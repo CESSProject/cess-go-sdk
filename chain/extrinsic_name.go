@@ -353,12 +353,17 @@ const (
 	ExtName_VoterList_rebag                 = "VoterList.rebag"
 )
 
+// InitExtrinsicsName initialises all transaction names
+//
+// Return:
+//   - error: error message
+//
+// Note:
+//   - if you need to make a transaction on the chain, you must call this method
 func (c *ChainClient) InitExtrinsicsName() error {
 	ExtrinsicsName = make(map[types.CallIndex]string, 0)
 	// Assets
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Assets_approve_transfer); err == nil {
-		//fmt.Println(ExtName_Timestamp_set, ".callIndex.MethodIndex:", callIndex.MethodIndex)
-		//fmt.Println(ExtName_Timestamp_set, ".callIndex.SectionIndex:", callIndex.SectionIndex)
 		ExtrinsicsName[callIndex] = ExtName_Assets_approve_transfer
 	} else {
 		return err

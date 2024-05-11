@@ -25,18 +25,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-// UploadFileChunks uploading file chunks
-//   - url: gateway url
-//   - mnemonic: polkadot account mnemonic
-//   - chunksDir: file chunks dir
-//   - bucket: bucket for storing file
-//   - fname: file name
-//   - chunksNum: chunk number
-//   - totalSize: total size
+// UploadFileChunks upload file chunks in the directory to the gateway as much as possible,
+// chunks will be removed after being uploaded, if the chunks are not transferred successfuly, jus
 //
-// Return:
-//   - string: fid
-//   - error: error message
+// Receive parameter:
+//   - url: the address of the gateway.
+//   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+//   - bucket: the bucket name to store user data.
+//   - fname: the name of the file.
+//   - chunksNum: total number of file chunks.
+//   - totalSize: chunks total size (byte), can be obtained from the first return value of SplitFile
+//
+// Return parameter:
+//   - Reader: number of file chunks.
+//   - error: error message.
 func UploadFileChunks(url, mnemonic, chunksDir, bucket, fname string, chunksNum int, totalSize int64) (string, error) {
 	entries, err := os.ReadDir(chunksDir)
 	if err != nil {
@@ -59,19 +61,20 @@ func UploadFileChunks(url, mnemonic, chunksDir, bucket, fname string, chunksNum 
 	return res, nil
 }
 
-// UploadFileChunk uploading a file chunk
-//   - url: gateway url
-//   - mnemonic: polkadot account mnemonic
-//   - chunksDir: file chunks dir
-//   - bucket: bucket for storing file
-//   - fname: file name
-//   - chunksNum: chunk number
-//   - chunksId: chunk index
-//   - totalSize: total size
+// UploadFileChunk upload chunk of file to the gateway
 //
-// Return:
-//   - string: fid
-//   - error: error message
+// Receive parameter:
+//   - url: the address of the gateway.
+//   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+//   - bucket: the bucket name to store user data.
+//   - fname: the name of the file.
+//   - chunksNum: total number of file chunks.
+//   - chunksId: index of the current chunk to be uploaded ([0,chunksNum)).
+//   - totalSize: chunks total size (byte), can be obtained from the first return value of SplitFile
+//
+// Return parameter:
+//   - Reader: number of file chunks.
+//   - error: error message.
 func UploadFileChunk(url, mnemonic, chunksDir, bucket, fname string, chunksNum, chunksId int, totalSize int64) (string, error) {
 
 	file := filepath.Join(chunksDir, fmt.Sprintf("chunk-%d", chunksId))
@@ -169,10 +172,32 @@ func UploadFileChunk(url, mnemonic, chunksDir, bucket, fname string, chunksNum, 
 	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
 }
 
+// Split File into Chunks with standard size.
+// It split file into chunks of the default size and fills the last chunk that does not meet the size.
+//
+// Receive parameter:
+//   - fpath: the path of the file to be split.
+//   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+//
+// Return parameter:
+//   - int64: chunks total size (byte).
+//   - int: number of file chunks.
+//   - error: error message.
 func SplitFileWithstandardSize(fpath, chunksDir string) (int64, int, error) {
 	return SplitFile(fpath, chunksDir, config.SegmentSize, true)
 }
 
+// Split File into Chunks.
+//
+// Receive parameter:
+//   - fpath: the path of the file to be split.
+//   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+//   - chunkSize: the size of each chunk, it does not exceed the file size
+//
+// Return parameter:
+//   - int64: chunks total size (byte).
+//   - int: number of file chunks.
+//   - error: error message.
 func SplitFile(fpath, chunksDir string, chunkSize int64, filling bool) (int64, int, error) {
 	fstat, err := os.Stat(fpath)
 	if err != nil {

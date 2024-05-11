@@ -424,7 +424,7 @@ func (c *ChainClient) QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo,
 		return nil, ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(Sminer, RestoralTarget)
+	key := CreatePrefixedKey(Sminer, RestoralTarget)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, err)

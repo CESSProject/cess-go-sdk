@@ -365,7 +365,7 @@ func (c *ChainClient) QueryAllNominators(block int32) ([]StakingNominations, err
 		return nil, ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(Staking, Nominators)
+	key := CreatePrefixedKey(Staking, Nominators)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), Staking, Nominators, err)
@@ -427,7 +427,7 @@ func (c *ChainClient) QueryAllBonded(block int32) ([]types.AccountID, error) {
 		return nil, ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(Staking, Bonded)
+	key := CreatePrefixedKey(Staking, Bonded)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), Staking, Bonded, err)
@@ -589,7 +589,7 @@ func (c *ChainClient) QueryEraValidatorReward(era uint32, block int) (string, er
 // 		return result, ERR_RPC_CONNECTION
 // 	}
 
-// 	// key := createPrefixedKey(Staking, ErasStakers)
+// 	// key := CreatePrefixedKey(Staking, ErasStakers)
 // 	param1, err := codec.Encode(types.NewU32(era))
 // 	if err != nil {
 // 		return result, err
@@ -624,7 +624,7 @@ func (c *ChainClient) QueryEraValidatorReward(era uint32, block int) (string, er
 // 		return result, err
 // 	}
 // 	_ = key
-// 	kkey := createPrefixedKey(Staking, ErasStakers)
+// 	kkey := CreatePrefixedKey(Staking, ErasStakers)
 // 	//kkey = append(kkey, []byte(" ")...)
 // 	//kkey = append(kkey, param1...) //xxhash.New128(param1).Sum(nil)...)
 

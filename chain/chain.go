@@ -9,12 +9,9 @@ package chain
 
 import (
 	"context"
-	"encoding/hex"
-	"fmt"
 	"io"
 	"log"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -25,9 +22,6 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/xxhash"
-	"github.com/mr-tron/base58"
-	"github.com/pkg/errors"
-	"github.com/vedhavyas/go-subkey/sr25519"
 )
 
 type ChainClient struct {
@@ -301,56 +295,8 @@ func reconnectRpc(oldRpc string, rpcs []string) (
 	return api, metadata, runtimeVer, eventRetriever, genesisHash, rpcAddr, err
 }
 
-func createPrefixedKey(pallet, method string) []byte {
+func CreatePrefixedKey(pallet, method string) []byte {
 	return append(xxhash.New128([]byte(pallet)).Sum(nil), xxhash.New128([]byte(method)).Sum(nil)...)
-}
-
-func (c *ChainClient) VerifyPolkaSignatureWithJS(account, msg, signature string) (bool, error) {
-	if len(msg) == 0 {
-		return false, errors.New("msg is empty")
-	}
-
-	pkey, err := utils.ParsingPublickey(account)
-	if err != nil {
-		return false, err
-	}
-
-	pub, err := sr25519.Scheme{}.FromPublicKey(pkey)
-	if err != nil {
-		return false, err
-	}
-
-	sign_bytes, err := hex.DecodeString(strings.TrimPrefix(signature, "0x"))
-	if err != nil {
-		return false, err
-	}
-	message := fmt.Sprintf("<Bytes>%s</Bytes>", msg)
-	ok := pub.Verify([]byte(message), sign_bytes)
-	return ok, nil
-}
-
-func (c *ChainClient) VerifyPolkaSignatureWithBase58(account, msg, signature string) (bool, error) {
-	if len(msg) == 0 {
-		return false, errors.New("msg is empty")
-	}
-
-	pkey, err := utils.ParsingPublickey(account)
-	if err != nil {
-		return false, err
-	}
-
-	pub, err := sr25519.Scheme{}.FromPublicKey(pkey)
-	if err != nil {
-		return false, err
-	}
-
-	sign_bytes, err := base58.Decode(signature)
-	if err != nil {
-		return false, err
-	}
-	message := fmt.Sprintf("<Bytes>%s</Bytes>", msg)
-	ok := pub.Verify([]byte(message), sign_bytes)
-	return ok, nil
 }
 
 // close chain client

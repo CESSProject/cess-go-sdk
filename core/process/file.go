@@ -28,14 +28,27 @@ var globalTransport = &http.Transport{
 }
 
 // StoreFile stores files to the gateway
+//
+// Receive parameter:
 //   - url: gateway url
 //   - file: stored file
 //   - bucket: bucket for storing file
 //   - mnemonic: polkadot account mnemonic
 //
-// Return:
-//   - string: fid
-//   - error: error message
+// Return parameter:
+//   - string: [fid] unique identifier for the file.
+//   - error: error message.
+//
+// Preconditions:
+//  1. Account requires purchasing space, refer to [BuySpace] interface.
+//  2. Authorize the space usage rights of the account to the gateway account,
+//     refer to the [AuthorizeSpace] interface.
+//  3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
+//
+// Explanation:
+//   - Account refers to the account where you configured mnemonic when creating an SDK.
+//   - CESS public gateway address: [http://deoss-pub-gateway.cess.cloud/]
+//   - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
 func StoreFile(url, file, bucket, mnemonic string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
@@ -130,14 +143,27 @@ func StoreFile(url, file, bucket, mnemonic string) (string, error) {
 }
 
 // StoreObject stores object to the gateway
-//   - url: gateway url
-//   - bucket: bucket for storing file
-//   - mnemonic: polkadot account mnemonic
-//   - reader: reader
 //
-// Return:
-//   - string: fid
-//   - error: error message
+// Receive parameter:
+//   - url: gateway url
+//   - bucket: the bucket for storing object, it will be created automatically.
+//   - mnemonic: polkadot account mnemonic
+//   - reader: strings, byte data, file streams, network streams, etc.
+//
+// Return parameter:
+//   - string: [fid] unique identifier for the file.
+//   - error: error message.
+//
+// Preconditions:
+//  1. Account requires purchasing space, refer to [BuySpace] interface.
+//  2. Authorize the space usage rights of the account to the gateway account,
+//     refer to the [AuthorizeSpace] interface.
+//  3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
+//
+// Explanation:
+//   - Account refers to the account where you configured mnemonic when creating an SDK.
+//   - CESS public gateway address: [http://deoss-pub-gateway.cess.cloud/]
+//   - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
 func StoreObject(url string, bucket, mnemonic string, reader io.Reader) (string, error) {
 	if !utils.CheckBucketName(bucket) {
 		return "", errors.New("invalid bucket name")

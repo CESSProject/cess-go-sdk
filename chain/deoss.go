@@ -92,7 +92,7 @@ func (c *ChainClient) QueryAllOss(block int32) ([]OssInfo, error) {
 		return nil, ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(Oss, Oss)
+	key := CreatePrefixedKey(Oss, Oss)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), Oss, Oss, err)
@@ -150,7 +150,7 @@ func (c *ChainClient) QueryAllOssPeerId(block int32) ([]string, error) {
 		return nil, ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(Oss, Oss)
+	key := CreatePrefixedKey(Oss, Oss)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), Oss, Oss, err)

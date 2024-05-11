@@ -321,7 +321,7 @@ func (c *ChainClient) QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, e
 		return nil, ERR_RPC_CONNECTION
 	}
 
-	key := createPrefixedKey(FileBank, RestoralOrder)
+	key := CreatePrefixedKey(FileBank, RestoralOrder)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, err)
@@ -681,6 +681,9 @@ func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user 
 // Note:
 //   - cannot create a bucket that already exists
 //   - if you are not the owner, the owner account must be authorised to you
+//
+// For details on bucket naming rules, see:
+//   - https://docs.cess.cloud/deoss/get-started/deoss-gateway/step-1-create-a-bucket#naming-conventions-for-a-bucket
 func (c *ChainClient) CreateBucket(owner []byte, bucketName string) (string, error) {
 	c.lock.Lock()
 	defer func() {
