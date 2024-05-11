@@ -219,6 +219,14 @@ const (
 	ExtName_Proxy_remove_proxies      = "Proxy.remove_proxies"
 	ExtName_Proxy_remove_proxy        = "Proxy.remove_proxy"
 
+	// Reservoir
+	ExtName_Reservoir_attend_evnet   = "Reservoir.attend_evnet"
+	ExtName_Reservoir_create_event   = "Reservoir.create_event"
+	ExtName_Reservoir_event_withdraw = "Reservoir.event_withdraw"
+	ExtName_Reservoir_filling        = "Reservoir.filling"
+	ExtName_Reservoir_store          = "Reservoir.store"
+	ExtName_Reservoir_withdraw       = "Reservoir.withdraw"
+
 	// Scheduler
 	ExtName_Scheduler_cancel               = "Scheduler.cancel"
 	ExtName_Scheduler_cancel_named         = "Scheduler.cancel_named"
@@ -1194,6 +1202,38 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Proxy_remove_proxy); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Proxy_remove_proxy
+	} else {
+		return err
+	}
+
+	// Reservoir
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_attend_evnet); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_attend_evnet
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_create_event); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_create_event
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_event_withdraw); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_event_withdraw
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_filling); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_filling
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_store); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_store
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_withdraw); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_withdraw
 	} else {
 		return err
 	}

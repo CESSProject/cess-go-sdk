@@ -22,10 +22,11 @@ If you find any system errors or you have better suggestions, please submit an i
 wss://testnet-rpc0.cess.cloud/ws/
 wss://testnet-rpc1.cess.cloud/ws/
 wss://testnet-rpc2.cess.cloud/ws/
+wss://testnet-rpc3.cess.cloud/ws/
 ```
 **CESS test network bootstrap node**
 ```
-_dnsaddr.boot-bucket-testnet.cess.cloud
+_dnsaddr.boot-miner-testnet.cess.cloud
 ```
 
 ## 🚰 CESS test network faucet
@@ -38,19 +39,16 @@ https://testnet-faucet.cess.cloud/
 To get the package use the standard:
 
 ```sh
-go get -u "github.com/CESSProject/cess-go-sdk"
+go get "github.com/CESSProject/cess-go-sdk"
 ```
 
 ## ✅ Testing
 
 To run test:
 
-1. Run a [CESS node](https://github.com/CESSProject/cess) locally.
-2. Run the command
-
-	```sh
-	go test -v
-	```
+```sh
+make check
+```
 
 ## 📖 Document
 
