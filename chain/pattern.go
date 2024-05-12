@@ -5,7 +5,7 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package pattern
+package chain
 
 import (
 	"time"
@@ -32,72 +32,75 @@ const MaxSubmitedIdleFileMeta = 30
 const PublicDeoss = "http://deoss-pub-gateway.cess.cloud/"
 const PublicDeossAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 
-// Pallets
+const TreasuryAccount = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
+
+// pallet names
 const (
-	//
-	AUDIT = "Audit"
+	// Audit
+	Audit = "Audit"
 	// OSS is a module about DeOSS
-	OSS = "Oss"
+	Oss = "Oss"
 	// FILEBANK is a module about data metadata, bucket info, etc.
-	FILEBANK = "FileBank"
+	FileBank = "FileBank"
 	// TEEWOEKER is a module about TEE
-	TEEWORKER = "TeeWorker"
+	TeeWorker = "TeeWorker"
 	// SMINER is a module about storage miners
-	SMINER = "Sminer"
+	Sminer = "Sminer"
 	// STAKING is a module about staking
-	STAKING = "Staking"
+	Staking = "Staking"
 	// SMINER is a module about storage miners
-	STORAGEHANDLER = "StorageHandler"
+	StorageHandler = "StorageHandler"
 	// BALANCES is a module about the balances
-	BALANCES = "Balances"
+	Balances = "Balances"
 	// SYSTEM is a module about the system
-	SYSTEM = "System"
+	System = "System"
 	// EVM is a module about the evm contract
 	EVM = "EVM"
 	//
 	CessTreasury = "CessTreasury"
 )
 
-// Chain state
+// chain state
 const (
-	//AUDIT
-	UNVERIFYPROOF           = "UnverifyProof"
-	CHALLENGEDURATION       = "ChallengeDuration"
-	CHALLENGEVERIFYDURATION = "VerifyDuration"
-	CHALLENGESNAPSHOT       = "ChallengeSnapShot"
-	UNVERIFYIDLEPROOF       = "UnverifyIdleProof"
-	UNVERIFYSERVICEPROOF    = "UnverifyServiceProof"
+	// Audit
+	ChallengeSlip        = "ChallengeSlip"
+	ChallengeSnapShot    = "ChallengeSnapShot"
+	CountedClear         = "CountedClear"
+	CountedServiceFailed = "CountedServiceFailed"
+	VerifySlip           = "VerifySlip"
 
-	// OSS
-	// OSS
-	AUTHORITYLIST = "AuthorityList"
+	// Oss
+	// Oss
+	AuthorityList = "AuthorityList"
 
-	// SMINER
-	ALLMINER           = "AllMiner"
-	MINERITEMS         = "MinerItems"
-	REWARDMAP          = "RewardMap"
-	EXPENDERS          = "Expenders"
-	RESTORALTARGETINFO = "RestoralTarget"
-	STAKINGSTARTBLOCK  = "StakingStartBlock"
-	CompleteSnapShot   = "CompleteSnapShot"
+	// Sminer
+	AllMiner             = "AllMiner"
+	CounterForMinerItems = "CounterForMinerItems"
+	MinerItems           = "MinerItems"
+	RewardMap            = "RewardMap"
+	Expenders            = "Expenders"
+	RestoralTarget       = "RestoralTarget"
+	StakingStartBlock    = "StakingStartBlock"
+	CompleteSnapShot     = "CompleteSnapShot"
 
-	// TEEWORKER
-	TEEWorkers       = "Workers"
-	TEEMasterPubkey  = "MasterPubkey"
-	TEEEndpoints     = "Endpoints"
-	TEEWorkerAddedAt = "WorkerAddedAt"
+	// TeeWorker
+	Workers       = "Workers"
+	MasterPubkey  = "MasterPubkey"
+	Endpoints     = "Endpoints"
+	WorkerAddedAt = "WorkerAddedAt"
 
-	// FILEBANK
-	FILE           = "File"
-	BUCKET         = "Bucket"
-	BUCKETLIST     = "UserBucketList"
-	DEALMAP        = "DealMap"
-	FILLERMAP      = "FillerMap"
-	PENDINGREPLACE = "PendingReplacements"
-	RESTORALORDER  = "RestoralOrder"
+	// FileBank
+	File                = "File"
+	Bucket              = "Bucket"
+	DealMap             = "DealMap"
+	FillerMap           = "FillerMap"
+	PendingReplacements = "PendingReplacements"
+	RestoralOrder       = "RestoralOrder"
+	UserBucketList      = "UserBucketList"
+	UserHoldFileList    = "UserHoldFileList"
 
-	// STAKING
-	COUNTERFORVALIDATORS = "CounterForValidators"
+	// Staking
+	CounterForValidators = "CounterForValidators"
 	CounterForNominators = "CounterForNominators"
 	ErasTotalStake       = "ErasTotalStake"
 	CurrentEra           = "CurrentEra"
@@ -109,76 +112,79 @@ const (
 	ErasValidatorReward  = "ErasValidatorReward"
 	ValidatorCount       = "ValidatorCount"
 
-	// STORAGE_HANDLER
-	USERSPACEINFO     = "UserOwnedSpace"
-	UNITPRICE         = "UnitPrice"
-	TOTALIDLESPACE    = "TotalIdleSpace"
-	TOTALSERVICESPACE = "TotalServiceSpace"
-	PURCHASEDSPACE    = "PurchasedSpace"
+	// StorageHandler
+	UserOwnedSpace    = "UserOwnedSpace"
+	UnitPrice         = "UnitPrice"
+	TotalIdleSpace    = "TotalIdleSpace"
+	TotalServiceSpace = "TotalServiceSpace"
+	PurchasedSpace    = "PurchasedSpace"
 
-	// BALANCES
-	TOTALISSUANCE = "TotalIssuance"
+	// Balances
+	TotalIssuance    = "TotalIssuance"
+	InactiveIssuance = "InactiveIssuance"
 
-	// SYSTEM
-	ACCOUNT = "Account"
-	EVENTS  = "Events"
+	// System
+	Account = "Account"
+	Events  = "Events"
 
 	// CessTreasury
-	RoundReward = "RoundReward"
+	CurrencyReward = "CurrencyReward"
+	EraReward      = "EraReward"
+	ReserveReward  = "ReserveReward"
+	RoundReward    = "RoundReward"
 )
 
 // Extrinsics
 const (
-	//AUDIT
-	TX_AUDIT_SUBMITPROOF              = AUDIT + DOT + "submit_proof"
-	TX_AUDIT_SUBMITIDLEPROOF          = AUDIT + DOT + "submit_idle_proof"
-	TX_AUDIT_SUBMITSERVICEPROOF       = AUDIT + DOT + "submit_service_proof"
-	TX_AUDIT_SUBMITIDLEPROOFRESULT    = AUDIT + DOT + "submit_verify_idle_result"
-	TX_AUDIT_SUBMITSERVICEPROOFRESULT = AUDIT + DOT + "submit_verify_service_result"
+	// Audit
+	TX_Audit_SubmitIdleProof           = Audit + DOT + "submit_idle_proof"
+	TX_Audit_SubmitServiceProof        = Audit + DOT + "submit_service_proof"
+	TX_Audit_SubmitVerifyIdleResult    = Audit + DOT + "submit_verify_idle_result"
+	TX_Audit_SubmitVerifyServiceResult = Audit + DOT + "submit_verify_service_result"
 
-	// OSS
-	TX_OSS_REGISTER    = OSS + DOT + "register"
-	TX_OSS_UPDATE      = OSS + DOT + "update"
-	TX_OSS_DESTROY     = OSS + DOT + "destroy"
-	TX_OSS_AUTHORIZE   = OSS + DOT + "authorize"
-	TX_OSS_UNAUTHORIZE = OSS + DOT + "cancel_authorize"
+	// Oss
+	TX_Oss_Register        = Oss + DOT + "register"
+	TX_Oss_Update          = Oss + DOT + "update"
+	TX_Oss_Destroy         = Oss + DOT + "destroy"
+	TX_Oss_Authorize       = Oss + DOT + "authorize"
+	TX_Oss_CancelAuthorize = Oss + DOT + "cancel_authorize"
 
-	// SMINER
-	TX_SMINER_REGISTER              = SMINER + DOT + "regnstk"
-	TX_SMINER_REGISTERASSIGNSTAKING = SMINER + DOT + "regnstk_assign_staking"
-	TX_SMINER_INCREASESTAKES        = SMINER + DOT + "increase_collateral"
-	TX_SMINER_UPDATEPEERID          = SMINER + DOT + "update_peer_id"
-	TX_SMINER_UPDATEINCOME          = SMINER + DOT + "update_beneficiary"
-	TX_SMINER_CLAIMREWARD           = SMINER + DOT + "receive_reward"
-	TX_SMINER_MINEREXITPREP         = SMINER + DOT + "miner_exit_prep"
-	TX_SMINER_WITHDRAW              = SMINER + DOT + "miner_withdraw"
-	TX_SMINER_REGISTERPOISKEY       = SMINER + DOT + "register_pois_key"
-	TX_SMINER_INCREASEDECSPACE      = SMINER + DOT + "increase_declaration_space"
+	// Sminer
+	TX_Sminer_Regnstk                  = Sminer + DOT + "regnstk"
+	TX_Sminer_RegnstkAssignStaking     = Sminer + DOT + "regnstk_assign_staking"
+	TX_Sminer_IncreaseCollateral       = Sminer + DOT + "increase_collateral"
+	TX_Sminer_UpdatePeerId             = Sminer + DOT + "update_peer_id"
+	TX_Sminer_UpdateBeneficiary        = Sminer + DOT + "update_beneficiary"
+	TX_Sminer_ReceiveReward            = Sminer + DOT + "receive_reward"
+	TX_Sminer_MinerExitPrep            = Sminer + DOT + "miner_exit_prep"
+	TX_Sminer_MinerWithdraw            = Sminer + DOT + "miner_withdraw"
+	TX_Sminer_RegisterPoisKey          = Sminer + DOT + "register_pois_key"
+	TX_Sminer_IncreaseDeclarationSpace = Sminer + DOT + "increase_declaration_space"
 
-	// FILEBANK
-	TX_FILEBANK_PUTBUCKET         = FILEBANK + DOT + "create_bucket"
-	TX_FILEBANK_DELBUCKET         = FILEBANK + DOT + "delete_bucket"
-	TX_FILEBANK_DELFILE           = FILEBANK + DOT + "delete_file"
-	TX_FILEBANK_UPLOADDEC         = FILEBANK + DOT + "upload_declaration"
-	TX_FILEBANK_FILEREPORT        = FILEBANK + DOT + "transfer_report"
-	TX_FILEBANK_GENRESTOREORDER   = FILEBANK + DOT + "generate_restoral_order"
-	TX_FILEBANK_CLAIMRESTOREORDER = FILEBANK + DOT + "claim_restoral_order"
-	TX_FILEBANK_CLAIMNOEXISTORDER = FILEBANK + DOT + "claim_restoral_noexist_order"
-	TX_FILEBANK_RESTORALCOMPLETE  = FILEBANK + DOT + "restoral_order_complete"
-	TX_FILEBANK_CERTIDLESPACE     = FILEBANK + DOT + "cert_idle_space"
-	TX_FILEBANK_REPLACEIDLESPACE  = FILEBANK + DOT + "replace_idle_space"
-	TX_FILEBANK_CALCULATEREPORT   = FILEBANK + DOT + "calculate_report"
+	// FileBank
+	TX_FileBank_CreateBucket              = FileBank + DOT + "create_bucket"
+	TX_FileBank_DeleteBucket              = FileBank + DOT + "delete_bucket"
+	TX_FileBank_DeleteFile                = FileBank + DOT + "delete_file"
+	TX_FileBank_UploadDeclaration         = FileBank + DOT + "upload_declaration"
+	TX_FileBank_TransferReport            = FileBank + DOT + "transfer_report"
+	TX_FileBank_GenerateRestoralOrder     = FileBank + DOT + "generate_restoral_order"
+	TX_FileBank_ClaimRestoralOrder        = FileBank + DOT + "claim_restoral_order"
+	TX_FileBank_ClaimRestoralNoexistOrder = FileBank + DOT + "claim_restoral_noexist_order"
+	TX_FileBank_RestoralOrderComplete     = FileBank + DOT + "restoral_order_complete"
+	TX_FileBank_CertIdleSpace             = FileBank + DOT + "cert_idle_space"
+	TX_FileBank_ReplaceIdleSpace          = FileBank + DOT + "replace_idle_space"
+	TX_FileBank_CalculateReport           = FileBank + DOT + "calculate_report"
 
-	// STORAGE_HANDLER
-	TX_STORAGE_BUYSPACE       = STORAGEHANDLER + DOT + "buy_space"
-	TX_STORAGE_EXPANSIONSPACE = STORAGEHANDLER + DOT + "expansion_space"
-	TX_STORAGE_RENEWALSPACE   = STORAGEHANDLER + DOT + "renewal_space"
+	// StorageHandler
+	TX_StorageHandler_BuySpace       = StorageHandler + DOT + "buy_space"
+	TX_StorageHandler_ExpansionSpace = StorageHandler + DOT + "expansion_space"
+	TX_StorageHandler_RenewalSpace   = StorageHandler + DOT + "renewal_space"
 
 	// BALANCES
-	TX_BALANCES_FORCETRANSFER = "Balances" + DOT + "transfer"
+	TX_Balances_Transfer = "Balances" + DOT + "transfer"
 
 	// EVM
-	TX_EVM_CALL = EVM + DOT + "call"
+	TX_EVM_Call = EVM + DOT + "call"
 )
 
 // RPC Call
@@ -221,33 +227,13 @@ const (
 	ERR_Empty   = "empty"
 )
 
-const (
-	MinBucketNameLength = 3
-	MaxBucketNameLength = 63
-	MaxDomainNameLength = 50
-)
-
-// byte size
-const (
-	SIZE_1KiB = 1024
-	SIZE_1MiB = 1024 * SIZE_1KiB
-	SIZE_1GiB = 1024 * SIZE_1MiB
-	SIZE_1TiB = 1024 * SIZE_1GiB
-)
-
-const (
-	SegmentSize  = 32 * SIZE_1MiB
-	FragmentSize = 8 * SIZE_1MiB
-	DataShards   = 4
-	ParShards    = 8
-)
-
 var (
 	ERR_RPC_CONNECTION     = errors.New("rpc err: connection failed")
 	ERR_RPC_IP_FORMAT      = errors.New("unsupported ip format")
 	ERR_RPC_TIMEOUT        = errors.New("timeout")
 	ERR_RPC_EMPTY_VALUE    = errors.New("empty")
 	ERR_RPC_PRIORITYTOOLOW = "Priority is too low"
+	ERR_IdleProofIsEmpty   = errors.New("idle data proof is empty")
 )
 
 const (
@@ -280,6 +266,65 @@ type MasterPublicKey [MasterPublicKeyLen]types.U8
 type EcdhPublicKey [EcdhPublicKeyLen]types.U8
 type TeeSig [TeeSigLen]types.U8
 
+// Audit
+type ChallengeInfo struct {
+	MinerSnapshot    MinerSnapShot
+	ChallengeElement ChallengeElement
+	ProveInfo        ProveInfo
+}
+
+// Oss
+type BucketInfo struct {
+	FileList  []FileHash
+	Authority []types.AccountID
+}
+
+// FileBank
+type StorageOrder struct {
+	FileSize     types.U128
+	SegmentList  []SegmentList
+	User         UserBrief
+	CompleteList []CompleteInfo
+}
+
+type FileMetadata struct {
+	SegmentList []SegmentInfo
+	Owner       []UserBrief
+	FileSize    types.U128
+	Completion  types.U32
+	State       types.U8
+}
+
+type RestoralOrderInfo struct {
+	Count        types.U32
+	Miner        types.AccountID
+	OriginMiner  types.AccountID
+	FragmentHash FileHash
+	FileHash     FileHash
+	GenBlock     types.U32
+	Deadline     types.U32
+}
+
+type RestoralTargetInfo struct {
+	Miner         types.AccountID
+	ServiceSpace  types.U128
+	RestoredSpace types.U128
+	CoolingBlock  types.U32
+}
+
+type UserFileSliceInfo struct {
+	Filehash FileHash
+	Filesize types.U128
+}
+
+type SpaceProofInfo struct {
+	Miner       types.AccountID
+	Front       types.U64
+	Rear        types.U64
+	PoisKey     PoISKeyInfo
+	Accumulator Accumulator
+}
+
 type SysProperties struct {
 	Ss58Format    types.Bytes
 	TokenDecimals types.U8
@@ -298,11 +343,7 @@ type OssInfo struct {
 	Domain types.Bytes
 }
 
-type BucketInfo struct {
-	ObjectsList []FileHash
-	Authority   []types.AccountID
-}
-
+// Sminer
 type MinerInfo struct {
 	BeneficiaryAccount types.AccountID
 	StakingAccount     types.AccountID
@@ -317,14 +358,6 @@ type MinerInfo struct {
 	SpaceProofInfo     types.Option[SpaceProofInfo]
 	ServiceBloomFilter BloomFilter
 	TeeSig             TeeSig
-}
-
-type SpaceProofInfo struct {
-	Miner       types.AccountID
-	Front       types.U64
-	Rear        types.U64
-	PoisKey     PoISKeyInfo
-	Accumulator Accumulator
 }
 
 type MinerReward struct {
@@ -342,12 +375,39 @@ type RewardOrder struct {
 	LastReceiveBlock types.U32
 }
 
-type FileMetadata struct {
-	SegmentList []SegmentInfo
-	Owner       []UserBrief
-	FileSize    types.U128
-	Completion  types.U32
-	State       types.U8
+// StorageHandler
+type UserSpaceInfo struct {
+	TotalSpace     types.U128
+	UsedSpace      types.U128
+	LockedSpace    types.U128
+	RemainingSpace types.U128
+	Start          types.U32
+	Deadline       types.U32
+	State          types.Bytes
+}
+
+// Staking
+type StakingEraRewardPoints struct {
+	Total      types.U32
+	Individual []Individual
+}
+
+type Individual struct {
+	Acc    types.AccountID
+	Reward types.U32
+}
+
+// TeeWorker
+type WorkerInfo struct {
+	Pubkey              WorkerPublicKey
+	EcdhPubkey          EcdhPublicKey
+	Version             types.U32
+	LastUpdated         types.U64
+	StashAccount        types.Option[types.AccountID]
+	AttestationProvider types.Option[types.U8]
+	ConfidenceLevel     types.U8
+	Features            []types.U32
+	Role                types.U8 // 0:Full 1:Verifier 2:Marker
 }
 
 type SegmentInfo struct {
@@ -368,13 +428,6 @@ type FragmentInfo struct {
 	Miner types.AccountID
 }
 
-type StorageOrder struct {
-	FileSize     types.U128
-	SegmentList  []SegmentList
-	User         UserBrief
-	CompleteList []CompleteInfo
-}
-
 type SegmentList struct {
 	SegmentHash  FileHash
 	FragmentHash []FileHash
@@ -383,22 +436,6 @@ type SegmentList struct {
 type CompleteInfo struct {
 	Index types.U8
 	Miner types.AccountID
-}
-
-type UserSpaceInfo struct {
-	TotalSpace     types.U128
-	UsedSpace      types.U128
-	LockedSpace    types.U128
-	RemainingSpace types.U128
-	Start          types.U32
-	Deadline       types.U32
-	State          types.Bytes
-}
-
-type ChallengeInfo struct {
-	MinerSnapshot    MinerSnapShot
-	ChallengeElement ChallengeElement
-	ProveInfo        ProveInfo
 }
 
 type ProveInfo struct {
@@ -441,35 +478,6 @@ type ServiceProveInfo struct {
 	VerifyResult types.Option[bool]
 }
 
-type TeeWorkerInfo struct {
-	Pubkey              WorkerPublicKey
-	EcdhPubkey          EcdhPublicKey
-	Version             types.U32
-	LastUpdated         types.U64
-	StashAccount        types.Option[types.AccountID]
-	AttestationProvider types.Option[types.U8]
-	ConfidenceLevel     types.U8
-	Features            []types.U32
-	Role                types.U8 // 0:Full 1:Verifier 2:Marker
-}
-
-type RestoralOrderInfo struct {
-	Count        types.U32
-	Miner        types.AccountID
-	OriginMiner  types.AccountID
-	FragmentHash FileHash
-	FileHash     FileHash
-	GenBlock     types.U32
-	Deadline     types.U32
-}
-
-type RestoralTargetInfo struct {
-	Miner         types.AccountID
-	ServiceSpace  types.U128
-	RestoredSpace types.U128
-	CoolingBlock  types.U32
-}
-
 type ExpendersInfo struct {
 	K types.U64
 	N types.U64
@@ -509,16 +517,6 @@ type StakingExposure struct {
 type OtherStakingExposure struct {
 	Who   types.AccountID
 	Value types.U128
-}
-
-type StakingEraRewardPoints struct {
-	Total      types.U32
-	Individual []Individual
-}
-
-type Individual struct {
-	Acc    types.AccountID
-	Reward types.U32
 }
 
 type StakingNominations struct {

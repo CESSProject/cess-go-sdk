@@ -6,7 +6,7 @@ import (
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/core/event"
+	"github.com/CESSProject/cess-go-sdk/chain"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
@@ -26,7 +26,7 @@ var RPC_ADDRS = []string{
 }
 
 type MyEvent struct {
-	Sminer_FaucetTopUpMoney []event.Event_FaucetTopUpMoney
+	Sminer_FaucetTopUpMoney []chain.Event_FaucetTopUpMoney
 	types.EventRecords
 }
 

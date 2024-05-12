@@ -5,7 +5,7 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package event
+package chain
 
 const (
 	// AUDIT

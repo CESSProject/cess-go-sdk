@@ -7,52 +7,25 @@
 
 package config
 
-import (
-	"context"
-	"time"
-
-	"github.com/CESSProject/cess-go-sdk/chain"
-)
-
-// Config describes a set of settings for a client
-type Config struct {
-	Rpc      []string
-	Mnemonic string
-	Name     string
-	Timeout  time.Duration
-}
-
-// Option is a client config option that can be given to the client constructor
-type Option func(cfg *Config) error
-
-// default service name
 const (
-	CharacterName_Default = "sdk"
-	CharacterName_Client  = "client"
-	CharacterName_Bucket  = "bucket"
-	CharacterName_Deoss   = "deoss"
+	SIZE_1KiB = 1024
+	SIZE_1MiB = 1024 * SIZE_1KiB
+	SIZE_1GiB = 1024 * SIZE_1MiB
+	SIZE_1TiB = 1024 * SIZE_1GiB
+
+	SegmentSize  = 32 * SIZE_1MiB
+	FragmentSize = 8 * SIZE_1MiB
+	DataShards   = 4
+	ParShards    = 8
 )
 
-// NewSDK constructs a new client from the Config.
-//
-// This function consumes the config. Do not reuse it (really!).
-func (cfg *Config) NewSDK(ctx context.Context) (*chain.ChainClient, error) {
-	if cfg.Name == "" {
-		cfg.Name = CharacterName_Default
-	}
-	return chain.NewChainClient(ctx, cfg.Name, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
-}
+const (
+	MinBucketNameLength = 3
+	MaxBucketNameLength = 63
+	MaxDomainNameLength = 100
+)
 
-// Apply applies the given options to the config, returning the first error
-// encountered (if any).
-func (cfg *Config) Apply(opts ...Option) error {
-	for _, opt := range opts {
-		if opt == nil {
-			continue
-		}
-		if err := opt(cfg); err != nil {
-			return err
-		}
-	}
-	return nil
-}
+// default name
+const (
+	CharacterName_Default = "cess-sdk-go"
+)

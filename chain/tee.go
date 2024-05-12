@@ -11,24 +11,83 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/pkg/errors"
 )
 
-func (c *ChainClient) QueryTeeWorker(puk pattern.WorkerPublicKey) (pattern.TeeWorkerInfo, error) {
+// QueryMasterPubKey query master public key
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - []byte: master public key
+//   - error: error message
+func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data pattern.TeeWorkerInfo
+	var data MasterPublicKey
 
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
+	if !c.GetRpcState() {
+		return nil, ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, TeeWorker, MasterPubkey)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, err)
+		return nil, err
+	}
+
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			c.SetRpcState(false)
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, err)
+			return nil, err
+		}
+		if !ok {
+			return nil, ERR_RPC_EMPTY_VALUE
+		}
+		return []byte(string(data[:])), nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		return nil, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		c.SetRpcState(false)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, err)
+		return nil, err
+	}
+	if !ok {
+		return nil, ERR_RPC_EMPTY_VALUE
+	}
+	return []byte(string(data[:])), nil
+}
+
+// QueryWorkers query tee work info
+//   - puk: tee's work public key
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - WorkerInfo: tee worker info
+//   - error: error message
+func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data WorkerInfo
+
+	if !c.GetRpcState() {
+		return data, ERR_RPC_CONNECTION
 	}
 
 	publickey, err := codec.Encode(puk)
@@ -36,122 +95,89 @@ func (c *ChainClient) QueryTeeWorker(puk pattern.WorkerPublicKey) (pattern.TeeWo
 		return data, errors.Wrap(err, "[EncodeToBytes]")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWorkers, publickey)
+	key, err := types.CreateStorageKey(c.metadata, TeeWorker, Workers, publickey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkers, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
 		return data, errors.Wrap(err, "[CreateStorageKey]")
 	}
 
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkers, err)
-		return data, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
-	}
-
-	return data, nil
-}
-
-func (c *ChainClient) QueryTeeInfo(puk pattern.WorkerPublicKey) (pattern.TeeInfo, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			c.SetRpcState(false)
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
+			return data, errors.Wrap(err, "[GetStorageLatest]")
 		}
-	}()
-
-	var data pattern.TeeInfo
-
-	teeWorkerInfo, err := c.QueryTeeWorker(puk)
+		if !ok {
+			return data, ERR_RPC_EMPTY_VALUE
+		}
+		return data, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
 		return data, err
 	}
-	data.Pubkey = string(teeWorkerInfo.Pubkey[:])
-	data.EcdhPubkey = string(teeWorkerInfo.EcdhPubkey[:])
-	data.Version = uint32(teeWorkerInfo.Version)
-	data.LastUpdated = uint64(teeWorkerInfo.LastUpdated)
-	if teeWorkerInfo.StashAccount.HasValue() {
-		if ok, puk := teeWorkerInfo.StashAccount.Unwrap(); ok {
-			data.StashAccount, _ = utils.EncodePublicKeyAsCessAccount(puk[:])
-		}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		c.SetRpcState(false)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
+		return data, errors.Wrap(err, "[GetStorageLatest]")
 	}
-	if teeWorkerInfo.AttestationProvider.HasValue() {
-		if ok, val := teeWorkerInfo.AttestationProvider.Unwrap(); ok {
-			data.AttestationProvider = uint8(val)
-		}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
 	}
-	data.ConfidenceLevel = uint8(teeWorkerInfo.ConfidenceLevel)
-	data.Features = make([]uint32, len(teeWorkerInfo.Features))
-	for i := 0; i < len(teeWorkerInfo.Features); i++ {
-		data.Features[i] = uint32(teeWorkerInfo.Features[i])
-	}
-	data.WorkerRole = uint8(teeWorkerInfo.Role)
 	return data, nil
 }
 
-func (c *ChainClient) QueryMasterPublicKey() ([]byte, error) {
+// QueryAllWorkers query all tee work info
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - []WorkerInfo: all tee worker info
+//   - error: error message
+func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data pattern.MasterPublicKey
+	var list []WorkerInfo
 
-	if !c.GetChainState() {
-		return nil, pattern.ERR_RPC_CONNECTION
+	if !c.GetRpcState() {
+		return list, ERR_RPC_CONNECTION
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEMasterPubkey)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEMasterPubkey, err)
-		return nil, errors.Wrap(err, "[CreateStorageKey]")
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEMasterPubkey, err)
-		return nil, errors.Wrap(err, "[GetStorageLatest]")
-	}
-	if !ok {
-		return nil, pattern.ERR_RPC_EMPTY_VALUE
-	}
-
-	return []byte(string(data[:])), nil
-}
-
-func (c *ChainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(utils.RecoverError(err))
-		}
-	}()
-
-	var list []pattern.TeeWorkerInfo
-
-	if !c.GetChainState() {
-		return list, pattern.ERR_RPC_CONNECTION
-	}
-
-	key := createPrefixedKey(pattern.TEEWORKER, pattern.TEEWorkers)
+	key := CreatePrefixedKey(TeeWorker, Workers)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkers, err)
-		return list, errors.Wrap(err, "[GetKeysLatest]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
+		return list, err
 	}
-
-	set, err := c.api.RPC.State.QueryStorageAtLatest(keys)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkers, err)
-		return list, errors.Wrap(err, "[QueryStorageAtLatest]")
+	var set []types.StorageChangeSet
+	if block < 0 {
+		set, err = c.api.RPC.State.QueryStorageAtLatest(keys)
+		if err != nil {
+			c.SetRpcState(false)
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
+			return list, err
+		}
+	} else {
+		blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+		if err != nil {
+			return list, err
+		}
+		set, err = c.api.RPC.State.QueryStorageAt(keys, blockhash)
+		if err != nil {
+			c.SetRpcState(false)
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAt: %v", c.GetCurrentRpcAddr(), TeeWorker, Workers, err)
+			return list, err
+		}
 	}
-
 	for _, elem := range set {
 		for _, change := range elem.Changes {
-			var teeWorker pattern.TeeWorkerInfo
+			var teeWorker WorkerInfo
 			if err := codec.Decode(change.StorageData, &teeWorker); err != nil {
-				log.Println(err)
 				continue
 			}
 			list = append(list, teeWorker)
@@ -160,38 +186,14 @@ func (c *ChainClient) QueryAllTeeWorkerMap() ([]pattern.TeeWorkerInfo, error) {
 	return list, nil
 }
 
-func (c *ChainClient) QueryAllTeeInfo() ([]pattern.TeeInfo, error) {
-	teelist, err := c.QueryAllTeeWorkerMap()
-	if err != nil {
-		return nil, err
-	}
-	var results = make([]pattern.TeeInfo, len(teelist))
-	for k, v := range teelist {
-		results[k].Pubkey = string(v.Pubkey[:])
-		results[k].EcdhPubkey = string(v.EcdhPubkey[:])
-		results[k].Version = uint32(v.Version)
-		results[k].LastUpdated = uint64(v.LastUpdated)
-		if v.StashAccount.HasValue() {
-			if ok, puk := v.StashAccount.Unwrap(); ok {
-				results[k].StashAccount, _ = utils.EncodePublicKeyAsCessAccount(puk[:])
-			}
-		}
-		if v.AttestationProvider.HasValue() {
-			if ok, val := v.AttestationProvider.Unwrap(); ok {
-				results[k].AttestationProvider = uint8(val)
-			}
-		}
-		results[k].ConfidenceLevel = uint8(v.ConfidenceLevel)
-		results[k].Features = make([]uint32, len(v.Features))
-		for i := 0; i < len(v.Features); i++ {
-			results[k].Features[i] = uint32(v.Features[i])
-		}
-		results[k].WorkerRole = uint8(v.Role)
-	}
-	return results, nil
-}
-
-func (c *ChainClient) QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (string, error) {
+// QueryEndpoints query tee's endpoint
+//   - puk: tee's work public key
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - string: tee's endpoint
+//   - error: error message
+func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -200,33 +202,55 @@ func (c *ChainClient) QueryTeeWorkEndpoint(workPuk pattern.WorkerPublicKey) (str
 
 	var data types.Text
 
-	if !c.GetChainState() {
-		return "", pattern.ERR_RPC_CONNECTION
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
 	}
 
-	val, err := codec.Encode(workPuk)
+	val, err := codec.Encode(puk)
 	if err != nil {
 		return "", errors.Wrap(err, "[Encode]")
 	}
-	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEEndpoints, val)
+	key, err := types.CreateStorageKey(c.metadata, TeeWorker, Endpoints, val)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEEndpoints, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, err)
 		return "", errors.Wrap(err, "[CreateStorageKey]")
 	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			c.SetRpcState(false)
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, err)
+			return "", errors.Wrap(err, "[GetStorageLatest]")
+		}
+		if !ok {
+			return "", ERR_RPC_EMPTY_VALUE
+		}
+		return string(data), nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEEndpoints, err)
-		return "", errors.Wrap(err, "[GetStorageLatest]")
+		return string(data), err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		c.SetRpcState(false)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, err)
+		return "", errors.Wrap(err, "[GetStorage]")
 	}
 	if !ok {
-		return "", pattern.ERR_RPC_EMPTY_VALUE
+		return "", ERR_RPC_EMPTY_VALUE
 	}
-
 	return string(data), nil
 }
 
-func (c *ChainClient) QueryWorkerAddedAt(workPuk pattern.WorkerPublicKey) (types.U32, error) {
+// QueryWorkerAddedAt query tee work registered block
+//   - puk: tee's work public key
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - uint32: tee work registered block
+//   - error: error message
+func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -235,28 +259,43 @@ func (c *ChainClient) QueryWorkerAddedAt(workPuk pattern.WorkerPublicKey) (types
 
 	var data types.U32
 
-	if !c.GetChainState() {
-		return data, pattern.ERR_RPC_CONNECTION
+	if !c.GetRpcState() {
+		return uint32(data), ERR_RPC_CONNECTION
 	}
 
-	val, err := codec.Encode(workPuk)
+	val, err := codec.Encode(puk)
 	if err != nil {
-		return data, errors.Wrap(err, "[Encode]")
+		return uint32(data), errors.Wrap(err, "[Encode]")
 	}
-	key, err := types.CreateStorageKey(c.metadata, pattern.TEEWORKER, pattern.TEEWorkerAddedAt, val)
+	key, err := types.CreateStorageKey(c.metadata, TeeWorker, WorkerAddedAt, val)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkerAddedAt, err)
-		return data, errors.Wrap(err, "[CreateStorageKey]")
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, err)
+		return uint32(data), err
 	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			c.SetRpcState(false)
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, err)
+			return uint32(data), err
+		}
+		if !ok {
+			return uint32(data), ERR_RPC_EMPTY_VALUE
+		}
+		return uint32(data), nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), pattern.TEEWORKER, pattern.TEEWorkerAddedAt, err)
-		return data, errors.Wrap(err, "[GetStorageLatest]")
+		return uint32(data), err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		c.SetRpcState(false)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, err)
+		return uint32(data), err
 	}
 	if !ok {
-		return data, pattern.ERR_RPC_EMPTY_VALUE
+		return uint32(data), ERR_RPC_EMPTY_VALUE
 	}
-
-	return data, nil
+	return uint32(data), nil
 }

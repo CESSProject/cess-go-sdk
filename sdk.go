@@ -11,14 +11,7 @@ import (
 	"context"
 
 	"github.com/CESSProject/cess-go-sdk/chain"
-	"github.com/CESSProject/cess-go-sdk/config"
 )
-
-// Config describes a set of settings for the sdk.
-type Config = config.Config
-
-// Option is a client config option that can be given to the client constructor
-type Option = config.Option
 
 // New constructs a new sdk client with the given options, falling back on
 // reasonable defaults. The defaults are:
@@ -30,11 +23,6 @@ type Option = config.Option
 // timeout: time.Duration(time.Second * 6)
 //
 // - The serviceName is used to specify the name of your service
-// Warning:
-//
-//	cess-bucket (cess storage service) must be set to bucket
-//	DeOSS (cess decentralized object storage service) must be set to deoss
-//	cess-cli (cess client) must be set to client
 func New(ctx context.Context, opts ...Option) (*chain.ChainClient, error) {
 	return NewWithoutDefaults(ctx, append(opts, FallbackDefaults)...)
 }

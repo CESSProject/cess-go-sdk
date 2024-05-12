@@ -9,14 +9,12 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"log"
 	"time"
 
-	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/chain"
+	"github.com/CESSProject/cess-go-sdk/core/process"
 )
 
 // Substrate well-known mnemonic:
@@ -39,46 +37,28 @@ const UploadFile = "file.go"
 const BucketName = "myBucket"
 
 func main() {
-	// 1. new sdk
-	sdk, err := NewSDK()
-	if err != nil {
-		panic(err)
-	}
-
-	// 2. buy space
-	_, err = sdk.BuySpace(1)
-	if err != nil {
-		panic(err)
-	}
-
-	// 3. authorize space to deoss
-	_, err = sdk.AuthorizeSpace(PublicGatewayAccount)
-	if err != nil {
-		panic(err)
-	}
-
-	// 4. upload file to deoss
-	fid, err := sdk.StoreFile(PublicGateway, UploadFile, BucketName)
+	// upload file to gateway
+	fid, err := process.StoreFile(PublicGateway, UploadFile, BucketName, MY_MNEMONIC)
 	if err != nil {
 		panic(err)
 	}
 	log.Println("fid:", fid)
 
-	// 5. downloag file from deoss
-	err = sdk.RetrieveFile(PublicGateway, fid, fmt.Sprintf("download_%d", time.Now().UnixNano()))
+	// downloag file from gateway
+	err = process.RetrieveFile(PublicGateway, fid, MY_MNEMONIC, fmt.Sprintf("download_%d", time.Now().UnixNano()))
 	if err != nil {
 		panic(err)
 	}
 
-	// 6. upload object to deoss
-	fid, err = sdk.StoreObject(PublicGateway, bytes.NewReader([]byte("test date")), BucketName)
+	// upload object to gateway
+	fid, err = process.StoreObject(PublicGateway, BucketName, MY_MNEMONIC, bytes.NewReader([]byte("test date")))
 	if err != nil {
 		panic(err)
 	}
 	log.Println("fid:", fid)
 
-	// 7. download object from deoss
-	body, err := sdk.RetrieveObject(PublicGateway, fid)
+	// download object from gateway
+	body, err := process.RetrieveObject(PublicGateway, fid, MY_MNEMONIC)
 	if err != nil {
 		panic(err)
 	}
@@ -88,13 +68,4 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(string(data))
-}
-
-func NewSDK() (*chain.ChainClient, error) {
-	return cess.New(
-		context.Background(),
-		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
-		cess.TransactionTimeout(time.Second*10),
-	)
 }

@@ -5,10 +5,9 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package event
+package chain
 
 import (
-	"github.com/CESSProject/cess-go-sdk/core/pattern"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
@@ -19,7 +18,7 @@ import (
 // ------------------------Audit-------------------
 type Event_VerifyProof struct {
 	Phase     types.Phase
-	TeeWorker pattern.WorkerPublicKey
+	TeeWorker WorkerPublicKey
 	Miner     types.AccountID
 	Topics    []types.Hash
 }
@@ -49,7 +48,7 @@ type Event_SubmitServiceProof struct {
 
 type Event_SubmitIdleVerifyResult struct {
 	Phase  types.Phase
-	Tee    pattern.WorkerPublicKey
+	Tee    WorkerPublicKey
 	Miner  types.AccountID
 	Result types.Bool
 	Topics []types.Hash
@@ -57,7 +56,7 @@ type Event_SubmitIdleVerifyResult struct {
 
 type Event_SubmitServiceVerifyResult struct {
 	Phase  types.Phase
-	Tee    pattern.WorkerPublicKey
+	Tee    WorkerPublicKey
 	Miner  types.AccountID
 	Result types.Bool
 	Topics []types.Hash
@@ -134,8 +133,8 @@ type Event_UpdateBeneficiary struct {
 type Event_UpdatePeerId struct {
 	Phase  types.Phase
 	Acc    types.AccountID
-	Old    pattern.PeerId
-	New    pattern.PeerId
+	Old    PeerId
+	New    PeerId
 	Topics []types.Hash
 }
 
@@ -157,14 +156,14 @@ type Event_DeleteFile struct {
 	Phase    types.Phase
 	Operator types.AccountID
 	Owner    types.AccountID
-	Filehash []pattern.FileHash
+	Filehash []FileHash
 	Topics   []types.Hash
 }
 
 type Event_FillerDelete struct {
 	Phase      types.Phase
 	Acc        types.AccountID
-	FillerHash pattern.FileHash
+	FillerHash FileHash
 	Topics     []types.Hash
 }
 
@@ -179,7 +178,7 @@ type Event_UploadDeclaration struct {
 	Phase     types.Phase
 	Operator  types.AccountID
 	Owner     types.AccountID
-	Deal_hash pattern.FileHash
+	Deal_hash FileHash
 	Topics    []types.Hash
 }
 
@@ -202,47 +201,47 @@ type Event_DeleteBucket struct {
 type Event_TransferReport struct {
 	Phase    types.Phase
 	Acc      types.AccountID
-	DealHash pattern.FileHash
+	DealHash FileHash
 	Topics   []types.Hash
 }
 
 type Event_ReplaceFiller struct {
 	Phase       types.Phase
 	Acc         types.AccountID
-	Filler_list []pattern.FileHash
+	Filler_list []FileHash
 	Topics      []types.Hash
 }
 
 type Event_CalculateEnd struct {
 	Phase     types.Phase
-	File_hash pattern.FileHash
+	File_hash FileHash
 	Topics    []types.Hash
 }
 
 type Event_GenerateRestoralOrder struct {
 	Phase        types.Phase
 	Miner        types.AccountID
-	FragmentHash pattern.FileHash
+	FragmentHash FileHash
 	Topics       []types.Hash
 }
 
 type Event_ClaimRestoralOrder struct {
 	Phase   types.Phase
 	Miner   types.AccountID
-	OrderId pattern.FileHash
+	OrderId FileHash
 	Topics  []types.Hash
 }
 
 type Event_RecoveryCompleted struct {
 	Phase   types.Phase
 	Miner   types.AccountID
-	OrderId pattern.FileHash
+	OrderId FileHash
 	Topics  []types.Hash
 }
 
 type Event_StorageCompleted struct {
 	Phase    types.Phase
-	FileHash pattern.FileHash
+	FileHash FileHash
 	Topics   []types.Hash
 }
 
@@ -276,7 +275,7 @@ type Event_ReplaceIdleSpace struct {
 type Event_CalculateReport struct {
 	Phase    types.Phase
 	Miner    types.AccountID
-	FileHash pattern.FileHash
+	FileHash FileHash
 	Topics   []types.Hash
 }
 
@@ -333,7 +332,7 @@ type Event_MasterKeyLaunched struct {
 
 type Event_WorkerAdded struct {
 	Phase               types.Phase
-	Pubkey              pattern.WorkerPublicKey
+	Pubkey              WorkerPublicKey
 	AttestationProvider types.Option[types.U8]
 	ConfidenceLevel     types.U8
 	Topics              []types.Hash
@@ -341,13 +340,13 @@ type Event_WorkerAdded struct {
 
 type Event_KeyfairyAdded struct {
 	Phase  types.Phase
-	Pubkey pattern.WorkerPublicKey
+	Pubkey WorkerPublicKey
 	Topics []types.Hash
 }
 
 type Event_WorkerUpdated struct {
 	Phase               types.Phase
-	Pubkey              pattern.WorkerPublicKey
+	Pubkey              WorkerPublicKey
 	AttestationProvider types.Option[types.U8]
 	ConfidenceLevel     types.U8
 	Topics              []types.Hash
@@ -356,7 +355,7 @@ type Event_WorkerUpdated struct {
 type Event_MasterKeyRotated struct {
 	Phase        types.Phase
 	RotationId   types.U64
-	MasterPubkey pattern.WorkerPublicKey
+	MasterPubkey WorkerPublicKey
 	Topics       []types.Hash
 }
 
@@ -379,14 +378,14 @@ type Event_MinimumCesealVersionChangedTo struct {
 type Event_OssRegister struct {
 	Phase    types.Phase
 	Acc      types.AccountID
-	Endpoint pattern.PeerId
+	Endpoint PeerId
 	Topics   []types.Hash
 }
 
 type Event_OssUpdate struct {
 	Phase       types.Phase
 	Acc         types.AccountID
-	NewEndpoint pattern.PeerId
+	NewEndpoint PeerId
 	Topics      []types.Hash
 }
 

@@ -219,6 +219,14 @@ const (
 	ExtName_Proxy_remove_proxies      = "Proxy.remove_proxies"
 	ExtName_Proxy_remove_proxy        = "Proxy.remove_proxy"
 
+	// Reservoir
+	ExtName_Reservoir_attend_evnet   = "Reservoir.attend_evnet"
+	ExtName_Reservoir_create_event   = "Reservoir.create_event"
+	ExtName_Reservoir_event_withdraw = "Reservoir.event_withdraw"
+	ExtName_Reservoir_filling        = "Reservoir.filling"
+	ExtName_Reservoir_store          = "Reservoir.store"
+	ExtName_Reservoir_withdraw       = "Reservoir.withdraw"
+
 	// Scheduler
 	ExtName_Scheduler_cancel               = "Scheduler.cancel"
 	ExtName_Scheduler_cancel_named         = "Scheduler.cancel_named"
@@ -321,16 +329,21 @@ const (
 	ExtName_TechnicalMembership_swap_member   = "TechnicalMembership.swap_member"
 
 	// TeeWorker
-	ExtName_TeeWorker_add_ceseal                 = "TeeWorker.add_ceseal"
-	ExtName_TeeWorker_force_register_worker      = "TeeWorker.force_register_worker"
-	ExtName_TeeWorker_register_keyfairy          = "TeeWorker.register_keyfairy"
-	ExtName_TeeWorker_register_worker            = "TeeWorker.register_worker"
-	ExtName_TeeWorker_register_worker_v2         = "TeeWorker.register_worker_v2"
-	ExtName_TeeWorker_remove_ceseal              = "TeeWorker.remove_ceseal"
-	ExtName_TeeWorker_rotate_master_key          = "TeeWorker.rotate_master_key"
+	ExtName_TeeWorker_add_ceseal            = "TeeWorker.add_ceseal"
+	ExtName_TeeWorker_apply_master_key      = "TeeWorker.apply_master_key"
+	ExtName_TeeWorker_force_register_worker = "TeeWorker.force_register_worker"
+	//ExtName_TeeWorker_register_keyfairy        = "TeeWorker.register_keyfairy"
+	ExtName_TeeWorker_launch_master_key        = "TeeWorker.launch_master_key"
+	ExtName_TeeWorker_migration_last_work      = "TeeWorker.migration_last_work"
+	ExtName_TeeWorker_patch_clear_invalid_tee  = "TeeWorker.patch_clear_invalid_tee"
+	ExtName_TeeWorker_patch_clear_not_work_tee = "TeeWorker.patch_clear_not_work_tee"
+	ExtName_TeeWorker_register_worker          = "TeeWorker.register_worker"
+	ExtName_TeeWorker_register_worker_v2       = "TeeWorker.register_worker_v2"
+	ExtName_TeeWorker_remove_ceseal            = "TeeWorker.remove_ceseal"
+	//ExtName_TeeWorker_rotate_master_key          = "TeeWorker.rotate_master_key"
 	ExtName_TeeWorker_set_minimum_ceseal_version = "TeeWorker.set_minimum_ceseal_version"
-	ExtName_TeeWorker_unregister_keyfairy        = "TeeWorker.unregister_keyfairy"
-	ExtName_TeeWorker_update_worker_endpoint     = "TeeWorker.update_worker_endpoint"
+	//ExtName_TeeWorker_unregister_keyfairy        = "TeeWorker.unregister_keyfairy"
+	ExtName_TeeWorker_update_worker_endpoint = "TeeWorker.update_worker_endpoint"
 
 	// Timestamp
 	ExtName_Timestamp_set = "Timestamp.set"
@@ -348,12 +361,17 @@ const (
 	ExtName_VoterList_rebag                 = "VoterList.rebag"
 )
 
+// InitExtrinsicsName initialises all transaction names
+//
+// Return:
+//   - error: error message
+//
+// Note:
+//   - if you need to make a transaction on the chain, you must call this method
 func (c *ChainClient) InitExtrinsicsName() error {
 	ExtrinsicsName = make(map[types.CallIndex]string, 0)
 	// Assets
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Assets_approve_transfer); err == nil {
-		//fmt.Println(ExtName_Timestamp_set, ".callIndex.MethodIndex:", callIndex.MethodIndex)
-		//fmt.Println(ExtName_Timestamp_set, ".callIndex.SectionIndex:", callIndex.SectionIndex)
 		ExtrinsicsName[callIndex] = ExtName_Assets_approve_transfer
 	} else {
 		return err
@@ -1188,6 +1206,38 @@ func (c *ChainClient) InitExtrinsicsName() error {
 		return err
 	}
 
+	// Reservoir
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_attend_evnet); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_attend_evnet
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_create_event); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_create_event
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_event_withdraw); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_event_withdraw
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_filling); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_filling
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_store); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_store
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Reservoir_withdraw); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Reservoir_withdraw
+	} else {
+		return err
+	}
+
 	// Scheduler
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Scheduler_cancel); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Scheduler_cancel
@@ -1627,13 +1677,33 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_apply_master_key); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_apply_master_key
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_force_register_worker); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_TeeWorker_force_register_worker
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_register_keyfairy); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_register_keyfairy
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_launch_master_key); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_launch_master_key
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_migration_last_work); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_migration_last_work
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_patch_clear_invalid_tee); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_patch_clear_invalid_tee
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_patch_clear_not_work_tee); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_patch_clear_not_work_tee
 	} else {
 		return err
 	}
@@ -1652,18 +1722,8 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_rotate_master_key); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_rotate_master_key
-	} else {
-		return err
-	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_set_minimum_ceseal_version); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_TeeWorker_set_minimum_ceseal_version
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_unregister_keyfairy); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_unregister_keyfairy
 	} else {
 		return err
 	}
