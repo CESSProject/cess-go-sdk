@@ -2286,6 +2286,30 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Miner:         acc,
 						Result:        result,
 					})
+				} else if e.Name == SminerRegisterPoisKey {
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.MinerRegPoiskeys = append(blockdata.MinerRegPoiskeys, MinerRegPoiskey{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						Miner:         acc,
+					})
+				} else if e.Name == OssOssRegister {
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.GatewayReg = append(blockdata.GatewayReg, GatewayReg{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						Account:       acc,
+					})
+				} else if e.Name == FileBankStorageCompleted {
+					fid, err := ParseStringFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.StorageCompleted = append(blockdata.StorageCompleted, fid)
 				} else if e.Name == SystemExtrinsicSuccess {
 					extInfo.Events = append(make([]string, 0), eventsBuf...)
 					extInfo.Name = name
@@ -2394,6 +2418,26 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 								blockdata.Punishment = nil
 							} else {
 								blockdata.Punishment = append(blockdata.Punishment[:m], blockdata.Punishment[m+1:]...)
+							}
+							break
+						}
+					}
+					for m := 0; m < len(blockdata.MinerRegPoiskeys); m++ {
+						if blockdata.MinerRegPoiskeys[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							if len(blockdata.MinerRegPoiskeys) == 1 {
+								blockdata.MinerRegPoiskeys = nil
+							} else {
+								blockdata.MinerRegPoiskeys = append(blockdata.MinerRegPoiskeys[:m], blockdata.MinerRegPoiskeys[m+1:]...)
+							}
+							break
+						}
+					}
+					for m := 0; m < len(blockdata.GatewayReg); m++ {
+						if blockdata.GatewayReg[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							if len(blockdata.GatewayReg) == 1 {
+								blockdata.GatewayReg = nil
+							} else {
+								blockdata.GatewayReg = append(blockdata.GatewayReg[:m], blockdata.GatewayReg[m+1:]...)
 							}
 							break
 						}

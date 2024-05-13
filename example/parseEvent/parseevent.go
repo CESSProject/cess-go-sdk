@@ -90,7 +90,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	blockData, err := sdk.ParseBlockData(12975)
+	blockData, err := sdk.ParseBlockData(72094)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -144,6 +144,18 @@ func main() {
 	for _, v := range blockData.SubmitServiceResult {
 		fmt.Println("    SubmitServiceResult miner: ", v.Miner)
 		fmt.Println("    SubmitServiceResult miner result: ", v.Result)
+	}
+	fmt.Println("MinerRegPoiskeys:")
+	for _, v := range blockData.MinerRegPoiskeys {
+		fmt.Println("    MinerRegPoiskeys miner: ", v.Miner)
+	}
+	fmt.Println("GatewayReg:")
+	for _, v := range blockData.GatewayReg {
+		fmt.Println("    GatewayReg account: ", v.Account)
+	}
+	fmt.Println("StorageCompleted:")
+	for _, v := range blockData.StorageCompleted {
+		fmt.Println("    StorageCompleted fid: ", v)
 	}
 	fmt.Println("system events: ", blockData.SysEvents)
 	fmt.Println("transfer info: ", blockData.TransferInfo)
