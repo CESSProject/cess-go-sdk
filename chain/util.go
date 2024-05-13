@@ -8,8 +8,13 @@
 package chain
 
 import (
+	"encoding/hex"
+
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/pkg/errors"
+	"github.com/vedhavyas/go-subkey"
+	"golang.org/x/crypto/blake2b"
 )
 
 func BytesToFileHash(val []byte) (FileHash, error) {
@@ -63,4 +68,21 @@ func IsWorkerPublicKeyAllZero(puk WorkerPublicKey) bool {
 		}
 	}
 	return true
+}
+
+func H160ToSS58(origin string, chain_id uint16) (string, error) {
+	decode_origin, err := hex.DecodeString(origin)
+	if err != nil {
+		log.Error("[CESS-GO-SDK][H160 convert to SS58] Error")
+		return "", err
+	}
+
+	temp_data := []byte("evm:")
+	data := append(temp_data, decode_origin...)
+
+	hashed := blake2b.Sum256(data)
+
+	new_acc := subkey.SS58Encode(hashed[:], chain_id)
+
+	return new_acc, nil
 }
