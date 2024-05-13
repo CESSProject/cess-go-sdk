@@ -20,17 +20,15 @@ const DOT = "."
 // Unit precision of CESS token
 const TokenPrecision_CESS = "000000000000000000"
 
+// the minimum account balance required for transaction
+const MinTransactionBalance = "1000000000000000000"
+
 const StakingStakePerTiB = 4000
 
 const BlockIntervalSec = 6
 
 // BlockInterval is the time interval for generating blocks, in seconds
 const BlockInterval = time.Second * time.Duration(BlockIntervalSec)
-
-const MaxSubmitedIdleFileMeta = 30
-
-const PublicDeoss = "http://deoss-pub-gateway.cess.cloud/"
-const PublicDeossAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 
 const TreasuryAccount = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
 

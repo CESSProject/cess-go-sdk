@@ -25,7 +25,12 @@ const (
 	MaxDomainNameLength = 100
 )
 
-// default name
 const (
+	// default name
 	CharacterName_Default = "cess-sdk-go"
+
+	// offcial gateway address
+	PublicGatewayAddr = "http://deoss-pub-gateway.cess.cloud/"
+	// offcial gateway account
+	PublicGatewayAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 )

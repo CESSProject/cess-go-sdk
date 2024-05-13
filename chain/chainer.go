@@ -143,6 +143,8 @@ type Chainer interface {
 	GetTokenSymbol() string
 	GetNetworkEnv() string
 	GetURI() string
+	GetBalances() uint64
+	SetBalances(balance uint64)
 	Sign(msg []byte) ([]byte, error)
 	Verify(msg []byte, sig []byte) (bool, error)
 	ReconnectRpc() error
@@ -154,7 +156,6 @@ type Chainer interface {
 	// event
 	DecodeEventNameFromBlock(block uint64) ([]string, error)
 	DecodeEventNameFromBlockhash(blockhash types.Hash) ([]string, error)
-	// retrieve event
 	RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) (Event_SubmitIdleProof, error)
 	RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Hash) (Event_SubmitServiceProof, error)
 	RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types.Hash) (Event_SubmitIdleVerifyResult, error)
