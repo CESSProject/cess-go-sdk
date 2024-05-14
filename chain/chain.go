@@ -9,6 +9,7 @@ package chain
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log"
 	"math"
@@ -118,18 +119,22 @@ func NewChainClient(ctx context.Context, name string, rpcs []string, mnemonic st
 		}
 		accInfo, err := chainClient.QueryAccountInfoByAccountID(chainClient.keyring.PublicKey, -1)
 		if err != nil {
-			return nil, err
-		}
-		if len(accInfo.Data.Free.Bytes()) <= 0 {
+			if !errors.Is(err, ERR_RPC_EMPTY_VALUE) {
+				return nil, err
+			}
 			chainClient.balance = 0
 		} else {
-			free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
-			minBanlance_bi, _ := new(big.Int).SetString(MinTransactionBalance, 10)
-			free_bi = free_bi.Div(free_bi, minBanlance_bi)
-			if free_bi.IsUint64() {
-				chainClient.balance = free_bi.Uint64()
+			if len(accInfo.Data.Free.Bytes()) <= 0 {
+				chainClient.balance = 0
 			} else {
-				chainClient.balance = math.MaxUint64
+				free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
+				minBanlance_bi, _ := new(big.Int).SetString(MinTransactionBalance, 10)
+				free_bi = free_bi.Div(free_bi, minBanlance_bi)
+				if free_bi.IsUint64() {
+					chainClient.balance = free_bi.Uint64()
+				} else {
+					chainClient.balance = math.MaxUint64
+				}
 			}
 		}
 	}
