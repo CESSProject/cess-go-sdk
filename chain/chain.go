@@ -11,6 +11,8 @@ import (
 	"context"
 	"io"
 	"log"
+	"math"
+	"math/big"
 	"os"
 	"sync"
 	"time"
@@ -41,6 +43,7 @@ type ChainClient struct {
 	networkEnv     string
 	signatureAcc   string
 	name           string
+	balance        uint64
 	rpcState       bool
 }
 
@@ -112,6 +115,22 @@ func NewChainClient(ctx context.Context, name string, rpcs []string, mnemonic st
 		chainClient.signatureAcc, err = utils.EncodePublicKeyAsCessAccount(chainClient.keyring.PublicKey)
 		if err != nil {
 			return nil, err
+		}
+		accInfo, err := chainClient.QueryAccountInfoByAccountID(chainClient.keyring.PublicKey, -1)
+		if err != nil {
+			return nil, err
+		}
+		if len(accInfo.Data.Free.Bytes()) <= 0 {
+			chainClient.balance = 0
+		} else {
+			free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
+			minBanlance_bi, _ := new(big.Int).SetString(MinTransactionBalance, 10)
+			free_bi = free_bi.Div(free_bi, minBanlance_bi)
+			if free_bi.IsUint64() {
+				chainClient.balance = free_bi.Uint64()
+			} else {
+				chainClient.balance = math.MaxUint64
+			}
 		}
 	}
 	properties, err := chainClient.SystemProperties()
@@ -198,6 +217,16 @@ func (c *ChainClient) GetURI() string {
 	return c.keyring.URI
 }
 
+// GetBalances get current account balance, the unit is CESS
+func (c *ChainClient) GetBalances() uint64 {
+	return c.balance
+}
+
+// SetBalances update current account balance, the unit is CESS
+func (c *ChainClient) SetBalances(balance uint64) {
+	c.balance = balance
+}
+
 // Sign with the mnemonic of your current account
 func (c *ChainClient) Sign(msg []byte) ([]byte, error) {
 	return signature.Sign(msg, c.keyring.URI)
@@ -232,7 +261,23 @@ func (c *ChainClient) ReconnectRpc() error {
 	if err != nil {
 		return err
 	}
+	accInfo, err := c.QueryAccountInfoByAccountID(c.keyring.PublicKey, -1)
+	if err != nil {
+		return err
+	}
 	c.SetRpcState(true)
+	if len(accInfo.Data.Free.Bytes()) <= 0 {
+		c.balance = 0
+	} else {
+		free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
+		minBanlance_bi, _ := new(big.Int).SetString(MinTransactionBalance, 10)
+		free_bi = free_bi.Div(free_bi, minBanlance_bi)
+		if free_bi.IsUint64() {
+			c.balance = free_bi.Uint64()
+		} else {
+			c.balance = math.MaxUint64
+		}
+	}
 	return nil
 }
 

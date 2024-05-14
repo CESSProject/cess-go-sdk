@@ -31,12 +31,6 @@ type MyEvent struct {
 }
 
 func main() {
-	// fmt.Println(time.Now().UTC().Truncate(24 * time.Hour).Add(time.Second).UnixMilli())
-	// fmt.Println(time.UnixMilli(1706699208000).UTC().Truncate(24 * time.Hour).Add(time.Hour * 24).UnixMilli())
-	// fmt.Println(time.Now().UTC())
-	// fmt.Println(time.Now().UTC().Hour())
-	// fmt.Println(time.Now().UTC().Minute())
-	// return
 	sdk, err := cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),
@@ -46,18 +40,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	defer sdk.Close()
-	// fmeta, err := sdk.QueryFileMetadataByBlock("bf7e61cf8abe365dc30e525be5058fd3f502245322300d76fe169c9292c6ba48", 2)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// for _, segment := range fmeta.SegmentList {
-	// 	for _, fragment := range segment.FragmentList {
-	// 		fmt.Println(utils.EncodePublicKeyAsCessAccount(fragment.Miner[:]))
-	// 	}
-	// }
-	// return
 	sdk.InitExtrinsicsName()
 
 	// RetrieveEvent_FileBank_CalculateReport
@@ -90,7 +73,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	blockData, err := sdk.ParseBlockData(12975)
+	blockData, err := sdk.ParseBlockData(72094)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -145,6 +128,18 @@ func main() {
 		fmt.Println("    SubmitServiceResult miner: ", v.Miner)
 		fmt.Println("    SubmitServiceResult miner result: ", v.Result)
 	}
+	fmt.Println("MinerRegPoiskeys:")
+	for _, v := range blockData.MinerRegPoiskeys {
+		fmt.Println("    MinerRegPoiskeys miner: ", v.Miner)
+	}
+	fmt.Println("GatewayReg:")
+	for _, v := range blockData.GatewayReg {
+		fmt.Println("    GatewayReg account: ", v.Account)
+	}
+	fmt.Println("StorageCompleted:")
+	for _, v := range blockData.StorageCompleted {
+		fmt.Println("    StorageCompleted fid: ", v)
+	}
 	fmt.Println("system events: ", blockData.SysEvents)
 	fmt.Println("transfer info: ", blockData.TransferInfo)
 	fmt.Println("minerReg info: ", blockData.MinerReg)
@@ -156,30 +151,4 @@ func main() {
 	fmt.Println("timpstamp: ", blockData.Timestamp)
 	fmt.Println("allGasFee: ", blockData.AllGasFee)
 	fmt.Println("IsNewEra: ", blockData.IsNewEra)
-	return
-	sysEvents, extrinsics, transferInfo, minerReg, newAccounts, blockhash, preHash, extHash, stHash, allGasFee, t, err := sdk.RetrieveBlockAndAll(351)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(" --------- ")
-
-	fmt.Println("extrinsics:")
-	for k, v := range extrinsics {
-		fmt.Println("  ", k, ": ", v.Name)
-		fmt.Println("    Singer: ", v.Signer)
-		fmt.Println("    Hash: ", v.Hash)
-		fmt.Println("    FeePaid: ", v.FeePaid)
-		fmt.Println("    Events: ", v.Events)
-	}
-	fmt.Println("system events: ", sysEvents)
-	fmt.Println("transfer info: ", transferInfo)
-	fmt.Println("minerReg info: ", minerReg)
-	fmt.Println("newAccounts info: ", newAccounts)
-	fmt.Println("blockhash: ", blockhash)
-	fmt.Println("preHash: ", preHash)
-	fmt.Println("extHash: ", extHash)
-	fmt.Println("stHash: ", stHash)
-	fmt.Println("timpstamp: ", t)
-	fmt.Println("allGasFee: ", allGasFee)
-	//fmt.Println(sdk.RetrieveEvent_FileBank_CalculateReport(bhash))
 }

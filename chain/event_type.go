@@ -642,6 +642,7 @@ type BlockData struct {
 	SysEvents           []string
 	NewAccounts         []string
 	GenChallenge        []string
+	StorageCompleted    []string
 	MinerReg            []MinerRegInfo
 	Extrinsics          []ExtrinsicsInfo
 	TransferInfo        []TransferInfo
@@ -654,6 +655,8 @@ type BlockData struct {
 	SubmitIdleResult    []SubmitIdleResult
 	SubmitServiceResult []SubmitServiceResult
 	Punishment          []Punishment
+	MinerRegPoiskeys    []MinerRegPoiskey
+	GatewayReg          []GatewayReg
 }
 
 type ExtrinsicsInfo struct {
@@ -730,4 +733,14 @@ type Punishment struct {
 	From          string
 	To            string
 	Amount        string
+}
+
+type MinerRegPoiskey struct {
+	ExtrinsicHash string
+	Miner         string
+}
+
+type GatewayReg struct {
+	ExtrinsicHash string
+	Account       string
 }
