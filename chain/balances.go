@@ -23,7 +23,7 @@ import (
 // Return:
 //   - string: the total amount of token issuance
 //   - error: error message
-func (c *ChainClient) QueryTotalIssuance(block int) (string, error) {
+func (c *ChainClient) QueryTotalIssuance(block int32) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -81,7 +81,7 @@ func (c *ChainClient) QueryTotalIssuance(block int) (string, error) {
 // Return:
 //   - string: the amount of inactive token issuance
 //   - error: error message
-func (c *ChainClient) QueryInactiveIssuance(block int) (string, error) {
+func (c *ChainClient) QueryInactiveIssuance(block int32) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
