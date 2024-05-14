@@ -23,7 +23,7 @@ import (
 // Return:
 //   - uint32: validator number
 //   - error: error message
-func (c *ChainClient) QueryCounterForValidators(block int) (uint32, error) {
+func (c *ChainClient) QueryCounterForValidators(block int32) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -76,7 +76,7 @@ func (c *ChainClient) QueryCounterForValidators(block int) (uint32, error) {
 // Return:
 //   - uint32: validator number
 //   - error: error message
-func (c *ChainClient) QueryValidatorsCount(block int) (uint32, error) {
+func (c *ChainClient) QueryValidatorsCount(block int32) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -129,7 +129,7 @@ func (c *ChainClient) QueryValidatorsCount(block int) (uint32, error) {
 // Return:
 //   - uint32: nominator number
 //   - error: error message
-func (c *ChainClient) QueryNominatorCount(block int) (uint32, error) {
+func (c *ChainClient) QueryNominatorCount(block int32) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -183,7 +183,7 @@ func (c *ChainClient) QueryNominatorCount(block int) (uint32, error) {
 // Return:
 //   - string: the total number of staking
 //   - error: error message
-func (c *ChainClient) QueryErasTotalStake(era uint32, block int) (string, error) {
+func (c *ChainClient) QueryErasTotalStake(era uint32, block int32) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -242,7 +242,7 @@ func (c *ChainClient) QueryErasTotalStake(era uint32, block int) (string, error)
 // Return:
 //   - uint32: era id
 //   - error: error message
-func (c *ChainClient) QueryCurrentEra(block int) (uint32, error) {
+func (c *ChainClient) QueryCurrentEra(block int32) (uint32, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -480,7 +480,7 @@ func (c *ChainClient) QueryAllBonded(block int32) ([]types.AccountID, error) {
 // Return:
 //   - uint8: validator commission
 //   - error: error message
-func (c *ChainClient) QueryValidatorCommission(accountID []byte, block int) (uint8, error) {
+func (c *ChainClient) QueryValidatorCommission(accountID []byte, block int32) (uint8, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -530,7 +530,7 @@ func (c *ChainClient) QueryValidatorCommission(accountID []byte, block int) (uin
 // Return:
 //   - string: total rewards
 //   - error: error message
-func (c *ChainClient) QueryEraValidatorReward(era uint32, block int) (string, error) {
+func (c *ChainClient) QueryEraValidatorReward(era uint32, block int32) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))

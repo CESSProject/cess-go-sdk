@@ -9,6 +9,7 @@ package chain
 
 import (
 	"encoding/hex"
+	"strings"
 
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/ethereum/go-ethereum/log"
@@ -70,7 +71,15 @@ func IsWorkerPublicKeyAllZero(puk WorkerPublicKey) bool {
 	return true
 }
 
+// H160ToSS58 convert Eth account to polkadot account
+//   - origin: eth account
+//   - chain_id: chain id, CESS chain id is 11330
+//
+// Return:
+//   - string: polkadot account
+//   - error: error message
 func H160ToSS58(origin string, chain_id uint16) (string, error) {
+	origin = strings.TrimPrefix(origin, "0x")
 	decode_origin, err := hex.DecodeString(origin)
 	if err != nil {
 		log.Error("[CESS-GO-SDK][H160 convert to SS58] Error")

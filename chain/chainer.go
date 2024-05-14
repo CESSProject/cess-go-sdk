@@ -22,8 +22,8 @@ type Chainer interface {
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
 
 	// Balances
-	QueryTotalIssuance(block int) (string, error)
-	QueryInactiveIssuance(block int) (string, error)
+	QueryTotalIssuance(block int32) (string, error)
+	QueryInactiveIssuance(block int32) (string, error)
 	TransferToken(dest string, amount uint64) (string, string, error)
 
 	// Oss
@@ -85,16 +85,16 @@ type Chainer interface {
 	UpdateSminerPeerId(peerid PeerId) (string, error)
 
 	// Staking
-	QueryCounterForValidators(block int) (uint32, error)
-	QueryValidatorsCount(block int) (uint32, error)
-	QueryNominatorCount(block int) (uint32, error)
-	QueryErasTotalStake(era uint32, block int) (string, error)
-	QueryCurrentEra(block int) (uint32, error)
+	QueryCounterForValidators(block int32) (uint32, error)
+	QueryValidatorsCount(block int32) (uint32, error)
+	QueryNominatorCount(block int32) (uint32, error)
+	QueryErasTotalStake(era uint32, block int32) (string, error)
+	QueryCurrentEra(block int32) (uint32, error)
 	QueryErasRewardPoints(era uint32, block int32) (StakingEraRewardPoints, error)
 	QueryAllNominators(block int32) ([]StakingNominations, error)
 	QueryAllBonded(block int32) ([]types.AccountID, error)
-	QueryValidatorCommission(accountID []byte, block int) (uint8, error)
-	QueryEraValidatorReward(era uint32, block int) (string, error)
+	QueryValidatorCommission(accountID []byte, block int32) (uint8, error)
+	QueryEraValidatorReward(era uint32, block int32) (string, error)
 
 	// StorageHandler
 	QueryUnitPrice(block int32) (string, error)
