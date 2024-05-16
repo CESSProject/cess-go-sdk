@@ -110,10 +110,11 @@ const (
 	// Staking
 	CounterForValidators = "CounterForValidators"
 	CounterForNominators = "CounterForNominators"
-	ErasTotalStake       = "ErasTotalStake"
 	CurrentEra           = "CurrentEra"
+	ErasTotalStake       = "ErasTotalStake"
 	ErasStakers          = "ErasStakers"
 	ErasRewardPoints     = "ErasRewardPoints"
+	Ledger               = "Ledger"
 	Nominators           = "Nominators"
 	Bonded               = "Bonded"
 	Validators           = "Validators"
@@ -425,6 +426,25 @@ type Individual struct {
 	Reward types.U32
 }
 
+type StakingNominations struct {
+	Targets     []types.AccountID
+	SubmittedIn types.U32
+	Suppressed  types.Bool
+}
+
+type StakingLedger struct {
+	Stash          types.AccountID
+	Total          types.UCompact
+	Active         types.UCompact
+	Unlocking      []UnlockChunk
+	ClaimedRewards []types.U32
+}
+
+type UnlockChunk struct {
+	Value types.UCompact
+	Era   types.BlockNumber
+}
+
 // TeeWorker
 type WorkerInfo struct {
 	Pubkey              WorkerPublicKey
@@ -537,20 +557,14 @@ type DigestInfo struct {
 }
 
 type StakingExposure struct {
-	Total  types.U128
-	Own    types.U128
+	Total  types.UCompact
+	Own    types.UCompact
 	Others []OtherStakingExposure
 }
 
 type OtherStakingExposure struct {
 	Who   types.AccountID
-	Value types.U128
-}
-
-type StakingNominations struct {
-	Targets     []types.AccountID
-	SubmittedIn types.U32
-	Suppressed  types.Bool
+	Value types.UCompact
 }
 
 type StakingValidatorPrefs struct {

@@ -101,6 +101,8 @@ type Chainer interface {
 	QueryAllBonded(block int32) ([]types.AccountID, error)
 	QueryValidatorCommission(accountID []byte, block int32) (uint8, error)
 	QueryEraValidatorReward(era uint32, block int32) (string, error)
+	QueryLedger(accountID []byte, block int32) (StakingLedger, error)
+	QueryeErasStakers(era uint32, accountId []byte) (StakingExposure, error)
 
 	// StorageHandler
 	QueryUnitPrice(block int32) (string, error)

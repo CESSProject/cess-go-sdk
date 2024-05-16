@@ -577,85 +577,93 @@ func (c *ChainClient) QueryEraValidatorReward(era uint32, block int32) (string, 
 	return result.String(), nil
 }
 
-// func (c *ChainClient) QueryeErasStakers(era uint32) ([]StakingExposure, error) {
-// 	defer func() {
-// 		if err := recover(); err != nil {
-// 			log.Println(utils.RecoverError(err))
-// 		}
-// 	}()
-// 	var result []StakingExposure
+// QueryLedger query the staking ledger
+//   - accountID: account id
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - StakingLedger: staking ledger
+//   - error: error message
+func (c *ChainClient) QueryLedger(accountID []byte, block int32) (StakingLedger, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
 
-// 	if !c.GetRpcState() {
-// 		return result, ERR_RPC_CONNECTION
-// 	}
+	var result StakingLedger
 
-// 	// key := CreatePrefixedKey(Staking, ErasStakers)
-// 	param1, err := codec.Encode(types.NewU32(era))
-// 	if err != nil {
-// 		return result, err
-// 	}
+	if !c.GetRpcState() {
+		return result, ERR_RPC_CONNECTION
+	}
 
-// 	var p2 types.OptionAccountID
+	key, err := types.CreateStorageKey(c.metadata, Staking, Ledger, accountID)
+	if err != nil {
+		return result, err
+	}
 
-// 	pk, err := utils.ParsingPublickey("cXjGzUnWJcNXBzKBEJKvs3ZBJ5f1aEEca38abpuNxvwGNZ5Gy")
-// 	if err != nil {
-// 		return result, err
-// 	}
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &result)
+		if err != nil {
+			return result, nil
+		}
+		if !ok {
+			return result, ERR_RPC_EMPTY_VALUE
+		}
+		return result, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		return result, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &result, blockhash)
+	if err != nil {
+		return result, nil
+	}
+	if !ok {
+		return result, ERR_RPC_EMPTY_VALUE
+	}
+	return result, nil
+}
 
-// 	accid, err := types.NewAccountID(pk)
-// 	if err != nil {
-// 		return result, err
-// 	}
-// 	p2.SetSome(*accid)
-// 	b := bytes.NewBuffer(make([]byte, 0))
+// QueryeErasStakers query the staking exposure
+//   - era: era id
+//   - accountId: account id
+//
+// Return:
+//   - StakingExposure: staking exposure
+//   - error: error message
+func (c *ChainClient) QueryeErasStakers(era uint32, accountId []byte) (StakingExposure, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var result StakingExposure
 
-// 	err = p2.Encode(*scale.NewEncoder(b))
-// 	if err != nil {
-// 		return result, err
-// 	}
-// 	param2, err := codec.Encode(p2)
-// 	if err != nil {
-// 		return result, err
-// 	}
-// 	_ = param2
-// 	//fmt.Println(p2.HasValue())
-// 	key, err := types.CreateStorageKey(c.metadata, Staking, "ErasStakersClipped", param1, param2)
-// 	if err != nil {
-// 		return result, err
-// 	}
-// 	_ = key
-// 	kkey := CreatePrefixedKey(Staking, ErasStakers)
-// 	//kkey = append(kkey, []byte(" ")...)
-// 	//kkey = append(kkey, param1...) //xxhash.New128(param1).Sum(nil)...)
+	if !c.GetRpcState() {
+		return result, ERR_RPC_CONNECTION
+	}
 
-// 	entryMeta, err := c.GetMetadata().FindStorageEntryMetadata(Staking, ErasStakers)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	hashers, err := entryMeta.Hashers()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	_, err = hashers[0].Write(param1)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	kkey = append(kkey, hashers[0].Sum(nil)...)
-// 	_, err = hashers[1].Write(param2)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	kkey = append(kkey, hashers[1].Sum(nil)...)
-// 	var result1 StakingExposure
-// 	ok, err := c.api.RPC.State.GetStorageLatest(kkey, &result1)
-// 	if err != nil {
-// 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Staking, ErasStakers, err)
-// 		c.SetRpcState(false)
-// 		return result, err
-// 	}
-// 	fmt.Println(result1)
-// 	if !ok {
-// 		return result, ERR_RPC_EMPTY_VALUE
-// 	}
-// 	return result, nil
-// }
+	param1, err := codec.Encode(types.NewU32(era))
+	if err != nil {
+		return result, err
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, Staking, ErasStakers, param1, accountId)
+	if err != nil {
+		return result, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &result)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Staking, ErasStakers, err)
+		c.SetRpcState(false)
+		return result, err
+	}
+	fmt.Println(result)
+	if !ok {
+		return result, ERR_RPC_EMPTY_VALUE
+	}
+	return result, nil
+}
