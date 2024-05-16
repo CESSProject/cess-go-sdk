@@ -51,7 +51,23 @@ func main() {
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
-	pk, err := utils.ParsingPublickey("cXik7GNf8qYgt6TtGajELHN8QRjd9iy4pd6soPnjcccsenSuh")
+	return
+
+	pk, err := utils.ParsingPublickey("cXfnLrW67qKkTn7DPXfh1SykwLSmqzrui2D81RVooUSV4e5VK")
+	if err != nil {
+		panic(err)
+	}
+	nominatorData, err := sdk.QueryeNominators(pk, 1507967)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("len(nominatorData.Targets): ", len(nominatorData.Targets))
+	for _, v := range nominatorData.Targets {
+		fmt.Println(utils.EncodePublicKeyAsCessAccount(v[:]))
+	}
+	return
+
+	pk, err = utils.ParsingPublickey("cXik7GNf8qYgt6TtGajELHN8QRjd9iy4pd6soPnjcccsenSuh")
 	if err != nil {
 		panic(err)
 	}

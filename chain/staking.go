@@ -661,7 +661,58 @@ func (c *ChainClient) QueryeErasStakers(era uint32, accountId []byte) (StakingEx
 		c.SetRpcState(false)
 		return result, err
 	}
-	fmt.Println(result)
+	if !ok {
+		return result, ERR_RPC_EMPTY_VALUE
+	}
+	return result, nil
+}
+
+// QueryeNominators query the nominator info
+//   - accountId: account id
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - StakingNominations: nominator info
+//   - error: error message
+func (c *ChainClient) QueryeNominators(accountId []byte, block int32) (StakingNominations, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var result StakingNominations
+
+	if !c.GetRpcState() {
+		return result, ERR_RPC_CONNECTION
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, Staking, Nominators, accountId)
+	if err != nil {
+		return result, err
+	}
+
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &result)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Staking, Nominators, err)
+			c.SetRpcState(false)
+			return result, err
+		}
+		if !ok {
+			return result, ERR_RPC_EMPTY_VALUE
+		}
+		return result, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		return result, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &result, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Staking, Nominators, err)
+		c.SetRpcState(false)
+		return result, err
+	}
 	if !ok {
 		return result, ERR_RPC_EMPTY_VALUE
 	}
