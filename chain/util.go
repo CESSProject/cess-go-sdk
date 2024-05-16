@@ -71,6 +71,14 @@ func IsWorkerPublicKeyAllZero(puk WorkerPublicKey) bool {
 	return true
 }
 
+func RrscAppPublicToByte(public RrscAppPublic) types.Bytes {
+	var result = make(types.Bytes, RrscAppPublicLen)
+	for i := 0; i < RrscAppPublicLen; i++ {
+		result[i] = byte(public[i])
+	}
+	return result
+}
+
 // H160ToSS58 convert Eth account to polkadot account
 //   - origin: eth account
 //   - chain_id: chain id, CESS chain id is 11330

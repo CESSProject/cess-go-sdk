@@ -36,12 +36,16 @@ const TreasuryAccount = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
 const (
 	// Audit
 	Audit = "Audit"
+	// Babe
+	Babe = "Babe"
 	// OSS is a module about DeOSS
 	Oss = "Oss"
 	// FILEBANK is a module about data metadata, bucket info, etc.
 	FileBank = "FileBank"
 	// TEEWOEKER is a module about TEE
 	TeeWorker = "TeeWorker"
+	// Session
+	Session = "Session"
 	// SMINER is a module about storage miners
 	Sminer = "Sminer"
 	// STAKING is a module about staking
@@ -67,9 +71,15 @@ const (
 	CountedServiceFailed = "CountedServiceFailed"
 	VerifySlip           = "VerifySlip"
 
+	// Babe
+	Authorities = "Authorities"
+
 	// Oss
 	// Oss
 	AuthorityList = "AuthorityList"
+
+	// Session
+	// Validators = "Validators"
 
 	// Sminer
 	AllMiner             = "AllMiner"
@@ -100,10 +110,11 @@ const (
 	// Staking
 	CounterForValidators = "CounterForValidators"
 	CounterForNominators = "CounterForNominators"
-	ErasTotalStake       = "ErasTotalStake"
 	CurrentEra           = "CurrentEra"
+	ErasTotalStake       = "ErasTotalStake"
 	ErasStakers          = "ErasStakers"
 	ErasRewardPoints     = "ErasRewardPoints"
+	Ledger               = "Ledger"
 	Nominators           = "Nominators"
 	Bonded               = "Bonded"
 	Validators           = "Validators"
@@ -248,6 +259,7 @@ const (
 	MasterPublicKeyLen     = 32
 	EcdhPublicKeyLen       = 32
 	TeeSigLen              = 64
+	RrscAppPublicLen       = 32
 )
 
 type FileHash [FileHashLen]types.U8
@@ -263,12 +275,25 @@ type WorkerPublicKey [WorkerPublicKeyLen]types.U8
 type MasterPublicKey [MasterPublicKeyLen]types.U8
 type EcdhPublicKey [EcdhPublicKeyLen]types.U8
 type TeeSig [TeeSigLen]types.U8
+type RrscAppPublic [RrscAppPublicLen]types.U8
+type AppPublicType [4]types.U8
+
+var RrscAppPublicType = AppPublicType{'r', 'r', 's', 'c'}
+var AudiAppPublicType = AppPublicType{'a', 'u', 'd', 'i'}
+var GranAppPublicType = AppPublicType{'g', 'r', 'a', 'n'}
+var ImonAppPublicType = AppPublicType{'i', 'm', 'o', 'n'}
 
 // Audit
 type ChallengeInfo struct {
 	MinerSnapshot    MinerSnapShot
 	ChallengeElement ChallengeElement
 	ProveInfo        ProveInfo
+}
+
+// babe
+type ConsensusRrscAppPublic struct {
+	Public  RrscAppPublic
+	Unknown types.U64
 }
 
 // Oss
@@ -341,6 +366,12 @@ type OssInfo struct {
 	Domain types.Bytes
 }
 
+// Session
+type KeyOwnerParam struct {
+	PublicType AppPublicType
+	Public     types.Bytes
+}
+
 // Sminer
 type MinerInfo struct {
 	BeneficiaryAccount types.AccountID
@@ -393,6 +424,25 @@ type StakingEraRewardPoints struct {
 type Individual struct {
 	Acc    types.AccountID
 	Reward types.U32
+}
+
+type StakingNominations struct {
+	Targets     []types.AccountID
+	SubmittedIn types.U32
+	Suppressed  types.Bool
+}
+
+type StakingLedger struct {
+	Stash          types.AccountID
+	Total          types.UCompact
+	Active         types.UCompact
+	Unlocking      []UnlockChunk
+	ClaimedRewards []types.U32
+}
+
+type UnlockChunk struct {
+	Value types.UCompact
+	Era   types.BlockNumber
 }
 
 // TeeWorker
@@ -507,20 +557,14 @@ type DigestInfo struct {
 }
 
 type StakingExposure struct {
-	Total  types.U128
-	Own    types.U128
+	Total  types.UCompact
+	Own    types.UCompact
 	Others []OtherStakingExposure
 }
 
 type OtherStakingExposure struct {
 	Who   types.AccountID
-	Value types.U128
-}
-
-type StakingNominations struct {
-	Targets     []types.AccountID
-	SubmittedIn types.U32
-	Suppressed  types.Bool
+	Value types.UCompact
 }
 
 type StakingValidatorPrefs struct {

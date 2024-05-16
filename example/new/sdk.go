@@ -16,8 +16,9 @@ import (
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/utils"
+	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/vedhavyas/go-subkey/scale"
 )
 
 // Substrate well-known mnemonic:
@@ -28,11 +29,11 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//devnet
-	"wss://devnet-rpc.cess.cloud/ws/",
+	//"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
 	//"wss://testnet-rpc0.cess.cloud/ws/",
 	//"wss://testnet-rpc1.cess.cloud/ws/",
-	//"wss://testnet-rpc2.cess.cloud/ws/",
+	"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
 func main() {
@@ -50,7 +51,39 @@ func main() {
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
+	return
 
+	pk, err := utils.ParsingPublickey("cXfnLrW67qKkTn7DPXfh1SykwLSmqzrui2D81RVooUSV4e5VK")
+	if err != nil {
+		panic(err)
+	}
+	nominatorData, err := sdk.QueryeNominators(pk, 1507967)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("len(nominatorData.Targets): ", len(nominatorData.Targets))
+	for _, v := range nominatorData.Targets {
+		fmt.Println(utils.EncodePublicKeyAsCessAccount(v[:]))
+	}
+	return
+
+	pk, err = utils.ParsingPublickey("cXik7GNf8qYgt6TtGajELHN8QRjd9iy4pd6soPnjcccsenSuh")
+	if err != nil {
+		panic(err)
+	}
+	dd, err := sdk.QueryeErasStakers(432, pk)
+	if err != nil {
+		panic(err)
+	}
+	to := big.Int(dd.Total)
+	ac := big.Int(dd.Own)
+	fmt.Printf("total: %v\n", to.String())
+	fmt.Printf("own: %v\n", ac.String())
+	for _, v := range dd.Others {
+		bg := big.Int(v.Value)
+		fmt.Println(utils.EncodePublicKeyAsCessAccount(v.Who[:]))
+		fmt.Printf("value: %v\n", bg.String())
+	}
 	return
 
 	blockhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(180)

@@ -21,6 +21,9 @@ type Chainer interface {
 	SubmitIdleProof(idleProof []types.U8) (string, error)
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
 
+	// Babe
+	QueryAuthorities(block int32) ([]ConsensusRrscAppPublic, error)
+
 	// Balances
 	QueryTotalIssuance(block int32) (string, error)
 	QueryInactiveIssuance(block int32) (string, error)
@@ -62,6 +65,9 @@ type Chainer interface {
 	ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo) (string, error)
 
+	// Session
+	QueryValidators(block int32) ([]types.AccountID, error)
+
 	// Sminer
 	QueryExpenders(block int32) (ExpendersInfo, error)
 	QueryMinerItems(accountID []byte, block int32) (MinerInfo, error)
@@ -95,6 +101,9 @@ type Chainer interface {
 	QueryAllBonded(block int32) ([]types.AccountID, error)
 	QueryValidatorCommission(accountID []byte, block int32) (uint8, error)
 	QueryEraValidatorReward(era uint32, block int32) (string, error)
+	QueryLedger(accountID []byte, block int32) (StakingLedger, error)
+	QueryeErasStakers(era uint32, accountId []byte) (StakingExposure, error)
+	QueryeNominators(accountId []byte, block int32) (StakingNominations, error)
 
 	// StorageHandler
 	QueryUnitPrice(block int32) (string, error)
