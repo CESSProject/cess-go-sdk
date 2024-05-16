@@ -21,6 +21,9 @@ type Chainer interface {
 	SubmitIdleProof(idleProof []types.U8) (string, error)
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
 
+	// Babe
+	QueryAuthorities(block int32) ([]ConsensusRrscAppPublic, error)
+
 	// Balances
 	QueryTotalIssuance(block int32) (string, error)
 	QueryInactiveIssuance(block int32) (string, error)
@@ -61,6 +64,9 @@ type Chainer interface {
 	CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo) (string, error)
+
+	// Session
+	QueryValidators(block int32) ([]types.AccountID, error)
 
 	// Sminer
 	QueryExpenders(block int32) (ExpendersInfo, error)

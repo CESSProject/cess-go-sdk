@@ -2662,8 +2662,6 @@ func ParseChallResultFromEvent(e *parser.Event) (string, bool, error) {
 	for _, v := range e.Fields {
 		k := reflect.TypeOf(v.Value).Kind()
 		val := reflect.ValueOf(v.Value)
-		fmt.Println("k: ", k)
-		fmt.Println("name: ", v.Name)
 		if k == reflect.Slice {
 			if strings.Contains(v.Name, "miner") {
 				acc = parseAccount(val)

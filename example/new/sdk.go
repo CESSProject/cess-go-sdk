@@ -28,11 +28,11 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//devnet
-	"wss://devnet-rpc.cess.cloud/ws/",
+	//"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
 	//"wss://testnet-rpc0.cess.cloud/ws/",
-	//"wss://testnet-rpc1.cess.cloud/ws/",
-	//"wss://testnet-rpc2.cess.cloud/ws/",
+	"wss://testnet-rpc1.cess.cloud/ws/",
+	"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
 func main() {
@@ -50,7 +50,6 @@ func main() {
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
-
 	return
 
 	blockhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(180)
