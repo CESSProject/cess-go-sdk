@@ -639,6 +639,7 @@ type BlockData struct {
 	Timestamp           int64
 	BlockId             uint32
 	IsNewEra            bool
+	EraPaid             EraPaid
 	SysEvents           []string
 	NewAccounts         []string
 	GenChallenge        []string
@@ -743,4 +744,11 @@ type MinerRegPoiskey struct {
 type GatewayReg struct {
 	ExtrinsicHash string
 	Account       string
+}
+
+type EraPaid struct {
+	HaveValue       bool
+	EraIndex        uint32
+	ValidatorPayout string
+	Remainder       string
 }
