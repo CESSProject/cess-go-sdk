@@ -73,7 +73,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	blockData, err := sdk.ParseBlockData(72094)
+	blockData, err := sdk.ParseBlockData(22427)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -140,6 +140,20 @@ func main() {
 	for _, v := range blockData.StorageCompleted {
 		fmt.Println("    StorageCompleted fid: ", v)
 	}
+	fmt.Println("EraPaid:")
+	fmt.Println("    EraPaid valu: ", blockData.EraPaid.HaveValue)
+	fmt.Println("    EraPaid EraIndex: ", blockData.EraPaid.EraIndex)
+	fmt.Println("    EraPaid ValidatorPayout: ", blockData.EraPaid.ValidatorPayout)
+	fmt.Println("    EraPaid Remainder: ", blockData.EraPaid.Remainder)
+
+	fmt.Println("StakingPayouts:")
+	for _, v := range blockData.StakingPayouts {
+		fmt.Println("    StakingPayouts EraIndex: ", v.EraIndex)
+		fmt.Println("    StakingPayouts ClaimedAcc: ", v.ClaimedAcc)
+		fmt.Println("    StakingPayouts Amount: ", v.Amount)
+		fmt.Println("    StakingPayouts ExtrinsicHash: ", v.ExtrinsicHash)
+	}
+
 	fmt.Println("system events: ", blockData.SysEvents)
 	fmt.Println("transfer info: ", blockData.TransferInfo)
 	fmt.Println("minerReg info: ", blockData.MinerReg)

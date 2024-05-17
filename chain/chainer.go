@@ -161,6 +161,7 @@ type Chainer interface {
 
 	// Extrinsics
 	InitExtrinsicsName() error
+	ParseBlockData(blocknumber uint64) (BlockData, error)
 
 	// event
 	DecodeEventNameFromBlock(block uint64) ([]string, error)
@@ -201,7 +202,4 @@ type Chainer interface {
 	RetrieveAllEvent_FileBank_StorageCompleted(blockhash types.Hash) ([]string, error)
 	RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]AllDeleteFileEvent, error)
 	RetrieveAllEventFromBlock(blockhash types.Hash) ([]string, map[string][]string, error)
-	RetrieveBlock(blocknumber uint64) ([]string, []ExtrinsicsInfo, []TransferInfo, string, string, string, string, int64, error)
-	RetrieveBlockAndAll(blocknumber uint64) ([]string, []ExtrinsicsInfo, []TransferInfo, []string, []string, string, string, string, string, string, int64, error)
-	ParseBlockData(blocknumber uint64) (BlockData, error)
 }

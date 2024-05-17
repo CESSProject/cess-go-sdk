@@ -8,7 +8,7 @@
 package chain
 
 const (
-	// AUDIT
+	// Audit
 	AuditVerifyProof               = "Audit.VerifyProof"
 	AuditSubmitProof               = "Audit.SubmitProof"
 	AuditGenerateChallenge         = "Audit.GenerateChallenge"
@@ -17,10 +17,11 @@ const (
 	AuditSubmitIdleVerifyResult    = "Audit.SubmitIdleVerifyResult"
 	AuditSubmitServiceVerifyResult = "Audit.SubmitServiceVerifyResult"
 
-	// BALANCE
-	BalanceTransfer = "Balances.Transfer"
+	// Balances
+	BalancesWithdraw = "Balances.Withdraw"
+	BalancesTransfer = "Balances.Transfer"
 
-	// FILEBANK
+	// FileBank
 	FileBankDeleteFile            = "FileBank.DeleteFile"
 	FileBankFillerDelete          = "FileBank.FillerDelete"
 	FileBankFillerUpload          = "FileBank.FillerUpload"
@@ -37,14 +38,14 @@ const (
 	FileBankReplaceIdleSpace      = "FileBank.ReplaceIdleSpace"
 	FileBankCalculateReport       = "FileBank.CalculateReport"
 
-	// OSS
+	// Oss
 	OssAuthorize       = "Oss.Authorize"
 	OssCancelAuthorize = "Oss.CancelAuthorize"
 	OssOssRegister     = "Oss.OssRegister"
 	OssOssUpdate       = "Oss.OssUpdate"
 	OssOssDestroy      = "Oss.OssDestroy"
 
-	// SMINER
+	// Sminer
 	SminerRegistered               = "Sminer.Registered"
 	SminerRegisterPoisKey          = "Sminer.RegisterPoisKey"
 	SminerDrawFaucetMoney          = "Sminer.DrawFaucetMoney"
@@ -57,6 +58,12 @@ const (
 	SminerMinerExitPrep            = "Sminer.MinerExitPrep"
 	SminerWithdraw                 = "Sminer.Withdraw"
 	SminerIncreaseDeclarationSpace = "Sminer.IncreaseDeclarationSpace"
+
+	// Staking
+	StakingStakersElected = "Staking.StakersElected"
+	StakingEraPaid        = "Staking.EraPaid"
+	StakingPayoutStarted  = "Staking.PayoutStarted"
+	StakingRewarded       = "Staking.Rewarded"
 
 	// StorageHandler
 	StorageHandlerBuySpace       = "StorageHandler.BuySpace"
@@ -77,13 +84,9 @@ const (
 	TransactionPaymentTransactionFeePaid = "TransactionPayment.TransactionFeePaid"
 	//
 	EvmAccountMappingTransactionFeePaid = "EvmAccountMapping.TransactionFeePaid"
-	//
-	BalancesWithdraw = "Balances.Withdraw"
-	BalancesTransfer = "Balances.Transfer"
-	//
+
+	// System
 	SystemExtrinsicSuccess = "System.ExtrinsicSuccess"
 	SystemExtrinsicFailed  = "System.ExtrinsicFailed"
 	SystemNewAccount       = "System.NewAccount"
-	//
-	StakingStakersElected = "Staking.StakersElected"
 )

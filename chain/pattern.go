@@ -80,6 +80,7 @@ const (
 
 	// Session
 	// Validators = "Validators"
+	KeyOwner = "keyOwner"
 
 	// Sminer
 	AllMiner             = "AllMiner"
