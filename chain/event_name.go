@@ -62,6 +62,8 @@ const (
 	// Staking
 	StakingStakersElected = "Staking.StakersElected"
 	StakingEraPaid        = "Staking.EraPaid"
+	StakingPayoutStarted  = "Staking.PayoutStarted"
+	StakingRewarded       = "Staking.Rewarded"
 
 	// StorageHandler
 	StorageHandlerBuySpace       = "StorageHandler.BuySpace"

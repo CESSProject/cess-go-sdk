@@ -73,7 +73,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	blockData, err := sdk.ParseBlockData(3571)
+	blockData, err := sdk.ParseBlockData(22427)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -145,6 +145,14 @@ func main() {
 	fmt.Println("    EraPaid EraIndex: ", blockData.EraPaid.EraIndex)
 	fmt.Println("    EraPaid ValidatorPayout: ", blockData.EraPaid.ValidatorPayout)
 	fmt.Println("    EraPaid Remainder: ", blockData.EraPaid.Remainder)
+
+	fmt.Println("StakingPayouts:")
+	for _, v := range blockData.StakingPayouts {
+		fmt.Println("    StakingPayouts EraIndex: ", v.EraIndex)
+		fmt.Println("    StakingPayouts ClaimedAcc: ", v.ClaimedAcc)
+		fmt.Println("    StakingPayouts Amount: ", v.Amount)
+		fmt.Println("    StakingPayouts ExtrinsicHash: ", v.ExtrinsicHash)
+	}
 
 	fmt.Println("system events: ", blockData.SysEvents)
 	fmt.Println("transfer info: ", blockData.TransferInfo)

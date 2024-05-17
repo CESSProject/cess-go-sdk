@@ -658,6 +658,7 @@ type BlockData struct {
 	Punishment          []Punishment
 	MinerRegPoiskeys    []MinerRegPoiskey
 	GatewayReg          []GatewayReg
+	StakingPayouts      []StakingPayout
 }
 
 type ExtrinsicsInfo struct {
@@ -751,4 +752,11 @@ type EraPaid struct {
 	EraIndex        uint32
 	ValidatorPayout string
 	Remainder       string
+}
+
+type StakingPayout struct {
+	EraIndex      uint32
+	ExtrinsicHash string
+	ClaimedAcc    string
+	Amount        string
 }

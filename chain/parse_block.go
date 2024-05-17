@@ -260,6 +260,28 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						return blockdata, err
 					}
 					blockdata.StorageCompleted = append(blockdata.StorageCompleted, fid)
+				} else if e.Name == StakingPayoutStarted {
+					eraIndex, validatorStash, err := ParseStakingPayoutStartedFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.StakingPayouts = append(blockdata.StakingPayouts, StakingPayout{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						EraIndex:      eraIndex,
+						ClaimedAcc:    validatorStash,
+					})
+				} else if e.Name == StakingRewarded {
+					acc, amount, err := ParseStakingRewardedFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					for i := 0; i < len(blockdata.StakingPayouts); i++ {
+						if blockdata.StakingPayouts[i].ClaimedAcc == acc &&
+							blockdata.StakingPayouts[i].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							blockdata.StakingPayouts[i].Amount = amount
+							break
+						}
+					}
 				} else if e.Name == SystemExtrinsicSuccess {
 					extInfo.Events = append(make([]string, 0), eventsBuf...)
 					extInfo.Name = name
@@ -388,6 +410,16 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 								blockdata.GatewayReg = nil
 							} else {
 								blockdata.GatewayReg = append(blockdata.GatewayReg[:m], blockdata.GatewayReg[m+1:]...)
+							}
+							break
+						}
+					}
+					for m := 0; m < len(blockdata.StakingPayouts); m++ {
+						if blockdata.StakingPayouts[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+							if len(blockdata.StakingPayouts) == 1 {
+								blockdata.StakingPayouts = nil
+							} else {
+								blockdata.StakingPayouts = append(blockdata.StakingPayouts[:m], blockdata.StakingPayouts[m+1:]...)
 							}
 							break
 						}
@@ -691,4 +723,56 @@ func ParseStakingEraPaidFromEvent(e *parser.Event) (uint32, string, string, erro
 		}
 	}
 	return eraIndex, validatorPayout, remainder, nil
+}
+
+func ParseStakingPayoutStartedFromEvent(e *parser.Event) (uint32, string, error) {
+	var eraIndex uint32
+	var validatorStash string
+	for _, v := range e.Fields {
+		k := reflect.TypeOf(v.Value).Kind()
+		val := reflect.ValueOf(v.Value)
+		if k == reflect.Uint32 {
+			if strings.Contains(v.Name, "era_index") {
+				eraid, err := strconv.ParseUint(fmt.Sprintf("%v", val), 10, 32)
+				if err != nil {
+					return 0, "", err
+				}
+				eraIndex = uint32(eraid)
+			}
+		}
+		if k == reflect.Slice {
+			if strings.Contains(v.Name, "validator_stash") {
+				validatorStash = parseAccount(val)
+			}
+		}
+	}
+	if validatorStash == "" {
+		return 0, "", errors.New("[ParseStakingPayoutStartedFromEvent] failed")
+	}
+	return eraIndex, validatorStash, nil
+}
+
+func ParseStakingRewardedFromEvent(e *parser.Event) (string, string, error) {
+	var account string
+	var amount string
+	for _, v := range e.Fields {
+		k := reflect.TypeOf(v.Value).Kind()
+		val := reflect.ValueOf(v.Value)
+
+		if k == reflect.Slice {
+			if strings.Contains(v.Name, "stash") ||
+				strings.Contains(v.Name, "account") {
+				account = parseAccount(val)
+			}
+		}
+		if k == reflect.Struct {
+			if strings.Contains(v.Name, "amount") {
+				amount = ExplicitBigInt(val, 0)
+			}
+		}
+	}
+	if account == "" {
+		return account, amount, fmt.Errorf("[ParseStakingRewardedFromEvent] failed")
+	}
+	return account, amount, nil
 }
