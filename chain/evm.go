@@ -90,7 +90,7 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {

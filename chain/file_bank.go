@@ -630,7 +630,7 @@ func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -970,7 +970,7 @@ func (c *ChainClient) DeleteFile(owner []byte, fid string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -1095,7 +1095,7 @@ func (c *ChainClient) TransferReport(index uint8, fid string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -1335,7 +1335,7 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -1473,7 +1473,7 @@ func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, fid, fragmentHash st
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -1594,7 +1594,7 @@ func (c *ChainClient) RestoralOrderComplete(fragmentHash string) (string, error)
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -1709,7 +1709,7 @@ func (c *ChainClient) CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAc
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -1825,7 +1825,7 @@ func (c *ChainClient) ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWit
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -1939,7 +1939,7 @@ func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo)
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {

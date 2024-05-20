@@ -248,7 +248,7 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -358,7 +358,7 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -474,7 +474,7 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -587,7 +587,7 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {

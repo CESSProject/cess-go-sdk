@@ -65,6 +65,9 @@ type Chainer interface {
 	ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo) (string, error)
 
+	// SchedulerCredit
+	QueryCurrentCounters(accountId []byte, block int32) (SchedulerCounterEntry, error)
+
 	// Session
 	QueryValidators(block int32) ([]types.AccountID, error)
 

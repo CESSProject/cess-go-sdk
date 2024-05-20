@@ -29,11 +29,11 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//devnet
-	//"wss://devnet-rpc.cess.cloud/ws/",
+	"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
 	//"wss://testnet-rpc0.cess.cloud/ws/",
 	//"wss://testnet-rpc1.cess.cloud/ws/",
-	"wss://testnet-rpc2.cess.cloud/ws/",
+	//"wss://testnet-rpc2.cess.cloud/ws/",
 }
 
 func main() {
@@ -53,7 +53,14 @@ func main() {
 	fmt.Println(sdk.GetCurrentRpcAddr())
 	return
 
-	pk, err := utils.ParsingPublickey("cXfnLrW67qKkTn7DPXfh1SykwLSmqzrui2D81RVooUSV4e5VK")
+	pk, err := utils.ParsingPublickey("cXiKthh2dyY1taTydtdxiqQwXY1HKZcXvYGmjS2UmuPi2qNDS")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(sdk.QueryCurrentCounters(pk, -1))
+	return
+
+	pk, err = utils.ParsingPublickey("cXfnLrW67qKkTn7DPXfh1SykwLSmqzrui2D81RVooUSV4e5VK")
 	if err != nil {
 		panic(err)
 	}
