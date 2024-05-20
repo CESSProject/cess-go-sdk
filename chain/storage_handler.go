@@ -377,7 +377,7 @@ func (c *ChainClient) BuySpace(count uint32) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -491,7 +491,7 @@ func (c *ChainClient) ExpansionSpace(count uint32) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
@@ -605,7 +605,7 @@ func (c *ChainClient) RenewalSpace(days uint32) (string, error) {
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		if strings.Contains(err.Error(), ERR_RPC_PRIORITYTOOLOW) {
+		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
 			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
 			err = ext.Sign(c.keyring, o)
 			if err != nil {
