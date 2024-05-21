@@ -73,7 +73,7 @@ func main() {
 
 	//fmt.Println(sdk.RetrieveAllEventFromBlock(bhash))
 
-	blockData, err := sdk.ParseBlockData(22427)
+	blockData, err := sdk.ParseBlockData(36590)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -152,6 +152,12 @@ func main() {
 		fmt.Println("    StakingPayouts ClaimedAcc: ", v.ClaimedAcc)
 		fmt.Println("    StakingPayouts Amount: ", v.Amount)
 		fmt.Println("    StakingPayouts ExtrinsicHash: ", v.ExtrinsicHash)
+	}
+	fmt.Println("Unbonded:")
+	for _, v := range blockData.Unbonded {
+		fmt.Println("    Unbonded Account: ", v.Account)
+		fmt.Println("    StakingPayouts Amount: ", v.Amount)
+		fmt.Println("    Unbonded ExtrinsicHash: ", v.ExtrinsicHash)
 	}
 
 	fmt.Println("system events: ", blockData.SysEvents)
