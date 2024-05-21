@@ -64,6 +64,7 @@ const (
 	StakingEraPaid        = "Staking.EraPaid"
 	StakingPayoutStarted  = "Staking.PayoutStarted"
 	StakingRewarded       = "Staking.Rewarded"
+	StakingUnbonded       = "Staking.Unbonded"
 
 	// StorageHandler
 	StorageHandlerBuySpace       = "StorageHandler.BuySpace"

@@ -96,8 +96,9 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					continue
 				}
 				eventsBuf = append(eventsBuf, e.Name)
-				if e.Name == TransactionPaymentTransactionFeePaid ||
-					e.Name == EvmAccountMappingTransactionFeePaid {
+
+				switch e.Name {
+				case TransactionPaymentTransactionFeePaid, EvmAccountMappingTransactionFeePaid:
 					signer, fee, err = parseSignerAndFeePaidFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -106,7 +107,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					if ok {
 						allGasFee = allGasFee.Add(allGasFee, tmp)
 					}
-				} else if e.Name == BalancesTransfer {
+				case BalancesTransfer:
 					from, to, amount, err := ParseTransferInfoFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -127,7 +128,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Amount:        amount,
 						Result:        true,
 					})
-				} else if e.Name == SminerRegistered {
+				case SminerRegistered:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -136,13 +137,13 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Account:       acc,
 					})
-				} else if e.Name == SystemNewAccount {
+				case SystemNewAccount:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
 					blockdata.NewAccounts = append(blockdata.NewAccounts, acc)
-				} else if e.Name == FileBankUploadDeclaration {
+				case FileBankUploadDeclaration:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -156,7 +157,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Owner:         acc,
 						Fid:           fid,
 					})
-				} else if e.Name == FileBankDeleteFile {
+				case FileBankDeleteFile:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -170,7 +171,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Owner:         acc,
 						Fid:           fid,
 					})
-				} else if e.Name == FileBankCreateBucket {
+				case FileBankCreateBucket:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -184,7 +185,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Owner:         acc,
 						BucketName:    bucketname,
 					})
-				} else if e.Name == FileBankDeleteBucket {
+				case FileBankDeleteBucket:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -198,7 +199,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Owner:         acc,
 						BucketName:    bucketname,
 					})
-				} else if e.Name == AuditSubmitIdleProof {
+				case AuditSubmitIdleProof:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -207,7 +208,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Miner:         acc,
 					})
-				} else if e.Name == AuditSubmitServiceProof {
+				case AuditSubmitServiceProof:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -216,7 +217,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Miner:         acc,
 					})
-				} else if e.Name == AuditSubmitIdleVerifyResult {
+				case AuditSubmitIdleVerifyResult:
 					acc, result, err := ParseChallResultFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -226,7 +227,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Miner:         acc,
 						Result:        result,
 					})
-				} else if e.Name == AuditSubmitServiceVerifyResult {
+				case AuditSubmitServiceVerifyResult:
 					acc, result, err := ParseChallResultFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -236,7 +237,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Miner:         acc,
 						Result:        result,
 					})
-				} else if e.Name == SminerRegisterPoisKey {
+				case SminerRegisterPoisKey:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -245,7 +246,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Miner:         acc,
 					})
-				} else if e.Name == OssOssRegister {
+				case OssOssRegister:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -254,13 +255,13 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Account:       acc,
 					})
-				} else if e.Name == FileBankStorageCompleted {
+				case FileBankStorageCompleted:
 					fid, err := ParseStringFromEvent(e)
 					if err != nil {
 						return blockdata, err
 					}
 					blockdata.StorageCompleted = append(blockdata.StorageCompleted, fid)
-				} else if e.Name == StakingPayoutStarted {
+				case StakingPayoutStarted:
 					eraIndex, validatorStash, err := ParseStakingPayoutStartedFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -270,7 +271,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						EraIndex:      eraIndex,
 						ClaimedAcc:    validatorStash,
 					})
-				} else if e.Name == StakingRewarded {
+				case StakingRewarded:
 					acc, amount, err := ParseStakingRewardedFromEvent(e)
 					if err != nil {
 						return blockdata, err
@@ -282,7 +283,17 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 							break
 						}
 					}
-				} else if e.Name == SystemExtrinsicSuccess {
+				case StakingUnbonded:
+					acc, amount, err := ParseStakingRewardedFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.Unbonded = append(blockdata.Unbonded, Unbonded{
+						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+						Account:       acc,
+						Amount:        amount,
+					})
+				case SystemExtrinsicSuccess:
 					extInfo.Events = append(make([]string, 0), eventsBuf...)
 					extInfo.Name = name
 					extInfo.Signer = signer
@@ -293,137 +304,164 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					eventsBuf = make([]string, 0)
 					extInfo = ExtrinsicsInfo{}
 					extrinsicIndex++
-				} else if e.Name == SystemExtrinsicFailed {
-					for m := 0; m < len(blockdata.UploadDecInfo); m++ {
-						if blockdata.UploadDecInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.UploadDecInfo) == 1 {
-								blockdata.UploadDecInfo = nil
-							} else {
-								blockdata.UploadDecInfo = append(blockdata.UploadDecInfo[:m], blockdata.UploadDecInfo[m+1:]...)
+				case SystemExtrinsicFailed:
+					switch name {
+					case ExtName_FileBank_upload_declaration:
+						for m := 0; m < len(blockdata.UploadDecInfo); m++ {
+							if blockdata.UploadDecInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.UploadDecInfo) == 1 {
+									blockdata.UploadDecInfo = nil
+								} else {
+									blockdata.UploadDecInfo = append(blockdata.UploadDecInfo[:m], blockdata.UploadDecInfo[m+1:]...)
+								}
+								break
 							}
-							break
+						}
+					case ExtName_FileBank_delete_file:
+						for m := 0; m < len(blockdata.DeleteFileInfo); m++ {
+							if blockdata.DeleteFileInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.DeleteFileInfo) == 1 {
+									blockdata.DeleteFileInfo = nil
+								} else {
+									blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo[:m], blockdata.DeleteFileInfo[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_FileBank_delete_bucket:
+						for m := 0; m < len(blockdata.DeleteBucketInfo); m++ {
+							if blockdata.DeleteBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.DeleteBucketInfo) == 1 {
+									blockdata.DeleteBucketInfo = nil
+								} else {
+									blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo[:m], blockdata.DeleteBucketInfo[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_FileBank_create_bucket:
+						for m := 0; m < len(blockdata.CreateBucketInfo); m++ {
+							if blockdata.CreateBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.CreateBucketInfo) == 1 {
+									blockdata.CreateBucketInfo = nil
+								} else {
+									blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo[:m], blockdata.CreateBucketInfo[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Sminer_regnstk:
+						for m := 0; m < len(blockdata.MinerReg); m++ {
+							if blockdata.MinerReg[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.MinerReg) == 1 {
+									blockdata.MinerReg = nil
+								} else {
+									blockdata.MinerReg = append(blockdata.MinerReg[:m], blockdata.MinerReg[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Sminer_register_pois_key:
+						for m := 0; m < len(blockdata.MinerRegPoiskeys); m++ {
+							if blockdata.MinerRegPoiskeys[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.MinerRegPoiskeys) == 1 {
+									blockdata.MinerRegPoiskeys = nil
+								} else {
+									blockdata.MinerRegPoiskeys = append(blockdata.MinerRegPoiskeys[:m], blockdata.MinerRegPoiskeys[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Audit_submit_idle_proof:
+						for m := 0; m < len(blockdata.SubmitIdleProve); m++ {
+							if blockdata.SubmitIdleProve[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.SubmitIdleProve) == 1 {
+									blockdata.SubmitIdleProve = nil
+								} else {
+									blockdata.SubmitIdleProve = append(blockdata.SubmitIdleProve[:m], blockdata.SubmitIdleProve[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Audit_submit_service_proof:
+						for m := 0; m < len(blockdata.SubmitServiceProve); m++ {
+							if blockdata.SubmitServiceProve[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.SubmitServiceProve) == 1 {
+									blockdata.SubmitServiceProve = nil
+								} else {
+									blockdata.SubmitServiceProve = append(blockdata.SubmitServiceProve[:m], blockdata.SubmitServiceProve[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Audit_submit_verify_idle_result:
+						for m := 0; m < len(blockdata.SubmitIdleResult); m++ {
+							if blockdata.SubmitIdleResult[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.SubmitIdleResult) == 1 {
+									blockdata.SubmitIdleResult = nil
+								} else {
+									blockdata.SubmitIdleResult = append(blockdata.SubmitIdleResult[:m], blockdata.SubmitIdleResult[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Audit_submit_verify_service_result:
+						for m := 0; m < len(blockdata.SubmitServiceResult); m++ {
+							if blockdata.SubmitServiceResult[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.SubmitServiceResult) == 1 {
+									blockdata.SubmitServiceResult = nil
+								} else {
+									blockdata.SubmitServiceResult = append(blockdata.SubmitServiceResult[:m], blockdata.SubmitServiceResult[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Oss_register:
+						for m := 0; m < len(blockdata.GatewayReg); m++ {
+							if blockdata.GatewayReg[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.GatewayReg) == 1 {
+									blockdata.GatewayReg = nil
+								} else {
+									blockdata.GatewayReg = append(blockdata.GatewayReg[:m], blockdata.GatewayReg[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Staking_payout_stakers:
+						for m := 0; m < len(blockdata.StakingPayouts); m++ {
+							if blockdata.StakingPayouts[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.StakingPayouts) == 1 {
+									blockdata.StakingPayouts = nil
+								} else {
+									blockdata.StakingPayouts = append(blockdata.StakingPayouts[:m], blockdata.StakingPayouts[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Balances_transfer, ExtName_Balances_transferKeepAlive:
+						for m := 0; m < len(blockdata.TransferInfo); m++ {
+							if blockdata.TransferInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.TransferInfo) == 1 {
+									blockdata.TransferInfo = nil
+								} else {
+									blockdata.TransferInfo = append(blockdata.TransferInfo[:m], blockdata.TransferInfo[m+1:]...)
+								}
+								break
+							}
+						}
+					case ExtName_Staking_unbond:
+						for m := 0; m < len(blockdata.Unbonded); m++ {
+							if blockdata.Unbonded[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.Unbonded) == 1 {
+									blockdata.Unbonded = nil
+								} else {
+									blockdata.Unbonded = append(blockdata.Unbonded[:m], blockdata.Unbonded[m+1:]...)
+								}
+								break
+							}
 						}
 					}
-					for m := 0; m < len(blockdata.DeleteFileInfo); m++ {
-						if blockdata.DeleteFileInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.DeleteFileInfo) == 1 {
-								blockdata.DeleteFileInfo = nil
-							} else {
-								blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo[:m], blockdata.DeleteFileInfo[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.MinerReg); m++ {
-						if blockdata.MinerReg[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.MinerReg) == 1 {
-								blockdata.MinerReg = nil
-							} else {
-								blockdata.MinerReg = append(blockdata.MinerReg[:m], blockdata.MinerReg[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.CreateBucketInfo); m++ {
-						if blockdata.CreateBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.CreateBucketInfo) == 1 {
-								blockdata.CreateBucketInfo = nil
-							} else {
-								blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo[:m], blockdata.CreateBucketInfo[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.DeleteBucketInfo); m++ {
-						if blockdata.DeleteBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.DeleteBucketInfo) == 1 {
-								blockdata.DeleteBucketInfo = nil
-							} else {
-								blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo[:m], blockdata.DeleteBucketInfo[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.SubmitIdleProve); m++ {
-						if blockdata.SubmitIdleProve[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.SubmitIdleProve) == 1 {
-								blockdata.SubmitIdleProve = nil
-							} else {
-								blockdata.SubmitIdleProve = append(blockdata.SubmitIdleProve[:m], blockdata.SubmitIdleProve[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.SubmitServiceProve); m++ {
-						if blockdata.SubmitServiceProve[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.SubmitServiceProve) == 1 {
-								blockdata.SubmitServiceProve = nil
-							} else {
-								blockdata.SubmitServiceProve = append(blockdata.SubmitServiceProve[:m], blockdata.SubmitServiceProve[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.SubmitIdleResult); m++ {
-						if blockdata.SubmitIdleResult[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.SubmitIdleResult) == 1 {
-								blockdata.SubmitIdleResult = nil
-							} else {
-								blockdata.SubmitIdleResult = append(blockdata.SubmitIdleResult[:m], blockdata.SubmitIdleResult[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.SubmitServiceResult); m++ {
-						if blockdata.SubmitServiceResult[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.SubmitServiceResult) == 1 {
-								blockdata.SubmitServiceResult = nil
-							} else {
-								blockdata.SubmitServiceResult = append(blockdata.SubmitServiceResult[:m], blockdata.SubmitServiceResult[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.Punishment); m++ {
-						if blockdata.Punishment[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.Punishment) == 1 {
-								blockdata.Punishment = nil
-							} else {
-								blockdata.Punishment = append(blockdata.Punishment[:m], blockdata.Punishment[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.MinerRegPoiskeys); m++ {
-						if blockdata.MinerRegPoiskeys[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.MinerRegPoiskeys) == 1 {
-								blockdata.MinerRegPoiskeys = nil
-							} else {
-								blockdata.MinerRegPoiskeys = append(blockdata.MinerRegPoiskeys[:m], blockdata.MinerRegPoiskeys[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.GatewayReg); m++ {
-						if blockdata.GatewayReg[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.GatewayReg) == 1 {
-								blockdata.GatewayReg = nil
-							} else {
-								blockdata.GatewayReg = append(blockdata.GatewayReg[:m], blockdata.GatewayReg[m+1:]...)
-							}
-							break
-						}
-					}
-					for m := 0; m < len(blockdata.StakingPayouts); m++ {
-						if blockdata.StakingPayouts[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-							if len(blockdata.StakingPayouts) == 1 {
-								blockdata.StakingPayouts = nil
-							} else {
-								blockdata.StakingPayouts = append(blockdata.StakingPayouts[:m], blockdata.StakingPayouts[m+1:]...)
-							}
-							break
-						}
-					}
+
 					extInfo.Events = append(make([]string, 0), eventsBuf...)
 					extInfo.Name = name
 					extInfo.Signer = signer
@@ -434,6 +472,8 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					eventsBuf = make([]string, 0)
 					extInfo = ExtrinsicsInfo{}
 					extrinsicIndex++
+
+				default:
 				}
 			}
 		} else {
