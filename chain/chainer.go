@@ -137,11 +137,14 @@ type Chainer interface {
 	QueryRoundReward(era uint32, block int32) (string, error)
 
 	// rpc_call
+	ChainGetBlock(hash types.Hash) (types.SignedBlock, error)
+	ChainGetBlockHash(block uint32) (types.Hash, error)
+	ChainGetFinalizedHead() (types.Hash, error)
+	NetListening() (bool, error)
 	SystemProperties() (SysProperties, error)
 	SystemChain() (string, error)
 	SystemSyncState() (SysSyncState, error)
 	SystemVersion() (string, error)
-	NetListening() (bool, error)
 
 	// chain_client
 	GetSDKName() string

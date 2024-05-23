@@ -14,6 +14,63 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
+// ChainGetBlock get SignedBlock info by block hash
+//
+// Return:
+//   - types.SignedBlock: SignedBlock info
+//   - error: error message
+func (c *ChainClient) ChainGetBlock(hash types.Hash) (types.SignedBlock, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.SignedBlock
+	if !c.GetRpcState() {
+		return data, ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, RPC_Chain_getBlock, hash)
+	return data, err
+}
+
+// ChainGetBlockHash get block hash by block number
+//
+// Return:
+//   - types.Hash: block hash
+//   - error: error message
+func (c *ChainClient) ChainGetBlockHash(block uint32) (types.Hash, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.Hash
+	if !c.GetRpcState() {
+		return data, ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, RPC_Chain_getBlockHash, types.NewU32(block))
+	return data, err
+}
+
+// ChainGetFinalizedHead get finalized block hash
+//
+// Return:
+//   - types.Hash: block hash
+//   - error: error message
+func (c *ChainClient) ChainGetFinalizedHead() (types.Hash, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var data types.Hash
+	if !c.GetRpcState() {
+		return data, ERR_RPC_CONNECTION
+	}
+	err := c.api.Client.Call(&data, RPC_Chain_getFinalizedHead)
+	return data, err
+}
+
 // SystemProperties query system properties
 //
 // Return:

@@ -206,6 +206,11 @@ const (
 
 // RPC Call
 const (
+	// Chain
+	RPC_Chain_getBlock         = "chain_getBlock"
+	RPC_Chain_getBlockHash     = "chain_getBlockHash"
+	RPC_Chain_getFinalizedHead = "chain_getFinalizedHead"
+
 	//Net
 	RPC_NET_Listening = "net_listening"
 
