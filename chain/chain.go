@@ -50,6 +50,40 @@ type ChainClient struct {
 
 var _ Chainer = (*ChainClient)(nil)
 
+// NewChainClientUnconnectedRpc creates a chainclient unconnected rpc
+//   - ctx: context
+//   - name: customised name, can be empty
+//   - rpcs: rpc addresses
+//   - mnemonic: account mnemonic, can be empty
+//   - t: waiting time for transaction packing, default is 30 seconds
+//
+// Return:
+//   - *ChainClient: chain client
+//   - error: error message
+func NewChainClientUnconnectedRpc(ctx context.Context, name string, rpcs []string, mnemonic string, t time.Duration) (*ChainClient, error) {
+	var err error
+	var chainClient = &ChainClient{
+		lock:        new(sync.Mutex),
+		chainStLock: new(sync.Mutex),
+		txTicker:    time.NewTicker(BlockInterval),
+		rpcAddr:     rpcs,
+		packingTime: t,
+		name:        name,
+	}
+	if mnemonic != "" {
+		chainClient.keyring, err = signature.KeyringPairFromSecret(mnemonic, 0)
+		if err != nil {
+			return nil, err
+		}
+		chainClient.signatureAcc, err = utils.EncodePublicKeyAsCessAccount(chainClient.keyring.PublicKey)
+		if err != nil {
+			return nil, err
+		}
+	}
+	chainClient.SetRpcState(false)
+	return chainClient, nil
+}
+
 // NewChainClient creates a chainclient
 //   - ctx: context
 //   - name: customised name, can be empty
@@ -184,7 +218,7 @@ func (c *ChainClient) GetRpcState() bool {
 // GetSignatureAcc get your current account address
 //
 // Note:
-//   - make sure you fill in mnemonic when you create the chain client
+//   - make sure you fill in mnemonic when you create the sdk client
 func (c *ChainClient) GetSignatureAcc() string {
 	return c.signatureAcc
 }
@@ -192,7 +226,7 @@ func (c *ChainClient) GetSignatureAcc() string {
 // GetSignatureAccPulickey get your current account public key
 //
 // Note:
-//   - make sure you fill in mnemonic when you create the chain client
+//   - make sure you fill in mnemonic when you create the sdk client
 func (c *ChainClient) GetSignatureAccPulickey() []byte {
 	return c.keyring.PublicKey
 }
