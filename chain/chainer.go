@@ -122,6 +122,7 @@ type Chainer interface {
 	QueryBlockNumber(blockhash string) (uint32, error)
 	QueryAccountInfo(account string, block int32) (types.AccountInfo, error)
 	QueryAccountInfoByAccountID(accountID []byte, block int32) (types.AccountInfo, error)
+	QueryAllAccountInfo(block int32) ([]types.AccountInfo, error)
 
 	// TeeWorker
 	QueryMasterPubKey(block int32) ([]byte, error)
