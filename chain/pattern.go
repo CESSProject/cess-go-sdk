@@ -526,10 +526,10 @@ type UnlockChunk struct {
 
 // System
 type SysProperties struct {
-	Ss58Format    types.Bytes
+	IsEthereum    types.Bool
+	Ss58Format    types.U32
 	TokenDecimals types.U8
 	TokenSymbol   types.Text
-	SS58Prefix    types.U32
 }
 
 type SysSyncState struct {
