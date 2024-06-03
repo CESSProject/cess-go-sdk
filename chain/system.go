@@ -8,6 +8,7 @@
 package chain
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/CESSProject/cess-go-sdk/utils"
@@ -120,4 +121,62 @@ func (c *ChainClient) QueryAccountInfoByAccountID(accountID []byte, block int32)
 		return data, ERR_RPC_EMPTY_VALUE
 	}
 	return data, nil
+}
+
+// QueryAllAccountInfo query all account info
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - []types.AccountInfo: all account info
+//   - error: error message
+func (c *ChainClient) QueryAllAccountInfo(block int32) ([]types.AccountInfo, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	if !c.GetRpcState() {
+		return nil, ERR_RPC_CONNECTION
+	}
+
+	var result []types.AccountInfo
+	key := CreatePrefixedKey(System, Account)
+	keys, err := c.api.RPC.State.GetKeysLatest(key)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), System, Account, err)
+		c.SetRpcState(false)
+		return nil, err
+	}
+
+	var set []types.StorageChangeSet
+	if block < 0 {
+		set, err = c.api.RPC.State.QueryStorageAtLatest(keys)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), System, Account, err)
+			c.SetRpcState(false)
+			return nil, err
+		}
+	} else {
+		blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+		if err != nil {
+			return nil, err
+		}
+		set, err = c.api.RPC.State.QueryStorageAt(keys, blockhash)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), System, Account, err)
+			c.SetRpcState(false)
+			return nil, err
+		}
+	}
+	for _, elem := range set {
+		for _, change := range elem.Changes {
+			var data types.AccountInfo
+			if err := codec.Decode(change.StorageData, &data); err != nil {
+				continue
+			}
+			result = append(result, data)
+		}
+	}
+	return result, nil
 }

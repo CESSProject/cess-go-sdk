@@ -9,12 +9,15 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"time"
 
+	sdkgo "github.com/CESSProject/cess-go-sdk"
 	"github.com/CESSProject/cess-go-sdk/core/process"
+	"github.com/CESSProject/cess-go-sdk/utils"
 )
 
 // Substrate well-known mnemonic:
@@ -23,8 +26,6 @@ import (
 var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
 
 var RPC_ADDRS = []string{
-	//devnet
-	"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
 	"wss://testnet-rpc0.cess.cloud/ws/",
 	"wss://testnet-rpc1.cess.cloud/ws/",
@@ -37,6 +38,33 @@ const UploadFile = "file.go"
 const BucketName = "myBucket"
 
 func main() {
+	sdk, err := sdkgo.New(
+		context.Background(),
+		sdkgo.ConnectRpcAddrs(RPC_ADDRS),
+		sdkgo.Mnemonic(MY_MNEMONIC),
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer sdk.Close()
+
+	// buy space
+	_, err = sdk.BuySpace(1)
+	if err != nil {
+		panic(err)
+	}
+
+	puk, err := utils.ParsingPublickey(PublicGatewayAccount)
+	if err != nil {
+		panic(err)
+	}
+
+	// authorize to oss
+	_, err = sdk.Authorize(puk)
+	if err != nil {
+		panic(err)
+	}
+
 	// upload file to gateway
 	fid, err := process.StoreFile(PublicGateway, UploadFile, BucketName, MY_MNEMONIC)
 	if err != nil {

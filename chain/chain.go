@@ -300,23 +300,27 @@ func (c *ChainClient) ReconnectRpc() error {
 	if err != nil {
 		return err
 	}
-	accInfo, err := c.QueryAccountInfoByAccountID(c.keyring.PublicKey, -1)
-	if err != nil {
-		return err
-	}
-	c.SetRpcState(true)
-	if len(accInfo.Data.Free.Bytes()) <= 0 {
-		c.balance = 0
-	} else {
-		free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
-		minBanlance_bi, _ := new(big.Int).SetString(MinTransactionBalance, 10)
-		free_bi = free_bi.Div(free_bi, minBanlance_bi)
-		if free_bi.IsUint64() {
-			c.balance = free_bi.Uint64()
+	if c.keyring.URI != "" && len(c.keyring.PublicKey) > 0 {
+		accInfo, err := c.QueryAccountInfoByAccountID(c.keyring.PublicKey, -1)
+		if err != nil {
+			return err
+		}
+
+		if len(accInfo.Data.Free.Bytes()) <= 0 {
+			c.balance = 0
 		} else {
-			c.balance = math.MaxUint64
+			free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
+			minBanlance_bi, _ := new(big.Int).SetString(MinTransactionBalance, 10)
+			free_bi = free_bi.Div(free_bi, minBanlance_bi)
+			if free_bi.IsUint64() {
+				c.balance = free_bi.Uint64()
+			} else {
+				c.balance = math.MaxUint64
+			}
 		}
 	}
+
+	c.SetRpcState(true)
 	return nil
 }
 
