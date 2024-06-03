@@ -51,6 +51,8 @@ func main() {
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
+
+	fmt.Println(sdk.QueryValidatorsCount(-1))
 	return
 
 	pk, err := utils.ParsingPublickey("cXiKthh2dyY1taTydtdxiqQwXY1HKZcXvYGmjS2UmuPi2qNDS")

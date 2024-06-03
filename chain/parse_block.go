@@ -478,17 +478,22 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 			}
 		} else {
 			blockdata.SysEvents = append(blockdata.SysEvents, e.Name)
-			if e.Name == StakingStakersElected {
+			switch e.Name {
+			case StakingStakersElected:
 				blockdata.IsNewEra = true
-			}
-			if e.Name == AuditGenerateChallenge {
+			case SystemNewAccount:
+				acc, err := ParseAccountFromEvent(e)
+				if err != nil {
+					return blockdata, err
+				}
+				blockdata.NewAccounts = append(blockdata.NewAccounts, acc)
+			case AuditGenerateChallenge:
 				acc, err := ParseAccountFromEvent(e)
 				if err != nil {
 					return blockdata, err
 				}
 				blockdata.GenChallenge = append(blockdata.GenChallenge, acc)
-			}
-			if e.Name == StakingEraPaid {
+			case StakingEraPaid:
 				eraIndex, validatorPayout, remainder, err := ParseStakingEraPaidFromEvent(e)
 				if err != nil {
 					return blockdata, err
@@ -499,6 +504,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					ValidatorPayout: validatorPayout,
 					Remainder:       remainder,
 				}
+			default:
 			}
 		}
 	}
