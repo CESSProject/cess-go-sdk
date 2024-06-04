@@ -14,6 +14,18 @@ import (
 var ExtrinsicsName map[types.CallIndex]string
 
 const (
+	// AssetConversion
+	ExtName_AssetConversion_add_liquidity                = "AssetConversion.add_liquidity"
+	ExtName_AssetConversion_create_pool                  = "AssetConversion.create_pool"
+	ExtName_AssetConversion_remove_liquidity             = "AssetConversion.remove_liquidity"
+	ExtName_AssetConversion_swap_exact_tokens_for_tokens = "AssetConversion.swap_exact_tokens_for_tokens"
+	ExtName_AssetConversion_swap_tokens_for_exact_tokens = "AssetConversion.swap_tokens_for_exact_tokens"
+
+	// AssetRate
+	ExtName_AssetRate_create = "AssetRate.create"
+	ExtName_AssetRate_remove = "AssetRate.remove"
+	ExtName_AssetRate_update = "AssetRate.update"
+
 	// Assets
 	ExtName_Assets_approve_transfer      = "Assets.approve_transfer"
 	ExtName_Assets_block                 = "Assets.block"
@@ -46,8 +58,10 @@ const (
 	ExtName_Assets_transfer              = "Assets.transfer"
 	ExtName_Assets_transfer_approved     = "Assets.transfer_approved"
 	ExtName_Assets_transfer_keep_alive   = "Assets.transfer_keep_alive"
+	ExtName_Assets_transfer_ownership    = "Assets.transfer_ownership"
 
 	// Audit
+	ExtName_Audit_point_miner_challenge        = "Audit.point_miner_challenge"
 	ExtName_Audit_submit_idle_proof            = "Audit.submit_idle_proof"
 	ExtName_Audit_submit_service_proof         = "Audit.submit_service_proof"
 	ExtName_Audit_submit_verify_idle_result    = "Audit.submit_verify_idle_result"
@@ -62,30 +76,31 @@ const (
 	ExtName_Babe_report_equivocation_unsigned = "Babe.report_equivocation_unsigned"
 
 	// Balances
-	ExtName_Balances_force_set_balance      = "Balances.force_set_balance"
-	ExtName_Balances_force_transfer         = "Balances.force_transfer"
-	ExtName_Balances_force_unreserve        = "Balances.force_unreserve"
-	ExtName_Balances_set_balance_deprecated = "Balances.set_balance_deprecated"
-	ExtName_Balances_transfer               = "Balances.transfer"
-	ExtName_Balances_transfer_all           = "Balances.transfer_all"
-	ExtName_Balances_transfer_allow_death   = "Balances.transfer_allow_death"
-	ExtName_Balances_transferKeepAlive      = "Balances.transfer_keep_alive"
-	ExtName_Balances_upgrade_accounts       = "Balances.upgrade_accounts"
+	ExtName_Balances_force_adjust_total_issuance = "Balances.force_adjust_total_issuance"
+	ExtName_Balances_force_set_balance           = "Balances.force_set_balance"
+	ExtName_Balances_force_transfer              = "Balances.force_transfer"
+	ExtName_Balances_force_unreserve             = "Balances.force_unreserve"
+	// ExtName_Balances_set_balance_deprecated      = "Balances.set_balance_deprecated"
+	// ExtName_Balances_transfer                    = "Balances.transfer"
+	ExtName_Balances_transfer_all         = "Balances.transfer_all"
+	ExtName_Balances_transfer_allow_death = "Balances.transfer_allow_death"
+	ExtName_Balances_transferKeepAlive    = "Balances.transfer_keep_alive"
+	ExtName_Balances_upgrade_accounts     = "Balances.upgrade_accounts"
 
 	// BaseFee
 	ExtName_BaseFee_set_base_fee_per_gas = "BaseFee.set_base_fee_per_gas"
 	ExtName_BaseFee_set_elasticity       = "BaseFee.set_elasticity"
 
 	// Bounties
-	ExtName_Bounties_accept_curator       = "Bounties.accept_curator"
-	ExtName_Bounties_approve_bounty       = "Bounties.approve_bounty"
-	ExtName_Bounties_award_bounty         = "Bounties.award_bounty"
-	ExtName_Bounties_claim_bounty         = "Bounties.claim_bounty"
-	ExtName_Bounties_close_bounty         = "Bounties.close_bounty"
-	ExtName_Bounties_extend_bounty_expiry = "Bounties.extend_bounty_expiry"
-	ExtName_Bounties_propose_bounty       = "Bounties.propose_bounty"
-	ExtName_Bounties_propose_curator      = "Bounties.propose_curator"
-	ExtName_Bounties_unassign_curator     = "Bounties.unassign_curator"
+	// ExtName_Bounties_accept_curator       = "Bounties.accept_curator"
+	// ExtName_Bounties_approve_bounty       = "Bounties.approve_bounty"
+	// ExtName_Bounties_award_bounty         = "Bounties.award_bounty"
+	// ExtName_Bounties_claim_bounty         = "Bounties.claim_bounty"
+	// ExtName_Bounties_close_bounty         = "Bounties.close_bounty"
+	// ExtName_Bounties_extend_bounty_expiry = "Bounties.extend_bounty_expiry"
+	// ExtName_Bounties_propose_bounty       = "Bounties.propose_bounty"
+	// ExtName_Bounties_propose_curator      = "Bounties.propose_curator"
+	// ExtName_Bounties_unassign_curator     = "Bounties.unassign_curator"
 
 	// Cacher
 	ExtName_Cacher_logout   = "Cacher.logout"
@@ -107,13 +122,13 @@ const (
 	ExtName_CessTreasury_sid_send_funds    = "CessTreasury.sid_send_funds"
 
 	// ChildBounties
-	ExtName_ChildBounties_accept_curator     = "ChildBounties.accept_curator"
-	ExtName_ChildBounties_add_child_bounty   = "ChildBounties.add_child_bounty"
-	ExtName_ChildBounties_award_child_bounty = "ChildBounties.award_child_bounty"
-	ExtName_ChildBounties_claim_child_bounty = "ChildBounties.claim_child_bounty"
-	ExtName_ChildBounties_close_child_bounty = "ChildBounties.close_child_bounty"
-	ExtName_ChildBounties_propose_curator    = "ChildBounties.propose_curator"
-	ExtName_ChildBounties_unassign_curator   = "ChildBounties.unassign_curator"
+	// ExtName_ChildBounties_accept_curator     = "ChildBounties.accept_curator"
+	// ExtName_ChildBounties_add_child_bounty   = "ChildBounties.add_child_bounty"
+	// ExtName_ChildBounties_award_child_bounty = "ChildBounties.award_child_bounty"
+	// ExtName_ChildBounties_claim_child_bounty = "ChildBounties.claim_child_bounty"
+	// ExtName_ChildBounties_close_child_bounty = "ChildBounties.close_child_bounty"
+	// ExtName_ChildBounties_propose_curator    = "ChildBounties.propose_curator"
+	// ExtName_ChildBounties_unassign_curator   = "ChildBounties.unassign_curator"
 
 	// Contracts
 	ExtName_Contracts_call                             = "Contracts.call"
@@ -136,7 +151,7 @@ const (
 	ExtName_Council_vote                = "Council.vote"
 
 	// DynamicFee
-	ExtName_DynamicFee_note_min_gas_price_target = "DynamicFee.note_min_gas_price_target"
+	// ExtName_DynamicFee_note_min_gas_price_target = "DynamicFee.note_min_gas_price_target"
 
 	// ElectionProviderMultiPhase
 	ExtName_ElectionProviderMultiPhase_governance_fallback           = "ElectionProviderMultiPhase.governance_fallback"
@@ -155,7 +170,12 @@ const (
 	ExtName_Evm_withdraw = "EVM.withdraw"
 
 	// EvmAccountMapping
-	ExtName_EvmAccountMapping_meta_call = "EvmAccountMapping.meta_call"
+	// ExtName_EvmAccountMapping_meta_call = "EvmAccountMapping.meta_call"
+
+	// FastUnstake
+	ExtName_FastUnstake_control               = "FastUnstake.control"
+	ExtName_FastUnstake_deregister            = "FastUnstake.deregister"
+	ExtName_FastUnstake_register_fast_unstake = "FastUnstake.register_fast_unstake"
 
 	// FileBank
 	ExtName_FileBank_calculate_report             = "FileBank.calculate_report"
@@ -188,6 +208,12 @@ const (
 	ExtName_Indices_freeze         = "Indices.freeze"
 	ExtName_Indices_transfer       = "Indices.transfer"
 
+	// MultiBlockMigrations
+	ExtName_MultiBlockMigrations_clear_historic          = "MultiBlockMigrations.clear_historic"
+	ExtName_MultiBlockMigrations_force_onboard_mbms      = "MultiBlockMigrations.force_onboard_mbms"
+	ExtName_MultiBlockMigrations_force_set_active_cursor = "MultiBlockMigrations.force_set_active_cursor"
+	ExtName_MultiBlockMigrations_force_set_cursor        = "MultiBlockMigrations.force_set_cursor"
+
 	// Multisig
 	ExtName_Multisig_approve_as_multi    = "Multisig.approve_as_multi"
 	ExtName_Multisig_as_multi            = "Multisig.as_multi"
@@ -198,10 +224,49 @@ const (
 	ExtName_Oss_authorize        = "Oss.authorize"
 	ExtName_Oss_cancel_authorize = "Oss.cancel_authorize"
 	ExtName_Oss_destroy          = "Oss.destroy"
+	ExtName_Oss_proxy_authorzie  = "Oss.proxy_authorzie"
 	ExtName_Oss_register         = "Oss.register"
 	ExtName_Oss_update           = "Oss.update"
 
+	// Parameters
+	ExtName_Parameters_set_parameter = "Parameters.set_parameter"
+
+	// PoolAssets
+	ExtName_PoolAssets_approve_transfer      = "PoolAssets.approve_transfer"
+	ExtName_PoolAssets_block                 = "PoolAssets.block"
+	ExtName_PoolAssets_burn                  = "PoolAssets.burn"
+	ExtName_PoolAssets_cancel_approval       = "PoolAssets.cancel_approval"
+	ExtName_PoolAssets_clear_metadata        = "PoolAssets.clear_metadata"
+	ExtName_PoolAssets_create                = "PoolAssets.create"
+	ExtName_PoolAssets_destroy_accounts      = "PoolAssets.destroy_accounts"
+	ExtName_PoolAssets_destroy_approvals     = "PoolAssets.destroy_approvals"
+	ExtName_PoolAssets_finish_destroy        = "PoolAssets.finish_destroy"
+	ExtName_PoolAssets_force_asset_status    = "PoolAssets.force_asset_status"
+	ExtName_PoolAssets_force_cancel_approval = "PoolAssets.force_cancel_approval"
+	ExtName_PoolAssets_force_clear_metadata  = "PoolAssets.force_clear_metadata"
+	ExtName_PoolAssets_force_create          = "PoolAssets.force_create"
+	ExtName_PoolAssets_force_set_metadata    = "PoolAssets.force_set_metadata"
+	ExtName_PoolAssets_force_transfer        = "PoolAssets.force_transfer"
+	ExtName_PoolAssets_freeze                = "PoolAssets.freeze"
+	ExtName_PoolAssets_freeze_asset          = "PoolAssets.freeze_asset"
+	ExtName_PoolAssets_mint                  = "PoolAssets.mint"
+	ExtName_PoolAssets_refund                = "PoolAssets.refund"
+	ExtName_PoolAssets_refund_other          = "PoolAssets.refund_other"
+	ExtName_PoolAssets_set_metadata          = "PoolAssets.set_metadata"
+	ExtName_PoolAssets_set_min_balance       = "PoolAssets.set_min_balance"
+	ExtName_PoolAssets_set_team              = "PoolAssets.set_team"
+	ExtName_PoolAssets_start_destroy         = "PoolAssets.start_destroy"
+	ExtName_PoolAssets_thaw                  = "PoolAssets.thaw"
+	ExtName_PoolAssets_thaw_asset            = "PoolAssets.thaw_asset"
+	ExtName_PoolAssets_touch                 = "PoolAssets.touch"
+	ExtName_PoolAssets_touch_other           = "PoolAssets.touch_other"
+	ExtName_PoolAssets_transfer              = "PoolAssets.transfer"
+	ExtName_PoolAssets_transfer_approved     = "PoolAssets.transfer_approved"
+	ExtName_PoolAssets_transfer_keep_alive   = "PoolAssets.transfer_keep_alive"
+	ExtName_PoolAssets_transfer_ownership    = "PoolAssets.transfer_ownership"
+
 	// Preimage
+	ExtName_Preimage_ensure_updated     = "Preimage.ensure_updated"
 	ExtName_Preimage_note_preimage      = "Preimage.note_preimage"
 	ExtName_Preimage_request_preimage   = "Preimage.request_preimage"
 	ExtName_Preimage_unnote_preimage    = "Preimage.unnote_preimage"
@@ -230,6 +295,8 @@ const (
 	// Scheduler
 	ExtName_Scheduler_cancel               = "Scheduler.cancel"
 	ExtName_Scheduler_cancel_named         = "Scheduler.cancel_named"
+	ExtName_Scheduler_cancel_retry         = "Scheduler.cancel_retry"
+	ExtName_Scheduler_cancel_retry_named   = "Scheduler.cancel_retry_named"
 	ExtName_Scheduler_schedule             = "Scheduler.schedule"
 	ExtName_Scheduler_schedule_after       = "Scheduler.schedule_after"
 	ExtName_Scheduler_schedule_named       = "Scheduler.schedule_named"
@@ -252,6 +319,7 @@ const (
 	ExtName_Sminer_register_pois_key          = "Sminer.register_pois_key"
 	ExtName_Sminer_regnstk                    = "Sminer.regnstk"
 	ExtName_Sminer_regnstk_assign_staking     = "Sminer.regnstk_assign_staking"
+	ExtName_Sminer_set_facuet_whitelist       = "Sminer.set_facuet_whitelist"
 	ExtName_Sminer_update_beneficiary         = "Sminer.update_beneficiary"
 	ExtName_Sminer_update_expender            = "Sminer.update_expender"
 	ExtName_Sminer_update_peer_id             = "Sminer.update_peer_id"
@@ -262,6 +330,7 @@ const (
 	ExtName_Staking_cancel_deferred_slash      = "Staking.cancel_deferred_slash"
 	ExtName_Staking_chill                      = "Staking.chill"
 	ExtName_Staking_chill_other                = "Staking.chill_other"
+	ExtName_Staking_deprecate_controller_batch = "Staking.deprecate_controller_batch"
 	ExtName_Staking_force_apply_min_commission = "Staking.force_apply_min_commission"
 	ExtName_Staking_force_new_era              = "Staking.force_new_era"
 	ExtName_Staking_force_new_era_always       = "Staking.force_new_era_always"
@@ -271,8 +340,10 @@ const (
 	ExtName_Staking_kick                       = "Staking.kick"
 	ExtName_Staking_nominate                   = "Staking.nominate"
 	ExtName_Staking_payout_stakers             = "Staking.payout_stakers"
+	ExtName_Staking_payout_stakers_by_page     = "Staking.payout_stakers_by_page"
 	ExtName_Staking_reap_stash                 = "Staking.reap_stash"
 	ExtName_Staking_rebond                     = "Staking.rebond"
+	ExtName_Staking_restore_ledger             = "Staking.restore_ledger"
 	ExtName_Staking_scale_validator_count      = "Staking.scale_validator_count"
 	ExtName_Staking_set_controller             = "Staking.set_controller"
 	ExtName_Staking_set_invulnerables          = "Staking.set_invulnerables"
@@ -281,8 +352,17 @@ const (
 	ExtName_Staking_set_staking_configs        = "Staking.set_staking_configs"
 	ExtName_Staking_set_validator_count        = "Staking.set_validator_count"
 	ExtName_Staking_unbond                     = "Staking.unbond"
+	ExtName_Staking_update_payee               = "Staking.update_payee"
 	ExtName_Staking_validate                   = "Staking.validate"
 	ExtName_Staking_withdraw_unbonded          = "Staking.withdraw_unbonded"
+
+	// StateTrieMigration
+	ExtName_StateTrieMigration_continue_migrate       = "StateTrieMigration.continue_migrate"
+	ExtName_StateTrieMigration_control_auto_migration = "StateTrieMigration.control_auto_migration"
+	ExtName_StateTrieMigration_force_set_progress     = "StateTrieMigration.force_set_progress"
+	ExtName_StateTrieMigration_migrate_custom_child   = "StateTrieMigration.migrate_custom_child"
+	ExtName_StateTrieMigration_migrate_custom_top     = "StateTrieMigration.migrate_custom_top"
+	ExtName_StateTrieMigration_set_signed_max_limits  = "StateTrieMigration.set_signed_max_limits"
 
 	// StorageHandler
 	ExtName_StorageHandler_buySpace              = "StorageHandler.buy_space"
@@ -296,20 +376,24 @@ const (
 	ExtName_StorageHandler_update_user_life      = "StorageHandler.update_user_life"
 
 	// Sudo
+	ExtName_Sudo_remove_key            = "Sudo.remove_key"
 	ExtName_Sudo_set_key               = "Sudo.set_key"
 	ExtName_Sudo_sudo                  = "Sudo.sudo"
 	ExtName_Sudo_sudo_as               = "Sudo.sudo_as"
 	ExtName_Sudo_sudo_unchecked_weight = "Sudo.sudo_unchecked_weight"
 
 	// System
-	ExtName_System_kill_prefix             = "System.kill_prefix"
-	ExtName_System_kill_storage            = "System.kill_storage"
-	ExtName_System_remark                  = "System.remark"
-	ExtName_System_remark_with_event       = "System.remark_with_event"
-	ExtName_System_set_code                = "System.set_code"
-	ExtName_System_set_code_without_checks = "System.set_code_without_checks"
-	ExtName_System_set_heap_pages          = "System.set_heap_pages"
-	ExtName_System_set_storage             = "System.set_storage"
+	ExtName_System_apply_authorized_upgrade         = "System.apply_authorized_upgrade"
+	ExtName_System_authorize_upgrade                = "System.authorize_upgrade"
+	ExtName_System_authorize_upgrade_without_checks = "System.authorize_upgrade_without_checks"
+	ExtName_System_kill_prefix                      = "System.kill_prefix"
+	ExtName_System_kill_storage                     = "System.kill_storage"
+	ExtName_System_remark                           = "System.remark"
+	ExtName_System_remark_with_event                = "System.remark_with_event"
+	ExtName_System_set_code                         = "System.set_code"
+	ExtName_System_set_code_without_checks          = "System.set_code_without_checks"
+	ExtName_System_set_heap_pages                   = "System.set_heap_pages"
+	ExtName_System_set_storage                      = "System.set_storage"
 
 	// TechnicalCommittee
 	ExtName_TechnicalCommittee_close               = "TechnicalCommittee.close"
@@ -320,17 +404,18 @@ const (
 	ExtName_TechnicalCommittee_vote                = "TechnicalCommittee.vote"
 
 	// TechnicalMembership
-	ExtName_TechnicalMembership_add_member    = "TechnicalMembership.add_member"
-	ExtName_TechnicalMembership_change_key    = "TechnicalMembership.change_key"
-	ExtName_TechnicalMembership_clear_prime   = "TechnicalMembership.clear_prime"
-	ExtName_TechnicalMembership_remove_member = "TechnicalMembership.remove_member"
-	ExtName_TechnicalMembership_reset_members = "TechnicalMembership.reset_members"
-	ExtName_TechnicalMembership_set_prime     = "TechnicalMembership.set_prime"
-	ExtName_TechnicalMembership_swap_member   = "TechnicalMembership.swap_member"
+	// ExtName_TechnicalMembership_add_member    = "TechnicalMembership.add_member"
+	// ExtName_TechnicalMembership_change_key    = "TechnicalMembership.change_key"
+	// ExtName_TechnicalMembership_clear_prime   = "TechnicalMembership.clear_prime"
+	// ExtName_TechnicalMembership_remove_member = "TechnicalMembership.remove_member"
+	// ExtName_TechnicalMembership_reset_members = "TechnicalMembership.reset_members"
+	// ExtName_TechnicalMembership_set_prime     = "TechnicalMembership.set_prime"
+	// ExtName_TechnicalMembership_swap_member   = "TechnicalMembership.swap_member"
 
 	// TeeWorker
 	ExtName_TeeWorker_add_ceseal            = "TeeWorker.add_ceseal"
 	ExtName_TeeWorker_apply_master_key      = "TeeWorker.apply_master_key"
+	ExtName_TeeWorker_change_first_holder   = "TeeWorker.change_first_holder"
 	ExtName_TeeWorker_force_register_worker = "TeeWorker.force_register_worker"
 	//ExtName_TeeWorker_register_keyfairy        = "TeeWorker.register_keyfairy"
 	ExtName_TeeWorker_launch_master_key        = "TeeWorker.launch_master_key"
@@ -348,12 +433,29 @@ const (
 	// Timestamp
 	ExtName_Timestamp_set = "Timestamp.set"
 
+	// TransactionStorage
+	ExtName_TransactionStorage_check_proof = "TransactionStorage.check_proof"
+	ExtName_TransactionStorage_renew       = "TransactionStorage.renew"
+	ExtName_TransactionStorage_store       = "TransactionStorage.store"
+
 	// Treasury
 	ExtName_Treasury_approve_proposal = "Treasury.approve_proposal"
+	ExtName_Treasury_check_status     = "Treasury.check_status"
+	ExtName_Treasury_payout           = "Treasury.payout"
 	ExtName_Treasury_propose_spend    = "Treasury.propose_spend"
 	ExtName_Treasury_reject_proposal  = "Treasury.reject_proposal"
 	ExtName_Treasury_remove_approval  = "Treasury.remove_approval"
 	ExtName_Treasury_spend            = "Treasury.spend"
+	ExtName_Treasury_spend_local      = "Treasury.spend_local"
+	ExtName_Treasury_void_spend       = "Treasury.void_spend"
+
+	// Utility
+	ExtName_Utility_as_derivative = "Utility.as_derivative"
+	ExtName_Utility_batch         = "Utility.batch"
+	ExtName_Utility_batch_all     = "Utility.batch_all"
+	ExtName_Utility_dispatch_as   = "Utility.dispatch_as"
+	ExtName_Utility_force_batch   = "Utility.force_batch"
+	ExtName_Utility_with_weight   = "Utility.with_weight"
 
 	// VoterList
 	ExtName_VoterList_put_in_front_of       = "VoterList.put_in_front_of"
@@ -370,6 +472,50 @@ const (
 //   - if you need to make a transaction on the chain, you must call this method
 func (c *ChainClient) InitExtrinsicsName() error {
 	ExtrinsicsName = make(map[types.CallIndex]string, 0)
+	// AssetConversion
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetConversion_add_liquidity); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetConversion_add_liquidity
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetConversion_create_pool); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetConversion_create_pool
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetConversion_remove_liquidity); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetConversion_remove_liquidity
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetConversion_swap_exact_tokens_for_tokens); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetConversion_swap_exact_tokens_for_tokens
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetConversion_swap_tokens_for_exact_tokens); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetConversion_swap_tokens_for_exact_tokens
+	} else {
+		return err
+	}
+
+	// AssetRate
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetRate_create); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetRate_create
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetRate_remove); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetRate_remove
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetRate_update); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetRate_update
+	} else {
+		return err
+	}
+
 	// Assets
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Assets_approve_transfer); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Assets_approve_transfer
@@ -526,44 +672,48 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Assets_transfer_ownership); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Assets_transfer_ownership
+	} else {
+		return err
+	}
 
 	// Audit
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Audit_point_miner_challenge); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Audit_point_miner_challenge
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Audit_submit_idle_proof); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Audit_submit_idle_proof
 	} else {
 		return err
 	}
-
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Audit_submit_service_proof); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Audit_submit_service_proof
 	} else {
 		return err
 	}
-
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Audit_submit_verify_idle_result); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Audit_submit_verify_idle_result
 	} else {
 		return err
 	}
-
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Audit_submit_verify_service_result); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Audit_submit_verify_service_result
 	} else {
 		return err
 	}
-
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Audit_test_update_clear_slip); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Audit_test_update_clear_slip
 	} else {
 		return err
 	}
-
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Audit_test_update_verify_slip); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Audit_test_update_verify_slip
 	} else {
 		return err
 	}
-
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Audit_update_counted_clear); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Audit_update_counted_clear
 	} else {
@@ -588,6 +738,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// Balances
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_force_adjust_total_issuance); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Balances_force_adjust_total_issuance
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_force_set_balance); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Balances_force_set_balance
 	} else {
@@ -603,16 +758,16 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_set_balance_deprecated); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Balances_set_balance_deprecated
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_transfer); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Balances_transfer
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_set_balance_deprecated); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Balances_set_balance_deprecated
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_transfer); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Balances_transfer
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_transfer_all); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Balances_transfer_all
 	} else {
@@ -647,51 +802,51 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// Bounties
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_accept_curator); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_accept_curator
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_approve_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_approve_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_award_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_award_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_claim_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_claim_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_close_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_close_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_extend_bounty_expiry); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_extend_bounty_expiry
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_propose_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_propose_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_propose_curator); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_propose_curator
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_unassign_curator); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Bounties_unassign_curator
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_accept_curator); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_accept_curator
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_approve_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_approve_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_award_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_award_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_claim_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_claim_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_close_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_close_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_extend_bounty_expiry); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_extend_bounty_expiry
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_propose_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_propose_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_propose_curator); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_propose_curator
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Bounties_unassign_curator); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Bounties_unassign_curator
+	// } else {
+	// 	return err
+	// }
 
 	// Cacher
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Cacher_logout); err == nil {
@@ -770,41 +925,41 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// ChildBounties
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_accept_curator); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_ChildBounties_accept_curator
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_add_child_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_ChildBounties_add_child_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_award_child_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_ChildBounties_award_child_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_claim_child_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_ChildBounties_claim_child_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_close_child_bounty); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_ChildBounties_close_child_bounty
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_propose_curator); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_ChildBounties_propose_curator
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_unassign_curator); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_ChildBounties_unassign_curator
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_accept_curator); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_ChildBounties_accept_curator
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_add_child_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_ChildBounties_add_child_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_award_child_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_ChildBounties_award_child_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_claim_child_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_ChildBounties_claim_child_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_close_child_bounty); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_ChildBounties_close_child_bounty
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_propose_curator); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_ChildBounties_propose_curator
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ChildBounties_unassign_curator); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_ChildBounties_unassign_curator
+	// } else {
+	// 	return err
+	// }
 
 	// Contracts
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Contracts_call); err == nil {
@@ -891,11 +1046,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// DynamicFee
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_DynamicFee_note_min_gas_price_target); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_DynamicFee_note_min_gas_price_target
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_DynamicFee_note_min_gas_price_target); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_DynamicFee_note_min_gas_price_target
+	// } else {
+	// 	return err
+	// }
 
 	// ElectionProviderMultiPhase
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_ElectionProviderMultiPhase_governance_fallback); err == nil {
@@ -954,8 +1109,25 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// EvmAccountMapping
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_EvmAccountMapping_meta_call); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_EvmAccountMapping_meta_call
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_EvmAccountMapping_meta_call); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_EvmAccountMapping_meta_call
+	// } else {
+	// 	return err
+	// }
+
+	// FastUnstake
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FastUnstake_control); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_FastUnstake_control
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FastUnstake_deregister); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_FastUnstake_deregister
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FastUnstake_register_fast_unstake); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_FastUnstake_register_fast_unstake
 	} else {
 		return err
 	}
@@ -1083,6 +1255,28 @@ func (c *ChainClient) InitExtrinsicsName() error {
 		return err
 	}
 
+	// MultiBlockMigrations
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_MultiBlockMigrations_clear_historic); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_MultiBlockMigrations_clear_historic
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_MultiBlockMigrations_force_onboard_mbms); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_MultiBlockMigrations_force_onboard_mbms
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_MultiBlockMigrations_force_set_active_cursor); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_MultiBlockMigrations_force_set_active_cursor
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_MultiBlockMigrations_force_set_cursor); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_MultiBlockMigrations_force_set_cursor
+	} else {
+		return err
+	}
+
 	// Multisig
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Multisig_approve_as_multi); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Multisig_approve_as_multi
@@ -1121,6 +1315,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Oss_proxy_authorzie); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Oss_proxy_authorzie
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Oss_register); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Oss_register
 	} else {
@@ -1132,7 +1331,181 @@ func (c *ChainClient) InitExtrinsicsName() error {
 		return err
 	}
 
+	// Parameters
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Parameters_set_parameter); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Parameters_set_parameter
+	} else {
+		return err
+	}
+
+	// PoolAssets
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_approve_transfer); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_approve_transfer
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_block); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_block
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_burn); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_burn
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_cancel_approval); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_cancel_approval
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_clear_metadata); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_clear_metadata
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_create); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_create
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_destroy_accounts); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_destroy_accounts
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_destroy_approvals); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_destroy_approvals
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_finish_destroy); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_finish_destroy
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_force_asset_status); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_force_asset_status
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_force_cancel_approval); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_force_cancel_approval
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_force_clear_metadata); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_force_clear_metadata
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_force_create); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_force_create
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_force_set_metadata); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_force_set_metadata
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_force_transfer); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_force_transfer
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_freeze); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_freeze
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_freeze_asset); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_freeze_asset
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_mint); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_mint
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_refund); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_refund
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_refund_other); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_refund_other
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_set_metadata); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_set_metadata
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_set_min_balance); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_set_min_balance
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_set_team); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_set_team
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_start_destroy); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_start_destroy
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_thaw); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_thaw
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_thaw_asset); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_thaw_asset
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_touch); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_touch
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_touch_other); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_touch_other
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_transfer); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_transfer
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_transfer_approved); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_transfer_approved
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_transfer_keep_alive); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_transfer_keep_alive
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_PoolAssets_transfer_ownership); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_PoolAssets_transfer_ownership
+	} else {
+		return err
+	}
+
 	// Preimage
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Preimage_ensure_updated); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Preimage_ensure_updated
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Preimage_note_preimage); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Preimage_note_preimage
 	} else {
@@ -1249,6 +1622,16 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Scheduler_cancel_retry); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Scheduler_cancel_retry
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Scheduler_cancel_retry_named); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Scheduler_cancel_retry_named
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Scheduler_schedule); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Scheduler_schedule
 	} else {
@@ -1343,6 +1726,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_set_facuet_whitelist); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Sminer_set_facuet_whitelist
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_beneficiary); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Sminer_update_beneficiary
 	} else {
@@ -1382,6 +1770,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_chill_other); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Staking_chill_other
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_deprecate_controller_batch); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Staking_deprecate_controller_batch
 	} else {
 		return err
 	}
@@ -1430,6 +1823,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_payout_stakers_by_page); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Staking_payout_stakers_by_page
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_reap_stash); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Staking_reap_stash
 	} else {
@@ -1437,6 +1835,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_rebond); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Staking_rebond
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_restore_ledger); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Staking_restore_ledger
 	} else {
 		return err
 	}
@@ -1480,6 +1883,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_update_payee); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Staking_update_payee
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_validate); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Staking_validate
 	} else {
@@ -1487,6 +1895,38 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_withdraw_unbonded); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Staking_withdraw_unbonded
+	} else {
+		return err
+	}
+
+	// StateTrieMigration
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StateTrieMigration_continue_migrate); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StateTrieMigration_continue_migrate
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StateTrieMigration_control_auto_migration); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StateTrieMigration_control_auto_migration
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StateTrieMigration_force_set_progress); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StateTrieMigration_force_set_progress
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StateTrieMigration_migrate_custom_child); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StateTrieMigration_migrate_custom_child
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StateTrieMigration_migrate_custom_top); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StateTrieMigration_migrate_custom_top
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StateTrieMigration_set_signed_max_limits); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StateTrieMigration_set_signed_max_limits
 	} else {
 		return err
 	}
@@ -1539,6 +1979,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// Sudo
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sudo_remove_key); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Sudo_remove_key
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sudo_set_key); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Sudo_set_key
 	} else {
@@ -1561,6 +2006,21 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// System
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_System_apply_authorized_upgrade); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_System_apply_authorized_upgrade
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_System_authorize_upgrade); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_System_authorize_upgrade
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_System_authorize_upgrade_without_checks); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_System_authorize_upgrade_without_checks
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_System_kill_prefix); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_System_kill_prefix
 	} else {
@@ -1635,41 +2095,41 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// TechnicalMembership
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_add_member); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_add_member
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_change_key); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_change_key
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_clear_prime); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_clear_prime
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_remove_member); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_remove_member
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_reset_members); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_reset_members
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_set_prime); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_set_prime
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_swap_member); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_swap_member
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_add_member); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_add_member
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_change_key); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_change_key
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_clear_prime); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_clear_prime
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_remove_member); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_remove_member
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_reset_members); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_reset_members
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_set_prime); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_set_prime
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalMembership_swap_member); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_TechnicalMembership_swap_member
+	// } else {
+	// 	return err
+	// }
 
 	// TeeWorker
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_add_ceseal); err == nil {
@@ -1679,6 +2139,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_apply_master_key); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_TeeWorker_apply_master_key
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_change_first_holder); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_change_first_holder
 	} else {
 		return err
 	}
@@ -1740,9 +2205,36 @@ func (c *ChainClient) InitExtrinsicsName() error {
 		return err
 	}
 
+	// TransactionStorage
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TransactionStorage_check_proof); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TransactionStorage_check_proof
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TransactionStorage_renew); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TransactionStorage_renew
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TransactionStorage_store); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TransactionStorage_store
+	} else {
+		return err
+	}
+
 	// Treasury
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_approve_proposal); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Treasury_approve_proposal
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_check_status); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Treasury_check_status
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_payout); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Treasury_payout
 	} else {
 		return err
 	}
@@ -1763,6 +2255,48 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_spend); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Treasury_spend
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_spend_local); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Treasury_spend_local
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_void_spend); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Treasury_void_spend
+	} else {
+		return err
+	}
+
+	// Utility
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Utility_as_derivative); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Utility_as_derivative
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Utility_batch); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Utility_batch
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Utility_batch_all); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Utility_batch_all
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Utility_dispatch_as); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Utility_dispatch_as
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Utility_force_batch); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Utility_force_batch
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Utility_with_weight); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Utility_with_weight
 	} else {
 		return err
 	}

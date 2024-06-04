@@ -438,7 +438,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 								break
 							}
 						}
-					case ExtName_Balances_transfer, ExtName_Balances_transferKeepAlive:
+					case ExtName_Balances_transfer_all, ExtName_Balances_transferKeepAlive:
 						for m := 0; m < len(blockdata.TransferInfo); m++ {
 							if blockdata.TransferInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
 								if len(blockdata.TransferInfo) == 1 {

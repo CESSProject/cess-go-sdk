@@ -48,6 +48,11 @@ func main() {
 	}
 	defer sdk.Close()
 
+	err = sdk.InitExtrinsicsName()
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
