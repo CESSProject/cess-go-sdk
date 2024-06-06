@@ -125,6 +125,7 @@ const (
 	CurrentEra           = "CurrentEra"
 	ErasTotalStake       = "ErasTotalStake"
 	ErasStakers          = "ErasStakers"
+	ErasStakersPaged     = "ErasStakersPaged"
 	ErasRewardPoints     = "ErasRewardPoints"
 	Ledger               = "Ledger"
 	Nominators           = "Nominators"
@@ -580,6 +581,11 @@ type StakingExposure struct {
 	Total  types.UCompact
 	Own    types.UCompact
 	Others []OtherStakingExposure
+}
+
+type StakingExposurePaged struct {
+	PageTotal types.UCompact
+	Others    []OtherStakingExposure
 }
 
 type OtherStakingExposure struct {
