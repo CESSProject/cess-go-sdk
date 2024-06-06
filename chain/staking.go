@@ -719,14 +719,14 @@ func (c *ChainClient) QueryeNominators(accountId []byte, block int32) (StakingNo
 	return result, nil
 }
 
-// QueryeErasStakersPaged query the staking exposure
+// QueryeAllErasStakersPaged query all the staking exposure
 //   - era: era id
 //   - accountId: account id
 //
 // Return:
-//   - QueryeErasStakersPaged: staking exposure
+//   - []QueryeErasStakersPaged: all staking exposure
 //   - error: error message
-func (c *ChainClient) QueryeErasStakersPaged(era uint32, accountId []byte) ([]StakingExposurePaged, error) {
+func (c *ChainClient) QueryeAllErasStakersPaged(era uint32, accountId []byte) ([]StakingExposurePaged, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -764,5 +764,47 @@ func (c *ChainClient) QueryeErasStakersPaged(era uint32, accountId []byte) ([]St
 		}
 		result = append(result, data)
 	}
+	return result, nil
+}
+
+// QueryeErasStakersOverview query the PagedExposureMetadata
+//   - era: era id
+//   - accountId: account id
+//
+// Return:
+//   - PagedExposureMetadata: PagedExposureMetadata
+//   - error: error message
+func (c *ChainClient) QueryeErasStakersOverview(era uint32, accountId []byte) (PagedExposureMetadata, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var result PagedExposureMetadata
+
+	if !c.GetRpcState() {
+		return result, ERR_RPC_CONNECTION
+	}
+
+	param1, err := codec.Encode(types.NewU32(era))
+	if err != nil {
+		return result, err
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, Staking, ErasStakersOverview, param1, accountId)
+	if err != nil {
+		return result, err
+	}
+
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &result)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Staking, ErasStakers, err)
+		c.SetRpcState(false)
+		return result, err
+	}
+	if !ok {
+		return result, ERR_RPC_EMPTY_VALUE
+	}
+
 	return result, nil
 }

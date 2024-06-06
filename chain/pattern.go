@@ -126,6 +126,7 @@ const (
 	ErasTotalStake       = "ErasTotalStake"
 	ErasStakers          = "ErasStakers"
 	ErasStakersPaged     = "ErasStakersPaged"
+	ErasStakersOverview  = "ErasStakersOverview"
 	ErasRewardPoints     = "ErasRewardPoints"
 	Ledger               = "Ledger"
 	Nominators           = "Nominators"
@@ -591,6 +592,13 @@ type StakingExposurePaged struct {
 type OtherStakingExposure struct {
 	Who   types.AccountID
 	Value types.UCompact
+}
+
+type PagedExposureMetadata struct {
+	Total          types.UCompact
+	Own            types.UCompact
+	NominatorCount types.U32
+	PageCount      types.U32
 }
 
 type StakingValidatorPrefs struct {
