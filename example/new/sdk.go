@@ -58,11 +58,19 @@ func main() {
 	fmt.Println(sdk.GetCurrentRpcAddr())
 
 	fmt.Println(sdk.QueryValidatorsCount(-1))
-
-	puk, err := utils.ParsingPublickey("cXfg2SYcq85nyZ1U4ccx6QnAgSeLQB8aXZ2jstbw9CPGSmhXY")
+	puk, err := utils.ParsingPublickey("cXk9UozEZTiuTLctK1Fia5N8ABVBFCokeememHuMVz91xNWd4")
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println(sdk.QueryValidatorCommission(puk, -1))
+
+	return
+	puk, err = utils.ParsingPublickey("cXfg2SYcq85nyZ1U4ccx6QnAgSeLQB8aXZ2jstbw9CPGSmhXY")
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println(sdk.QueryeErasStakersOverview(6, puk))
 	return
 

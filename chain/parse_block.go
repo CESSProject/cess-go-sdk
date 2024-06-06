@@ -763,7 +763,8 @@ func ParseStakingEraPaidFromEvent(e *parser.Event) (uint32, string, string, erro
 			if strings.Contains(v.Name, "validator_payout") {
 				validatorPayout = ExplicitBigInt(val, 0)
 			}
-			if strings.Contains(v.Name, "remainder") {
+			if strings.Contains(v.Name, "remainder") ||
+				strings.Contains(v.Name, "sminer_payout") {
 				remainder = ExplicitBigInt(val, 0)
 			}
 		}
