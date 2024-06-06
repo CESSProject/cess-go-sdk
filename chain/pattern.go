@@ -125,6 +125,8 @@ const (
 	CurrentEra           = "CurrentEra"
 	ErasTotalStake       = "ErasTotalStake"
 	ErasStakers          = "ErasStakers"
+	ErasStakersPaged     = "ErasStakersPaged"
+	ErasStakersOverview  = "ErasStakersOverview"
 	ErasRewardPoints     = "ErasRewardPoints"
 	Ledger               = "Ledger"
 	Nominators           = "Nominators"
@@ -526,10 +528,10 @@ type UnlockChunk struct {
 
 // System
 type SysProperties struct {
-	Ss58Format    types.Bytes
+	IsEthereum    types.Bool
+	Ss58Format    types.U32
 	TokenDecimals types.U8
 	TokenSymbol   types.Text
-	SS58Prefix    types.U32
 }
 
 type SysSyncState struct {
@@ -582,9 +584,21 @@ type StakingExposure struct {
 	Others []OtherStakingExposure
 }
 
+type StakingExposurePaged struct {
+	PageTotal types.UCompact
+	Others    []OtherStakingExposure
+}
+
 type OtherStakingExposure struct {
 	Who   types.AccountID
 	Value types.UCompact
+}
+
+type PagedExposureMetadata struct {
+	Total          types.UCompact
+	Own            types.UCompact
+	NominatorCount types.U32
+	PageCount      types.U32
 }
 
 type StakingValidatorPrefs struct {

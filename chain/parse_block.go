@@ -438,7 +438,7 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 								break
 							}
 						}
-					case ExtName_Balances_transfer, ExtName_Balances_transferKeepAlive:
+					case ExtName_Balances_transfer_all, ExtName_Balances_transferKeepAlive:
 						for m := 0; m < len(blockdata.TransferInfo); m++ {
 							if blockdata.TransferInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
 								if len(blockdata.TransferInfo) == 1 {
@@ -763,7 +763,8 @@ func ParseStakingEraPaidFromEvent(e *parser.Event) (uint32, string, string, erro
 			if strings.Contains(v.Name, "validator_payout") {
 				validatorPayout = ExplicitBigInt(val, 0)
 			}
-			if strings.Contains(v.Name, "remainder") {
+			if strings.Contains(v.Name, "remainder") ||
+				strings.Contains(v.Name, "sminer_payout") {
 				remainder = ExplicitBigInt(val, 0)
 			}
 		}

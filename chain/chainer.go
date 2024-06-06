@@ -106,6 +106,8 @@ type Chainer interface {
 	QueryEraValidatorReward(era uint32, block int32) (string, error)
 	QueryLedger(accountID []byte, block int32) (StakingLedger, error)
 	QueryeErasStakers(era uint32, accountId []byte) (StakingExposure, error)
+	QueryeAllErasStakersPaged(era uint32, accountId []byte) ([]StakingExposurePaged, error)
+	QueryeErasStakersOverview(era uint32, accountId []byte) (PagedExposureMetadata, error)
 	QueryeNominators(accountId []byte, block int32) (StakingNominations, error)
 
 	// StorageHandler

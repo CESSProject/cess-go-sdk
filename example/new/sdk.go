@@ -48,11 +48,49 @@ func main() {
 	}
 	defer sdk.Close()
 
+	err = sdk.InitExtrinsicsName()
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.InitExtrinsicsName())
 	fmt.Println(sdk.GetCurrentRpcAddr())
 
 	fmt.Println(sdk.QueryValidatorsCount(-1))
+	puk, err := utils.ParsingPublickey("cXk9UozEZTiuTLctK1Fia5N8ABVBFCokeememHuMVz91xNWd4")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(sdk.QueryValidatorCommission(puk, -1))
+
+	return
+	puk, err = utils.ParsingPublickey("cXfg2SYcq85nyZ1U4ccx6QnAgSeLQB8aXZ2jstbw9CPGSmhXY")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(sdk.QueryeErasStakersOverview(6, puk))
+	return
+
+	puk, err = utils.ParsingPublickey("cXfg2SYcq85nyZ1U4ccx6QnAgSeLQB8aXZ2jstbw9CPGSmhXY")
+	if err != nil {
+		panic(err)
+	}
+	result, err := sdk.QueryeAllErasStakersPaged(6, puk)
+	if err != nil {
+		panic(err)
+	}
+	pagetotal_bg := big.Int(result[0].PageTotal)
+	fmt.Printf("pagetotal: %v\n", pagetotal_bg.String())
+	for i := 0; i < len(result); i++ {
+		for _, v := range result[i].Others {
+			bg := big.Int(v.Value)
+			fmt.Println(utils.EncodePublicKeyAsCessAccount(v.Who[:]))
+			fmt.Printf("value: %v\n", bg.String())
+		}
+	}
 	return
 
 	pk, err := utils.ParsingPublickey("cXiKthh2dyY1taTydtdxiqQwXY1HKZcXvYGmjS2UmuPi2qNDS")
