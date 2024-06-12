@@ -140,7 +140,7 @@ type Event_UpdatePeerId struct {
 
 type Event_Receive struct {
 	Phase  types.Phase
-	Acc    types.AccountID
+	Acc    string
 	Reward types.U128
 	Topics []types.Hash
 }

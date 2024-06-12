@@ -682,7 +682,8 @@ func ParseAccountFromEvent(e *parser.Event) (string, error) {
 			if strings.Contains(v.Name, "acc") ||
 				strings.Contains(v.Name, "account") ||
 				strings.Contains(v.Name, "owner") ||
-				strings.Contains(v.Name, "miner") {
+				strings.Contains(v.Name, "miner") ||
+				strings.Contains(v.Name, "AccountId32") {
 				acc = parseAccount(val)
 			}
 		}

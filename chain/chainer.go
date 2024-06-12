@@ -86,7 +86,7 @@ type Chainer interface {
 	IncreaseDeclarationSpace(tibCount uint32) (string, error)
 	MinerExitPrep() (string, error)
 	MinerWithdraw() (string, error)
-	ReceiveReward() (string, error)
+	ReceiveReward() (string, string, error)
 	RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	RegnstkSminer(earnings string, peerId []byte, staking uint64, tibCount uint32) (string, error)
 	RegnstkAssignStaking(earnings string, peerId []byte, stakingAcc string, tibCount uint32) (string, error)
