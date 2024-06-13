@@ -355,8 +355,9 @@ func reconnectRpc(oldRpc string, rpcs []string) (
 			continue
 		}
 		rpcAddr = rpcaddrs[i]
+		break
 	}
-	if api == nil {
+	if err != nil {
 		return nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
 	var metadata *types.Metadata
