@@ -1291,16 +1291,22 @@ func (c *ChainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (Event_
 	var earningsAcc string
 	fmt.Println("c.GetSignatureAcc():", c.GetSignatureAcc())
 	for _, e := range events {
-		fmt.Println("e.Name: ", e.Name)
+		fmt.Println("e.Name: ", e.Name, "len(e.Name):", len(e.Name))
 		if e.Phase.IsApplyExtrinsic {
+			fmt.Println("1")
 			if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+				fmt.Println("2")
 				if name == ExtName_Sminer_receive_reward {
+					fmt.Println("3")
 					switch e.Name {
 					case SminerReceive:
 						earningsAcc, _ = ParseAccountFromEvent(e)
 						fmt.Println("earningsAcc: ", earningsAcc)
 						result.Acc = earningsAcc
-					case TransactionPaymentTransactionFeePaid, EvmAccountMappingTransactionFeePaid:
+					case TransactionPaymentTransactionFeePaid:
+						signer, _, _ = parseSignerAndFeePaidFromEvent(e)
+						fmt.Println("signer: ", signer)
+					case EvmAccountMappingTransactionFeePaid:
 						signer, _, _ = parseSignerAndFeePaidFromEvent(e)
 						fmt.Println("signer: ", signer)
 					case SystemExtrinsicSuccess:

@@ -67,7 +67,7 @@ func main() {
 	}
 
 	fmt.Println(sdk.QueryValidatorCommission(puk, -1))
-	hash, err := sdk.ChainGetBlockHash(98549)
+	hash, err := sdk.ChainGetBlockHash(98680)
 	if err != nil {
 		panic(err)
 	}
