@@ -140,7 +140,7 @@ type Event_UpdatePeerId struct {
 
 type Event_Receive struct {
 	Phase  types.Phase
-	Acc    types.AccountID
+	Acc    string
 	Reward types.U128
 	Topics []types.Hash
 }
@@ -732,6 +732,7 @@ type SubmitServiceResult struct {
 }
 
 type Punishment struct {
+	ExtrinsicName string
 	ExtrinsicHash string
 	From          string
 	To            string

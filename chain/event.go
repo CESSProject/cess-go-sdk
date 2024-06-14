@@ -1275,42 +1275,38 @@ func (c *ChainClient) RetrieveEvent_Sminer_IncreaseDeclarationSpace(blockhash ty
 
 func (c *ChainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (Event_Receive, error) {
 	var result Event_Receive
+
+	block, err := c.api.RPC.Chain.GetBlock(blockhash)
+	if err != nil {
+		return result, err
+	}
+
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
+
+	var signer string
+	var earningsAcc string
 	for _, e := range events {
-		if e.Name == SminerReceive {
-			for _, v := range e.Fields {
-				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
-					vf := reflect.ValueOf(v.Value)
-					if vf.Len() > 0 {
-						allValue := fmt.Sprintf("%v", vf.Index(0))
-						if strings.Contains(v.Name, "AccountId32") {
-							temp := strings.Split(allValue, "] ")
-							puk := make([]byte, types.AccountIDLen)
-							for _, v := range temp {
-								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
-									subValue := strings.TrimPrefix(v, "[")
-									ids := strings.Split(subValue, " ")
-									if len(ids) != types.AccountIDLen {
-										continue
-									}
-									for kk, vv := range ids {
-										intv, _ := strconv.Atoi(vv)
-										puk[kk] = byte(intv)
-									}
-								}
-							}
-							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
-								continue
-							}
-							accid, err := types.NewAccountID(puk)
-							if err != nil {
-								continue
-							}
-							result.Acc = *accid
+		if e.Phase.IsApplyExtrinsic {
+			if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+				if name == ExtName_Sminer_receive_reward {
+					switch e.Name {
+					case SminerReceive:
+						earningsAcc, _ = ParseAccountFromEvent(e)
+						result.Acc = earningsAcc
+					case TransactionPaymentTransactionFeePaid:
+						signer, _, _ = parseSignerAndFeePaidFromEvent(e)
+					case EvmAccountMappingTransactionFeePaid:
+						signer, _, _ = parseSignerAndFeePaidFromEvent(e)
+					case SystemExtrinsicSuccess:
+						if signer == c.GetSignatureAcc() {
 							return result, nil
+						}
+					case SystemExtrinsicFailed:
+						if signer == c.GetSignatureAcc() {
+							return result, errors.New(ERR_Failed)
 						}
 					}
 				}
