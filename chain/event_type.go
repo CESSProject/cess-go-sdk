@@ -732,6 +732,7 @@ type SubmitServiceResult struct {
 }
 
 type Punishment struct {
+	ExtrinsicName string
 	ExtrinsicHash string
 	From          string
 	To            string

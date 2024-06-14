@@ -110,14 +110,15 @@ const (
 	KeyOwner = "keyOwner"
 
 	// Sminer
-	AllMiner             = "AllMiner"
-	CounterForMinerItems = "CounterForMinerItems"
-	MinerItems           = "MinerItems"
-	RewardMap            = "RewardMap"
-	Expenders            = "Expenders"
-	RestoralTarget       = "RestoralTarget"
-	StakingStartBlock    = "StakingStartBlock"
-	CompleteSnapShot     = "CompleteSnapShot"
+	AllMiner              = "AllMiner"
+	CounterForMinerItems  = "CounterForMinerItems"
+	MinerItems            = "MinerItems"
+	RewardMap             = "RewardMap"
+	Expenders             = "Expenders"
+	RestoralTarget        = "RestoralTarget"
+	StakingStartBlock     = "StakingStartBlock"
+	CompleteSnapShot      = "CompleteSnapShot"
+	CompleteMinerSnapShot = "CompleteMinerSnapShot"
 
 	// Staking
 	CounterForValidators = "CounterForValidators"
@@ -609,6 +610,13 @@ type StakingValidatorPrefs struct {
 type CompleteSnapShotType struct {
 	MinerCount types.U32
 	TotalPower types.U128
+}
+
+type MinerCompleteInfo struct {
+	EraIndex    types.U32
+	Issued      types.Bool
+	FinishBlock types.U32
+	Power       types.U128
 }
 
 type RoundRewardType struct {

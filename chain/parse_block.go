@@ -112,14 +112,6 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					if err != nil {
 						return blockdata, err
 					}
-					if to == TreasuryAccount {
-						blockdata.Punishment = append(blockdata.Punishment, Punishment{
-							ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
-							From:          from,
-							To:            to,
-							Amount:        amount,
-						})
-					}
 					blockdata.TransferInfo = append(blockdata.TransferInfo, TransferInfo{
 						ExtrinsicName: name,
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
@@ -128,6 +120,15 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Amount:        amount,
 						Result:        true,
 					})
+					if name == ExtName_Audit_submit_verify_service_result {
+						blockdata.Punishment = append(blockdata.Punishment, Punishment{
+							ExtrinsicName: name,
+							ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
+							From:          from,
+							To:            to,
+							Amount:        amount,
+						})
+					}
 				case SminerRegistered:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
@@ -503,6 +504,24 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					EraIndex:        eraIndex,
 					ValidatorPayout: validatorPayout,
 					Remainder:       remainder,
+				}
+			case BalancesTransfer:
+				from, to, amount, err := ParseTransferInfoFromEvent(e)
+				if err != nil {
+					return blockdata, err
+				}
+				blockdata.TransferInfo = append(blockdata.TransferInfo, TransferInfo{
+					From:   from,
+					To:     to,
+					Amount: amount,
+					Result: true,
+				})
+				if to == TreasuryAccount {
+					blockdata.Punishment = append(blockdata.Punishment, Punishment{
+						From:   from,
+						To:     to,
+						Amount: amount,
+					})
 				}
 			default:
 			}

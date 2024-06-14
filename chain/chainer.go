@@ -82,6 +82,7 @@ type Chainer interface {
 	QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo, error)
 	QueryPendingReplacements(accountID []byte, block int32) (types.U128, error)
 	QueryCompleteSnapShot(era uint32, block int32) (uint32, uint64, error)
+	QueryCompleteMinerSnapShot(puk []byte, block int32) (MinerCompleteInfo, error)
 	IncreaseCollateral(accountID []byte, token string) (string, error)
 	IncreaseDeclarationSpace(tibCount uint32) (string, error)
 	MinerExitPrep() (string, error)
