@@ -45,16 +45,18 @@ type CansRequestParams struct {
 //
 // Receive parameter:
 //   - url: the address of the gateway.
+//   - mnemonic: the space owner's CESS account mnemonic
 //   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
 //   - bucket: the bucket name to store user data.
 //   - fname: the name of the file.
+//   - cipher: symmetric encryption key, used to encrypt data using AES
 //   - chunksNum: total number of file chunks.
 //   - totalSize: chunks total size (byte), can be obtained from the first return value of SplitFile
 //
 // Return parameter:
 //   - response: file's FID(if all chunks are uploaded successfully).
 //   - error: error message.
-func UploadFileChunks(url, mnemonic, chunksDir, bucket, fname string, chunksNum int, totalSize int64) (string, error) {
+func UploadFileChunks(url, mnemonic, chunksDir, bucket, fname, cipher string, chunksNum int, totalSize int64) (string, error) {
 	entries, err := os.ReadDir(chunksDir)
 	if err != nil {
 		return "", errors.Wrap(err, "upload file chunk error")
@@ -69,7 +71,7 @@ func UploadFileChunks(url, mnemonic, chunksDir, bucket, fname string, chunksNum 
 	for i := chunksNum - len(entries); i < chunksNum; i++ {
 		file := filepath.Join(chunksDir, fmt.Sprintf("chunk-%d", i))
 		res, err = UploadFileChunk(url, mnemonic, file, bucket,
-			AddUploadChunkRequestHeader(fname, chunksNum, i, totalSize))
+			AddUploadChunkRequestHeader(fname, cipher, chunksNum, i, totalSize))
 		if err != nil {
 			return res, errors.Wrap(err, "upload file chunks error")
 		}
@@ -82,15 +84,17 @@ func UploadFileChunks(url, mnemonic, chunksDir, bucket, fname string, chunksNum 
 //
 // Receive parameter:
 //   - fname: the name of the file.
+//   - cipher: symmetric encryption key, used to encrypt data using AES
 //   - chunksNum: total number of file chunks.
 //   - chunksId: index of the current chunk to be uploaded ([0,chunksNum)).
 //   - totalSize: chunks total size (byte), can be obtained from the first return value of SplitFile
 //
 // Return parameter:
 //   - handleFunc: function to set request headers.
-func AddUploadChunkRequestHeader(fname string, chunksNum, chunksId int, totalSize int64) func(req *http.Request) {
+func AddUploadChunkRequestHeader(fname, cipher string, chunksNum, chunksId int, totalSize int64) func(req *http.Request) {
 	return func(req *http.Request) {
 		req.Header.Set("FileName", fname)
+		req.Header.Set("cipher", cipher)
 		req.Header.Set("BlockNumber", fmt.Sprint(chunksNum))
 		req.Header.Set("BlockIndex", fmt.Sprint(chunksId))
 		req.Header.Set("TotalSize", fmt.Sprint(totalSize))
@@ -101,6 +105,7 @@ func AddUploadChunkRequestHeader(fname string, chunksNum, chunksId int, totalSiz
 //
 // Receive parameter:
 //   - fname: the name of the file.
+//   - cipher: symmetric encryption key, used to encrypt data using AES
 //   - chunksNum: total number of file chunks.
 //   - chunksId: index of the current chunk to be uploaded ([0,chunksNum)).
 //   - totalSize: chunks total size (byte), can be obtained from the first return value of SplitFile
@@ -109,9 +114,10 @@ func AddUploadChunkRequestHeader(fname string, chunksNum, chunksId int, totalSiz
 //
 // Return parameter:
 //   - handleFunc: function to set request headers.
-func AddCansProtoRequestHeader(fname string, chunksNum, chunksId int, totalSize int64, isSplit bool, archiveFormat string) func(req *http.Request) {
+func AddCansProtoRequestHeader(fname, cipher string, chunksNum, chunksId int, totalSize int64, isSplit bool, archiveFormat string) func(req *http.Request) {
 	return func(req *http.Request) {
 		req.Header.Set("FileName", fname)
+		req.Header.Set("cipher", cipher)
 		req.Header.Set("BlockNumber", fmt.Sprint(chunksNum))
 		req.Header.Set("BlockIndex", fmt.Sprint(chunksId))
 		req.Header.Set("TotalSize", fmt.Sprint(totalSize))
@@ -146,6 +152,7 @@ func AddFileRequestHeader(bucket, account, message, sig, contentType string) fun
 //
 // Receive parameter:
 //   - url: the address of the gateway.
+//   - mnemonic: the space owner's CESS account mnemonic
 //   - file: file path to store file chunks.
 //   - bucket: the bucket name to store user data.
 //   - fname: the name of the file.
@@ -330,15 +337,17 @@ func SplitFile(fpath, chunksDir string, chunkSize int64, filling bool) (int64, i
 //
 // Receive parameter:
 //   - url: the address of the gateway.
+//   - mnemonic: the space owner's CESS account mnemonic
 //   - filesDir: directory path to store file chunks, please do not mix it elsewhere.
 //   - bucket: the bucket name to store user data.
 //   - archiveFormat: Specifies the compression format of the file. If it is "", no compression is performed. Currently supported formats are: "zip", "tar", and "tar.gz"
+//   - cipher: symmetric encryption key, used to encrypt data using AES
 //   - isSplit: indicate whether the file can be split into different cans.
 //
 // Return parameter:
 //   - response: file's FID(if all chunks are uploaded successfully).
 //   - error: error message.
-func UploadFilesWithCansProto(url, mnemonic, filesDir, bucket, archiveFormat string, isSplit bool) (string, error) {
+func UploadFilesWithCansProto(url, mnemonic, filesDir, bucket, archiveFormat, cipher string, isSplit bool) (string, error) {
 	entries, err := os.ReadDir(filesDir)
 	if err != nil {
 		return "", errors.Wrap(err, "upload file with CANS PROTOCOL error")
@@ -375,7 +384,7 @@ func UploadFilesWithCansProto(url, mnemonic, filesDir, bucket, archiveFormat str
 		res, err = UploadFileChunk(
 			url, mnemonic, fpath, bucket,
 			AddCansProtoRequestHeader(
-				filename, fileNum, count, totalSize, isSplit, archiveFormat,
+				filename, cipher, fileNum, count, totalSize, isSplit, archiveFormat,
 			),
 		)
 		if err != nil {
@@ -386,14 +395,28 @@ func UploadFilesWithCansProto(url, mnemonic, filesDir, bucket, archiveFormat str
 	return res, nil
 }
 
-func DownloadCanFile(url, mnemonic, savepath, fid, filename, cipher string, segmentIndex int) error {
+// DownloadCanFile download files in the directory from the gateway with CANS PROTOCOL,
+//
+// Receive parameter:
+//   - url: the address of the gateway.
+//   - mnemonic: user's CESS account mnemonic.
+//   - savepath: file path to store downloaded file.
+//   - fid: file's FID on chain metadata.
+//   - filename: name of sub file in cans, if it is an empty string, the specified segment(can) is downloaded.
+//   - cipher: symmetric encryption key, used to encrypt data using AES.
+//   - sid: segment hash, if filename is an empty string, the specified segment(can) is downloaded.
+//
+// Return parameter:
+//   - response: file(if successful).
+//   - error: error message.
+func DownloadCanFile(url, mnemonic, savepath, fid, filename, cipher string, sid int) error {
 	url, err := u.JoinPath(url, fid)
 	if err != nil {
 		return errors.Wrap(err, "download can file error")
 	}
 
 	jbytes, err := json.Marshal(CansRequestParams{
-		SegmentIndex: segmentIndex,
+		SegmentIndex: sid,
 		SubFile:      filename,
 		Cipher:       cipher,
 	})
