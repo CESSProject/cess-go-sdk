@@ -615,6 +615,48 @@ func (c *ChainClient) RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) 
 	return result, errors.Errorf("failed: no %s event found", FileBankCreateBucket)
 }
 
+func (c *ChainClient) RetrieveEvent_FileBank_TerritorFileDelivery(blockhash types.Hash) (Event_TerritorFileDelivery, error) {
+	var result Event_TerritorFileDelivery
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return result, err
+	}
+	for _, e := range events {
+		if e.Name == FileBankCreateBucket {
+			for _, v := range e.Fields {
+				if reflect.TypeOf(v.Value).Kind() == reflect.Slice {
+					vf := reflect.ValueOf(v.Value)
+					if vf.Len() > 0 {
+						allValue := fmt.Sprintf("%v", vf.Index(0))
+						if strings.Contains(v.Name, "hash") {
+							temp := strings.Split(allValue, "] ")
+							puk := make([]byte, types.AccountIDLen)
+							for _, v := range temp {
+								if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+									subValue := strings.TrimPrefix(v, "[")
+									ids := strings.Split(subValue, " ")
+									if len(ids) != types.AccountIDLen {
+										continue
+									}
+									for kk, vv := range ids {
+										intv, _ := strconv.Atoi(vv)
+										puk[kk] = byte(intv)
+									}
+								}
+							}
+							if !utils.CompareSlice(puk, c.GetSignatureAccPulickey()) {
+								continue
+							}
+							return result, nil
+						}
+					}
+				}
+			}
+		}
+	}
+	return result, errors.Errorf("failed: no %s event found", FileBankTerritorFileDelivery)
+}
+
 func (c *ChainClient) RetrieveEvent_FileBank_DeleteBucket(blockhash types.Hash) (Event_DeleteBucket, error) {
 	var result Event_DeleteBucket
 	events, err := c.eventRetriever.GetEvents(blockhash)

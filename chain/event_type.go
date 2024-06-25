@@ -190,6 +190,13 @@ type Event_CreateBucket struct {
 	Topics     []types.Hash
 }
 
+type Event_TerritorFileDelivery struct {
+	Phase        types.Phase
+	Filehash     FileHash
+	NewTerritory types.Bytes
+	Topics       []types.Hash
+}
+
 type Event_DeleteBucket struct {
 	Phase      types.Phase
 	Acc        types.AccountID

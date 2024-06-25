@@ -65,6 +65,9 @@ type Chainer interface {
 	ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo) (string, error)
 
+	QueryUserHoldFileList(accountID []byte, block int32) ([]string, error)
+	TerritorFileDelivery(user []byte, fid string, target_territory string) (string, error)
+
 	// SchedulerCredit
 	QueryCurrentCounters(accountId []byte, block int32) (SchedulerCounterEntry, error)
 
@@ -120,6 +123,17 @@ type Chainer interface {
 	BuySpace(count uint32) (string, error)
 	ExpansionSpace(count uint32) (string, error)
 	RenewalSpace(days uint32) (string, error)
+
+	QueryTerritory(accountId []byte, name string, block int32) (TerritoryInfo, error)
+	QueryConsignment(token string, block int32) (ConsignmentInfo, error)
+	MintTerritory(gib_count uint32, territory_name string) (string, error)
+	ExpandingTerritory(territory_name string, gib_count uint32) (string, error)
+	RenewalTerritory(territory_name string, days_count uint32) (string, error)
+	ReactivateTerritory(territory_name string, days_count uint32) (string, error)
+	TerritoryConsignment(territory_name string) (string, error)
+	CancelConsignment(territory_name string) (string, error)
+	BuyConsignment(token string, territory_name string) (string, error)
+	CancelPurchaseAction(token string) (string, error)
 
 	// System
 	QueryBlockNumber(blockhash string) (uint32, error)

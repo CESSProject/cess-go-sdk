@@ -37,6 +37,7 @@ const (
 	FileBankIdleSpaceCert         = "FileBank.IdleSpaceCert"
 	FileBankReplaceIdleSpace      = "FileBank.ReplaceIdleSpace"
 	FileBankCalculateReport       = "FileBank.CalculateReport"
+	FileBankTerritorFileDelivery  = "FileBank.TerritorFileDelivery"
 
 	// Oss
 	OssAuthorize       = "Oss.Authorize"
