@@ -37,7 +37,8 @@ const (
 	FileBankIdleSpaceCert         = "FileBank.IdleSpaceCert"
 	FileBankReplaceIdleSpace      = "FileBank.ReplaceIdleSpace"
 	FileBankCalculateReport       = "FileBank.CalculateReport"
-	FileBankTerritorFileDelivery  = "FileBank.TerritorFileDelivery"
+
+	FileBankTerritorFileDelivery = "FileBank.TerritorFileDelivery"
 
 	// Oss
 	OssAuthorize       = "Oss.Authorize"
@@ -71,6 +72,15 @@ const (
 	StorageHandlerBuySpace       = "StorageHandler.BuySpace"
 	StorageHandlerExpansionSpace = "StorageHandler.ExpansionSpace"
 	StorageHandlerRenewalSpace   = "StorageHandler.RenewalSpace"
+
+	StorageHandlerMintTerritory        = "StorageHandler.MintTerritory"
+	StorageHandlerExpansionTerritory   = "StorageHandler.ExpansionTerritory"
+	StorageHandlerRenewalTerritory     = "StorageHandler.RenewalTerritory"
+	StorageHandlerReactivateTerritory  = "StorageHandler.ReactivateTerritory"
+	StorageHandlerConsignment          = "StorageHandler.Consignment"
+	StorageHandlerCancleConsignment    = "StorageHandler.CancleConsignment"
+	StorageHandlerBuyConsignment       = "StorageHandler.BuyConsignment"
+	StorageHandlerCancelPurchaseAction = "StorageHandler.CancelPurchaseAction"
 
 	// TeeWorker
 	TeeWorkerExit                          = "TeeWorker.Exit"

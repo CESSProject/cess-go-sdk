@@ -277,7 +277,7 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Audit_SubmitIdleProof(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_idle_proof, AuditSubmitIdleProof, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -387,7 +387,7 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Audit_SubmitServiceProof(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_service_proof, AuditSubmitServiceProof, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -503,7 +503,7 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Audit_SubmitIdleVerifyResult(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_verify_idle_result, AuditSubmitIdleVerifyResult, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -616,7 +616,7 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Audit_SubmitServiceVerifyResult(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_service_proof, AuditSubmitServiceProof, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():

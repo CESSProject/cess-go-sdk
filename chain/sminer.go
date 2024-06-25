@@ -768,7 +768,7 @@ func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_IncreaseCollateral(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_increase_collateral, SminerIncreaseCollateral, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -882,7 +882,7 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_IncreaseDeclarationSpace(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_increase_declaration_space, SminerIncreaseDeclarationSpace, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1003,7 +1003,7 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				txhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_MinerExitPrep(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_miner_exit, SminerMinerExitPrep, c.signatureAcc)
 				return txhash, err
 			}
 		case err = <-sub.Err():
@@ -1116,7 +1116,7 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				txhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_Withdraw(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_miner_withdraw, SminerWithdraw, c.signatureAcc)
 				return txhash, err
 			}
 		case err = <-sub.Err():
@@ -1354,7 +1354,7 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_RegisterPoisKey(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_register_pois_key, SminerRegisterPoisKey, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1496,7 +1496,7 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_Registered(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_regnstk, SminerRegistered, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1650,7 +1650,7 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_Registered(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_regnstk_assign_staking, SminerRegistered, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1771,7 +1771,7 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_UpdataBeneficiary(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_update_beneficiary, SminerUpdateBeneficiary, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1880,7 +1880,7 @@ func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Sminer_UpdataIp(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_update_peer_id, SminerUpdatePeerId, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():

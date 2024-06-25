@@ -546,232 +546,93 @@ type AllDeleteFileEvent struct {
 	Filehash string
 }
 
-// Events
-type EventRecords struct {
-	// AUDIT
-	Audit_VerifyProof               []Event_VerifyProof
-	Audit_SubmitProof               []Event_SubmitProof
-	Audit_GenerateChallenge         []Event_GenerateChallenge
-	Audit_SubmitIdleProof           []Event_SubmitIdleProof
-	Audit_SubmitServiceProof        []Event_SubmitServiceProof
-	Audit_SubmitIdleVerifyResult    []Event_SubmitIdleVerifyResult
-	Audit_SubmitServiceVerifyResult []Event_SubmitServiceVerifyResult
+// // Events
+// type EventRecords struct {
+// 	// AUDIT
+// 	Audit_VerifyProof               []Event_VerifyProof
+// 	Audit_SubmitProof               []Event_SubmitProof
+// 	Audit_GenerateChallenge         []Event_GenerateChallenge
+// 	Audit_SubmitIdleProof           []Event_SubmitIdleProof
+// 	Audit_SubmitServiceProof        []Event_SubmitServiceProof
+// 	Audit_SubmitIdleVerifyResult    []Event_SubmitIdleVerifyResult
+// 	Audit_SubmitServiceVerifyResult []Event_SubmitServiceVerifyResult
 
-	// Cacher
+// 	// Cacher
 
-	// FILEBANK
-	FileBank_DeleteFile            []Event_DeleteFile
-	FileBank_FillerDelete          []Event_FillerDelete
-	FileBank_FillerUpload          []Event_FillerUpload
-	FileBank_UploadDeclaration     []Event_UploadDeclaration
-	FileBank_CreateBucket          []Event_CreateBucket
-	FileBank_DeleteBucket          []Event_DeleteBucket
-	FileBank_TransferReport        []Event_TransferReport
-	FileBank_ReplaceFiller         []Event_ReplaceFiller
-	FileBank_CalculateEnd          []Event_CalculateEnd
-	FileBank_GenerateRestoralOrder []Event_GenerateRestoralOrder
-	FileBank_ClaimRestoralOrder    []Event_ClaimRestoralOrder
-	FileBank_RecoveryCompleted     []Event_RecoveryCompleted
-	FileBank_StorageCompleted      []Event_StorageCompleted
-	FileBank_IdleSpaceCert         []Event_IdleSpaceCert
-	FileBank_ReplaceIdleSpace      []Event_ReplaceIdleSpace
-	FileBank_CalculateReport       []Event_CalculateReport
+// 	// FILEBANK
+// 	FileBank_DeleteFile            []Event_DeleteFile
+// 	FileBank_FillerDelete          []Event_FillerDelete
+// 	FileBank_FillerUpload          []Event_FillerUpload
+// 	FileBank_UploadDeclaration     []Event_UploadDeclaration
+// 	FileBank_CreateBucket          []Event_CreateBucket
+// 	FileBank_DeleteBucket          []Event_DeleteBucket
+// 	FileBank_TransferReport        []Event_TransferReport
+// 	FileBank_ReplaceFiller         []Event_ReplaceFiller
+// 	FileBank_CalculateEnd          []Event_CalculateEnd
+// 	FileBank_GenerateRestoralOrder []Event_GenerateRestoralOrder
+// 	FileBank_ClaimRestoralOrder    []Event_ClaimRestoralOrder
+// 	FileBank_RecoveryCompleted     []Event_RecoveryCompleted
+// 	FileBank_StorageCompleted      []Event_StorageCompleted
+// 	FileBank_IdleSpaceCert         []Event_IdleSpaceCert
+// 	FileBank_ReplaceIdleSpace      []Event_ReplaceIdleSpace
+// 	FileBank_CalculateReport       []Event_CalculateReport
 
-	// OSS
-	Oss_Authorize       []Event_Authorize
-	Oss_CancelAuthorize []Event_CancelAuthorize
-	Oss_OssRegister     []Event_OssRegister
-	Oss_OssUpdate       []Event_OssUpdate
-	Oss_OssDestroy      []Event_OssDestroy
+// 	// OSS
+// 	Oss_Authorize       []Event_Authorize
+// 	Oss_CancelAuthorize []Event_CancelAuthorize
+// 	Oss_OssRegister     []Event_OssRegister
+// 	Oss_OssUpdate       []Event_OssUpdate
+// 	Oss_OssDestroy      []Event_OssDestroy
 
-	// SMINER
-	Sminer_Registered               []Event_Registered
-	Sminer_RegisterPoisKey          []Event_RegisterPoisKey
-	Sminer_DrawFaucetMoney          []Event_DrawFaucetMoney
-	Sminer_FaucetTopUpMoney         []Event_FaucetTopUpMoney
-	Sminer_LessThan24Hours          []Event_LessThan24Hours
-	Sminer_AlreadyFrozen            []Event_AlreadyFrozen
-	Sminer_IncreaseCollateral       []Event_IncreaseCollateral
-	Sminer_Deposit                  []Event_Deposit
-	Sminer_UpdateBeneficiary        []Event_UpdateBeneficiary
-	Sminer_UpdatePeerId             []Event_UpdatePeerId
-	Sminer_Receive                  []Event_Receive
-	Sminer_MinerExitPrep            []Event_MinerExitPrep
-	Sminer_Withdraw                 []Event_Withdraw
-	Sminer_IncreaseDeclarationSpace []Event_IncreaseDeclarationSpace
+// 	// SMINER
+// 	Sminer_Registered               []Event_Registered
+// 	Sminer_RegisterPoisKey          []Event_RegisterPoisKey
+// 	Sminer_DrawFaucetMoney          []Event_DrawFaucetMoney
+// 	Sminer_FaucetTopUpMoney         []Event_FaucetTopUpMoney
+// 	Sminer_LessThan24Hours          []Event_LessThan24Hours
+// 	Sminer_AlreadyFrozen            []Event_AlreadyFrozen
+// 	Sminer_IncreaseCollateral       []Event_IncreaseCollateral
+// 	Sminer_Deposit                  []Event_Deposit
+// 	Sminer_UpdateBeneficiary        []Event_UpdateBeneficiary
+// 	Sminer_UpdatePeerId             []Event_UpdatePeerId
+// 	Sminer_Receive                  []Event_Receive
+// 	Sminer_MinerExitPrep            []Event_MinerExitPrep
+// 	Sminer_Withdraw                 []Event_Withdraw
+// 	Sminer_IncreaseDeclarationSpace []Event_IncreaseDeclarationSpace
 
-	// StorageHandler
-	StorageHandler_BuySpace             []Event_BuySpace
-	StorageHandler_ExpansionSpace       []Event_ExpansionSpace
-	StorageHandler_RenewalSpace         []Event_RenewalSpace
-	StorageHandler_LeaseExpired         []Event_LeaseExpired
-	StorageHandler_LeaseExpireIn24Hours []Event_LeaseExpireIn24Hours
+// 	// StorageHandler
+// 	StorageHandler_BuySpace             []Event_BuySpace
+// 	StorageHandler_ExpansionSpace       []Event_ExpansionSpace
+// 	StorageHandler_RenewalSpace         []Event_RenewalSpace
+// 	StorageHandler_LeaseExpired         []Event_LeaseExpired
+// 	StorageHandler_LeaseExpireIn24Hours []Event_LeaseExpireIn24Hours
 
-	// TeeWorker
-	TeeWorker_Exit                          []Event_Exit
-	TeeWorker_MasterKeyLaunched             []Event_MasterKeyLaunched
-	TeeWorker_WorkerAdded                   []Event_WorkerAdded
-	TeeWorker_KeyfairyAdded                 []Event_KeyfairyAdded
-	TeeWorker_WorkerUpdated                 []Event_WorkerUpdated
-	TeeWorker_MasterKeyRotated              []Event_MasterKeyRotated
-	TeeWorker_MasterKeyRotationFailed       []Event_MasterKeyRotationFailed
-	TeeWorker_MinimumCesealVersionChangedTo []Event_MinimumCesealVersionChangedTo
+// 	// TeeWorker
+// 	TeeWorker_Exit                          []Event_Exit
+// 	TeeWorker_MasterKeyLaunched             []Event_MasterKeyLaunched
+// 	TeeWorker_WorkerAdded                   []Event_WorkerAdded
+// 	TeeWorker_KeyfairyAdded                 []Event_KeyfairyAdded
+// 	TeeWorker_WorkerUpdated                 []Event_WorkerUpdated
+// 	TeeWorker_MasterKeyRotated              []Event_MasterKeyRotated
+// 	TeeWorker_MasterKeyRotationFailed       []Event_MasterKeyRotationFailed
+// 	TeeWorker_MinimumCesealVersionChangedTo []Event_MinimumCesealVersionChangedTo
 
-	// system - Staking
-	Balances_Locked []Event_Locked
+// 	// system - Staking
+// 	Balances_Locked []Event_Locked
 
-	// system - EvmAccountMapping
-	EvmAccountMapping_ServiceFeePaid     []Event_ServiceFeePaid
-	EvmAccountMapping_CallDone           []Event_CallDone
-	EvmAccountMapping_TransactionFeePaid []Event_TransactionFeePaid
+// 	// system - EvmAccountMapping
+// 	EvmAccountMapping_ServiceFeePaid     []Event_ServiceFeePaid
+// 	EvmAccountMapping_CallDone           []Event_CallDone
+// 	EvmAccountMapping_TransactionFeePaid []Event_TransactionFeePaid
 
-	// system - Staking
-	Staking_ValidatorPrefsSet []Event_ValidatorPrefsSet
+// 	// system - Staking
+// 	Staking_ValidatorPrefsSet []Event_ValidatorPrefsSet
 
-	// system - ElectionProviderMultiPhase
-	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
-	ElectionProviderMultiPhase_PhaseTransitioned []Event_PhaseTransitioned
-	ElectionProviderMultiPhase_SolutionStored    []Event_SolutionStored
+// 	// system - ElectionProviderMultiPhase
+// 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
+// 	ElectionProviderMultiPhase_PhaseTransitioned []Event_PhaseTransitioned
+// 	ElectionProviderMultiPhase_SolutionStored    []Event_SolutionStored
 
-	// system-gsrpc
-	types.EventRecords
-}
-
-type BlockData struct {
-	BlockHash           string
-	PreHash             string
-	ExtHash             string
-	StHash              string
-	AllGasFee           string
-	Timestamp           int64
-	BlockId             uint32
-	IsNewEra            bool
-	EraPaid             EraPaid
-	SysEvents           []string
-	NewAccounts         []string
-	GenChallenge        []string
-	StorageCompleted    []string
-	MinerReg            []MinerRegInfo
-	Extrinsics          []ExtrinsicsInfo
-	TransferInfo        []TransferInfo
-	UploadDecInfo       []UploadDecInfo
-	DeleteFileInfo      []DeleteFileInfo
-	CreateBucketInfo    []CreateBucketInfo
-	DeleteBucketInfo    []DeleteBucketInfo
-	SubmitIdleProve     []SubmitIdleProve
-	SubmitServiceProve  []SubmitServiceProve
-	SubmitIdleResult    []SubmitIdleResult
-	SubmitServiceResult []SubmitServiceResult
-	Punishment          []Punishment
-	MinerRegPoiskeys    []MinerRegPoiskey
-	GatewayReg          []GatewayReg
-	StakingPayouts      []StakingPayout
-	Unbonded            []Unbonded
-}
-
-type ExtrinsicsInfo struct {
-	Name    string
-	Signer  string
-	Hash    string
-	FeePaid string
-	Result  bool
-	Events  []string
-}
-
-type TransferInfo struct {
-	ExtrinsicName string
-	ExtrinsicHash string
-	From          string
-	To            string
-	Amount        string
-	Result        bool
-}
-
-type UploadDecInfo struct {
-	ExtrinsicHash string
-	Owner         string
-	Fid           string
-}
-
-type DeleteFileInfo struct {
-	ExtrinsicHash string
-	Owner         string
-	Fid           string
-}
-
-type MinerRegInfo struct {
-	ExtrinsicHash string
-	Account       string
-}
-
-type CreateBucketInfo struct {
-	ExtrinsicHash string
-	Owner         string
-	BucketName    string
-}
-
-type DeleteBucketInfo struct {
-	ExtrinsicHash string
-	Owner         string
-	BucketName    string
-}
-
-type SubmitIdleProve struct {
-	ExtrinsicHash string
-	Miner         string
-}
-
-type SubmitServiceProve struct {
-	ExtrinsicHash string
-	Miner         string
-}
-
-type SubmitIdleResult struct {
-	ExtrinsicHash string
-	Miner         string
-	Result        bool
-}
-
-type SubmitServiceResult struct {
-	ExtrinsicHash string
-	Miner         string
-	Result        bool
-}
-
-type Punishment struct {
-	ExtrinsicName string
-	ExtrinsicHash string
-	From          string
-	To            string
-	Amount        string
-}
-
-type MinerRegPoiskey struct {
-	ExtrinsicHash string
-	Miner         string
-}
-
-type GatewayReg struct {
-	ExtrinsicHash string
-	Account       string
-}
-
-type EraPaid struct {
-	HaveValue       bool
-	EraIndex        uint32
-	ValidatorPayout string
-	Remainder       string
-}
-
-type StakingPayout struct {
-	EraIndex      uint32
-	ExtrinsicHash string
-	ClaimedAcc    string
-	Amount        string
-}
-
-type Unbonded struct {
-	ExtrinsicHash string
-	Account       string
-	Amount        string
-}
+// 	// system-gsrpc
+// 	types.EventRecords
+// }

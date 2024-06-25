@@ -729,7 +729,7 @@ func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user 
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_UploadDeclaration(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_upload_declaration, FileBankUploadDeclaration, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -837,7 +837,7 @@ func (c *ChainClient) CreateBucket(owner []byte, bucketName string) (string, err
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_CreateBucket(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_create_bucket, FileBankCreateBucket, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -941,7 +941,7 @@ func (c *ChainClient) DeleteBucket(owner []byte, bucketName string) (string, err
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_DeleteBucket(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_delete_bucket, FileBankDeleteBucket, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1070,7 +1070,7 @@ func (c *ChainClient) DeleteFile(owner []byte, fid string) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_DeleteFile(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_delete_file, FileBankDeleteFile, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1194,7 +1194,7 @@ func (c *ChainClient) TransferReport(index uint8, fid string) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_TransferReport(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_transfer_report, FileBankTransferReport, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1312,7 +1312,7 @@ func (c *ChainClient) GenerateRestoralOrder(fid, fragmentHash string) (string, e
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_GenRestoralOrder(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_generate_restoral_order, FileBankGenerateRestoralOrder, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1434,7 +1434,7 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_ClaimRestoralOrder(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_claim_restoral_order, FileBankClaimRestoralOrder, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1572,7 +1572,7 @@ func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, fid, fragmentHash st
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_ClaimRestoralOrder(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_claim_restoral_noexist_order, FileBankClaimRestoralOrder, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1692,7 +1692,7 @@ func (c *ChainClient) RestoralOrderComplete(fragmentHash string) (string, error)
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_RecoveryCompleted(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_restoral_order_complete, FileBankRecoveryCompleted, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1808,7 +1808,7 @@ func (c *ChainClient) CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAc
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_IdleSpaceCert(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_cert_idle_space, FileBankIdleSpaceCert, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -1924,7 +1924,7 @@ func (c *ChainClient) ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWit
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_ReplaceIdleSpace(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_replace_idle_space, FileBankReplaceIdleSpace, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -2038,7 +2038,7 @@ func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo)
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_CalculateReport(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_calculate_report, FileBankCalculateReport, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -2140,7 +2140,7 @@ func (c *ChainClient) TerritorFileDelivery(user []byte, fid string, target_terri
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_FileBank_TerritorFileDelivery(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_FileBank_territory_file_delivery, FileBankTerritorFileDelivery, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
