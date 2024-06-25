@@ -27,6 +27,8 @@ const StakingStakePerTiB = 4000
 
 const BlockIntervalSec = 6
 
+const CESSWalletLen = 49
+
 // BlockInterval is the time interval for generating blocks, in seconds
 const BlockInterval = time.Second * time.Duration(BlockIntervalSec)
 
@@ -142,6 +144,9 @@ const (
 	TotalIdleSpace    = "TotalIdleSpace"
 	TotalServiceSpace = "TotalServiceSpace"
 	PurchasedSpace    = "PurchasedSpace"
+	TerritoryKey      = "TerritoryKey"
+	PayOrder          = "PayOrder"
+	Consignment       = "Consignment"
 
 	// System
 	Account = "Account"
@@ -181,6 +186,7 @@ const (
 	TX_FileBank_CertIdleSpace             = FileBank + DOT + "cert_idle_space"
 	TX_FileBank_ReplaceIdleSpace          = FileBank + DOT + "replace_idle_space"
 	TX_FileBank_CalculateReport           = FileBank + DOT + "calculate_report"
+	TX_FileBank_TerritoryFileDelivery     = FileBank + DOT + "territory_file_delivery"
 
 	// Oss
 	TX_Oss_Register        = Oss + DOT + "register"
@@ -205,6 +211,15 @@ const (
 	TX_StorageHandler_BuySpace       = StorageHandler + DOT + "buy_space"
 	TX_StorageHandler_ExpansionSpace = StorageHandler + DOT + "expansion_space"
 	TX_StorageHandler_RenewalSpace   = StorageHandler + DOT + "renewal_space"
+
+	TX_StorageHandler_MintTerritory        = StorageHandler + DOT + "mint_territory"
+	TX_StorageHandler_ExpandingTerritory   = StorageHandler + DOT + "expanding_territory"
+	TX_StorageHandler_RenewalTerritory     = StorageHandler + DOT + "renewal_territory"
+	TX_StorageHandler_ReactivateTerritory  = StorageHandler + DOT + "reactivate_territory"
+	TX_StorageHandler_TerritoryConsignment = StorageHandler + DOT + "territory_consignment"
+	TX_StorageHandler_CancelConsignment    = StorageHandler + DOT + "cancel_consignment"
+	TX_StorageHandler_BuyConsignment       = StorageHandler + DOT + "buy_consignment"
+	TX_StorageHandler_CancelPurchaseAction = StorageHandler + DOT + "cancel_purchase_action"
 )
 
 // RPC Call
@@ -276,6 +291,7 @@ const (
 	EcdhPublicKeyLen       = 32
 	TeeSigLen              = 64
 	RrscAppPublicLen       = 32
+	TerritoryKeyLen        = 32
 )
 
 type FileHash [FileHashLen]types.U8
@@ -420,6 +436,13 @@ type UserBrief struct {
 	BucketName types.Bytes
 }
 
+type UserBrief_T struct {
+	User          types.AccountID
+	FileName      types.Bytes
+	BucketName    types.Bytes
+	TerriortyName types.Bytes
+}
+
 type RestoralOrderInfo struct {
 	Count        types.U32
 	Miner        types.AccountID
@@ -435,11 +458,6 @@ type RestoralTargetInfo struct {
 	ServiceSpace  types.U128
 	RestoredSpace types.U128
 	CoolingBlock  types.U32
-}
-
-type UserFileSliceInfo struct {
-	Filehash FileHash
-	Filesize types.U128
 }
 
 // SchedulerCredit
@@ -487,14 +505,54 @@ type RewardOrder struct {
 }
 
 // StorageHandler
-type UserSpaceInfo struct {
+// type UserSpaceInfo struct {
+// 	TotalSpace     types.U128
+// 	UsedSpace      types.U128
+// 	LockedSpace    types.U128
+// 	RemainingSpace types.U128
+// 	Start          types.U32
+// 	Deadline       types.U32
+// 	State          types.Bytes
+// }
+
+type TerritoryInfo struct {
+	Token          types.H256
 	TotalSpace     types.U128
 	UsedSpace      types.U128
 	LockedSpace    types.U128
 	RemainingSpace types.U128
 	Start          types.U32
 	Deadline       types.U32
-	State          types.Bytes
+	State          types.U8 //0: Active 1: Frozen 2: Expired 3: OnConsignment
+}
+
+// type OrderInfo struct {
+// 	TerritoryName [TerritoryKeyLen]types.U8
+// 	Pay           types.U128
+// 	GibCount      types.U32
+// 	Days          types.U32
+// 	Expired       types.U32
+// 	TargetAcc     types.AccountID
+// 	OrderType     types.U8
+// }
+
+type ConsignmentInfo struct {
+	User   types.AccountID
+	Price  types.U128
+	Buyers types.OptionAccountID
+	Exec   types.OptionU32
+	Locked types.Bool
+}
+
+type UserFileSliceInfo struct {
+	Filehash FileHash
+	Filesize types.U128
+}
+
+type UserFileSliceInfo_T struct {
+	TerritoryName [TerritoryKeyLen]types.U8
+	Filehash      FileHash
+	FileSize      types.U128
 }
 
 // Staking
@@ -687,6 +745,145 @@ type UserInfo struct {
 }
 
 type AccessInfo struct {
-	r types.H160
-	c []types.H160
+	R types.H160
+	C []types.H160
+}
+
+type BlockData struct {
+	BlockHash           string
+	PreHash             string
+	ExtHash             string
+	StHash              string
+	AllGasFee           string
+	Timestamp           int64
+	BlockId             uint32
+	IsNewEra            bool
+	EraPaid             EraPaid
+	SysEvents           []string
+	NewAccounts         []string
+	GenChallenge        []string
+	StorageCompleted    []string
+	MinerReg            []MinerRegInfo
+	Extrinsics          []ExtrinsicsInfo
+	TransferInfo        []TransferInfo
+	UploadDecInfo       []UploadDecInfo
+	DeleteFileInfo      []DeleteFileInfo
+	CreateBucketInfo    []CreateBucketInfo
+	DeleteBucketInfo    []DeleteBucketInfo
+	SubmitIdleProve     []SubmitIdleProve
+	SubmitServiceProve  []SubmitServiceProve
+	SubmitIdleResult    []SubmitIdleResult
+	SubmitServiceResult []SubmitServiceResult
+	Punishment          []Punishment
+	MinerRegPoiskeys    []MinerRegPoiskey
+	GatewayReg          []GatewayReg
+	StakingPayouts      []StakingPayout
+	Unbonded            []Unbonded
+}
+
+type ExtrinsicsInfo struct {
+	Name    string
+	Signer  string
+	Hash    string
+	FeePaid string
+	Result  bool
+	Events  []string
+}
+
+type TransferInfo struct {
+	ExtrinsicName string
+	ExtrinsicHash string
+	From          string
+	To            string
+	Amount        string
+	Result        bool
+}
+
+type UploadDecInfo struct {
+	ExtrinsicHash string
+	Owner         string
+	Fid           string
+}
+
+type DeleteFileInfo struct {
+	ExtrinsicHash string
+	Owner         string
+	Fid           string
+}
+
+type MinerRegInfo struct {
+	ExtrinsicHash string
+	Account       string
+}
+
+type CreateBucketInfo struct {
+	ExtrinsicHash string
+	Owner         string
+	BucketName    string
+}
+
+type DeleteBucketInfo struct {
+	ExtrinsicHash string
+	Owner         string
+	BucketName    string
+}
+
+type SubmitIdleProve struct {
+	ExtrinsicHash string
+	Miner         string
+}
+
+type SubmitServiceProve struct {
+	ExtrinsicHash string
+	Miner         string
+}
+
+type SubmitIdleResult struct {
+	ExtrinsicHash string
+	Miner         string
+	Result        bool
+}
+
+type SubmitServiceResult struct {
+	ExtrinsicHash string
+	Miner         string
+	Result        bool
+}
+
+type Punishment struct {
+	ExtrinsicName string
+	ExtrinsicHash string
+	From          string
+	To            string
+	Amount        string
+}
+
+type MinerRegPoiskey struct {
+	ExtrinsicHash string
+	Miner         string
+}
+
+type GatewayReg struct {
+	ExtrinsicHash string
+	Account       string
+}
+
+type EraPaid struct {
+	HaveValue       bool
+	EraIndex        uint32
+	ValidatorPayout string
+	Remainder       string
+}
+
+type StakingPayout struct {
+	EraIndex      uint32
+	ExtrinsicHash string
+	ClaimedAcc    string
+	Amount        string
+}
+
+type Unbonded struct {
+	ExtrinsicHash string
+	Account       string
+	Amount        string
 }

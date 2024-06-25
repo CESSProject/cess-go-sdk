@@ -186,12 +186,13 @@ const (
 	ExtName_FileBank_delete_bucket                = "FileBank.delete_bucket"
 	ExtName_FileBank_delete_file                  = "FileBank.delete_file"
 	ExtName_FileBank_generate_restoral_order      = "FileBank.generate_restoral_order"
-	ExtName_FileBank_ownership_transfer           = "FileBank.ownership_transfer"
-	ExtName_FileBank_replace_idle_space           = "FileBank.replace_idle_space"
-	ExtName_FileBank_restoral_order_complete      = "FileBank.restoral_order_complete"
-	ExtName_FileBank_root_clear_file              = "FileBank.root_clear_file"
-	ExtName_FileBank_transfer_report              = "FileBank.transfer_report"
-	ExtName_FileBank_upload_declaration           = "FileBank.upload_declaration"
+	//ExtName_FileBank_ownership_transfer           = "FileBank.ownership_transfer"
+	ExtName_FileBank_replace_idle_space      = "FileBank.replace_idle_space"
+	ExtName_FileBank_restoral_order_complete = "FileBank.restoral_order_complete"
+	ExtName_FileBank_root_clear_file         = "FileBank.root_clear_file"
+	ExtName_FileBank_territory_file_delivery = "FileBank.territory_file_delivery"
+	ExtName_FileBank_transfer_report         = "FileBank.transfer_report"
+	ExtName_FileBank_upload_declaration      = "FileBank.upload_declaration"
 
 	// Grandpa
 	ExtName_Grandpa_note_stalled                 = "Grandpa.note_stalled"
@@ -365,15 +366,27 @@ const (
 	ExtName_StateTrieMigration_set_signed_max_limits  = "StateTrieMigration.set_signed_max_limits"
 
 	// StorageHandler
-	ExtName_StorageHandler_buySpace              = "StorageHandler.buy_space"
-	ExtName_StorageHandler_clear_service_space   = "StorageHandler.clear_service_space"
-	ExtName_StorageHandler_clear_user_used_space = "StorageHandler.clear_user_used_space"
+	//ExtName_StorageHandler_buySpace               = "StorageHandler.buy_space"
+	ExtName_StorageHandler_buy_consignment        = "StorageHandler.buy_consignment"
+	ExtName_StorageHandler_cancel_consignment     = "StorageHandler.cancel_consignment"
+	ExtName_StorageHandler_cancel_purchase_action = "StorageHandler.cancel_purchase_action"
+	ExtName_StorageHandler_clear_service_space    = "StorageHandler.clear_service_space"
+	//ExtName_StorageHandler_clear_user_used_space  = "StorageHandler.clear_user_used_space"
 	ExtName_StorageHandler_create_order          = "StorageHandler.create_order"
+	ExtName_StorageHandler_exec_consignment      = "StorageHandler.exec_consignment"
 	ExtName_StorageHandler_exec_order            = "StorageHandler.exec_order"
-	ExtName_StorageHandler_expansion_space       = "StorageHandler.expansion_space"
-	ExtName_StorageHandler_renewal_space         = "StorageHandler.renewal_space"
-	ExtName_StorageHandler_update_price          = "StorageHandler.update_price"
-	ExtName_StorageHandler_update_user_life      = "StorageHandler.update_user_life"
+	ExtName_StorageHandler_expanding_territory   = "StorageHandler.expanding_territory"
+	ExtName_StorageHandler_mint_territory        = "StorageHandler.mint_territory"
+	ExtName_StorageHandler_reactivate_territory  = "StorageHandler.reactivate_territory"
+	ExtName_StorageHandler_renewal_territory     = "StorageHandler.renewal_territory"
+	ExtName_StorageHandler_territory_grants      = "StorageHandler.territory_grants"
+	ExtName_StorageHandler_territory_rename      = "StorageHandler.territory_rename"
+	ExtName_StorageHandler_treeitory_consignment = "StorageHandler.treeitory_consignment"
+	//ExtName_StorageHandler_expansion_space        = "StorageHandler.expansion_space"
+	//ExtName_StorageHandler_renewal_space          = "StorageHandler.renewal_space"
+	ExtName_StorageHandler_update_price               = "StorageHandler.update_price"
+	ExtName_StorageHandler_update_user_territory_life = "StorageHandler.update_user_territory_life"
+	//ExtName_StorageHandler_update_user_life       = "StorageHandler.update_user_life"
 
 	// Sudo
 	ExtName_Sudo_remove_key            = "Sudo.remove_key"
@@ -1173,11 +1186,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_ownership_transfer); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_FileBank_ownership_transfer
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_ownership_transfer); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_FileBank_ownership_transfer
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_replace_idle_space); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_FileBank_replace_idle_space
 	} else {
@@ -1200,6 +1213,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_upload_declaration); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_FileBank_upload_declaration
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_territory_file_delivery); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_FileBank_territory_file_delivery
 	} else {
 		return err
 	}
@@ -1932,23 +1950,28 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// StorageHandler
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_buySpace); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_StorageHandler_buySpace
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_buySpace); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_StorageHandler_buySpace
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_clear_service_space); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_StorageHandler_clear_service_space
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_clear_user_used_space); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_StorageHandler_clear_user_used_space
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_clear_user_used_space); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_StorageHandler_clear_user_used_space
+	// } else {
+	// 	return err
+	// }
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_create_order); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_create_order
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_create_order); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_StorageHandler_create_order
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_exec_consignment); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_exec_consignment
 	} else {
 		return err
 	}
@@ -1957,23 +1980,78 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_expansion_space); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_StorageHandler_expansion_space
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_renewal_space); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_StorageHandler_renewal_space
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_expansion_space); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_StorageHandler_expansion_space
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_renewal_space); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_StorageHandler_renewal_space
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_update_price); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_StorageHandler_update_price
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_update_user_life); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_StorageHandler_update_user_life
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_update_user_territory_life); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_update_user_territory_life
+	} else {
+		return err
+	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_update_user_life); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_StorageHandler_update_user_life
+	// } else {
+	// 	return err
+	// }
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_mint_territory); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_mint_territory
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_expanding_territory); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_expanding_territory
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_renewal_territory); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_renewal_territory
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_territory_rename); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_territory_rename
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_territory_grants); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_territory_grants
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_reactivate_territory); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_reactivate_territory
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_treeitory_consignment); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_treeitory_consignment
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_cancel_consignment); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_cancel_consignment
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_buy_consignment); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_buy_consignment
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_cancel_purchase_action); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_cancel_purchase_action
 	} else {
 		return err
 	}

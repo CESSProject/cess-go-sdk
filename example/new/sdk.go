@@ -8,17 +8,13 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"math/big"
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
 	"github.com/CESSProject/cess-go-sdk/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/scale"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 // Substrate well-known mnemonic:
@@ -128,12 +124,6 @@ func main() {
 	}
 	return
 
-	blockhash, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlockHash(180)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	fmt.Println(sdk.RetrieveAllEventFromBlock(blockhash))
-
 	// header, err := sdk.GetSubstrateAPI().RPC.Chain.GetHeader(blockhash)
 	// if err != nil {
 	// 	log.Fatalln(err)
@@ -148,43 +138,4 @@ func main() {
 	// 	fmt.Println(i, ": ", header.Digest[i])
 	// }
 	// fmt.Println("------------block-----------")
-	//
-
-	block, err := sdk.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	fmt.Println("number of Extrinsics: ", len(block.Block.Extrinsics))
-
-	callIndex, err := sdk.GetMetadata().FindCallIndex("Timestamp.set")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	var eve = types.EventRecords{}
-	_ = eve
-
-	// for _, e := range eve.System_ExtrinsicFailed {
-	// 	//if IsApplyExtrinsic
-	// 	//e.Phase.AsApplyExtrinsic
-	// }
-
-	timestamp := new(big.Int)
-	for _, extrinsic := range block.Block.Extrinsics {
-		if extrinsic.Method.CallIndex != callIndex {
-			continue
-		}
-		timeDecoder := scale.NewDecoder(bytes.NewReader(extrinsic.Method.Args))
-		timestamp, err = timeDecoder.DecodeUintCompact()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		break
-	}
-
-	msec := timestamp.Int64()
-	time := time.Unix(msec/1e3, (msec%1e3)*1e6)
-	fmt.Println(msec)
-	fmt.Println(time)
-	fmt.Println(sdk.RetrieveAllEventFromBlock(blockhash))
 }

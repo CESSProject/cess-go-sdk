@@ -12,7 +12,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
-// Chain client interface
+// chain client interface
 type Chainer interface {
 	// Audit
 	QueryChallengeSnapShot(accountID []byte, block int32) (bool, ChallengeInfo, error)
@@ -27,7 +27,7 @@ type Chainer interface {
 	// Balances
 	QueryTotalIssuance(block int32) (string, error)
 	QueryInactiveIssuance(block int32) (string, error)
-	TransferToken(dest string, amount uint64) (string, string, error)
+	TransferToken(dest string, amount uint64) (string, error)
 
 	// Oss
 	QueryOss(accountID []byte, block int32) (OssInfo, error)
@@ -64,6 +64,9 @@ type Chainer interface {
 	CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo) (string, error)
+
+	QueryUserHoldFileList(accountID []byte, block int32) ([]string, error)
+	TerritorFileDelivery(user []byte, fid string, target_territory string) (string, error)
 
 	// SchedulerCredit
 	QueryCurrentCounters(accountId []byte, block int32) (SchedulerCounterEntry, error)
@@ -113,13 +116,19 @@ type Chainer interface {
 
 	// StorageHandler
 	QueryUnitPrice(block int32) (string, error)
-	QueryUserOwnedSpace(accountID []byte, block int32) (UserSpaceInfo, error)
 	QueryTotalIdleSpace(block int32) (uint64, error)
 	QueryTotalServiceSpace(block int32) (uint64, error)
 	QueryPurchasedSpace(block int32) (uint64, error)
-	BuySpace(count uint32) (string, error)
-	ExpansionSpace(count uint32) (string, error)
-	RenewalSpace(days uint32) (string, error)
+	QueryTerritory(accountId []byte, name string, block int32) (TerritoryInfo, error)
+	QueryConsignment(token string, block int32) (ConsignmentInfo, error)
+	MintTerritory(gib_count uint32, territory_name string) (string, error)
+	ExpandingTerritory(territory_name string, gib_count uint32) (string, error)
+	RenewalTerritory(territory_name string, days_count uint32) (string, error)
+	ReactivateTerritory(territory_name string, days_count uint32) (string, error)
+	TerritoryConsignment(territory_name string) (string, error)
+	CancelConsignment(territory_name string) (string, error)
+	BuyConsignment(token string, territory_name string) (string, error)
+	CancelPurchaseAction(token string) (string, error)
 
 	// System
 	QueryBlockNumber(blockhash string) (uint32, error)
@@ -169,47 +178,12 @@ type Chainer interface {
 	ReconnectRpc() error
 	Close()
 
-	// Extrinsics
+	// extrinsics
 	InitExtrinsicsName() error
 	ParseBlockData(blocknumber uint64) (BlockData, error)
 
 	// event
-	DecodeEventNameFromBlock(block uint64) ([]string, error)
-	DecodeEventNameFromBlockhash(blockhash types.Hash) ([]string, error)
-	RetrieveEvent_Audit_SubmitIdleProof(blockhash types.Hash) (Event_SubmitIdleProof, error)
-	RetrieveEvent_Audit_SubmitServiceProof(blockhash types.Hash) (Event_SubmitServiceProof, error)
-	RetrieveEvent_Audit_SubmitIdleVerifyResult(blockhash types.Hash) (Event_SubmitIdleVerifyResult, error)
-	RetrieveEvent_Audit_SubmitServiceVerifyResult(blockhash types.Hash) (Event_SubmitServiceVerifyResult, error)
-	RetrieveEvent_Oss_OssUpdate(blockhash types.Hash) (Event_OssUpdate, error)
-	RetrieveEvent_Oss_OssRegister(blockhash types.Hash) (Event_OssRegister, error)
-	RetrieveEvent_Oss_OssDestroy(blockhash types.Hash) (Event_OssDestroy, error)
-	RetrieveEvent_Oss_Authorize(blockhash types.Hash) (Event_Authorize, error)
-	RetrieveEvent_Oss_CancelAuthorize(blockhash types.Hash) (Event_CancelAuthorize, error)
-	RetrieveEvent_FileBank_UploadDeclaration(blockhash types.Hash) (Event_UploadDeclaration, error)
-	RetrieveEvent_FileBank_CreateBucket(blockhash types.Hash) (Event_CreateBucket, error)
-	RetrieveEvent_FileBank_DeleteFile(blockhash types.Hash) (Event_DeleteFile, error)
-	RetrieveEvent_FileBank_TransferReport(blockhash types.Hash) (Event_TransferReport, error)
-	RetrieveEvent_FileBank_ClaimRestoralOrder(blockhash types.Hash) (Event_ClaimRestoralOrder, error)
-	RetrieveEvent_FileBank_RecoveryCompleted(blockhash types.Hash) (Event_RecoveryCompleted, error)
-	RetrieveEvent_FileBank_IdleSpaceCert(blockhash types.Hash) (Event_IdleSpaceCert, error)
-	RetrieveEvent_FileBank_ReplaceIdleSpace(blockhash types.Hash) (Event_ReplaceIdleSpace, error)
-	RetrieveEvent_FileBank_CalculateReport(blockhash types.Hash) (Event_CalculateReport, error)
-	RetrieveEvent_Sminer_Registered(blockhash types.Hash) (Event_Registered, error)
-	RetrieveEvent_Sminer_RegisterPoisKey(blockhash types.Hash) (Event_RegisterPoisKey, error)
-	RetrieveEvent_Sminer_UpdataIp(blockhash types.Hash) (Event_UpdatePeerId, error)
-	RetrieveEvent_Sminer_UpdataBeneficiary(blockhash types.Hash) (Event_UpdateBeneficiary, error)
-	RetrieveEvent_Sminer_MinerExitPrep(blockhash types.Hash) (Event_MinerExitPrep, error)
-	RetrieveEvent_Sminer_IncreaseCollateral(blockhash types.Hash) (Event_IncreaseCollateral, error)
-	RetrieveEvent_Sminer_Receive(blockhash types.Hash) (Event_Receive, error)
-	RetrieveEvent_Sminer_Withdraw(blockhash types.Hash) (Event_Withdraw, error)
-	RetrieveEvent_Sminer_IncreaseDeclarationSpace(blockhash types.Hash) (Event_IncreaseDeclarationSpace, error)
-	RetrieveEvent_StorageHandler_BuySpace(blockhash types.Hash) (Event_BuySpace, error)
-	RetrieveEvent_StorageHandler_ExpansionSpace(blockhash types.Hash) (Event_ExpansionSpace, error)
-	RetrieveEvent_StorageHandler_RenewalSpace(blockhash types.Hash) (Event_RenewalSpace, error)
-	RetrieveEvent_Balances_Transfer(blockhash types.Hash) (types.EventBalancesTransfer, error)
-	RetrieveEvent_FileBank_GenRestoralOrder(blockhash types.Hash) (Event_GenerateRestoralOrder, error)
-	RetrieveAllEvent_FileBank_UploadDeclaration(blockhash types.Hash) ([]AllUploadDeclarationEvent, error)
-	RetrieveAllEvent_FileBank_StorageCompleted(blockhash types.Hash) ([]string, error)
-	RetrieveAllEvent_FileBank_DeleteFile(blockhash types.Hash) ([]AllDeleteFileEvent, error)
-	RetrieveAllEventFromBlock(blockhash types.Hash) ([]string, map[string][]string, error)
+	RetrieveAllEventName(blockhash types.Hash) ([]string, error)
+	RetrieveEvent(blockhash types.Hash, extrinsic_name, event_name, signer string) error
+	RetrieveExtrinsicsAndEvents(blockhash types.Hash) ([]string, map[string][]string, error)
 }

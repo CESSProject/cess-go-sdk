@@ -48,12 +48,6 @@ func main() {
 	}
 	defer sdk.Close()
 
-	// buy space
-	_, err = sdk.BuySpace(1)
-	if err != nil {
-		panic(err)
-	}
-
 	puk, err := utils.ParsingPublickey(PublicGatewayAccount)
 	if err != nil {
 		panic(err)
