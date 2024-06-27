@@ -431,12 +431,6 @@ type FragmentInfo struct {
 }
 
 type UserBrief struct {
-	User       types.AccountID
-	FileName   types.Bytes
-	BucketName types.Bytes
-}
-
-type UserBrief_T struct {
 	User          types.AccountID
 	FileName      types.Bytes
 	BucketName    types.Bytes

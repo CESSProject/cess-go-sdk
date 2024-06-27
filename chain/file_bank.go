@@ -571,18 +571,19 @@ func (c *ChainClient) QueryUserHoldFileList(accountID []byte, block int32) ([]st
 	return value, nil
 }
 
-// GenerateStorageOrder generate a file storage order
+// PlaceStorageOrder place an order for storage file
 //   - fid: file identification
+//   - file_name: file name
+//   - bucket_name: bucket name
+//   - territory_name: territory name
 //   - segment: segment info
 //   - owner: account of the file owner
-//   - filename: file name
-//   - buckname: bucket to store the file
 //   - filesize: file size
 //
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) GenerateStorageOrder(fid string, segment []SegmentDataInfo, owner []byte, filename string, buckname string, filesize uint64) (string, error) {
+func (c *ChainClient) PlaceStorageOrder(fid, file_name, bucket_name, territory_name string, segment []SegmentDataInfo, owner []byte, file_size uint64) (string, error) {
 	var err error
 	var segmentList = make([]SegmentList, len(segment))
 	var user UserBrief
@@ -606,9 +607,10 @@ func (c *ChainClient) GenerateStorageOrder(fid string, segment []SegmentDataInfo
 		return "", err
 	}
 	user.User = *acc
-	user.BucketName = types.NewBytes([]byte(buckname))
-	user.FileName = types.NewBytes([]byte(filename))
-	return c.UploadDeclaration(fid, segmentList, user, filesize)
+	user.BucketName = types.NewBytes([]byte(bucket_name))
+	user.FileName = types.NewBytes([]byte(file_name))
+	user.TerriortyName = types.NewBytes([]byte(territory_name))
+	return c.UploadDeclaration(fid, segmentList, user, file_size)
 }
 
 // GenerateStorageOrder generate a file storage order
