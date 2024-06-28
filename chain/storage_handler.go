@@ -256,21 +256,21 @@ func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32)
 		return data, ERR_RPC_CONNECTION
 	}
 
-	param1, err := codec.Encode(accountId)
+	param2, err := codec.Encode(types.NewBytes([]byte(name)))
 	if err != nil {
 		return data, errors.New("invalid account id")
 	}
 
-	key, err := types.CreateStorageKey(c.metadata, StorageHandler, TerritoryKey, param1, types.NewBytes([]byte(name)))
+	key, err := types.CreateStorageKey(c.metadata, StorageHandler, Territory, accountId, param2)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), StorageHandler, TerritoryKey, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), StorageHandler, Territory, err)
 		return data, err
 	}
 
 	if block < 0 {
 		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
 		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), StorageHandler, TerritoryKey, err)
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), StorageHandler, Territory, err)
 			c.SetRpcState(false)
 			return data, err
 		}
@@ -285,7 +285,7 @@ func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32)
 	}
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), StorageHandler, TerritoryKey, err)
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), StorageHandler, Territory, err)
 		c.SetRpcState(false)
 		return data, err
 	}

@@ -51,7 +51,7 @@ type Chainer interface {
 	QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, error)
 	QueryAllBucketName(accountID []byte, block int32) ([]string, error)
 	QueryAllUserFiles(accountID []byte, block int32) ([]string, error)
-	GenerateStorageOrder(fid string, segment []SegmentDataInfo, owner []byte, filename string, buckname string, filesize uint64) (string, error)
+	PlaceStorageOrder(fid, file_name, bucket_name, territory_name string, segment []SegmentDataInfo, owner []byte, file_size uint64) (string, error)
 	UploadDeclaration(fid string, segment []SegmentList, user UserBrief, filesize uint64) (string, error)
 	CreateBucket(owner []byte, bucketName string) (string, error)
 	DeleteBucket(owner []byte, bucketName string) (string, error)

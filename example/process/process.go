@@ -11,25 +11,15 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/CESSProject/cess-go-sdk/chain"
 	"github.com/CESSProject/cess-go-sdk/core/process"
 )
 
-type result struct {
-	Fid         string
-	SegmentData []chain.SegmentDataInfo
-}
-
 func main() {
 	var file = "process.go"
-	seg, rhash, err := process.ShardedEncryptionProcessing(file, "")
+	segmentInfo, fid, err := process.FullProcessing(file, "", ".")
 	if err != nil {
-		log.Println(err)
-		return
+		log.Fatal(err)
 	}
-	var myResult = result{
-		Fid:         rhash,
-		SegmentData: seg,
-	}
-	fmt.Println(myResult)
+	fmt.Println("fid: ", fid)
+	fmt.Println("segment info: ", segmentInfo)
 }
