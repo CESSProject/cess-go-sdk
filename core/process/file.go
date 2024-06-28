@@ -32,7 +32,8 @@ var globalTransport = &http.Transport{
 // Receive parameter:
 //   - url: gateway url
 //   - file: stored file
-//   - bucket: bucket for storing file
+//   - bucket: bucket for storing file, it will be created automatically
+//   - territory: territory name
 //   - mnemonic: polkadot account mnemonic
 //
 // Return parameter:
@@ -49,7 +50,7 @@ var globalTransport = &http.Transport{
 //   - Account refers to the account where you configured mnemonic when creating an SDK.
 //   - CESS public gateway address: [http://deoss-pub-gateway.cess.cloud/]
 //   - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
-func StoreFile(url, file, bucket, mnemonic string) (string, error) {
+func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
 
@@ -113,7 +114,8 @@ func StoreFile(url, file, bucket, mnemonic string) (string, error) {
 		return "", err
 	}
 
-	req.Header.Set("BucketName", bucket)
+	req.Header.Set("Bucket", bucket)
+	req.Header.Set("Territory", territory)
 	req.Header.Set("Account", acc)
 	req.Header.Set("Message", message)
 	req.Header.Set("Signature", base58.Encode(sig[:]))
@@ -146,13 +148,14 @@ func StoreFile(url, file, bucket, mnemonic string) (string, error) {
 //
 // Receive parameter:
 //   - url: gateway url
-//   - bucket: the bucket for storing object, it will be created automatically.
+//   - bucket: the bucket for storing object, it will be created automatically
+//   - territory: territory name
 //   - mnemonic: polkadot account mnemonic
-//   - reader: strings, byte data, file streams, network streams, etc.
+//   - reader: strings, byte data, file streams, network streams, etc
 //
 // Return parameter:
-//   - string: [fid] unique identifier for the file.
-//   - error: error message.
+//   - string: [fid] unique identifier for the file
+//   - error: error message
 //
 // Preconditions:
 //  1. Account requires purchasing space, refer to [BuySpace] interface.
@@ -164,7 +167,7 @@ func StoreFile(url, file, bucket, mnemonic string) (string, error) {
 //   - Account refers to the account where you configured mnemonic when creating an SDK.
 //   - CESS public gateway address: [http://deoss-pub-gateway.cess.cloud/]
 //   - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
-func StoreObject(url string, bucket, mnemonic string, reader io.Reader) (string, error) {
+func StoreObject(url string, bucket, territory, mnemonic string, reader io.Reader) (string, error) {
 	if !utils.CheckBucketName(bucket) {
 		return "", errors.New("invalid bucket name")
 	}
@@ -191,7 +194,8 @@ func StoreObject(url string, bucket, mnemonic string, reader io.Reader) (string,
 		return "", err
 	}
 
-	req.Header.Set("BucketName", bucket)
+	req.Header.Set("Bucket", bucket)
+	req.Header.Set("Territory", territory)
 	req.Header.Set("Account", acc)
 	req.Header.Set("Message", message)
 	req.Header.Set("Signature", base58.Encode(sig[:]))

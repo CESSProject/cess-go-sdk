@@ -21,14 +21,15 @@ import (
 // ReedSolomon uses reed-solomon algorithm to redundancy file
 //
 // Receive parameter:
-//   - path: files to process.
+//   - file: the file to be processed
+//   - saveDir: save directory
 //
 // Return parameter:
-//   - []string: Processed data fragmentation.
+//   - []string: processed data fragmentation
 //   - error: error message.
-func ReedSolomon(path string) ([]string, error) {
+func ReedSolomon(file string, saveDir string) ([]string, error) {
 	var shardspath = make([]string, 0)
-	fstat, err := os.Stat(path)
+	fstat, err := os.Stat(file)
 	if err != nil {
 		return nil, err
 	}
@@ -39,14 +40,12 @@ func ReedSolomon(path string) ([]string, error) {
 		return nil, errors.New("invalid size")
 	}
 
-	basedir := filepath.Dir(path)
-
 	enc, err := reedsolomon.New(config.DataShards, config.ParShards)
 	if err != nil {
 		return shardspath, err
 	}
 
-	b, err := os.ReadFile(path)
+	b, err := os.ReadFile(file)
 	if err != nil {
 		return shardspath, err
 	}
@@ -67,7 +66,7 @@ func ReedSolomon(path string) ([]string, error) {
 		if err != nil {
 			return shardspath, err
 		}
-		newpath := filepath.Join(basedir, hash)
+		newpath := filepath.Join(saveDir, hash)
 		_, err = os.Stat(newpath)
 		if err != nil {
 			err = os.WriteFile(newpath, shard, 0755)

@@ -21,138 +21,31 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Process the file according to CESS specifications.
+// FillAndCut fill and cut files
 //
 // Receive parameter:
-//   - file: the file to be processed.
+//   - file: the file to be processed
+//   - saveDir: segment save directory
 //
 // Return parameter:
-//   - segmentDataInfo: segment and fragment information of the file.
-//   - string: [fid] unique identifier for the file.
-//   - error: error message.
-func ProcessingData(file string) ([]chain.SegmentDataInfo, string, error) {
-	segmentPath, err := cutfile(file)
-	if err != nil {
-		if segmentPath != nil {
-			for _, v := range segmentPath {
-				os.Remove(v)
-			}
-		}
-		return nil, "", errors.Wrapf(err, "[cutfile]")
-	}
-
-	var segmentDataInfo = make([]chain.SegmentDataInfo, len(segmentPath))
-
-	for i := 0; i < len(segmentPath); i++ {
-		segmentDataInfo[i].SegmentHash = segmentPath[i]
-		segmentDataInfo[i].FragmentHash, err = erasure.ReedSolomon(segmentPath[i])
-		if err != nil {
-			return segmentDataInfo, "", errors.Wrapf(err, "[ReedSolomon]")
-		}
-		os.Remove(segmentPath[i])
-	}
-
-	// calculate merkle root hash
-	var hash string
-	if len(segmentPath) == 1 {
-		hash, err = hashtree.BuildSimpleMerkelRootHash(filepath.Base(segmentPath[0]))
-		if err != nil {
-			return nil, "", err
-		}
-	} else {
-		hash, err = hashtree.BuildMerkelRootHash(ExtractSegmenthash(segmentPath))
-		if err != nil {
-			return nil, "", err
-		}
-	}
-
-	return segmentDataInfo, hash, nil
-}
-
-// Process the file according to CESS specifications.
-//
-// Receive parameter:
-//   - file: the file to be processed.
-//   - cipher: encryption and decryption keys.
-//
-// Return parameter:
-//   - segmentDataInfo: segment and fragment information of the file.
-//   - string: [fid] unique identifier for the file.
-//   - error: error message.
-func ShardedEncryptionProcessing(file string, cipher string) ([]chain.SegmentDataInfo, string, error) {
-	var err error
-	var segmentPath []string
-	if cipher != "" {
-		segmentPath, err = cutFileWithEncryption(file)
-		if err != nil {
-			if segmentPath != nil {
-				for _, v := range segmentPath {
-					os.Remove(v)
-				}
-			}
-			return nil, "", errors.Wrapf(err, "[cutFileWithEncryption]")
-		}
-		segmentPath, err = encryptedSegment(segmentPath, cipher)
-		if err != nil {
-			if segmentPath != nil {
-				for _, v := range segmentPath {
-					os.Remove(v)
-				}
-			}
-			return nil, "", err
-		}
-	} else {
-		segmentPath, err = cutfile(file)
-		if err != nil {
-			if segmentPath != nil {
-				for _, v := range segmentPath {
-					os.Remove(v)
-				}
-			}
-			return nil, "", errors.Wrapf(err, "[cutFileWithEncryption]")
-		}
-	}
-
-	var segmentDataInfo = make([]chain.SegmentDataInfo, len(segmentPath))
-
-	for i := 0; i < len(segmentPath); i++ {
-		segmentDataInfo[i].SegmentHash = segmentPath[i]
-		segmentDataInfo[i].FragmentHash, err = erasure.ReedSolomon(segmentPath[i])
-		if err != nil {
-			return segmentDataInfo, "", errors.Wrapf(err, "[ReedSolomon]")
-		}
-		os.Remove(segmentPath[i])
-	}
-
-	// calculate merkle root hash
-	var hash string
-	if len(segmentPath) == 1 {
-		hash, err = hashtree.BuildSimpleMerkelRootHash(filepath.Base(segmentPath[0]))
-		if err != nil {
-			return nil, "", err
-		}
-	} else {
-		hash, err = hashtree.BuildMerkelRootHash(ExtractSegmenthash(segmentPath))
-		if err != nil {
-			return nil, "", err
-		}
-	}
-
-	return segmentDataInfo, hash, nil
-}
-
-func cutfile(file string) ([]string, error) {
+//   - []string: segment list
+//   - error: error message
+func FillAndCut(file string, saveDir string) ([]string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
 		return nil, err
 	}
 	if fstat.IsDir() {
-		return nil, errors.New("not a file")
+		return nil, errors.New("FillingAndCutting: not a file")
 	}
-	if fstat.Size() == 0 {
-		return nil, errors.New("empty file")
+	if fstat.Size() <= 0 {
+		return nil, errors.New("FillingAndCutting: file is empty")
 	}
-	baseDir := filepath.Dir(file)
+	err = os.MkdirAll(saveDir, 0755)
+	if err != nil {
+		return nil, errors.Wrap(err, "FillingAndCutting")
+	}
+
 	segmentCount := fstat.Size() / config.SegmentSize
 	if fstat.Size()%int64(config.SegmentSize) != 0 {
 		segmentCount++
@@ -162,7 +55,7 @@ func cutfile(file string) ([]string, error) {
 	buf := make([]byte, config.SegmentSize)
 	f, err := os.Open(file)
 	if err != nil {
-		return segment, err
+		return segment, errors.Wrap(err, "FillingAndCutting")
 	}
 	defer f.Close()
 
@@ -178,43 +71,54 @@ func cutfile(file string) ([]string, error) {
 		}
 		if num < config.SegmentSize {
 			if i+1 != segmentCount {
-				return segment, errors.New("read file err")
+				return segment, errors.New("read file failed")
 			}
-			copy(buf[num:], make([]byte, config.SegmentSize-num, config.SegmentSize-num))
+			copy(buf[num:], make([]byte, config.SegmentSize-num))
 		}
-
 		hash, err := utils.CalcSHA256(buf)
 		if err != nil {
 			return segment, err
 		}
-
-		err = utils.WriteBufToFile(buf, filepath.Join(baseDir, hash))
+		err = utils.WriteBufToFile(buf, filepath.Join(saveDir, hash))
 		if err != nil {
 			return segment, errors.Wrapf(err, "[WriteBufToFile]")
 		}
-		segment[i] = filepath.Join(baseDir, hash)
+		segment[i] = filepath.Join(saveDir, hash)
 	}
 	return segment, nil
 }
 
-func cutFileWithEncryption(file string) ([]string, error) {
+// FillAndCutWithAESEncryption fill and cut files, then encrypt using AES algorithm
+//
+// Receive parameter:
+//   - file: the file to be processed
+//   - cipher: encryption and decryption cipher
+//   - saveDir: segment save directory
+//
+// Return parameter:
+//   - []string: segment list
+//   - error: error message
+func FillAndCutWithAESEncryption(file string, cipher string, saveDir string) ([]string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
 		return nil, err
 	}
 	if fstat.IsDir() {
-		return nil, errors.New("not a file")
+		return nil, errors.New("FillAndCutWithEncryption: not a file")
 	}
-	if fstat.Size() == 0 {
-		return nil, errors.New("empty file")
+	if fstat.Size() <= 0 {
+		return nil, errors.New("FillAndCutWithEncryption: file is empty")
 	}
-	baseDir := filepath.Dir(file)
+	err = os.MkdirAll(saveDir, 0755)
+	if err != nil {
+		return nil, errors.Wrap(err, "FillAndCutWithEncryption")
+	}
+
 	segmentSize := config.SegmentSize - 16
 	segmentCount := fstat.Size() / int64(segmentSize)
 	if fstat.Size()%int64(segmentSize) != 0 {
 		segmentCount++
 	}
-
 	segment := make([]string, segmentCount)
 	buf := make([]byte, segmentSize)
 	f, err := os.Open(file)
@@ -235,32 +139,117 @@ func cutFileWithEncryption(file string) ([]string, error) {
 		}
 		if num < segmentSize {
 			if i+1 != segmentCount {
-				return segment, errors.New("read file err")
+				return segment, errors.New("read file failed")
 			}
-			copy(buf[num:], make([]byte, segmentSize-num, segmentSize-num))
+			copy(buf[num:], make([]byte, segmentSize-num))
 		}
-
 		hash, err := utils.CalcSHA256(buf)
 		if err != nil {
 			return segment, err
 		}
-
-		err = utils.WriteBufToFile(buf, filepath.Join(baseDir, hash))
+		err = utils.WriteBufToFile(buf, filepath.Join(saveDir, hash))
 		if err != nil {
 			return segment, errors.Wrapf(err, "[WriteBufToFile]")
 		}
-		segment[i] = filepath.Join(baseDir, hash)
+		segment[i] = filepath.Join(saveDir, hash)
 	}
-	return segment, nil
+	segment_encrypted := make([]string, segmentCount)
+	for i := int64(0); i < segmentCount; i++ {
+		segment_encrypted[i], err = EncryptWithAES(segment[i], cipher, saveDir)
+		if err != nil {
+			return nil, err
+		}
+		os.Remove(segment[i])
+	}
+	return segment_encrypted, nil
 }
 
-func encryptedSegment(segments []string, cipher string) ([]string, error) {
+// Redundancy calculate redundancy for files
+//
+// Receive parameter:
+//   - segment: the file to be processed
+//   - saveDir: fragment save directory
+//
+// Return parameter:
+//   - []chain.SegmentDataInfo: segment info
+//   - string: fid
+//   - error: error message
+func Redundancy(segment []string, saveDir string) ([]chain.SegmentDataInfo, string, error) {
+	var (
+		err         error
+		segmentInfo = make([]chain.SegmentDataInfo, len(segment))
+	)
+	for i := 0; i < len(segment); i++ {
+		segmentInfo[i].SegmentHash = filepath.Base(segment[i])
+		segmentInfo[i].FragmentHash, err = erasure.ReedSolomon(segment[i], saveDir)
+		if err != nil {
+			return segmentInfo, "", errors.Wrap(err, "[ReedSolomon]")
+		}
+		os.Remove(segment[i])
+	}
+	// calculate merkle root hash
+	var hash string
+	if len(segment) == 1 {
+		hash, err = hashtree.BuildSimpleMerkelRootHash(filepath.Base(segment[0]))
+		if err != nil {
+			return nil, "", errors.Wrap(err, "[BuildSimpleMerkelRootHash]")
+		}
+	} else {
+		hash, err = hashtree.BuildMerkelRootHash(ExtractSegmenthash(segment))
+		if err != nil {
+			return nil, "", errors.Wrap(err, "[BuildMerkelRootHash]")
+		}
+	}
+	return segmentInfo, hash, nil
+}
+
+// EncryptWithAES encrypt a file with AES
+//
+// Receive parameter:
+//   - file: file
+//   - cipher: encryption and decryption cipher
+//   - saveDir: encrypted file save directory
+//
+// Return parameter:
+//   - string: encrypted file
+//   - error: error message
+func EncryptWithAES(file string, cipher string, saveDir string) (string, error) {
+	buf, err := os.ReadFile(file)
+	if err != nil {
+		return "", err
+	}
+	buf, err = crypte.AesCbcEncrypt(buf, []byte(cipher))
+	if err != nil {
+		return "", err
+	}
+	hash, err := utils.CalcSHA256(buf)
+	if err != nil {
+		return "", err
+	}
+	encryptedPath := filepath.Join(saveDir, hash)
+	err = os.WriteFile(encryptedPath, buf, 0755)
+	if err != nil {
+		return "", err
+	}
+	return encryptedPath, nil
+}
+
+// BatchEncryptWithAES encrypt a batch of files with AES
+//
+// Receive parameter:
+//   - files: file list
+//   - cipher: encryption and decryption cipher
+//   - saveDir: encrypted files save directory
+//
+// Return parameter:
+//   - string: encrypted files
+//   - error: error message
+func BatchEncryptWithAES(files []string, cipher string, saveDir string) ([]string, error) {
 	var err error
 	var hash string
 	var buf []byte
-	var encryptedSegmentPath string
-	var encryptedSegments = make([]string, len(segments))
-	for k, v := range segments {
+	var encryptedFiles = make([]string, len(files))
+	for k, v := range files {
 		buf, err = os.ReadFile(v)
 		if err != nil {
 			return nil, err
@@ -273,17 +262,51 @@ func encryptedSegment(segments []string, cipher string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		encryptedSegmentPath = filepath.Join(filepath.Dir(v), hash)
-		err = os.WriteFile(encryptedSegmentPath, buf, 0755)
+		encryptedPath := filepath.Join(saveDir, hash)
+		err = os.WriteFile(encryptedPath, buf, 0755)
 		if err != nil {
 			return nil, err
 		}
-		encryptedSegments[k] = encryptedSegmentPath
+		encryptedFiles[k] = encryptedPath
 	}
-	for _, v := range segments {
+	for _, v := range files {
 		os.Remove(v)
 	}
-	return encryptedSegments, nil
+	return encryptedFiles, nil
+}
+
+// FullProcessing perform full process processing on the file
+//
+// Receive parameter:
+//   - file: the file to be processed
+//   - cipher: encryption and decryption cipher
+//   - saveDir: saved directory after processing
+//
+// Return parameter:
+//   - []segmentDataInfo: segment and fragment information of the file
+//   - string: [fid] unique identifier for the file
+//   - error: error message
+func FullProcessing(file string, cipher string, savedir string) ([]chain.SegmentDataInfo, string, error) {
+	var err error
+	var segmentList []string
+	if cipher != "" {
+		segmentList, err = FillAndCutWithAESEncryption(file, cipher, savedir)
+		if err != nil {
+			for _, v := range segmentList {
+				os.Remove(v)
+			}
+			return nil, "", err
+		}
+		return Redundancy(segmentList, savedir)
+	}
+	segmentList, err = FillAndCut(file, savedir)
+	if err != nil {
+		for _, v := range segmentList {
+			os.Remove(v)
+		}
+		return nil, "", err
+	}
+	return Redundancy(segmentList, savedir)
 }
 
 func ExtractSegmenthash(segment []string) []string {

@@ -27,15 +27,14 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//testnet
-	"wss://testnet-rpc0.cess.cloud/ws/",
-	"wss://testnet-rpc1.cess.cloud/ws/",
-	"wss://testnet-rpc2.cess.cloud/ws/",
+	"wss://testnet-rpc.cess.cloud/ws/",
 }
 
 const PublicGateway = "http://deoss-pub-gateway.cess.cloud/"
 const PublicGatewayAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 const UploadFile = "file.go"
 const BucketName = "myBucket"
+const TerritoryName = "myTerritory"
 
 func main() {
 	sdk, err := sdkgo.New(
@@ -60,7 +59,7 @@ func main() {
 	}
 
 	// upload file to gateway
-	fid, err := process.StoreFile(PublicGateway, UploadFile, BucketName, MY_MNEMONIC)
+	fid, err := process.StoreFile(PublicGateway, UploadFile, BucketName, TerritoryName, MY_MNEMONIC)
 	if err != nil {
 		panic(err)
 	}
@@ -73,7 +72,7 @@ func main() {
 	}
 
 	// upload object to gateway
-	fid, err = process.StoreObject(PublicGateway, BucketName, MY_MNEMONIC, bytes.NewReader([]byte("test date")))
+	fid, err = process.StoreObject(PublicGateway, BucketName, TerritoryName, MY_MNEMONIC, bytes.NewReader([]byte("test date")))
 	if err != nil {
 		panic(err)
 	}

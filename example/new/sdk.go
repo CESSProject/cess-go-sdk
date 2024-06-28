@@ -21,18 +21,14 @@ import (
 //
 //   - cXgaee2N8E77JJv9gdsGAckv1Qsf3hqWYf7NL4q6ZuQzuAUtB
 //   - https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "repair high another sell behave clock when auction tortoise real track cupboard" //"bottom drive obey lake curtain smoke basket hold race lonely fit walk"
+var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
 
 var RPC_ADDRS = []string{
 	//devnet
 	"wss://devnet-rpc.cess.cloud/ws/",
-	"wss://devnet-rpc.cess.cloud/ws-1/",
-	"wss://devnet-rpc.cess.cloud/ws-3/",
 
 	//testnet
-	//"wss://testnet-rpc0.cess.cloud/ws/",
-	//"wss://testnet-rpc1.cess.cloud/ws/",
-	//"wss://testnet-rpc2.cess.cloud/ws/",
+	//"wss://testnet-rpc.cess.cloud/ws/",
 }
 
 func main() {
@@ -122,20 +118,4 @@ func main() {
 		fmt.Println(utils.EncodePublicKeyAsCessAccount(v.Who[:]))
 		fmt.Printf("value: %v\n", bg.String())
 	}
-	return
-
-	// header, err := sdk.GetSubstrateAPI().RPC.Chain.GetHeader(blockhash)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-	// fmt.Println("------------block header-----------")
-	// fmt.Println(blockhash.Hex())
-	// fmt.Println(header.ParentHash.Hex())
-	// fmt.Println(header.ExtrinsicsRoot.Hex())
-	// fmt.Println(header.Number)
-	// fmt.Println(header.StateRoot.Hex())
-	// for i := 0; i < len(header.Digest); i++ {
-	// 	fmt.Println(i, ": ", header.Digest[i])
-	// }
-	// fmt.Println("------------block-----------")
 }
