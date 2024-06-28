@@ -144,7 +144,7 @@ const (
 	TotalIdleSpace    = "TotalIdleSpace"
 	TotalServiceSpace = "TotalServiceSpace"
 	PurchasedSpace    = "PurchasedSpace"
-	TerritoryKey      = "TerritoryKey"
+	Territory         = "Territory"
 	PayOrder          = "PayOrder"
 	Consignment       = "Consignment"
 

@@ -50,18 +50,9 @@ func main() {
 
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.GetCurrentRpcAddr())
-
-	fmt.Println(sdk.QueryRewardMap(sdk.GetSignatureAccPulickey(), -1))
 	return
+
 	puk, err := utils.ParsingPublickey("cXfg2SYcq85nyZ1U4ccx6QnAgSeLQB8aXZ2jstbw9CPGSmhXY")
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(sdk.QueryeErasStakersOverview(6, puk))
-	return
-
-	puk, err = utils.ParsingPublickey("cXfg2SYcq85nyZ1U4ccx6QnAgSeLQB8aXZ2jstbw9CPGSmhXY")
 	if err != nil {
 		panic(err)
 	}
