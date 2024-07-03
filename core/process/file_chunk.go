@@ -56,7 +56,7 @@ type CansRequestParams struct {
 // Return parameter:
 //   - response: file's FID(if all chunks are uploaded successfully).
 //   - error: error message.
-func UploadFileChunks(url, mnemonic, chunksDir, bucket, fname, cipher string, chunksNum int, totalSize int64) (string, error) {
+func UploadFileChunks(url, mnemonic, chunksDir, territory, bucket, fname, cipher string, chunksNum int, totalSize int64) (string, error) {
 	entries, err := os.ReadDir(chunksDir)
 	if err != nil {
 		return "", errors.Wrap(err, "upload file chunk error")
@@ -70,7 +70,7 @@ func UploadFileChunks(url, mnemonic, chunksDir, bucket, fname, cipher string, ch
 	var res string
 	for i := chunksNum - len(entries); i < chunksNum; i++ {
 		file := filepath.Join(chunksDir, fmt.Sprintf("chunk-%d", i))
-		res, err = UploadFileChunk(url, mnemonic, file, bucket,
+		res, err = UploadFileChunk(url, mnemonic, file, territory, bucket,
 			AddUploadChunkRequestHeader(fname, cipher, chunksNum, i, totalSize))
 		if err != nil {
 			return res, errors.Wrap(err, "upload file chunks error")
@@ -138,9 +138,10 @@ func AddCansProtoRequestHeader(fname, cipher string, chunksNum, chunksId int, to
 //
 // Return parameter:
 //   - handleFunc: function to set request headers.
-func AddFileRequestHeader(bucket, account, message, sig, contentType string) func(req *http.Request) {
+func AddFileRequestHeader(territory, bucket, account, message, sig, contentType string) func(req *http.Request) {
 	return func(req *http.Request) {
 		req.Header.Set("BucketName", bucket)
+		req.Header.Set("Territory", territory)
 		req.Header.Set("Account", account)
 		req.Header.Set("Message", message)
 		req.Header.Set("Signature", sig)
@@ -163,7 +164,7 @@ func AddFileRequestHeader(bucket, account, message, sig, contentType string) fun
 // Return parameter:
 //   - response: chunk ID or file's FID(if all chunks are uploaded successfully).
 //   - error: error message.
-func UploadFileChunk(url, mnemonic, file, bucket string, addExtendHeader func(*http.Request)) (string, error) {
+func UploadFileChunk(url, mnemonic, file, territory, bucket string, addExtendHeader func(*http.Request)) (string, error) {
 
 	fstat, err := os.Stat(file)
 	if err != nil {
@@ -227,7 +228,7 @@ func UploadFileChunk(url, mnemonic, file, bucket string, addExtendHeader func(*h
 		return "", err
 	}
 	AddFileRequestHeader(
-		bucket, acc, message,
+		territory, bucket, acc, message,
 		base58.Encode(sig[:]),
 		writer.FormDataContentType(),
 	)(req)
@@ -347,7 +348,7 @@ func SplitFile(fpath, chunksDir string, chunkSize int64, filling bool) (int64, i
 // Return parameter:
 //   - response: file's FID(if all chunks are uploaded successfully).
 //   - error: error message.
-func UploadFilesWithCansProto(url, mnemonic, filesDir, bucket, archiveFormat, cipher string, isSplit bool) (string, error) {
+func UploadFilesWithCansProto(url, mnemonic, filesDir, territory, bucket, archiveFormat, cipher string, isSplit bool) (string, error) {
 	entries, err := os.ReadDir(filesDir)
 	if err != nil {
 		return "", errors.Wrap(err, "upload file with CANS PROTOCOL error")
@@ -382,7 +383,7 @@ func UploadFilesWithCansProto(url, mnemonic, filesDir, bucket, archiveFormat, ci
 		}
 		fpath := filepath.Join(filesDir, entry.Name())
 		res, err = UploadFileChunk(
-			url, mnemonic, fpath, bucket,
+			url, mnemonic, fpath, territory, bucket,
 			AddCansProtoRequestHeader(
 				filename, cipher, fileNum, count, totalSize, isSplit, archiveFormat,
 			),
