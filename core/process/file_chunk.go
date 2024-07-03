@@ -117,7 +117,7 @@ func AddUploadChunkRequestHeader(fname, cipher string, chunksNum, chunksId int, 
 func AddCansProtoRequestHeader(fname, cipher string, chunksNum, chunksId int, totalSize int64, isSplit bool, archiveFormat string) func(req *http.Request) {
 	return func(req *http.Request) {
 		req.Header.Set("FileName", fname)
-		req.Header.Set("cipher", cipher)
+		req.Header.Set("Cipher", cipher)
 		req.Header.Set("BlockNumber", fmt.Sprint(chunksNum))
 		req.Header.Set("BlockIndex", fmt.Sprint(chunksId))
 		req.Header.Set("TotalSize", fmt.Sprint(totalSize))
@@ -140,7 +140,7 @@ func AddCansProtoRequestHeader(fname, cipher string, chunksNum, chunksId int, to
 //   - handleFunc: function to set request headers.
 func AddFileRequestHeader(territory, bucket, account, message, sig, contentType string) func(req *http.Request) {
 	return func(req *http.Request) {
-		req.Header.Set("BucketName", bucket)
+		req.Header.Set("Bucket", bucket)
 		req.Header.Set("Territory", territory)
 		req.Header.Set("Account", account)
 		req.Header.Set("Message", message)
