@@ -1,6 +1,8 @@
 module github.com/CESSProject/cess-go-sdk
 
-go 1.20
+go 1.21
+
+toolchain go1.22.4
 
 require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
