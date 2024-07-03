@@ -15,23 +15,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestProcessingData(t *testing.T) {
+func TestFullProcessing(t *testing.T) {
 	var processFile = "./process.go"
-	segmentData, roothash, err := ProcessingData(processFile)
+
+	// not encryption
+	segmentData, fid, err := FullProcessing(processFile, "", ".")
 	assert.NoError(t, err)
-	fmt.Println(roothash)
+	fmt.Println("not encryption: ", fid)
 	for _, segment := range segmentData {
 		for _, fragment := range segment.FragmentHash {
 			os.Remove(fragment)
 		}
 	}
-}
 
-func TestShardedEncryptionProcessing(t *testing.T) {
-	var processFile = "./process.go"
-	segmentData, roothash, err := ShardedEncryptionProcessing(processFile, "")
+	// encryption
+	segmentData, fid, err = FullProcessing(processFile, "123456", ".")
 	assert.NoError(t, err)
-	fmt.Println(roothash)
+	fmt.Println("encryption: ", fid)
 	for _, segment := range segmentData {
 		for _, fragment := range segment.FragmentHash {
 			os.Remove(fragment)

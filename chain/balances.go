@@ -139,9 +139,8 @@ func (c *ChainClient) QueryInactiveIssuance(block int32) (string, error) {
 //
 // Return:
 //   - string: block hash
-//   - string: target account
 //   - error: error message
-func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string, error) {
+func (c *ChainClient) TransferToken(dest string, amount uint64) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -156,23 +155,23 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string,
 	)
 
 	if !c.GetRpcState() {
-		return blockhash, "", ERR_RPC_CONNECTION
+		return blockhash, ERR_RPC_CONNECTION
 	}
 
 	pubkey, err := utils.ParsingPublickey(dest)
 	if err != nil {
-		return blockhash, "", errors.Wrapf(err, "[ParsingPublickey]")
+		return blockhash, errors.Wrapf(err, "[ParsingPublickey]")
 	}
 
 	address, err := types.NewMultiAddressFromAccountID(pubkey)
 	if err != nil {
-		return blockhash, "", errors.Wrapf(err, "[NewMultiAddressFromAccountID]")
+		return blockhash, errors.Wrapf(err, "[NewMultiAddressFromAccountID]")
 	}
 
 	call, err := types.NewCall(c.metadata, TX_Balances_Transfer, address, types.NewUCompactFromUInt(amount))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
-		return blockhash, "", err
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
@@ -180,17 +179,17 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string,
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
-		return blockhash, "", err
+		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
 		c.SetRpcState(false)
-		return blockhash, "", err
+		return blockhash, err
 	}
 	if !ok {
-		return blockhash, "", ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -207,7 +206,7 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string,
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
-		return blockhash, "", err
+		return blockhash, err
 	}
 
 	<-c.txTicker.C
@@ -217,7 +216,7 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string,
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
 		c.SetRpcState(false)
-		return blockhash, "", err
+		return blockhash, err
 	}
 	defer sub.Unsubscribe()
 
@@ -229,13 +228,13 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, string,
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Balances_Transfer(status.AsInBlock)
-				return blockhash, dest, err
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Balances_transferKeepAlive, BalancesTransfer, c.signatureAcc)
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return blockhash, "", errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return blockhash, "", ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }

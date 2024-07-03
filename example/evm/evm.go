@@ -19,12 +19,8 @@ import (
 var MY_MNEMONIC = "head achieve piano online exhaust bulk trust vote inflict room keen maximum"
 
 var RPC_ADDRS = []string{
-	//devnet
-	"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
-	// "wss://testnet-rpc0.cess.cloud/ws/",
-	// "wss://testnet-rpc1.cess.cloud/ws/",
-	// "wss://testnet-rpc2.cess.cloud/ws/",
+	"wss://testnet-rpc.cess.cloud/ws/",
 }
 
 func main() {

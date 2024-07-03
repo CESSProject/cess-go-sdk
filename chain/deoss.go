@@ -351,7 +351,7 @@ func (c *ChainClient) Authorize(accountID []byte) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Oss_Authorize(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_authorize, OssAuthorize, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -461,7 +461,7 @@ func (c *ChainClient) CancelAuthorize(accountID []byte) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Oss_CancelAuthorize(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_cancel_authorize, OssCancelAuthorize, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -595,7 +595,7 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Oss_OssRegister(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_register, OssOssRegister, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -721,7 +721,7 @@ func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Oss_OssUpdate(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_update, OssOssUpdate, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
@@ -831,7 +831,7 @@ func (c *ChainClient) DestroyOss() (string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				_, err = c.RetrieveEvent_Oss_OssDestroy(status.AsInBlock)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_destroy, OssOssDestroy, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
