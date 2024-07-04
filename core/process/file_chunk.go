@@ -47,6 +47,7 @@ type CansRequestParams struct {
 //   - url: the address of the gateway.
 //   - mnemonic: the space owner's CESS account mnemonic
 //   - chunksDir: directory path to store file chunks, please do not mix it elsewhere.
+//   - territory: the territory(a space block) in which you would like your data to be stored
 //   - bucket: the bucket name to store user data.
 //   - fname: the name of the file.
 //   - cipher: symmetric encryption key, used to encrypt data using AES
@@ -94,7 +95,7 @@ func UploadFileChunks(url, mnemonic, chunksDir, territory, bucket, fname, cipher
 func AddUploadChunkRequestHeader(fname, cipher string, chunksNum, chunksId int, totalSize int64) func(req *http.Request) {
 	return func(req *http.Request) {
 		req.Header.Set("FileName", fname)
-		req.Header.Set("cipher", cipher)
+		req.Header.Set("Cipher", cipher)
 		req.Header.Set("BlockNumber", fmt.Sprint(chunksNum))
 		req.Header.Set("BlockIndex", fmt.Sprint(chunksId))
 		req.Header.Set("TotalSize", fmt.Sprint(totalSize))
@@ -131,6 +132,7 @@ func AddCansProtoRequestHeader(fname, cipher string, chunksNum, chunksId int, to
 //
 // Receive parameter:
 //   - bucket: the territory to which the file will be uploaded, formerly known as bucket
+//   - territory: the territory(a space block) in which you would like your data to be stored
 //   - account: CESS account to which the territory belongs
 //   - message: message to sign
 //   - sig: signature of the above message using the above CESS account
@@ -155,6 +157,7 @@ func AddFileRequestHeader(territory, bucket, account, message, sig, contentType 
 //   - url: the address of the gateway.
 //   - mnemonic: the space owner's CESS account mnemonic
 //   - file: file path to store file chunks.
+//   - territory: the territory(a space block) in which you would like your data to be stored
 //   - bucket: the bucket name to store user data.
 //   - fname: the name of the file.
 //   - chunksNum: total number of file chunks.
@@ -340,6 +343,7 @@ func SplitFile(fpath, chunksDir string, chunkSize int64, filling bool) (int64, i
 //   - url: the address of the gateway.
 //   - mnemonic: the space owner's CESS account mnemonic
 //   - filesDir: directory path to store file chunks, please do not mix it elsewhere.
+//   - territory: the territory(a space block) in which you would like your data to be stored
 //   - bucket: the bucket name to store user data.
 //   - archiveFormat: Specifies the compression format of the file. If it is "", no compression is performed. Currently supported formats are: "zip", "tar", and "tar.gz"
 //   - cipher: symmetric encryption key, used to encrypt data using AES
