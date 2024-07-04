@@ -471,11 +471,15 @@ func DownloadCanFile(url, mnemonic, savepath, fid, filename, cipher string, sid 
 		return errors.Wrap(errors.New(buf.String()), "download can file error")
 	}
 
+	if fi, err := os.Stat(savepath); err == nil && fi.IsDir() {
+		savepath = filepath.Join(savepath, filename)
+	}
+
 	f, err := os.Create(savepath)
 	if err != nil {
 		return errors.Wrap(err, "download can file error")
 	}
-	f.Close()
+	defer f.Close()
 	_, err = io.Copy(f, resp.Body)
 	return errors.Wrap(err, "download can file error")
 }
