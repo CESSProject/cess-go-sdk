@@ -376,7 +376,6 @@ func (c *ChainClient) QueryAllBucketName(accountID []byte, block int32) ([]strin
 	}()
 
 	var data []types.Bytes
-	var value []string
 
 	if !c.GetRpcState() {
 		return nil, ERR_RPC_CONNECTION
@@ -407,6 +406,7 @@ func (c *ChainClient) QueryAllBucketName(accountID []byte, block int32) ([]strin
 		if !ok {
 			return []string{}, ERR_RPC_EMPTY_VALUE
 		}
+		value := make([]string, len(data))
 		for i := 0; i < len(data); i++ {
 			value[i] = string(data[i])
 		}
@@ -425,6 +425,7 @@ func (c *ChainClient) QueryAllBucketName(accountID []byte, block int32) ([]strin
 	if !ok {
 		return []string{}, ERR_RPC_EMPTY_VALUE
 	}
+	value := make([]string, len(data))
 	for i := 0; i < len(data); i++ {
 		value[i] = string(data[i])
 	}
