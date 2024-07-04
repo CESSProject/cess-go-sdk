@@ -925,7 +925,7 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_StorageHandler_treeitory_consignment, StorageHandlerConsignment, c.signatureAcc)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_StorageHandler_territory_consignment, StorageHandlerConsignment, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():

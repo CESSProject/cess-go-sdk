@@ -381,7 +381,7 @@ const (
 	ExtName_StorageHandler_renewal_territory     = "StorageHandler.renewal_territory"
 	ExtName_StorageHandler_territory_grants      = "StorageHandler.territory_grants"
 	ExtName_StorageHandler_territory_rename      = "StorageHandler.territory_rename"
-	ExtName_StorageHandler_treeitory_consignment = "StorageHandler.treeitory_consignment"
+	ExtName_StorageHandler_territory_consignment = "StorageHandler.territory_consignment"
 	//ExtName_StorageHandler_expansion_space        = "StorageHandler.expansion_space"
 	//ExtName_StorageHandler_renewal_space          = "StorageHandler.renewal_space"
 	ExtName_StorageHandler_update_price               = "StorageHandler.update_price"
@@ -2035,8 +2035,8 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_treeitory_consignment); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_StorageHandler_treeitory_consignment
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_territory_consignment); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_territory_consignment
 	} else {
 		return err
 	}
