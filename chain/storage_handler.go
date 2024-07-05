@@ -302,7 +302,7 @@ func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32)
 // Return:
 //   - ConsignmentInfo: consignment info
 //   - error: error message
-func (c *ChainClient) QueryConsignment(token string, block int32) (ConsignmentInfo, error) {
+func (c *ChainClient) QueryConsignment(token types.H256, block int32) (ConsignmentInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -315,15 +315,7 @@ func (c *ChainClient) QueryConsignment(token string, block int32) (ConsignmentIn
 		return data, ERR_RPC_CONNECTION
 	}
 
-	if len(token) != TerritoryKeyLen {
-		return data, errors.New("invalid territory key")
-	}
-	var token_chain types.H256
-	for i := 0; i < TerritoryKeyLen; i++ {
-		token_chain[i] = byte(token[i])
-	}
-
-	param1, err := codec.Encode(token_chain)
+	param1, err := codec.Encode(token)
 	if err != nil {
 		return data, errors.New("invalid territory key")
 	}
@@ -1048,12 +1040,12 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 
 // BuyConsignment purchase territories for consignment
 //   - token: territory key
-//   - territory_name: territory name
+//   - territory_name: renamed territory name
 //
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) BuyConsignment(token string, territory_name string) (string, error) {
+func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1075,12 +1067,7 @@ func (c *ChainClient) BuyConsignment(token string, territory_name string) (strin
 		return blockhash, errors.New("territory name is empty")
 	}
 
-	var token_chain types.H256
-	for i := 0; i < TerritoryKeyLen; i++ {
-		token_chain[i] = byte(token[i])
-	}
-
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_BuyConsignment, token_chain, types.NewBytes([]byte(territory_name)))
+	call, err := types.NewCall(c.metadata, TX_StorageHandler_BuyConsignment, token, types.NewBytes([]byte(territory_name)))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuyConsignment, err)
 		return blockhash, err
@@ -1172,7 +1159,7 @@ func (c *ChainClient) BuyConsignment(token string, territory_name string) (strin
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) CancelPurchaseAction(token string) (string, error) {
+func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -1190,12 +1177,7 @@ func (c *ChainClient) CancelPurchaseAction(token string) (string, error) {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	var token_chain types.H256
-	for i := 0; i < TerritoryKeyLen; i++ {
-		token_chain[i] = byte(token[i])
-	}
-
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_CancelPurchaseAction, token_chain)
+	call, err := types.NewCall(c.metadata, TX_StorageHandler_CancelPurchaseAction, token)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelPurchaseAction, err)
 		return blockhash, err

@@ -539,12 +539,7 @@ type ConsignmentInfo struct {
 }
 
 type UserFileSliceInfo struct {
-	Filehash FileHash
-	Filesize types.U128
-}
-
-type UserFileSliceInfo_T struct {
-	TerritoryName [TerritoryKeyLen]types.U8
+	TerritoryName types.Bytes
 	Filehash      FileHash
 	FileSize      types.U128
 }

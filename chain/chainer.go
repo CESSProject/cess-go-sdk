@@ -50,7 +50,8 @@ type Chainer interface {
 	QueryRestoralOrder(fragmentHash string, block int32) (RestoralOrderInfo, error)
 	QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, error)
 	QueryAllBucketName(accountID []byte, block int32) ([]string, error)
-	QueryAllUserFiles(accountID []byte, block int32) ([]string, error)
+	QueryUserHoldFileList(accountID []byte, block int32) ([]UserFileSliceInfo, error)
+	QueryUserFidList(accountID []byte, block int32) ([]string, error)
 	PlaceStorageOrder(fid, file_name, bucket_name, territory_name string, segment []SegmentDataInfo, owner []byte, file_size uint64) (string, error)
 	UploadDeclaration(fid string, segment []SegmentList, user UserBrief, filesize uint64) (string, error)
 	CreateBucket(owner []byte, bucketName string) (string, error)
@@ -64,8 +65,6 @@ type Chainer interface {
 	CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo) (string, error)
-
-	QueryUserHoldFileList(accountID []byte, block int32) ([]string, error)
 	TerritorFileDelivery(user []byte, fid string, target_territory string) (string, error)
 
 	// SchedulerCredit
@@ -120,15 +119,15 @@ type Chainer interface {
 	QueryTotalServiceSpace(block int32) (uint64, error)
 	QueryPurchasedSpace(block int32) (uint64, error)
 	QueryTerritory(accountId []byte, name string, block int32) (TerritoryInfo, error)
-	QueryConsignment(token string, block int32) (ConsignmentInfo, error)
+	QueryConsignment(token types.H256, block int32) (ConsignmentInfo, error)
 	MintTerritory(gib_count uint32, territory_name string) (string, error)
 	ExpandingTerritory(territory_name string, gib_count uint32) (string, error)
 	RenewalTerritory(territory_name string, days_count uint32) (string, error)
 	ReactivateTerritory(territory_name string, days_count uint32) (string, error)
 	TerritoryConsignment(territory_name string) (string, error)
 	CancelConsignment(territory_name string) (string, error)
-	BuyConsignment(token string, territory_name string) (string, error)
-	CancelPurchaseAction(token string) (string, error)
+	BuyConsignment(token types.H256, territory_name string) (string, error)
+	CancelPurchaseAction(token types.H256) (string, error)
 
 	// System
 	QueryBlockNumber(blockhash string) (uint32, error)
