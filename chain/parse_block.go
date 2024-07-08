@@ -200,6 +200,17 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						Owner:         acc,
 						BucketName:    bucketname,
 					})
+				case StorageHandlerMintTerritory:
+					token, name, size, err := parseTerritoryInfoFromEvent(e)
+					if err != nil {
+						return blockdata, err
+					}
+					blockdata.MintTerritory = append(blockdata.MintTerritory, MintTerritory{
+						ExtrinsicHash:  blockdata.Extrinsics[extrinsicIndex].Hash,
+						TerritoryToken: token,
+						TerritoryName:  name,
+						TerritorySize:  size,
+					})
 				case AuditSubmitIdleProof:
 					acc, err := ParseAccountFromEvent(e)
 					if err != nil {
@@ -302,6 +313,12 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 					extInfo.Result = true
 					extInfo.Hash = blockdata.Extrinsics[extrinsicIndex].Hash
 					blockdata.Extrinsics[extrinsicIndex] = extInfo
+					for i := 0; i < len(blockdata.MintTerritory); i++ {
+						if blockdata.MintTerritory[i].ExtrinsicHash == extInfo.Hash {
+							blockdata.MintTerritory[i].Account = signer
+							break
+						}
+					}
 					eventsBuf = make([]string, 0)
 					extInfo = ExtrinsicsInfo{}
 					extrinsicIndex++
@@ -461,6 +478,17 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 								break
 							}
 						}
+					case ExtName_StorageHandler_mint_territory:
+						for m := 0; m < len(blockdata.MintTerritory); m++ {
+							if blockdata.MintTerritory[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
+								if len(blockdata.MintTerritory) == 1 {
+									blockdata.MintTerritory = nil
+								} else {
+									blockdata.MintTerritory = append(blockdata.MintTerritory[:m], blockdata.MintTerritory[m+1:]...)
+								}
+								break
+							}
+						}
 					}
 
 					extInfo.Events = append(make([]string, 0), eventsBuf...)
@@ -582,6 +610,26 @@ func parseAccount(v reflect.Value) string {
 	return acc
 }
 
+func parseH256Hex(v reflect.Value) string {
+	allValue := fmt.Sprintf("%v", v.Index(0))
+	temp := strings.Split(allValue, "] ")
+	puk := make([]byte, types.AccountIDLen)
+	for _, v := range temp {
+		if strings.Count(v, " ") == (types.AccountIDLen - 1) {
+			subValue := strings.TrimPrefix(v, "[")
+			ids := strings.Split(subValue, " ")
+			if len(ids) != types.AccountIDLen {
+				continue
+			}
+			for kk, vv := range ids {
+				intv, _ := strconv.Atoi(vv)
+				puk[kk] = byte(intv)
+			}
+		}
+	}
+	return hexutil.Encode(puk)
+}
+
 func parseFidString(v reflect.Value) string {
 	if v.Len() > 0 {
 		allValue := fmt.Sprintf("%v", v.Index(0))
@@ -605,13 +653,21 @@ func parseFidString(v reflect.Value) string {
 	return ""
 }
 
-func parseBucketNameString(v reflect.Value) string {
+func parseString(v reflect.Value) string {
 	var value []byte
 	for i := 0; i < v.Len(); i++ {
 		intv, _ := strconv.Atoi(fmt.Sprintf("%v", v.Index(i)))
 		value = append(value, byte(intv))
 	}
 	return string(value)
+}
+
+func parseTerritoryName(v reflect.Value) string {
+	if v.Len() > 0 {
+		v := utils.ExtractArray(fmt.Sprintf("%v", v.Index(0)))
+		return string(v)
+	}
+	return ""
 }
 
 func ExplicitBigInt(v reflect.Value, depth int) string {
@@ -752,7 +808,7 @@ func ParseStringFromEvent(e *parser.Event) (string, error) {
 				value = parseFidString(val)
 			}
 			if strings.Contains(v.Name, "bucket") {
-				value = parseBucketNameString(val)
+				value = parseString(val)
 			}
 		}
 	}
@@ -842,4 +898,42 @@ func ParseStakingRewardedFromEvent(e *parser.Event) (string, string, error) {
 		return account, amount, fmt.Errorf("[ParseStakingRewardedFromEvent] failed")
 	}
 	return account, amount, nil
+}
+
+func parseTerritoryInfoFromEvent(e *parser.Event) (string, string, uint64, error) {
+	if e == nil {
+		return "", "", 0, errors.New("event is nil")
+	}
+	if e.Name != StorageHandlerMintTerritory {
+		return "", "", 0, fmt.Errorf("event is not %s", StorageHandlerMintTerritory)
+	}
+
+	token := ""
+	name := ""
+	size := ""
+	for _, v := range e.Fields {
+		val := reflect.ValueOf(v.Value)
+		kind := reflect.TypeOf(v.Value).Kind()
+		switch kind {
+		case reflect.Slice:
+			if strings.Contains(v.Name, "token") {
+				token = parseH256Hex(val)
+			}
+			if strings.Contains(v.Name, "name") {
+				name = parseTerritoryName(val)
+			}
+		case reflect.Struct:
+			if strings.Contains(v.Name, "capacity") {
+				size = ExplicitBigInt(val, 0)
+			}
+		}
+	}
+	size_int, err := strconv.ParseUint(size, 10, 64)
+	if err != nil {
+		return "", "", 0, errors.New("event is nil")
+	}
+	if token == "" || name == "" {
+		return "", "", 0, errors.New("parse territory info from event failed")
+	}
+	return token, name, size_int, nil
 }

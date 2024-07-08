@@ -10,6 +10,8 @@ package utils
 import (
 	"math/rand"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -21,6 +23,8 @@ const (
 	letterIdMax  = 63 / letterIdBits
 	baseStr      = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()[]{}+-*/_=."
 )
+
+var regexp_array = regexp.MustCompile(`\[(.*?)\]`)
 
 // Generate random password
 func GetRandomcode(length uint8) string {
@@ -69,4 +73,20 @@ func RandSlice(slice interface{}) {
 		swap(i, j)
 	}
 	return
+}
+
+func ExtractArray(str string) []byte {
+	match := regexp_array.FindString(str)
+	match = strings.TrimPrefix(match, "[")
+	match = strings.TrimSuffix(match, "]")
+	array := strings.Split(match, " ")
+	var s = make([]byte, len(array))
+	for i := 0; i < len(array); i++ {
+		in, err := strconv.Atoi(array[i])
+		if err != nil {
+			panic(err)
+		}
+		s[i] = byte(in)
+	}
+	return s
 }
