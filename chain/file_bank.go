@@ -432,14 +432,14 @@ func (c *ChainClient) QueryAllBucketName(accountID []byte, block int32) ([]strin
 	return value, nil
 }
 
-// QueryAllUserFiles query user's all files
+// QueryUserHoldFileList query user's all files
 //   - accountID: user account
 //   - block: block number, less than 0 indicates the latest block
 //
 // Return:
-//   - []string: all file identification
+//   - []UserFileSliceInfo: file list
 //   - error: error message
-func (c *ChainClient) QueryAllUserFiles(accountID []byte, block int32) ([]string, error) {
+func (c *ChainClient) QueryUserHoldFileList(accountID []byte, block int32) ([]UserFileSliceInfo, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -447,8 +447,6 @@ func (c *ChainClient) QueryAllUserFiles(accountID []byte, block int32) ([]string
 	}()
 
 	var data []UserFileSliceInfo
-	var value []string
-
 	if !c.GetRpcState() {
 		return nil, ERR_RPC_CONNECTION
 	}
@@ -476,12 +474,9 @@ func (c *ChainClient) QueryAllUserFiles(accountID []byte, block int32) ([]string
 			return nil, err
 		}
 		if !ok {
-			return []string{}, ERR_RPC_EMPTY_VALUE
+			return data, ERR_RPC_EMPTY_VALUE
 		}
-		for i := 0; i < len(data); i++ {
-			value[i] = string(data[i].Filehash[:])
-		}
-		return value, nil
+		return data, nil
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
 	if err != nil {
@@ -494,30 +489,26 @@ func (c *ChainClient) QueryAllUserFiles(accountID []byte, block int32) ([]string
 		return nil, err
 	}
 	if !ok {
-		return []string{}, ERR_RPC_EMPTY_VALUE
+		return data, ERR_RPC_EMPTY_VALUE
 	}
-	for i := 0; i < len(data); i++ {
-		value[i] = string(data[i].Filehash[:])
-	}
-	return value, nil
+	return data, nil
 }
 
-// QueryUserHoldFileList query user's all files
+// QueryUserFidList query user's all fid
 //   - accountID: user account
 //   - block: block number, less than 0 indicates the latest block
 //
 // Return:
-//   - []string: all file identification
+//   - []string: all fid
 //   - error: error message
-func (c *ChainClient) QueryUserHoldFileList(accountID []byte, block int32) ([]string, error) {
+func (c *ChainClient) QueryUserFidList(accountID []byte, block int32) ([]string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
 
-	var data []UserFileSliceInfo_T
-	var value []string
+	var data []UserFileSliceInfo
 
 	if !c.GetRpcState() {
 		return nil, ERR_RPC_CONNECTION
@@ -548,6 +539,7 @@ func (c *ChainClient) QueryUserHoldFileList(accountID []byte, block int32) ([]st
 		if !ok {
 			return []string{}, ERR_RPC_EMPTY_VALUE
 		}
+		var value = make([]string, len(data))
 		for i := 0; i < len(data); i++ {
 			value[i] = string(data[i].Filehash[:])
 		}
@@ -566,6 +558,7 @@ func (c *ChainClient) QueryUserHoldFileList(accountID []byte, block int32) ([]st
 	if !ok {
 		return []string{}, ERR_RPC_EMPTY_VALUE
 	}
+	var value = make([]string, len(data))
 	for i := 0; i < len(data); i++ {
 		value[i] = string(data[i].Filehash[:])
 	}

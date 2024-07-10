@@ -539,12 +539,7 @@ type ConsignmentInfo struct {
 }
 
 type UserFileSliceInfo struct {
-	Filehash FileHash
-	Filesize types.U128
-}
-
-type UserFileSliceInfo_T struct {
-	TerritoryName [TerritoryKeyLen]types.U8
+	TerritoryName types.Bytes
 	Filehash      FileHash
 	FileSize      types.U128
 }
@@ -773,6 +768,7 @@ type BlockData struct {
 	GatewayReg          []GatewayReg
 	StakingPayouts      []StakingPayout
 	Unbonded            []Unbonded
+	MintTerritory       []MintTerritory
 }
 
 type ExtrinsicsInfo struct {
@@ -880,4 +876,12 @@ type Unbonded struct {
 	ExtrinsicHash string
 	Account       string
 	Amount        string
+}
+
+type MintTerritory struct {
+	ExtrinsicHash  string
+	Account        string
+	TerritoryToken string
+	TerritoryName  string
+	TerritorySize  uint64
 }

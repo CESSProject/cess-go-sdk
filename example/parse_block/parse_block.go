@@ -42,7 +42,7 @@ func main() {
 		panic(err)
 	}
 
-	blockData, err := sdk.ParseBlockData(36590)
+	blockData, err := sdk.ParseBlockData(43742)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -127,6 +127,14 @@ func main() {
 		fmt.Println("    Unbonded Account: ", v.Account)
 		fmt.Println("    StakingPayouts Amount: ", v.Amount)
 		fmt.Println("    Unbonded ExtrinsicHash: ", v.ExtrinsicHash)
+	}
+	fmt.Println("MintTerritory:")
+	for _, v := range blockData.MintTerritory {
+		fmt.Println("    MintTerritory Account: ", v.Account)
+		fmt.Println("    MintTerritory token: ", v.TerritoryToken)
+		fmt.Println("    MintTerritory name: ", v.TerritoryName)
+		fmt.Println("    MintTerritory size: ", v.TerritorySize)
+		fmt.Println("    MintTerritory ExtrinsicHash: ", v.ExtrinsicHash)
 	}
 
 	fmt.Println("system events: ", blockData.SysEvents)

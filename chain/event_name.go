@@ -69,10 +69,6 @@ const (
 	StakingUnbonded       = "Staking.Unbonded"
 
 	// StorageHandler
-	StorageHandlerBuySpace       = "StorageHandler.BuySpace"
-	StorageHandlerExpansionSpace = "StorageHandler.ExpansionSpace"
-	StorageHandlerRenewalSpace   = "StorageHandler.RenewalSpace"
-
 	StorageHandlerMintTerritory        = "StorageHandler.MintTerritory"
 	StorageHandlerExpansionTerritory   = "StorageHandler.ExpansionTerritory"
 	StorageHandlerRenewalTerritory     = "StorageHandler.RenewalTerritory"
