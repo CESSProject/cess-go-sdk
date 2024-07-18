@@ -300,13 +300,14 @@ func (c *ChainClient) ReconnectRpc() error {
 	if err != nil {
 		return err
 	}
+	c.SetRpcState(true)
+
 	if c.keyring.URI != "" && len(c.keyring.PublicKey) > 0 {
 		accInfo, err := c.QueryAccountInfoByAccountID(c.keyring.PublicKey, -1)
 		if err != nil {
-			return err
-		}
-
-		if len(accInfo.Data.Free.Bytes()) <= 0 {
+			if !errors.Is(err, ERR_RPC_EMPTY_VALUE) {
+				return err
+			}
 			c.balance = 0
 		} else {
 			free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
@@ -320,7 +321,6 @@ func (c *ChainClient) ReconnectRpc() error {
 		}
 	}
 
-	c.SetRpcState(true)
 	return nil
 }
 
@@ -344,12 +344,11 @@ func reconnectRpc(oldRpc string, rpcs []string) (
 		}
 	}
 	rpcaddrs = append(rpcaddrs, oldRpc)
+	length := len(rpcaddrs)
+
 	defer log.SetOutput(os.Stdout)
 	log.SetOutput(io.Discard)
-	for i := 0; i < len(rpcaddrs); i++ {
-		if oldRpc == rpcaddrs[i] {
-			continue
-		}
+	for i := 0; i < length; i++ {
 		api, err = gsrpc.NewSubstrateAPI(rpcaddrs[i])
 		if err != nil {
 			continue
@@ -381,7 +380,7 @@ func reconnectRpc(oldRpc string, rpcs []string) (
 	if err != nil {
 		return nil, nil, nil, nil, types.Hash{}, rpcAddr, ERR_RPC_CONNECTION
 	}
-	return api, metadata, runtimeVer, eventRetriever, genesisHash, rpcAddr, err
+	return api, metadata, runtimeVer, eventRetriever, genesisHash, rpcAddr, nil
 }
 
 func CreatePrefixedKey(pallet, method string) []byte {
