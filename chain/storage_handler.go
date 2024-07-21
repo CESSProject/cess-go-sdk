@@ -357,11 +357,12 @@ func (c *ChainClient) QueryConsignment(token types.H256, block int32) (Consignme
 // MintTerritory purchase a territory
 //   - gib_count: territory size
 //   - territory_name: territory name
+//   - days: the validity period of the territory, in days
 //
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string) (string, error) {
+func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, days uint32) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -379,11 +380,15 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string) (st
 		return "", errors.New("[MintTerritory] invalid gib_count")
 	}
 
+	if days == 0 {
+		return "", errors.New("[MintTerritory] invalid days")
+	}
+
 	if !c.GetRpcState() {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_MintTerritory, types.NewU32(gib_count), types.NewBytes([]byte(territory_name)))
+	call, err := types.NewCall(c.metadata, TX_StorageHandler_MintTerritory, types.NewU32(gib_count), types.NewBytes([]byte(territory_name)), types.NewU32(days))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_MintTerritory, err)
 		return blockhash, err

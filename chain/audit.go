@@ -616,7 +616,7 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_service_proof, AuditSubmitServiceProof, c.signatureAcc)
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_verify_service_result, AuditSubmitServiceVerifyResult, c.signatureAcc)
 				return blockhash, err
 			}
 		case err = <-sub.Err():
