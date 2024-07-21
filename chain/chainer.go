@@ -27,7 +27,7 @@ type Chainer interface {
 	// Balances
 	QueryTotalIssuance(block int32) (string, error)
 	QueryInactiveIssuance(block int32) (string, error)
-	TransferToken(dest string, amount uint64) (string, error)
+	TransferToken(dest string, amount string) (string, error)
 
 	// Oss
 	QueryOss(accountID []byte, block int32) (OssInfo, error)

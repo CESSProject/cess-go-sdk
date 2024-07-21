@@ -202,9 +202,9 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_Audit_SubmitIdleProof, idleProof)
+	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_idle_proof, idleProof)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 		return blockhash, err
 	}
 
@@ -212,13 +212,13 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -239,7 +239,7 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 		return blockhash, err
 	}
 
@@ -257,12 +257,12 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitIdleProof, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -312,9 +312,9 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_Audit_SubmitServiceProof, serviceProof)
+	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_service_proof, serviceProof)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 		return blockhash, err
 	}
 
@@ -322,13 +322,13 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -349,7 +349,7 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 		return blockhash, err
 	}
 
@@ -367,12 +367,12 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitServiceProof, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -428,9 +428,9 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_Audit_SubmitVerifyIdleResult, totalProofHash, front, rear, accumulator, result, sig, teePuk)
+	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_verify_idle_result, totalProofHash, front, rear, accumulator, result, sig, teePuk)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 		return blockhash, err
 	}
 
@@ -438,13 +438,13 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -465,7 +465,7 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 		return blockhash, err
 	}
 
@@ -483,12 +483,12 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyIdleResult, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -541,9 +541,9 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_Audit_SubmitVerifyServiceResult, result, sign, bloomFilter, teePuk)
+	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_verify_service_result, result, sign, bloomFilter, teePuk)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 		return blockhash, err
 	}
 
@@ -551,13 +551,13 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -578,7 +578,7 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 		return blockhash, err
 	}
 
@@ -596,12 +596,12 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Audit_SubmitVerifyServiceResult, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}

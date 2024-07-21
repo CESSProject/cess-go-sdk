@@ -162,13 +162,13 @@ const (
 // Extrinsics
 const (
 	// Audit
-	TX_Audit_SubmitIdleProof           = Audit + DOT + "submit_idle_proof"
-	TX_Audit_SubmitServiceProof        = Audit + DOT + "submit_service_proof"
-	TX_Audit_SubmitVerifyIdleResult    = Audit + DOT + "submit_verify_idle_result"
-	TX_Audit_SubmitVerifyServiceResult = Audit + DOT + "submit_verify_service_result"
+	//TX_Audit_SubmitIdleProof           = Audit + DOT + "submit_idle_proof"
+	//TX_Audit_SubmitServiceProof        = Audit + DOT + "submit_service_proof"
+	//TX_Audit_SubmitVerifyIdleResult    = Audit + DOT + "submit_verify_idle_result"
+	//TX_Audit_SubmitVerifyServiceResult = Audit + DOT + "submit_verify_service_result"
 
 	// BALANCES
-	TX_Balances_Transfer = "Balances" + DOT + "transfer"
+	//TX_Balances_Transfer = "Balances" + DOT + "transfer"
 
 	// EVM
 	TX_EVM_Call = EVM + DOT + "call"

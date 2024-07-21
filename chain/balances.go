@@ -10,6 +10,7 @@ package chain
 import (
 	"fmt"
 	"log"
+	"math/big"
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/utils"
@@ -135,12 +136,13 @@ func (c *ChainClient) QueryInactiveIssuance(block int32) (string, error) {
 
 // TransferToken transfers to other accounts
 //   - dest: target account
-//   - amount: transfer amount
+//   - amount: transfer amount, It is the smallest unit. If you need to use CESS as the unit, you need to add 18 zeros.
+//     For example, if you transfer 1 CESS, you need to fill in "1000000000000000000"
 //
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) TransferToken(dest string, amount uint64) (string, error) {
+func (c *ChainClient) TransferToken(dest string, amount string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
@@ -168,9 +170,14 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, error) 
 		return blockhash, errors.Wrapf(err, "[NewMultiAddressFromAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_Balances_Transfer, address, types.NewUCompactFromUInt(amount))
+	amount_bg, ok := new(big.Int).SetString(amount, 10)
+	if !ok {
+		return blockhash, errors.New("[TransferToken] invalid amount")
+	}
+
+	call, err := types.NewCall(c.metadata, ExtName_Balances_transferKeepAlive, address, types.NewUCompact(amount_bg))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, err)
 		return blockhash, err
 	}
 
@@ -178,13 +185,13 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, error) 
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, err)
 		return blockhash, err
 	}
 
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	ok, err = c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -205,7 +212,7 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, error) 
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, err)
 		return blockhash, err
 	}
 
@@ -214,7 +221,7 @@ func (c *ChainClient) TransferToken(dest string, amount uint64) (string, error) 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_Balances_Transfer, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
