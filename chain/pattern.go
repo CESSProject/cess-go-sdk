@@ -159,69 +159,6 @@ const (
 	WorkerAddedAt = "WorkerAddedAt"
 )
 
-// Extrinsics
-const (
-	// Audit
-	TX_Audit_SubmitIdleProof           = Audit + DOT + "submit_idle_proof"
-	TX_Audit_SubmitServiceProof        = Audit + DOT + "submit_service_proof"
-	TX_Audit_SubmitVerifyIdleResult    = Audit + DOT + "submit_verify_idle_result"
-	TX_Audit_SubmitVerifyServiceResult = Audit + DOT + "submit_verify_service_result"
-
-	// BALANCES
-	TX_Balances_Transfer = "Balances" + DOT + "transfer"
-
-	// EVM
-	TX_EVM_Call = EVM + DOT + "call"
-
-	// FileBank
-	TX_FileBank_CreateBucket              = FileBank + DOT + "create_bucket"
-	TX_FileBank_DeleteBucket              = FileBank + DOT + "delete_bucket"
-	TX_FileBank_DeleteFile                = FileBank + DOT + "delete_file"
-	TX_FileBank_UploadDeclaration         = FileBank + DOT + "upload_declaration"
-	TX_FileBank_TransferReport            = FileBank + DOT + "transfer_report"
-	TX_FileBank_GenerateRestoralOrder     = FileBank + DOT + "generate_restoral_order"
-	TX_FileBank_ClaimRestoralOrder        = FileBank + DOT + "claim_restoral_order"
-	TX_FileBank_ClaimRestoralNoexistOrder = FileBank + DOT + "claim_restoral_noexist_order"
-	TX_FileBank_RestoralOrderComplete     = FileBank + DOT + "restoral_order_complete"
-	TX_FileBank_CertIdleSpace             = FileBank + DOT + "cert_idle_space"
-	TX_FileBank_ReplaceIdleSpace          = FileBank + DOT + "replace_idle_space"
-	TX_FileBank_CalculateReport           = FileBank + DOT + "calculate_report"
-	TX_FileBank_TerritoryFileDelivery     = FileBank + DOT + "territory_file_delivery"
-
-	// Oss
-	TX_Oss_Register        = Oss + DOT + "register"
-	TX_Oss_Update          = Oss + DOT + "update"
-	TX_Oss_Destroy         = Oss + DOT + "destroy"
-	TX_Oss_Authorize       = Oss + DOT + "authorize"
-	TX_Oss_CancelAuthorize = Oss + DOT + "cancel_authorize"
-
-	// Sminer
-	TX_Sminer_Regnstk                  = Sminer + DOT + "regnstk"
-	TX_Sminer_RegnstkAssignStaking     = Sminer + DOT + "regnstk_assign_staking"
-	TX_Sminer_IncreaseCollateral       = Sminer + DOT + "increase_collateral"
-	TX_Sminer_UpdatePeerId             = Sminer + DOT + "update_peer_id"
-	TX_Sminer_UpdateBeneficiary        = Sminer + DOT + "update_beneficiary"
-	TX_Sminer_ReceiveReward            = Sminer + DOT + "receive_reward"
-	TX_Sminer_MinerExitPrep            = Sminer + DOT + "miner_exit_prep"
-	TX_Sminer_MinerWithdraw            = Sminer + DOT + "miner_withdraw"
-	TX_Sminer_RegisterPoisKey          = Sminer + DOT + "register_pois_key"
-	TX_Sminer_IncreaseDeclarationSpace = Sminer + DOT + "increase_declaration_space"
-
-	// StorageHandler
-	TX_StorageHandler_BuySpace       = StorageHandler + DOT + "buy_space"
-	TX_StorageHandler_ExpansionSpace = StorageHandler + DOT + "expansion_space"
-	TX_StorageHandler_RenewalSpace   = StorageHandler + DOT + "renewal_space"
-
-	TX_StorageHandler_MintTerritory        = StorageHandler + DOT + "mint_territory"
-	TX_StorageHandler_ExpandingTerritory   = StorageHandler + DOT + "expanding_territory"
-	TX_StorageHandler_RenewalTerritory     = StorageHandler + DOT + "renewal_territory"
-	TX_StorageHandler_ReactivateTerritory  = StorageHandler + DOT + "reactivate_territory"
-	TX_StorageHandler_TerritoryConsignment = StorageHandler + DOT + "territory_consignment"
-	TX_StorageHandler_CancelConsignment    = StorageHandler + DOT + "cancel_consignment"
-	TX_StorageHandler_BuyConsignment       = StorageHandler + DOT + "buy_consignment"
-	TX_StorageHandler_CancelPurchaseAction = StorageHandler + DOT + "cancel_purchase_action"
-)
-
 // RPC Call
 const (
 	// Chain

@@ -27,7 +27,7 @@ type Chainer interface {
 	// Balances
 	QueryTotalIssuance(block int32) (string, error)
 	QueryInactiveIssuance(block int32) (string, error)
-	TransferToken(dest string, amount uint64) (string, error)
+	TransferToken(dest string, amount string) (string, error)
 
 	// Oss
 	QueryOss(accountID []byte, block int32) (OssInfo, error)
@@ -120,7 +120,7 @@ type Chainer interface {
 	QueryPurchasedSpace(block int32) (uint64, error)
 	QueryTerritory(accountId []byte, name string, block int32) (TerritoryInfo, error)
 	QueryConsignment(token types.H256, block int32) (ConsignmentInfo, error)
-	MintTerritory(gib_count uint32, territory_name string) (string, error)
+	MintTerritory(gib_count uint32, territory_name string, days uint32) (string, error)
 	ExpandingTerritory(territory_name string, gib_count uint32) (string, error)
 	RenewalTerritory(territory_name string, days_count uint32) (string, error)
 	ReactivateTerritory(territory_name string, days_count uint32) (string, error)

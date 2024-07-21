@@ -42,9 +42,9 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 	var maxPriorityFeePerGas types.Option[types.U256]
 	maxPriorityFeePerGas.SetNone()
 
-	call, err := types.NewCall(c.metadata, TX_EVM_Call, source, target, input, value, gasLimit, maxFeePerGas, maxPriorityFeePerGas, nonce, accessList)
+	call, err := types.NewCall(c.metadata, ExtName_Evm_call, source, target, input, value, gasLimit, maxFeePerGas, maxPriorityFeePerGas, nonce, accessList)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Evm_call, err)
 		return blockhash, err
 	}
 
@@ -52,13 +52,13 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Evm_call, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Evm_call, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -84,7 +84,7 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Evm_call, err)
 		return blockhash, err
 	}
 
@@ -98,12 +98,12 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Evm_call, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_EVM_Call, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Evm_call, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
