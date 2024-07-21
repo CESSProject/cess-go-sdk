@@ -645,9 +645,9 @@ func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user 
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_UploadDeclaration, hash, segment, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_upload_declaration, hash, segment, user, types.NewU128(*new(big.Int).SetUint64(filesize)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_upload_declaration, err)
 		return blockhash, err
 	}
 
@@ -655,13 +655,13 @@ func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user 
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_upload_declaration, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_upload_declaration, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -687,7 +687,7 @@ func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user 
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_upload_declaration, err)
 		return blockhash, err
 	}
 
@@ -705,12 +705,12 @@ func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user 
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_upload_declaration, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_UploadDeclaration, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_upload_declaration, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -773,9 +773,9 @@ func (c *ChainClient) CreateBucket(owner []byte, bucketName string) (string, err
 		return blockhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_CreateBucket, *acc, types.NewBytes([]byte(bucketName)))
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_create_bucket, *acc, types.NewBytes([]byte(bucketName)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_create_bucket, err)
 		return blockhash, err
 	}
 
@@ -783,13 +783,13 @@ func (c *ChainClient) CreateBucket(owner []byte, bucketName string) (string, err
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_create_bucket, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_create_bucket, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -810,7 +810,7 @@ func (c *ChainClient) CreateBucket(owner []byte, bucketName string) (string, err
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_create_bucket, err)
 		return blockhash, err
 	}
 
@@ -819,7 +819,7 @@ func (c *ChainClient) CreateBucket(owner []byte, bucketName string) (string, err
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CreateBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_create_bucket, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -877,9 +877,9 @@ func (c *ChainClient) DeleteBucket(owner []byte, bucketName string) (string, err
 		return blockhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_DeleteBucket, *acc, types.NewBytes([]byte(bucketName)))
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_delete_bucket, *acc, types.NewBytes([]byte(bucketName)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_bucket, err)
 		return blockhash, err
 	}
 
@@ -887,13 +887,13 @@ func (c *ChainClient) DeleteBucket(owner []byte, bucketName string) (string, err
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_bucket, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_bucket, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -914,7 +914,7 @@ func (c *ChainClient) DeleteBucket(owner []byte, bucketName string) (string, err
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_bucket, err)
 		return blockhash, err
 	}
 
@@ -923,7 +923,7 @@ func (c *ChainClient) DeleteBucket(owner []byte, bucketName string) (string, err
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteBucket, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_bucket, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -990,9 +990,9 @@ func (c *ChainClient) DeleteFile(owner []byte, fid string) (string, error) {
 		fhash[i] = types.U8(fid[i])
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_DeleteFile, *acc, fhash)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_delete_file, *acc, fhash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_file, err)
 		return blockhash, err
 	}
 
@@ -1000,13 +1000,13 @@ func (c *ChainClient) DeleteFile(owner []byte, fid string) (string, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_file, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_file, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1027,7 +1027,7 @@ func (c *ChainClient) DeleteFile(owner []byte, fid string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_file, err)
 		return blockhash, err
 	}
 
@@ -1045,12 +1045,12 @@ func (c *ChainClient) DeleteFile(owner []byte, fid string) (string, error) {
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_file, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_DeleteFile, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_delete_file, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1115,9 +1115,9 @@ func (c *ChainClient) TransferReport(index uint8, fid string) (string, error) {
 		fhash[j] = types.U8(fid[j])
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_TransferReport, types.NewU8(index), fhash)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_transfer_report, types.NewU8(index), fhash)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_transfer_report, err)
 		return blockhash, err
 	}
 
@@ -1125,13 +1125,13 @@ func (c *ChainClient) TransferReport(index uint8, fid string) (string, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_transfer_report, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_transfer_report, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1152,7 +1152,7 @@ func (c *ChainClient) TransferReport(index uint8, fid string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_transfer_report, err)
 		return blockhash, err
 	}
 
@@ -1170,12 +1170,12 @@ func (c *ChainClient) TransferReport(index uint8, fid string) (string, error) {
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_transfer_report, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_TransferReport, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_transfer_report, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1248,9 +1248,9 @@ func (c *ChainClient) GenerateRestoralOrder(fid, fragmentHash string) (string, e
 		fragh[i] = types.U8(fragmentHash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_GenerateRestoralOrder, rooth, fragh)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_generate_restoral_order, rooth, fragh)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_generate_restoral_order, err)
 		return blockhash, err
 	}
 
@@ -1258,13 +1258,13 @@ func (c *ChainClient) GenerateRestoralOrder(fid, fragmentHash string) (string, e
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_generate_restoral_order, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_generate_restoral_order, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1285,7 +1285,7 @@ func (c *ChainClient) GenerateRestoralOrder(fid, fragmentHash string) (string, e
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_generate_restoral_order, err)
 		return blockhash, err
 	}
 
@@ -1294,7 +1294,7 @@ func (c *ChainClient) GenerateRestoralOrder(fid, fragmentHash string) (string, e
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_GenerateRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_generate_restoral_order, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1355,9 +1355,9 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 		fragh[i] = types.U8(fragmentHash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_ClaimRestoralOrder, fragh)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_claim_restoral_order, fragh)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_order, err)
 		return blockhash, err
 	}
 
@@ -1365,13 +1365,13 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_order, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_order, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1392,7 +1392,7 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_order, err)
 		return blockhash, err
 	}
 
@@ -1410,12 +1410,12 @@ func (c *ChainClient) ClaimRestoralOrder(fragmentHash string) (string, error) {
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_order, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralOrder, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_order, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1494,9 +1494,9 @@ func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, fid, fragmentHash st
 		fragh[i] = types.U8(fragmentHash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_ClaimRestoralNoexistOrder, *acc, rooth, fragh)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_claim_restoral_noexist_order, *acc, rooth, fragh)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_noexist_order, err)
 		return blockhash, err
 	}
 
@@ -1504,13 +1504,13 @@ func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, fid, fragmentHash st
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_noexist_order, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_noexist_order, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1548,12 +1548,12 @@ func (c *ChainClient) ClaimRestoralNoExistOrder(puk []byte, fid, fragmentHash st
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_noexist_order, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ClaimRestoralNoexistOrder, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_claim_restoral_noexist_order, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1616,21 +1616,21 @@ func (c *ChainClient) RestoralOrderComplete(fragmentHash string) (string, error)
 		fragh[i] = types.U8(fragmentHash[i])
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_RestoralOrderComplete, fragh)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_restoral_order_complete, fragh)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_restoral_order_complete, err)
 		return blockhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_restoral_order_complete, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_restoral_order_complete, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1653,7 +1653,7 @@ func (c *ChainClient) RestoralOrderComplete(fragmentHash string) (string, error)
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_restoral_order_complete, err)
 		return blockhash, err
 	}
 
@@ -1668,12 +1668,12 @@ func (c *ChainClient) RestoralOrderComplete(fragmentHash string) (string, error)
 			}
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_restoral_order_complete, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_RestoralOrderComplete, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_restoral_order_complete, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1729,21 +1729,21 @@ func (c *ChainClient) CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAc
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_CertIdleSpace, spaceProofInfo, teeSignWithAcc, teeSign, teePuk)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_cert_idle_space, spaceProofInfo, teeSignWithAcc, teeSign, teePuk)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_cert_idle_space, err)
 		return blockhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_cert_idle_space, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_cert_idle_space, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1766,7 +1766,7 @@ func (c *ChainClient) CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAc
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_cert_idle_space, err)
 		return blockhash, err
 	}
 
@@ -1784,12 +1784,12 @@ func (c *ChainClient) CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAc
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_cert_idle_space, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CertIdleSpace, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_cert_idle_space, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1845,21 +1845,21 @@ func (c *ChainClient) ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWit
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_ReplaceIdleSpace, spaceProofInfo, teeSignWithAcc, teeSign, teePuk)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_replace_idle_space, spaceProofInfo, teeSignWithAcc, teeSign, teePuk)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_replace_idle_space, err)
 		return blockhash, err
 	}
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_replace_idle_space, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_replace_idle_space, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1882,7 +1882,7 @@ func (c *ChainClient) ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWit
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_replace_idle_space, err)
 		return blockhash, err
 	}
 
@@ -1900,12 +1900,12 @@ func (c *ChainClient) ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWit
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_replace_idle_space, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_ReplaceIdleSpace, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_replace_idle_space, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1959,9 +1959,9 @@ func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo)
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_CalculateReport, teeSig, tagSigInfo)
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_calculate_report, teeSig, tagSigInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_calculate_report, err)
 		return blockhash, err
 	}
 
@@ -1969,13 +1969,13 @@ func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo)
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_calculate_report, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_calculate_report, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1996,7 +1996,7 @@ func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo)
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_calculate_report, err)
 		return blockhash, err
 	}
 
@@ -2014,12 +2014,12 @@ func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo)
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_calculate_report, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_CalculateReport, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_calculate_report, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -2076,9 +2076,9 @@ func (c *ChainClient) TerritorFileDelivery(user []byte, fid string, target_terri
 		return blockhash, errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_FileBank_TerritoryFileDelivery, *acc, types.NewBytes([]byte(fid)), types.NewBytes([]byte(target_territory)))
+	call, err := types.NewCall(c.metadata, ExtName_FileBank_territory_file_delivery, *acc, types.NewBytes([]byte(fid)), types.NewBytes([]byte(target_territory)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_FileBank_TerritoryFileDelivery, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_territory_file_delivery, err)
 		return blockhash, err
 	}
 
@@ -2086,13 +2086,13 @@ func (c *ChainClient) TerritorFileDelivery(user []byte, fid string, target_terri
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_FileBank_TerritoryFileDelivery, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_territory_file_delivery, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_FileBank_TerritoryFileDelivery, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_territory_file_delivery, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -2113,7 +2113,7 @@ func (c *ChainClient) TerritorFileDelivery(user []byte, fid string, target_terri
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_FileBank_TerritoryFileDelivery, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_territory_file_delivery, err)
 		return blockhash, err
 	}
 
@@ -2122,7 +2122,7 @@ func (c *ChainClient) TerritorFileDelivery(user []byte, fid string, target_terri
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_FileBank_TerritoryFileDelivery, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_FileBank_territory_file_delivery, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}

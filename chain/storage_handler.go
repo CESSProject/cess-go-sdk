@@ -388,9 +388,9 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_MintTerritory, types.NewU32(gib_count), types.NewBytes([]byte(territory_name)), types.NewU32(days))
+	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_mint_territory, types.NewU32(gib_count), types.NewBytes([]byte(territory_name)), types.NewU32(days))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_MintTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, err)
 		return blockhash, err
 	}
 
@@ -398,13 +398,13 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_MintTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_MintTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -425,7 +425,7 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_MintTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, err)
 		return blockhash, err
 	}
 
@@ -443,12 +443,12 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_MintTerritory, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_MintTerritory, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -503,9 +503,9 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_ExpandingTerritory, types.NewBytes([]byte(territory_name)), types.NewU32(gib_count))
+	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_expanding_territory, types.NewBytes([]byte(territory_name)), types.NewU32(gib_count))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpandingTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, err)
 		return blockhash, err
 	}
 
@@ -513,13 +513,13 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpandingTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpandingTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -540,7 +540,7 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpandingTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, err)
 		return blockhash, err
 	}
 
@@ -558,12 +558,12 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpandingTerritory, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ExpandingTerritory, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -618,9 +618,9 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_RenewalTerritory, types.NewBytes([]byte(territory_name)), types.NewU32(days_count))
+	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_renewal_territory, types.NewBytes([]byte(territory_name)), types.NewU32(days_count))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, err)
 		return blockhash, err
 	}
 
@@ -628,13 +628,13 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -655,7 +655,7 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, err)
 		return blockhash, err
 	}
 
@@ -673,12 +673,12 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalTerritory, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_RenewalTerritory, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -733,9 +733,9 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_ReactivateTerritory, types.NewBytes([]byte(territory_name)), types.NewU32(days_count))
+	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_reactivate_territory, types.NewBytes([]byte(territory_name)), types.NewU32(days_count))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ReactivateTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, err)
 		return blockhash, err
 	}
 
@@ -743,13 +743,13 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ReactivateTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ReactivateTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -770,7 +770,7 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ReactivateTerritory, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, err)
 		return blockhash, err
 	}
 
@@ -788,12 +788,12 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ReactivateTerritory, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_ReactivateTerritory, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -847,9 +847,9 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_TerritoryConsignment, types.NewBytes([]byte(territory_name)))
+	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_territory_consignment, types.NewBytes([]byte(territory_name)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_TerritoryConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, err)
 		return blockhash, err
 	}
 
@@ -857,13 +857,13 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_TerritoryConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_TerritoryConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -884,7 +884,7 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_TerritoryConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, err)
 		return blockhash, err
 	}
 
@@ -902,12 +902,12 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_TerritoryConsignment, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_TerritoryConsignment, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -957,9 +957,9 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_CancelConsignment, types.NewBytes([]byte(territory_name)))
+	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_cancel_consignment, types.NewBytes([]byte(territory_name)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, err)
 		return blockhash, err
 	}
 
@@ -967,13 +967,13 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -994,7 +994,7 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, err)
 		return blockhash, err
 	}
 
@@ -1012,12 +1012,12 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelConsignment, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelConsignment, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1072,9 +1072,9 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 		return blockhash, errors.New("territory name is empty")
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_BuyConsignment, token, types.NewBytes([]byte(territory_name)))
+	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_buy_consignment, token, types.NewBytes([]byte(territory_name)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuyConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, err)
 		return blockhash, err
 	}
 
@@ -1082,13 +1082,13 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuyConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuyConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1109,7 +1109,7 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuyConsignment, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, err)
 		return blockhash, err
 	}
 
@@ -1127,12 +1127,12 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuyConsignment, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_BuyConsignment, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
@@ -1182,9 +1182,9 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 		return blockhash, ERR_RPC_CONNECTION
 	}
 
-	call, err := types.NewCall(c.metadata, TX_StorageHandler_CancelPurchaseAction, token)
+	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_cancel_purchase_action, token)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelPurchaseAction, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, err)
 		return blockhash, err
 	}
 
@@ -1192,13 +1192,13 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelPurchaseAction, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, err)
 		return blockhash, err
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelPurchaseAction, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, err)
 		c.SetRpcState(false)
 		return blockhash, err
 	}
@@ -1219,7 +1219,7 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 	// Sign the transaction
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelPurchaseAction, err)
+		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, err)
 		return blockhash, err
 	}
 
@@ -1237,12 +1237,12 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelPurchaseAction, err)
+				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, err)
 				c.SetRpcState(false)
 				return blockhash, err
 			}
 		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), TX_StorageHandler_CancelPurchaseAction, err)
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, err)
 			c.SetRpcState(false)
 			return blockhash, err
 		}
