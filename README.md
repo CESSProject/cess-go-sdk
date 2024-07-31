@@ -19,10 +19,7 @@ If you find any system errors or you have better suggestions, please submit an i
 ## 📢 Announcement
 **CESS test network rpc endpoints**
 ```
-wss://testnet-rpc0.cess.cloud/ws/
-wss://testnet-rpc1.cess.cloud/ws/
-wss://testnet-rpc2.cess.cloud/ws/
-wss://testnet-rpc3.cess.cloud/ws/
+wss://testnet-rpc.cess.cloud/ws/
 ```
 **CESS test network bootstrap node**
 ```
@@ -53,7 +50,7 @@ make check
 ## 📖 Document
 
 - [Reference](https://pkg.go.dev/github.com/CESSProject/cess-go-sdk)
-- [Guidebook](https://docs.cess.cloud/deoss/get-started/go-sdk)
+- [Guidebook](https://docs.cess.cloud/core/developer/cess-sdk/sdk-golang)
 
 ## License
 
