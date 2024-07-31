@@ -14,9 +14,7 @@ import (
 // DefaultRpcAddrs configures the default rpc address
 var DefaultRpcAddrs = func(cfg *Config) error {
 	rpcAddrs := []string{
-		"wss://testnet-rpc0.cess.cloud/ws/",
-		"wss://testnet-rpc1.cess.cloud/ws/",
-		"wss://testnet-rpc2.cess.cloud/ws/",
+		"wss://testnet-rpc.cess.cloud/ws/",
 	}
 	return cfg.Apply(ConnectRpcAddrs(rpcAddrs))
 }
