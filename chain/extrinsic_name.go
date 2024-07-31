@@ -286,7 +286,7 @@ const (
 	ExtName_Proxy_remove_proxy        = "Proxy.remove_proxy"
 
 	// Reservoir
-	ExtName_Reservoir_attend_evnet   = "Reservoir.attend_evnet"
+	ExtName_Reservoir_attend_evnet   = "Reservoir.attend_event"
 	ExtName_Reservoir_create_event   = "Reservoir.create_event"
 	ExtName_Reservoir_event_withdraw = "Reservoir.event_withdraw"
 	ExtName_Reservoir_filling        = "Reservoir.filling"

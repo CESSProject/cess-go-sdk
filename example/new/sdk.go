@@ -25,7 +25,7 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//devnet
-	"wss://devnet-rpc.cess.cloud/ws/",
+	"wss://testnet-rpc.cess.cloud/ws/",
 
 	//testnet
 	//"wss://testnet-rpc.cess.cloud/ws/",
