@@ -24,11 +24,8 @@ import (
 var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
 
 var RPC_ADDRS = []string{
-	//devnet
-	"wss://testnet-rpc.cess.cloud/ws/",
-
 	//testnet
-	//"wss://testnet-rpc.cess.cloud/ws/",
+	"wss://testnet-rpc.cess.network/ws/",
 }
 
 func main() {
@@ -50,6 +47,7 @@ func main() {
 
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.GetCurrentRpcAddr())
+	fmt.Println(sdk.SystemProperties())
 	return
 
 	puk, err := utils.ParsingPublickey("cXfg2SYcq85nyZ1U4ccx6QnAgSeLQB8aXZ2jstbw9CPGSmhXY")

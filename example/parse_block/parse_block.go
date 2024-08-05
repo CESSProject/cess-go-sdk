@@ -10,16 +10,9 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
-// Substrate well-known mnemonic:
-//
-//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
-
 var RPC_ADDRS = []string{
-	//devnet
-	"wss://devnet-rpc.cess.cloud/ws/",
 	//testnet
-	// "wss://testnet-rpc.cess.cloud/ws/",
+	"wss://testnet-rpc.cess.network/ws/",
 }
 
 type MyEvent struct {
@@ -42,7 +35,7 @@ func main() {
 		panic(err)
 	}
 
-	blockData, err := sdk.ParseBlockData(43742)
+	blockData, err := sdk.ParseBlockData(24112)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return

@@ -17,7 +17,7 @@ import (
 // reasonable defaults. The defaults are:
 //
 // - If no rpc address is provided, the sdk client uses the default address
-// "wss://testnet-rpc0.cess.cloud/ws/"" or "wss://testnet-rpc1.cess.cloud/ws/";
+// "wss://testnet-rpc.cess.network/ws/"
 //
 // - If no transaction timeout is provided, the sdk client uses the default
 // timeout: time.Duration(time.Second * 6)

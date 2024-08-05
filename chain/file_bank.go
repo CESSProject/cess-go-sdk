@@ -161,6 +161,64 @@ func (c *ChainClient) QueryDealMap(fid string, block int32) (StorageOrder, error
 	return data, nil
 }
 
+// QueryDealMapList query file storage order list
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - []StorageOrder: file storage order list
+//   - error: error message
+func (c *ChainClient) QueryDealMapList(block int32) ([]StorageOrder, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+	var result []StorageOrder
+
+	if !c.GetRpcState() {
+		return nil, ERR_RPC_CONNECTION
+	}
+
+	key := CreatePrefixedKey(FileBank, DealMap)
+	keys, err := c.api.RPC.State.GetKeysLatest(key)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetKeysLatest: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+		c.SetRpcState(false)
+		return nil, err
+	}
+
+	var set []types.StorageChangeSet
+	if block < 0 {
+		set, err = c.api.RPC.State.QueryStorageAtLatest(keys)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+			c.SetRpcState(false)
+			return nil, err
+		}
+	} else {
+		blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+		if err != nil {
+			return nil, err
+		}
+		set, err = c.api.RPC.State.QueryStorageAt(keys, blockhash)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] QueryStorageAtLatest: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+			c.SetRpcState(false)
+			return nil, err
+		}
+	}
+	for _, elem := range set {
+		for _, change := range elem.Changes {
+			var data StorageOrder
+			if err := codec.Decode(change.StorageData, &data); err != nil {
+				continue
+			}
+			result = append(result, data)
+		}
+	}
+	return result, nil
+}
+
 // QueryFile query file metadata
 //   - fid: file identification
 //   - block: block number, less than 0 indicates the latest block
@@ -747,9 +805,6 @@ func (c *ChainClient) UploadDeclaration(fid string, segment []SegmentList, user 
 // Note:
 //   - cannot create a bucket that already exists
 //   - if you are not the owner, the owner account must be authorised to you
-//
-// For details on bucket naming rules, see:
-//   - https://docs.cess.cloud/deoss/get-started/deoss-gateway/step-1-create-a-bucket#naming-conventions-for-a-bucket
 func (c *ChainClient) CreateBucket(owner []byte, bucketName string) (string, error) {
 	c.lock.Lock()
 	defer func() {

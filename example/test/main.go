@@ -9,14 +9,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	sdkgo "github.com/CESSProject/cess-go-sdk"
 )
 
 var RPC_ADDRS = []string{
 	//testnet
-	"wss://testnet-rpc.cess.cloud/ws/",
+	"wss://testnet-rpc.cess.network/ws/",
 }
 
 func main() {
@@ -28,11 +27,4 @@ func main() {
 		panic(err)
 	}
 	defer sdk.Close()
-
-	blockhash, err := sdk.ChainGetBlockHash(0)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(sdk.ChainGetBlock(blockhash))
 }
