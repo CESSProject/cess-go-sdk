@@ -40,6 +40,14 @@ func main() {
 	}
 	defer sdk.Close()
 
+	err = sdk.InitExtrinsicsNameForMiner()
+	if err != nil {
+		panic(err)
+	}
+	err = sdk.InitExtrinsicsNameForOSS()
+	if err != nil {
+		panic(err)
+	}
 	err = sdk.InitExtrinsicsName()
 	if err != nil {
 		panic(err)

@@ -180,6 +180,8 @@ type Chainer interface {
 
 	// extrinsics
 	InitExtrinsicsName() error
+	InitExtrinsicsNameForMiner() error
+	InitExtrinsicsNameForOSS() error
 	ParseBlockData(blocknumber uint64) (BlockData, error)
 
 	// event
