@@ -46,6 +46,7 @@ type Chainer interface {
 	// FileBank
 	QueryBucket(accountID []byte, bucketName string, block int32) (BucketInfo, error)
 	QueryDealMap(fid string, block int32) (StorageOrder, error)
+	QueryDealMapList(block int32) ([]StorageOrder, error)
 	QueryFile(fid string, block int32) (FileMetadata, error)
 	QueryRestoralOrder(fragmentHash string, block int32) (RestoralOrderInfo, error)
 	QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, error)
@@ -179,6 +180,8 @@ type Chainer interface {
 
 	// extrinsics
 	InitExtrinsicsName() error
+	InitExtrinsicsNameForMiner() error
+	InitExtrinsicsNameForOSS() error
 	ParseBlockData(blocknumber uint64) (BlockData, error)
 
 	// event

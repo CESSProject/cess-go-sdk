@@ -19,11 +19,11 @@ If you find any system errors or you have better suggestions, please submit an i
 ## 📢 Announcement
 **CESS test network rpc endpoints**
 ```
-wss://testnet-rpc.cess.cloud/ws/
+wss://testnet-rpc.cess.network/ws/
 ```
 **CESS test network bootstrap node**
 ```
-_dnsaddr.boot-miner-testnet.cess.cloud
+_dnsaddr.boot-miner-testnet.cess.network
 ```
 
 ## 🚰 CESS test network faucet
@@ -50,7 +50,7 @@ make check
 ## 📖 Document
 
 - [Reference](https://pkg.go.dev/github.com/CESSProject/cess-go-sdk)
-- [Guidebook](https://docs.cess.cloud/core/developer/cess-sdk/sdk-golang)
+- [Guidebook](https://doc.cess.network/developer/cess-sdk/sdk-golang)
 
 ## License
 

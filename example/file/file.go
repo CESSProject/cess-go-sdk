@@ -27,10 +27,10 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//testnet
-	"wss://testnet-rpc.cess.cloud/ws/",
+	"wss://testnet-rpc.cess.network/ws/",
 }
 
-const PublicGateway = "http://deoss-pub-gateway.cess.cloud/"
+const PublicGateway = "https://deoss-pub-gateway.cess.network/"
 const PublicGatewayAccount = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9"
 const UploadFile = "file.go"
 const BucketName = "myBucket"
