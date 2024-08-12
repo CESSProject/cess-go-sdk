@@ -2100,7 +2100,7 @@ func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo)
 	}
 }
 
-// TerritorFileDelivery transfer files to another territory
+// TerritoryFileDelivery transfer files to another territory
 //   - user: file owner account
 //   - fid: file id
 //   - target_territory: transfer to the target territory
@@ -2108,7 +2108,7 @@ func (c *ChainClient) CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo)
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) TerritorFileDelivery(user []byte, fid string, target_territory string) (string, error) {
+func (c *ChainClient) TerritoryFileDelivery(user []byte, fid string, target_territory string) (string, error) {
 	c.lock.Lock()
 	defer func() {
 		c.lock.Unlock()
