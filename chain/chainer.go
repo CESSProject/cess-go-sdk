@@ -66,7 +66,7 @@ type Chainer interface {
 	CertIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	ReplaceIdleSpace(spaceProofInfo SpaceProofInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	CalculateReport(teeSig types.Bytes, tagSigInfo TagSigInfo) (string, error)
-	TerritorFileDelivery(user []byte, fid string, target_territory string) (string, error)
+	TerritoryFileDelivery(user []byte, fid string, target_territory string) (string, error)
 
 	// SchedulerCredit
 	QueryCurrentCounters(accountId []byte, block int32) (SchedulerCounterEntry, error)
