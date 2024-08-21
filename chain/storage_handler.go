@@ -26,6 +26,14 @@ import (
 //   - string: price per GiB space
 //   - error: error message
 func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, UnitPrice, ERR_RPC_CONNECTION.Error())
+			return "", err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -33,10 +41,6 @@ func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
 	}()
 
 	var data types.U128
-
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
 
 	key, err := types.CreateStorageKey(c.metadata, StorageHandler, UnitPrice)
 	if err != nil {
@@ -82,6 +86,14 @@ func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
 //   - uint64: the size of all idle space
 //   - error: error message
 func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, TotalIdleSpace, ERR_RPC_CONNECTION.Error())
+			return 0, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -89,10 +101,6 @@ func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
 	}()
 
 	var data types.U128
-
-	if !c.GetRpcState() {
-		return 0, ERR_RPC_CONNECTION
-	}
 
 	key, err := types.CreateStorageKey(c.metadata, StorageHandler, TotalIdleSpace)
 	if err != nil {
@@ -136,6 +144,14 @@ func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
 //   - uint64: the size of all service space
 //   - error: error message
 func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, TotalServiceSpace, ERR_RPC_CONNECTION.Error())
+			return 0, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -143,10 +159,6 @@ func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
 	}()
 
 	var data types.U128
-
-	if !c.GetRpcState() {
-		return 0, ERR_RPC_CONNECTION
-	}
 
 	key, err := types.CreateStorageKey(c.metadata, StorageHandler, TotalServiceSpace)
 	if err != nil {
@@ -189,6 +201,14 @@ func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
 //   - uint64: all purchased space size
 //   - error: error message
 func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, PurchasedSpace, ERR_RPC_CONNECTION.Error())
+			return 0, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -196,10 +216,6 @@ func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
 	}()
 
 	var data types.U128
-
-	if !c.GetRpcState() {
-		return 0, ERR_RPC_CONNECTION
-	}
 
 	key, err := types.CreateStorageKey(c.metadata, StorageHandler, PurchasedSpace)
 	if err != nil {
@@ -244,6 +260,14 @@ func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
 //   - TerritoryInfo: territory info
 //   - error: error message
 func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32) (TerritoryInfo, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, Territory, ERR_RPC_CONNECTION.Error())
+			return TerritoryInfo{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -251,10 +275,6 @@ func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32)
 	}()
 
 	var data TerritoryInfo
-
-	if !c.GetRpcState() {
-		return data, ERR_RPC_CONNECTION
-	}
 
 	param2, err := codec.Encode(types.NewBytes([]byte(name)))
 	if err != nil {
@@ -303,6 +323,14 @@ func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32)
 //   - ConsignmentInfo: consignment info
 //   - error: error message
 func (c *ChainClient) QueryConsignment(token types.H256, block int32) (ConsignmentInfo, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, Consignment, ERR_RPC_CONNECTION.Error())
+			return ConsignmentInfo{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -310,10 +338,6 @@ func (c *ChainClient) QueryConsignment(token types.H256, block int32) (Consignme
 	}()
 
 	var data ConsignmentInfo
-
-	if !c.GetRpcState() {
-		return data, ERR_RPC_CONNECTION
-	}
 
 	param1, err := codec.Encode(token)
 	if err != nil {
@@ -363,9 +387,11 @@ func (c *ChainClient) QueryConsignment(token types.H256, block int32) (Consignme
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, days uint32) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -382,10 +408,6 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 
 	if days == 0 {
 		return "", errors.New("[MintTerritory] invalid days")
-	}
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
 	}
 
 	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_mint_territory, types.NewU32(gib_count), types.NewBytes([]byte(territory_name)), types.NewU32(days))
@@ -430,6 +452,15 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -482,9 +513,11 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -497,10 +530,6 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 
 	if gib_count == 0 {
 		return "", errors.New("[ExpandingTerritory] invalid gib_count")
-	}
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
 	}
 
 	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_expanding_territory, types.NewBytes([]byte(territory_name)), types.NewU32(gib_count))
@@ -545,6 +574,15 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -597,9 +635,11 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -612,10 +652,6 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 
 	if days_count == 0 {
 		return "", errors.New("[RenewalTerritory] invalid days_count")
-	}
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
 	}
 
 	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_renewal_territory, types.NewBytes([]byte(territory_name)), types.NewU32(days_count))
@@ -660,6 +696,15 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -712,9 +757,11 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint32) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -727,10 +774,6 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 
 	if days_count == 0 {
 		return "", errors.New("[ReactivateTerritory] invalid days_count")
-	}
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
 	}
 
 	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_reactivate_territory, types.NewBytes([]byte(territory_name)), types.NewU32(days_count))
@@ -775,6 +818,15 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -830,9 +882,11 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 //   - The territory must be in an active state
 //   - Remaining lease term greater than 1 day
 func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -842,10 +896,6 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_territory_consignment, types.NewBytes([]byte(territory_name)))
 	if err != nil {
@@ -889,6 +939,15 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -940,9 +999,11 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -952,10 +1013,6 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_cancel_consignment, types.NewBytes([]byte(territory_name)))
 	if err != nil {
@@ -999,6 +1056,15 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -1051,9 +1117,11 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1063,10 +1131,6 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	if len(territory_name) <= 0 {
 		return blockhash, errors.New("territory name is empty")
@@ -1114,6 +1178,15 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -1165,9 +1238,11 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1177,10 +1252,6 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	call, err := types.NewCall(c.metadata, ExtName_StorageHandler_cancel_purchase_action, token)
 	if err != nil {
@@ -1224,6 +1295,15 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)

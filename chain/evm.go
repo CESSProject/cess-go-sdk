@@ -19,9 +19,11 @@ import (
 )
 
 func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input types.Bytes, value types.U256, gasLimit types.U64, maxFeePerGas types.U256, accessList []AccessInfo) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", fmt.Errorf("chainSDK.UploadDeclaration(): GetRpcState(): %v", ERR_RPC_CONNECTION)
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -31,10 +33,6 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, fmt.Errorf("chainSDK.UploadDeclaration(): GetRpcState(): %v", ERR_RPC_CONNECTION)
-	}
 
 	var nonce types.Option[types.U256]
 	nonce.SetNone()
@@ -86,6 +84,17 @@ func (c *ChainClient) SendEvmCall(source types.H160, target types.H160, input ty
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Evm_call, err)
 		return blockhash, err
+	}
+
+	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Evm_call, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
 	}
 
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)

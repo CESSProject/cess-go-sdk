@@ -22,6 +22,14 @@ import (
 //   - []ConsensusRrscAppPublic: all consensus rrsc public
 //   - error: error message
 func (c *ChainClient) QueryAuthorities(block int32) ([]ConsensusRrscAppPublic, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Babe, Authorities, ERR_RPC_CONNECTION.Error())
+			return []ConsensusRrscAppPublic{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -29,10 +37,6 @@ func (c *ChainClient) QueryAuthorities(block int32) ([]ConsensusRrscAppPublic, e
 	}()
 
 	var data []ConsensusRrscAppPublic
-
-	if !c.GetRpcState() {
-		return data, ERR_RPC_CONNECTION
-	}
 
 	key, err := types.CreateStorageKey(c.metadata, Babe, Authorities)
 	if err != nil {

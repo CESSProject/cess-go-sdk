@@ -29,16 +29,21 @@ import (
 //   - OssInfo: oss info
 //   - error: error message
 func (c *ChainClient) QueryOss(accountID []byte, block int32) (OssInfo, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Oss, Oss, ERR_RPC_CONNECTION.Error())
+			return OssInfo{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data OssInfo
 
-	if !c.GetRpcState() {
-		return data, ERR_RPC_CONNECTION
-	}
+	var data OssInfo
 
 	key, err := types.CreateStorageKey(c.metadata, Oss, Oss, accountID)
 	if err != nil {
@@ -81,16 +86,21 @@ func (c *ChainClient) QueryOss(accountID []byte, block int32) (OssInfo, error) {
 //   - []OssInfo: all oss info
 //   - error: error message
 func (c *ChainClient) QueryAllOss(block int32) ([]OssInfo, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Oss, Oss, ERR_RPC_CONNECTION.Error())
+			return []OssInfo{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var result []OssInfo
 
-	if !c.GetRpcState() {
-		return nil, ERR_RPC_CONNECTION
-	}
+	var result []OssInfo
 
 	key := CreatePrefixedKey(Oss, Oss)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
@@ -139,16 +149,21 @@ func (c *ChainClient) QueryAllOss(block int32) ([]OssInfo, error) {
 //   - []string: all oss's peer id
 //   - error: error message
 func (c *ChainClient) QueryAllOssPeerId(block int32) ([]string, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Oss, Oss, ERR_RPC_CONNECTION.Error())
+			return []string{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var result []string
 
-	if !c.GetRpcState() {
-		return nil, ERR_RPC_CONNECTION
-	}
+	var result []string
 
 	key := CreatePrefixedKey(Oss, Oss)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
@@ -199,16 +214,21 @@ func (c *ChainClient) QueryAllOssPeerId(block int32) ([]string, error) {
 //   - []types.AccountID: authorised all accounts
 //   - error: error message
 func (c *ChainClient) QueryAuthorityList(accountID []byte, block int32) ([]types.AccountID, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Oss, AuthorityList, ERR_RPC_CONNECTION.Error())
+			return []types.AccountID{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data []types.AccountID
 
-	if !c.GetRpcState() {
-		return data, ERR_RPC_CONNECTION
-	}
+	var data []types.AccountID
 
 	key, err := types.CreateStorageKey(c.metadata, Oss, AuthorityList, accountID)
 	if err != nil {
@@ -254,9 +274,11 @@ func (c *ChainClient) QueryAuthorityList(accountID []byte, block int32) ([]types
 // Node:
 //   - accountID should be oss account
 func (c *ChainClient) Authorize(accountID []byte) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -266,10 +288,6 @@ func (c *ChainClient) Authorize(accountID []byte) (string, error) {
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	acc, err := types.NewAccountID(accountID)
 	if err != nil {
@@ -318,6 +336,15 @@ func (c *ChainClient) Authorize(accountID []byte) (string, error) {
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -369,9 +396,11 @@ func (c *ChainClient) Authorize(accountID []byte) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) CancelAuthorize(accountID []byte) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -381,10 +410,6 @@ func (c *ChainClient) CancelAuthorize(accountID []byte) (string, error) {
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	call, err := types.NewCall(c.metadata, ExtName_Oss_cancel_authorize, accountID)
 	if err != nil {
@@ -428,6 +453,15 @@ func (c *ChainClient) CancelAuthorize(accountID []byte) (string, error) {
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -480,9 +514,11 @@ func (c *ChainClient) CancelAuthorize(accountID []byte) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -490,14 +526,10 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 
 	var (
 		blockhash   string
+		peerid      PeerId
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
-
-	var peerid PeerId
 	if len(peerId) != PeerIdPublicKeyLen {
 		return blockhash, errors.New("register oss: invalid peerid")
 	}
@@ -563,6 +595,15 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 
 	<-c.txTicker.C
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_register, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
+
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -614,9 +655,11 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -624,14 +667,10 @@ func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
 
 	var (
 		blockhash   string
+		peerid      PeerId
 		accountInfo types.AccountInfo
 	)
 
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
-
-	var peerid PeerId
 	if len(peerid) != len(peerId) {
 		return blockhash, errors.New("update oss: invalid peerid")
 	}
@@ -691,6 +730,15 @@ func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
 
 	<-c.txTicker.C
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_update, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
+
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -738,9 +786,11 @@ func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) DestroyOss() (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -750,10 +800,6 @@ func (c *ChainClient) DestroyOss() (string, error) {
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	call, err := types.NewCall(c.metadata, ExtName_Oss_destroy)
 	if err != nil {
@@ -798,6 +844,15 @@ func (c *ChainClient) DestroyOss() (string, error) {
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)

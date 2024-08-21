@@ -25,16 +25,21 @@ import (
 //   - string: the total amount of token issuance
 //   - error: error message
 func (c *ChainClient) QueryTotalIssuance(block int32) (string, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Balances, TotalIssuance, ERR_RPC_CONNECTION.Error())
+			return "", err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data types.U128
 
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
+	var data types.U128
 
 	key, err := types.CreateStorageKey(c.metadata, Balances, TotalIssuance)
 	if err != nil {
@@ -83,16 +88,21 @@ func (c *ChainClient) QueryTotalIssuance(block int32) (string, error) {
 //   - string: the amount of inactive token issuance
 //   - error: error message
 func (c *ChainClient) QueryInactiveIssuance(block int32) (string, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Balances, InactiveIssuance, ERR_RPC_CONNECTION.Error())
+			return "", err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data types.U128
 
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
+	var data types.U128
 
 	key, err := types.CreateStorageKey(c.metadata, Balances, InactiveIssuance)
 	if err != nil {
@@ -143,9 +153,11 @@ func (c *ChainClient) QueryInactiveIssuance(block int32) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) TransferToken(dest string, amount string) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -155,10 +167,6 @@ func (c *ChainClient) TransferToken(dest string, amount string) (string, error) 
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	pubkey, err := utils.ParsingPublickey(dest)
 	if err != nil {
@@ -217,6 +225,15 @@ func (c *ChainClient) TransferToken(dest string, amount string) (string, error) 
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)

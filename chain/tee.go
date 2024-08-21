@@ -24,6 +24,14 @@ import (
 //   - []byte: master public key
 //   - error: error message
 func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, ERR_RPC_CONNECTION.Error())
+			return []byte{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -31,10 +39,6 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 	}()
 
 	var data MasterPublicKey
-
-	if !c.GetRpcState() {
-		return nil, ERR_RPC_CONNECTION
-	}
 
 	key, err := types.CreateStorageKey(c.metadata, TeeWorker, MasterPubkey)
 	if err != nil {
@@ -78,6 +82,14 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 //   - WorkerInfo: tee worker info
 //   - error: error message
 func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
+			return WorkerInfo{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -85,10 +97,6 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 	}()
 
 	var data WorkerInfo
-
-	if !c.GetRpcState() {
-		return data, ERR_RPC_CONNECTION
-	}
 
 	publickey, err := codec.Encode(puk)
 	if err != nil {
@@ -136,6 +144,14 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 //   - []WorkerInfo: all tee worker info
 //   - error: error message
 func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
+			return []WorkerInfo{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -143,10 +159,6 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 	}()
 
 	var list []WorkerInfo
-
-	if !c.GetRpcState() {
-		return list, ERR_RPC_CONNECTION
-	}
 
 	key := CreatePrefixedKey(TeeWorker, Workers)
 	keys, err := c.api.RPC.State.GetKeysLatest(key)
@@ -194,6 +206,14 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 //   - string: tee's endpoint
 //   - error: error message
 func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, ERR_RPC_CONNECTION.Error())
+			return "", err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -201,10 +221,6 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 	}()
 
 	var data types.Text
-
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
 
 	val, err := codec.Encode(puk)
 	if err != nil {
@@ -251,6 +267,14 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 //   - uint32: tee work registered block
 //   - error: error message
 func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, ERR_RPC_CONNECTION.Error())
+			return 0, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -258,10 +282,6 @@ func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint
 	}()
 
 	var data types.U32
-
-	if !c.GetRpcState() {
-		return uint32(data), ERR_RPC_CONNECTION
-	}
 
 	val, err := codec.Encode(puk)
 	if err != nil {

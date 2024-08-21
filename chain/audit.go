@@ -27,6 +27,14 @@ import (
 //   - ChallengeInfo: challenge snapshot data
 //   - error: error message
 func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (bool, ChallengeInfo, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, ChallengeSnapShot, ERR_RPC_CONNECTION.Error())
+			return false, ChallengeInfo{}, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -34,10 +42,6 @@ func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (boo
 	}()
 
 	var data ChallengeInfo
-
-	if !c.GetRpcState() {
-		return false, data, ERR_RPC_CONNECTION
-	}
 
 	key, err := types.CreateStorageKey(c.metadata, Audit, ChallengeSnapShot, accountID)
 	if err != nil {
@@ -75,6 +79,14 @@ func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (boo
 //   - uint8: cleanup count
 //   - error: error message
 func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, CountedClear, ERR_RPC_CONNECTION.Error())
+			return 0, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
@@ -82,10 +94,6 @@ func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, e
 	}()
 
 	var data types.U8
-
-	if !c.GetRpcState() {
-		return uint8(data), ERR_RPC_CONNECTION
-	}
 
 	key, err := types.CreateStorageKey(c.metadata, Audit, CountedClear, accountID)
 	if err != nil {
@@ -129,16 +137,21 @@ func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, e
 //   - uint32: Is there a value
 //   - error: error message
 func (c *ChainClient) QueryCountedServiceFailed(accountID []byte, block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, CountedServiceFailed, ERR_RPC_CONNECTION.Error())
+			return 0, err
+		}
+	}
+
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-	var data types.U32
 
-	if !c.GetRpcState() {
-		return uint32(data), ERR_RPC_CONNECTION
-	}
+	var data types.U32
 
 	key, err := types.CreateStorageKey(c.metadata, Audit, CountedServiceFailed, accountID)
 	if err != nil {
@@ -181,9 +194,11 @@ func (c *ChainClient) QueryCountedServiceFailed(accountID []byte, block int32) (
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -196,10 +211,6 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 
 	if len(idleProof) == 0 {
 		return blockhash, ERR_IdleProofIsEmpty
-	}
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
 	}
 
 	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_idle_proof, idleProof)
@@ -244,6 +255,15 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -295,9 +315,11 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -307,10 +329,6 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_service_proof, serviceProof)
 	if err != nil {
@@ -354,6 +372,15 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -411,9 +438,11 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, rear types.U64, accumulator Accumulator, result types.Bool, sig types.Bytes, teePuk WorkerPublicKey) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -423,10 +452,6 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_verify_idle_result, totalProofHash, front, rear, accumulator, result, sig, teePuk)
 	if err != nil {
@@ -470,6 +495,15 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
@@ -524,9 +558,11 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.Bytes, bloomFilter BloomFilter, teePuk WorkerPublicKey) (string, error) {
-	c.lock.Lock()
+	if !c.GetRpcState() {
+		return "", ERR_RPC_CONNECTION
+	}
+
 	defer func() {
-		c.lock.Unlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -536,10 +572,6 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 		blockhash   string
 		accountInfo types.AccountInfo
 	)
-
-	if !c.GetRpcState() {
-		return blockhash, ERR_RPC_CONNECTION
-	}
 
 	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_verify_service_result, result, sign, bloomFilter, teePuk)
 	if err != nil {
@@ -583,6 +615,15 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 	}
 
 	<-c.txTicker.C
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+		<-c.txTicker.C
+	}
 
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
