@@ -349,6 +349,11 @@ func (c *ChainClient) QueryRewardMap(accountID []byte, block int32) (MinerReward
 		if !ok {
 			return data, ERR_RPC_EMPTY_VALUE
 		}
+		if data.OrderList == nil {
+			if data.RewardIssued.Int64() == 0 && data.TotalReward.Int64() == 0 {
+				return data, ERR_RPC_EMPTY_VALUE
+			}
+		}
 		return data, nil
 	}
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
@@ -363,6 +368,11 @@ func (c *ChainClient) QueryRewardMap(accountID []byte, block int32) (MinerReward
 	}
 	if !ok {
 		return data, ERR_RPC_EMPTY_VALUE
+	}
+	if data.OrderList == nil {
+		if data.RewardIssued.Int64() == 0 && data.TotalReward.Int64() == 0 {
+			return data, ERR_RPC_EMPTY_VALUE
+		}
 	}
 	return data, nil
 }
