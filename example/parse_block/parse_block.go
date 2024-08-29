@@ -90,6 +90,14 @@ func main() {
 		fmt.Println("    SubmitServiceResult miner: ", v.Miner)
 		fmt.Println("    SubmitServiceResult miner result: ", v.Result)
 	}
+	fmt.Println("Punishment:")
+	for _, v := range blockData.Punishment {
+		fmt.Println("    Punishment miner: ", v.From)
+		fmt.Println("    Punishment to: ", v.To)
+		fmt.Println("    Punishment Amount: ", v.Amount)
+		fmt.Println("    Punishment ExtrinsicHash: ", v.ExtrinsicHash)
+		fmt.Println("    Punishment ExtrinsicName: ", v.ExtrinsicName)
+	}
 	fmt.Println("MinerRegPoiskeys:")
 	for _, v := range blockData.MinerRegPoiskeys {
 		fmt.Println("    MinerRegPoiskeys miner: ", v.Miner)
