@@ -30,7 +30,6 @@ import (
 type ChainClient struct {
 	lock           *sync.Mutex
 	chainStLock    *sync.Mutex
-	txTicker       *time.Ticker
 	api            *gsrpc.SubstrateAPI
 	metadata       *types.Metadata
 	runtimeVersion *types.RuntimeVersion
@@ -39,12 +38,13 @@ type ChainClient struct {
 	keyring        signature.KeyringPair
 	rpcAddr        []string
 	currentRpcAddr string
-	packingTime    time.Duration
 	tokenSymbol    string
 	networkEnv     string
 	signatureAcc   string
 	name           string
 	balance        uint64
+	packingTime    time.Duration
+	tradeCh        chan bool
 	rpcState       bool
 }
 
@@ -65,11 +65,12 @@ func NewChainClientUnconnectedRpc(ctx context.Context, name string, rpcs []strin
 	var chainClient = &ChainClient{
 		lock:        new(sync.Mutex),
 		chainStLock: new(sync.Mutex),
-		txTicker:    time.NewTicker(BlockInterval),
+		tradeCh:     make(chan bool, 1),
 		rpcAddr:     rpcs,
 		packingTime: t,
 		name:        name,
 	}
+	chainClient.tradeCh <- true
 	if mnemonic != "" {
 		chainClient.keyring, err = signature.KeyringPairFromSecret(mnemonic, 0)
 		if err != nil {
@@ -100,12 +101,13 @@ func NewChainClient(ctx context.Context, name string, rpcs []string, mnemonic st
 		chainClient = &ChainClient{
 			lock:        new(sync.Mutex),
 			chainStLock: new(sync.Mutex),
-			txTicker:    time.NewTicker(BlockInterval),
+			tradeCh:     make(chan bool, 1),
 			rpcAddr:     rpcs,
 			packingTime: t,
 			name:        name,
 		}
 	)
+	chainClient.tradeCh <- true
 
 	log.SetOutput(io.Discard)
 	for i := 0; i < len(rpcs); i++ {

@@ -387,11 +387,9 @@ func (c *ChainClient) QueryConsignment(token types.H256, block int32) (Consignme
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, days uint32) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -424,6 +422,14 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 		return blockhash, err
 	}
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+	}
+
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, err)
@@ -451,17 +457,6 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -471,7 +466,6 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_mint_territory, err)
@@ -513,11 +507,9 @@ func (c *ChainClient) MintTerritory(gib_count uint32, territory_name string, day
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -544,6 +536,14 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -573,17 +573,6 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -593,7 +582,6 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_expanding_territory, err)
@@ -635,11 +623,9 @@ func (c *ChainClient) ExpandingTerritory(territory_name string, gib_count uint32
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -666,6 +652,14 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -695,17 +689,6 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -715,7 +698,6 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_renewal_territory, err)
@@ -757,11 +739,9 @@ func (c *ChainClient) RenewalTerritory(territory_name string, days_count uint32)
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint32) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -788,6 +768,14 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -817,17 +805,6 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -837,7 +814,6 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_reactivate_territory, err)
@@ -882,11 +858,9 @@ func (c *ChainClient) ReactivateTerritory(territory_name string, days_count uint
 //   - The territory must be in an active state
 //   - Remaining lease term greater than 1 day
 func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -909,6 +883,14 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -938,17 +920,6 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -958,7 +929,6 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_territory_consignment, err)
@@ -999,11 +969,9 @@ func (c *ChainClient) TerritoryConsignment(territory_name string) (string, error
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1026,6 +994,14 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -1055,17 +1031,6 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1075,7 +1040,6 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_consignment, err)
@@ -1117,11 +1081,9 @@ func (c *ChainClient) CancelConsignment(territory_name string) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1148,6 +1110,14 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -1177,17 +1147,6 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1197,7 +1156,6 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_buy_consignment, err)
@@ -1238,11 +1196,9 @@ func (c *ChainClient) BuyConsignment(token types.H256, territory_name string) (s
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1265,6 +1221,14 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -1294,17 +1258,6 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1314,7 +1267,6 @@ func (c *ChainClient) CancelPurchaseAction(token types.H256) (string, error) {
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_StorageHandler_cancel_purchase_action, err)

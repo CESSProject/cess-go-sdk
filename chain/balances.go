@@ -153,11 +153,9 @@ func (c *ChainClient) QueryInactiveIssuance(block int32) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) TransferToken(dest string, amount string) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -197,6 +195,14 @@ func (c *ChainClient) TransferToken(dest string, amount string) (string, error) 
 		return blockhash, err
 	}
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+	}
+
 	ok, err = c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, err)
@@ -222,17 +228,6 @@ func (c *ChainClient) TransferToken(dest string, amount string) (string, error) 
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, err)
 		return blockhash, err
-	}
-
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Balances_transferKeepAlive, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
 	}
 
 	// Do the transfer and track the actual status
