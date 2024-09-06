@@ -194,11 +194,9 @@ func (c *ChainClient) QueryCountedServiceFailed(accountID []byte, block int32) (
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -225,6 +223,14 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -254,17 +260,6 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -274,7 +269,6 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
@@ -315,11 +309,9 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -342,6 +334,14 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -371,17 +371,6 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -391,7 +380,6 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
@@ -438,11 +426,9 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, rear types.U64, accumulator Accumulator, result types.Bool, sig types.Bytes, teePuk WorkerPublicKey) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -465,6 +451,14 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -494,17 +488,6 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -514,7 +497,6 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
@@ -558,11 +540,9 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.Bytes, bloomFilter BloomFilter, teePuk WorkerPublicKey) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -585,6 +565,14 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -614,17 +602,6 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -634,7 +611,6 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)

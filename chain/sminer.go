@@ -721,11 +721,9 @@ func (c *ChainClient) QueryCompleteMinerSnapShot(puk []byte, block int32) (Miner
 //   - The number of staking to be added is calculated in the smallest unit,
 //     if you want to add 1CESS staking, you need to fill in "1000000000000000000"
 func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -760,6 +758,14 @@ func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string
 		return blockhash, err
 	}
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_increase_collateral, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+	}
+
 	ok, err = c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_increase_collateral, err)
@@ -787,17 +793,6 @@ func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_increase_collateral, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -807,7 +802,6 @@ func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_increase_collateral, err)
@@ -852,11 +846,9 @@ func (c *ChainClient) IncreaseCollateral(accountID []byte, token string) (string
 //   - the size of the declared space cannot be reduced
 //   - when the staking does not meet the declared space size, you will be frozen
 func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -879,6 +871,14 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_increase_declaration_space, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_increase_declaration_space, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -908,17 +908,6 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_increase_declaration_space, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -928,7 +917,6 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_increase_declaration_space, err)
@@ -972,11 +960,9 @@ func (c *ChainClient) IncreaseDeclarationSpace(tibCount uint32) (string, error) 
 //   - after pre-exit, you need to wait for one day before it will automatically exit
 //   - cannot register as a storage miner again after pre-exit
 func (c *ChainClient) MinerExitPrep() (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1008,6 +994,14 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 		return blockhash, err
 	}
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_miner_exit, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+	}
+
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_miner_exit, err)
@@ -1036,17 +1030,6 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_miner_exit, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1056,7 +1039,6 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_miner_exit, err)
@@ -1100,11 +1082,9 @@ func (c *ChainClient) MinerExitPrep() (string, error) {
 //   - must be an exited miner to withdraw
 //   - wait a day to withdraw after pre-exit
 func (c *ChainClient) MinerWithdraw() (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1127,6 +1107,14 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_miner_withdraw, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_miner_withdraw, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -1156,17 +1144,6 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_miner_withdraw, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1176,7 +1153,6 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_miner_withdraw, err)
@@ -1221,11 +1197,9 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 //   - for storage miner only
 //   - pass at least one idle and service challenge at the same time to get the reward
 func (c *ChainClient) ReceiveReward() (string, string, error) {
-	if !c.GetRpcState() {
-		return "", "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1249,6 +1223,14 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, err)
 		return blockhash, earningsAcc, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, ERR_RPC_CONNECTION.Error())
+			return blockhash, earningsAcc, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -1276,17 +1258,6 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, err)
 		return blockhash, earningsAcc, err
-	}
-
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, ERR_RPC_CONNECTION.Error())
-			return blockhash, "", err
-		}
-		<-c.txTicker.C
 	}
 
 	// Do the transfer and track the actual status
@@ -1346,11 +1317,9 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 // Note:
 //   - storage miners must complete the first stage to register for the second stage
 func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1373,6 +1342,14 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_register_pois_key, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_register_pois_key, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -1408,17 +1385,6 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_register_pois_key, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1428,7 +1394,6 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_register_pois_key, err)
@@ -1474,11 +1439,9 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint64, tibCount uint32) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1524,6 +1487,14 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 		return blockhash, err
 	}
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+	}
+
 	ok, err = c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk, err)
@@ -1557,17 +1528,6 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1577,7 +1537,6 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk, err)
@@ -1624,11 +1583,9 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, stakingAcc string, tibCount uint32) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1685,6 +1642,14 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 		return blockhash, err
 	}
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk_assign_staking, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+	}
+
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk_assign_staking, err)
@@ -1718,17 +1683,6 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk_assign_staking, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1738,7 +1692,6 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk_assign_staking, err)
@@ -1780,11 +1733,9 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1819,6 +1770,14 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 		return blockhash, err
 	}
 
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_update_beneficiary, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
+	}
+
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_beneficiary, err)
@@ -1846,17 +1805,6 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_update_beneficiary, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1866,7 +1814,6 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_beneficiary, err)
@@ -1908,11 +1855,9 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 //   - string: block hash
 //   - error: error message
 func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
-	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
-	}
-
+	<-c.tradeCh
 	defer func() {
+		c.tradeCh <- true
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -1935,6 +1880,14 @@ func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_peer_id, err)
 		return blockhash, err
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_update_peer_id, ERR_RPC_CONNECTION.Error())
+			return blockhash, err
+		}
 	}
 
 	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
@@ -1964,17 +1917,6 @@ func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
 		return blockhash, err
 	}
 
-	<-c.txTicker.C
-
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_update_peer_id, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-		<-c.txTicker.C
-	}
-
 	// Do the transfer and track the actual status
 	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 	if err != nil {
@@ -1984,7 +1926,6 @@ func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
 			if err != nil {
 				return blockhash, errors.Wrap(err, "[Sign]")
 			}
-			<-c.txTicker.C
 			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
 			if err != nil {
 				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_peer_id, err)

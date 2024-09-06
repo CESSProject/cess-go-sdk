@@ -8,4 +8,4 @@
 package sdkgo
 
 // SDK Version
-const Version = "0.6.1"
+const Version = "0.6.2"
