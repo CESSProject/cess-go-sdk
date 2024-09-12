@@ -23,7 +23,7 @@ import (
 // timeout: time.Duration(time.Second * 6)
 //
 // - The serviceName is used to specify the name of your service
-func New(ctx context.Context, opts ...Option) (*chain.ChainClient, error) {
+func New(ctx context.Context, opts ...Option) (chain.Chainer, error) {
 	return NewWithoutDefaults(ctx, append(opts, FallbackDefaults)...)
 }
 
@@ -33,7 +33,7 @@ func New(ctx context.Context, opts ...Option) (*chain.ChainClient, error) {
 // Warning: This function should not be considered a stable interface. We may
 // choose to add required services at any time and, by using this function, you
 // opt-out of any defaults we may provide.
-func NewWithoutDefaults(ctx context.Context, opts ...Option) (*chain.ChainClient, error) {
+func NewWithoutDefaults(ctx context.Context, opts ...Option) (chain.Chainer, error) {
 	var cfg Config
 	if err := cfg.Apply(opts...); err != nil {
 		return nil, err

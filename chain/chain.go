@@ -60,7 +60,7 @@ var _ Chainer = (*ChainClient)(nil)
 // Return:
 //   - *ChainClient: chain client
 //   - error: error message
-func NewChainClientUnconnectedRpc(ctx context.Context, name string, rpcs []string, mnemonic string, t time.Duration) (*ChainClient, error) {
+func NewChainClientUnconnectedRpc(ctx context.Context, name string, rpcs []string, mnemonic string, t time.Duration) (Chainer, error) {
 	var err error
 	var chainClient = &ChainClient{
 		lock:        new(sync.Mutex),
@@ -95,7 +95,7 @@ func NewChainClientUnconnectedRpc(ctx context.Context, name string, rpcs []strin
 // Return:
 //   - *ChainClient: chain client
 //   - error: error message
-func NewChainClient(ctx context.Context, name string, rpcs []string, mnemonic string, t time.Duration) (*ChainClient, error) {
+func NewChainClient(ctx context.Context, name string, rpcs []string, mnemonic string, t time.Duration) (Chainer, error) {
 	var (
 		err         error
 		chainClient = &ChainClient{

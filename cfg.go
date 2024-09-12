@@ -32,7 +32,7 @@ type Option func(cfg *Config) error
 // NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
-func (cfg *Config) NewSDK(ctx context.Context) (*chain.ChainClient, error) {
+func (cfg *Config) NewSDK(ctx context.Context) (chain.Chainer, error) {
 	if cfg.Name == "" {
 		cfg.Name = config.CharacterName_Default
 	}
