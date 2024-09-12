@@ -14,7 +14,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/pkg/errors"
-	"github.com/vedhavyas/go-subkey"
+	"github.com/vedhavyas/go-subkey/v2"
 	"golang.org/x/crypto/blake2b"
 )
 
