@@ -1847,14 +1847,14 @@ func (c *ChainClient) UpdateBeneficiary(earnings string) (string, error) {
 	}
 }
 
-// UpdateSminerPeerId update peer id for storage miner
+// UpdateSminerAddr update address for storage miner
 //
-//   - peerid: peer id
+//   - addr: address
 //
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
+func (c *ChainClient) UpdateSminerAddr(addr []byte) (string, error) {
 	<-c.tradeCh
 	defer func() {
 		c.tradeCh <- true
@@ -1868,7 +1868,17 @@ func (c *ChainClient) UpdateSminerPeerId(peerid PeerId) (string, error) {
 		accountInfo types.AccountInfo
 	)
 
-	call, err := types.NewCall(c.metadata, ExtName_Sminer_update_peer_id, peerid)
+	var pid PeerId
+
+	if len(addr) > PeerIdPublicKeyLen {
+		return blockhash, fmt.Errorf("addr exceeds %d bytes", PeerIdPublicKeyLen)
+	}
+
+	for i := 0; i < len(addr); i++ {
+		pid[i] = types.U8(addr[i])
+	}
+
+	call, err := types.NewCall(c.metadata, ExtName_Sminer_update_peer_id, pid)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_peer_id, err)
 		return blockhash, err

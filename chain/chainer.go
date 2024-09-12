@@ -95,7 +95,7 @@ type Chainer interface {
 	RegnstkSminer(earnings string, peerId []byte, staking uint64, tibCount uint32) (string, error)
 	RegnstkAssignStaking(earnings string, peerId []byte, stakingAcc string, tibCount uint32) (string, error)
 	UpdateBeneficiary(earnings string) (string, error)
-	UpdateSminerPeerId(peerid PeerId) (string, error)
+	UpdateSminerAddr(addr []byte) (string, error)
 
 	// Staking
 	QueryCounterForValidators(block int32) (uint32, error)
