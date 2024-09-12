@@ -9,8 +9,10 @@ package chain
 
 import (
 	"encoding/hex"
+	"regexp"
 	"strings"
 
+	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/pkg/errors"
@@ -102,4 +104,43 @@ func H160ToSS58(origin string, chain_id uint16) (string, error) {
 	new_acc := subkey.SS58Encode(hashed[:], chain_id)
 
 	return new_acc, nil
+}
+
+var re = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+
+func CheckBucketName(name string) bool {
+	if len(name) < int(MinBucketNameLength) || len(name) > int(MaxBucketNameLength) {
+		return false
+	}
+
+	if !re.MatchString(name) {
+		return false
+	}
+
+	if strings.Contains(name, " ") {
+		return false
+	}
+
+	if strings.Count(name, ".") > 2 {
+		return false
+	}
+
+	if byte(name[0]) == byte('.') ||
+		byte(name[0]) == byte('-') ||
+		byte(name[0]) == byte('_') ||
+		byte(name[len(name)-1]) == byte('.') ||
+		byte(name[len(name)-1]) == byte('-') ||
+		byte(name[len(name)-1]) == byte('_') {
+		return false
+	}
+
+	if utils.IsIPv4(name) {
+		return false
+	}
+
+	if utils.IsIPv6(name) {
+		return false
+	}
+
+	return true
 }

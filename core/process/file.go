@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/CESSProject/cess-go-sdk/chain"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
@@ -65,7 +66,7 @@ func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 		return "", errors.New("empty file")
 	}
 
-	if !utils.CheckBucketName(bucket) {
+	if !chain.CheckBucketName(bucket) {
 		return "", errors.New("invalid bucket name")
 	}
 
@@ -168,7 +169,7 @@ func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 //   - CESS public gateway address: [https://deoss-pub-gateway.cess.network/]
 //   - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
 func StoreObject(url string, bucket, territory, mnemonic string, reader io.Reader) (string, error) {
-	if !utils.CheckBucketName(bucket) {
+	if !chain.CheckBucketName(bucket) {
 		return "", errors.New("invalid bucket name")
 	}
 
