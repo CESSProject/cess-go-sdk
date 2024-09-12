@@ -20,6 +20,8 @@ type Chainer interface {
 	QueryCountedServiceFailed(accountID []byte, block int32) (uint32, error)
 	SubmitIdleProof(idleProof []types.U8) (string, error)
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
+	SubmitVerifyIdleResult(totalProofHash []types.U8, front, rear types.U64, accumulator Accumulator, result types.Bool, sig types.Bytes, teePuk WorkerPublicKey) (string, error)
+	SubmitVerifyServiceResult(result types.Bool, sign types.Bytes, bloomFilter BloomFilter, teePuk WorkerPublicKey) (string, error)
 
 	// Babe
 	QueryAuthorities(block int32) ([]ConsensusRrscAppPublic, error)
