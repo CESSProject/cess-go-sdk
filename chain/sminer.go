@@ -1431,14 +1431,14 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 // which is the first stage of storage miner registration.
 //
 //   - earnings: earnings account
-//   - peerId: peer id
+//   - addr: address
 //   - staking: number of staking, the unit is CESS
 //   - tibCount: the size of declaration space, in TiB
 //
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint64, tibCount uint32) (string, error) {
+func (c *ChainClient) RegnstkSminer(earnings string, addr []byte, staking uint64, tibCount uint32) (string, error) {
 	<-c.tradeCh
 	defer func() {
 		c.tradeCh <- true
@@ -1452,13 +1452,13 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 		accountInfo types.AccountInfo
 	)
 
-	var peerid PeerId
-	if len(peerId) != PeerIdPublicKeyLen {
-		return blockhash, fmt.Errorf("[RegnstkSminer] invalid peerid: %v", peerId)
+	var pid PeerId
+	if len(addr) > PeerIdPublicKeyLen {
+		return blockhash, fmt.Errorf("[RegnstkSminer] addr exceeds %d bytes", PeerIdPublicKeyLen)
 	}
 
-	for i := 0; i < len(peerid); i++ {
-		peerid[i] = types.U8(peerId[i])
+	for i := 0; i < len(addr); i++ {
+		pid[i] = types.U8(addr[i])
 	}
 
 	pubkey, err := utils.ParsingPublickey(earnings)
@@ -1473,7 +1473,7 @@ func (c *ChainClient) RegnstkSminer(earnings string, peerId []byte, staking uint
 	if !ok {
 		return blockhash, errors.New("[big.Int.SetString]")
 	}
-	call, err := types.NewCall(c.metadata, ExtName_Sminer_regnstk, *acc, peerid, types.NewU128(*realTokens), types.U32(tibCount))
+	call, err := types.NewCall(c.metadata, ExtName_Sminer_regnstk, *acc, pid, types.NewU128(*realTokens), types.U32(tibCount))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_regnstk, err)
 		return blockhash, err
