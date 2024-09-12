@@ -21,7 +21,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
-	"github.com/vedhavyas/go-subkey/scale"
+	"github.com/vedhavyas/go-subkey/v2/scale"
 	"golang.org/x/crypto/blake2b"
 )
 

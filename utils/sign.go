@@ -16,7 +16,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/vedhavyas/go-subkey/sr25519"
+	"github.com/vedhavyas/go-subkey/v2/sr25519"
 )
 
 // SignedSR25519WithMnemonic sign sr25519 with mnemonic
