@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/CESSProject/cess-go-sdk/config"
+	"github.com/CESSProject/cess-go-sdk/chain"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
@@ -182,7 +182,7 @@ func UploadFileChunk(url, mnemonic, file, territory, bucket string, addExtendHea
 		return "", errors.New("empty file")
 	}
 
-	if !utils.CheckBucketName(bucket) {
+	if !chain.CheckBucketName(bucket) {
 		return "", errors.New("invalid bucket name")
 	}
 
@@ -271,7 +271,7 @@ func UploadFileChunk(url, mnemonic, file, territory, bucket string, addExtendHea
 //   - int: number of file chunks.
 //   - error: error message.
 func SplitFileWithstandardSize(fpath, chunksDir string) (int64, int, error) {
-	return SplitFile(fpath, chunksDir, config.SegmentSize, true)
+	return SplitFile(fpath, chunksDir, chain.SegmentSize, true)
 }
 
 // Split File into Chunks.

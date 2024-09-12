@@ -13,7 +13,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/CESSProject/cess-go-sdk/config"
+	"github.com/CESSProject/cess-go-sdk/chain"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/klauspost/reedsolomon"
 )
@@ -36,11 +36,11 @@ func ReedSolomon(file string, saveDir string) ([]string, error) {
 	if fstat.IsDir() {
 		return nil, errors.New("not a file")
 	}
-	if fstat.Size() != config.SegmentSize {
+	if fstat.Size() != chain.SegmentSize {
 		return nil, errors.New("invalid size")
 	}
 
-	enc, err := reedsolomon.New(config.DataShards, config.ParShards)
+	enc, err := reedsolomon.New(chain.DataShards, chain.ParShards)
 	if err != nil {
 		return shardspath, err
 	}
@@ -93,12 +93,12 @@ func RSRestore(outpath string, shardspath []string) error {
 		return nil
 	}
 
-	enc, err := reedsolomon.New(config.DataShards, config.ParShards)
+	enc, err := reedsolomon.New(chain.DataShards, chain.ParShards)
 	if err != nil {
 		return err
 	}
 
-	shards := make([][]byte, config.DataShards+config.ParShards)
+	shards := make([][]byte, chain.DataShards+chain.ParShards)
 	for k, v := range shardspath {
 		shards[k], err = os.ReadFile(v)
 		if err != nil {
@@ -127,7 +127,7 @@ func RSRestore(outpath string, shardspath []string) error {
 		return err
 	}
 	defer f.Close()
-	err = enc.Join(f, shards, len(shards[0])*config.DataShards)
+	err = enc.Join(f, shards, len(shards[0])*chain.DataShards)
 	return err
 }
 
@@ -145,7 +145,7 @@ func RSRestoreData(outpath string, sharddata [][]byte) error {
 		return nil
 	}
 
-	datashards, parshards := config.DataShards, config.ParShards
+	datashards, parshards := chain.DataShards, chain.ParShards
 
 	enc, err := reedsolomon.New(datashards, parshards)
 	if err != nil {

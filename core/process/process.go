@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 
 	"github.com/CESSProject/cess-go-sdk/chain"
-	"github.com/CESSProject/cess-go-sdk/config"
 	"github.com/CESSProject/cess-go-sdk/core/crypte"
 	"github.com/CESSProject/cess-go-sdk/core/erasure"
 	"github.com/CESSProject/cess-go-sdk/core/hashtree"
@@ -46,13 +45,13 @@ func FillAndCut(file string, saveDir string) ([]string, error) {
 		return nil, errors.Wrap(err, "FillingAndCutting")
 	}
 
-	segmentCount := fstat.Size() / config.SegmentSize
-	if fstat.Size()%int64(config.SegmentSize) != 0 {
+	segmentCount := fstat.Size() / chain.SegmentSize
+	if fstat.Size()%int64(chain.SegmentSize) != 0 {
 		segmentCount++
 	}
 
 	segment := make([]string, segmentCount)
-	buf := make([]byte, config.SegmentSize)
+	buf := make([]byte, chain.SegmentSize)
 	f, err := os.Open(file)
 	if err != nil {
 		return segment, errors.Wrap(err, "FillingAndCutting")
@@ -61,7 +60,7 @@ func FillAndCut(file string, saveDir string) ([]string, error) {
 
 	var num int
 	for i := int64(0); i < segmentCount; i++ {
-		f.Seek(config.SegmentSize*i, 0)
+		f.Seek(chain.SegmentSize*i, 0)
 		num, err = f.Read(buf)
 		if err != nil && err != io.EOF {
 			return segment, err
@@ -69,11 +68,11 @@ func FillAndCut(file string, saveDir string) ([]string, error) {
 		if num == 0 {
 			return segment, errors.New("read file is empty")
 		}
-		if num < config.SegmentSize {
+		if num < chain.SegmentSize {
 			if i+1 != segmentCount {
 				return segment, errors.New("read file failed")
 			}
-			copy(buf[num:], make([]byte, config.SegmentSize-num))
+			copy(buf[num:], make([]byte, chain.SegmentSize-num))
 		}
 		hash, err := utils.CalcSHA256(buf)
 		if err != nil {
@@ -114,7 +113,7 @@ func FillAndCutWithAESEncryption(file string, cipher string, saveDir string) ([]
 		return nil, errors.Wrap(err, "FillAndCutWithEncryption")
 	}
 
-	segmentSize := config.SegmentSize - 16
+	segmentSize := chain.SegmentSize - 16
 	segmentCount := fstat.Size() / int64(segmentSize)
 	if fstat.Size()%int64(segmentSize) != 0 {
 		segmentCount++
