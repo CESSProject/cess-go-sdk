@@ -49,8 +49,6 @@ var globalTransport = &http.Transport{
 //
 // Explanation:
 //   - Account refers to the account where you configured mnemonic when creating an SDK.
-//   - CESS public gateway address: [https://deoss-pub-gateway.cess.network/]
-//   - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
 func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
@@ -166,8 +164,6 @@ func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 //
 // Explanation:
 //   - Account refers to the account where you configured mnemonic when creating an SDK.
-//   - CESS public gateway address: [https://deoss-pub-gateway.cess.network/]
-//   - CESS public gateway account: [cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9]
 func StoreObject(url string, bucket, territory, mnemonic string, reader io.Reader) (string, error) {
 	if !chain.CheckBucketName(bucket) {
 		return "", errors.New("invalid bucket name")

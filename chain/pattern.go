@@ -40,6 +40,8 @@ const (
 	SIZE_1GiB = 1024 * SIZE_1MiB
 	SIZE_1TiB = 1024 * SIZE_1GiB
 
+	NumberOfDataCopies = 3
+
 	SegmentSize  = 32 * SIZE_1MiB
 	FragmentSize = 8 * SIZE_1MiB
 	DataShards   = 4
