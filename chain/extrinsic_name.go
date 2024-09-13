@@ -199,12 +199,13 @@ const (
 	ExtName_Multisig_cancel_as_multi     = "Multisig.cancel_as_multi"
 
 	// Oss
-	ExtName_Oss_authorize        = "Oss.authorize"
-	ExtName_Oss_cancel_authorize = "Oss.cancel_authorize"
-	ExtName_Oss_destroy          = "Oss.destroy"
-	ExtName_Oss_proxy_authorzie  = "Oss.proxy_authorzie"
-	ExtName_Oss_register         = "Oss.register"
-	ExtName_Oss_update           = "Oss.update"
+	ExtName_Oss_authorize           = "Oss.authorize"
+	ExtName_Oss_cancel_authorize    = "Oss.cancel_authorize"
+	ExtName_Oss_destroy             = "Oss.destroy"
+	ExtName_Oss_evm_proxy_authorzie = "Oss.evm_proxy_authorzie"
+	ExtName_Oss_proxy_authorzie     = "Oss.proxy_authorzie"
+	ExtName_Oss_register            = "Oss.register"
+	ExtName_Oss_update              = "Oss.update"
 
 	// Parameters
 	ExtName_Parameters_set_parameter = "Parameters.set_parameter"
@@ -1210,6 +1211,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Oss_destroy); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Oss_destroy
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Oss_evm_proxy_authorzie); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Oss_evm_proxy_authorzie
 	} else {
 		return err
 	}
