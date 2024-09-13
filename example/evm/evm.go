@@ -69,7 +69,7 @@ func main() {
 	fmt.Printf("%s", block_hash)
 }
 
-func NewSDK() (*chain.ChainClient, error) {
+func NewSDK() (chain.Chainer, error) {
 	return cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),

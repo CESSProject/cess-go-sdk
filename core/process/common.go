@@ -5,4 +5,10 @@
 	SPDX-License-Identifier: Apache-2.0
 */
 
-package utils
+package process
+
+type RespType struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Data any    `json:"data"`
+}

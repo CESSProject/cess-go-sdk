@@ -34,6 +34,28 @@ const BlockInterval = time.Second * time.Duration(BlockIntervalSec)
 
 const TreasuryAccount = "cXhT9Xh3DhrBMDmXcGeMPDmTzDm1J8vDxBtKvogV33pPshnWS"
 
+const (
+	SIZE_1KiB = 1024
+	SIZE_1MiB = 1024 * SIZE_1KiB
+	SIZE_1GiB = 1024 * SIZE_1MiB
+	SIZE_1TiB = 1024 * SIZE_1GiB
+
+	NumberOfDataCopies = 3
+
+	SegmentSize  = 32 * SIZE_1MiB
+	FragmentSize = 8 * SIZE_1MiB
+	DataShards   = 4
+	ParShards    = 8
+)
+
+const (
+	MinBucketNameLength uint8 = 3
+	MaxBucketNameLength uint8 = 63
+	MaxDomainNameLength uint8 = 100
+)
+
+const ZeroFileHash_8M string = "2daeb1f36095b44b318410b3f4e8b5d989dcc7bb023d1426c492dab0a3053e74"
+
 // pallet names
 const (
 	// Audit

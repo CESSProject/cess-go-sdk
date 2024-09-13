@@ -20,6 +20,8 @@ type Chainer interface {
 	QueryCountedServiceFailed(accountID []byte, block int32) (uint32, error)
 	SubmitIdleProof(idleProof []types.U8) (string, error)
 	SubmitServiceProof(serviceProof []types.U8) (string, error)
+	SubmitVerifyIdleResult(totalProofHash []types.U8, front, rear types.U64, accumulator Accumulator, result types.Bool, sig types.Bytes, teePuk WorkerPublicKey) (string, error)
+	SubmitVerifyServiceResult(result types.Bool, sign types.Bytes, bloomFilter BloomFilter, teePuk WorkerPublicKey) (string, error)
 
 	// Babe
 	QueryAuthorities(block int32) ([]ConsensusRrscAppPublic, error)
@@ -92,10 +94,10 @@ type Chainer interface {
 	MinerWithdraw() (string, error)
 	ReceiveReward() (string, string, error)
 	RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
-	RegnstkSminer(earnings string, peerId []byte, staking uint64, tibCount uint32) (string, error)
+	RegnstkSminer(earnings string, addr []byte, staking uint64, tibCount uint32) (string, error)
 	RegnstkAssignStaking(earnings string, peerId []byte, stakingAcc string, tibCount uint32) (string, error)
 	UpdateBeneficiary(earnings string) (string, error)
-	UpdateSminerPeerId(peerid PeerId) (string, error)
+	UpdateSminerAddr(addr []byte) (string, error)
 
 	// Staking
 	QueryCounterForValidators(block int32) (uint32, error)

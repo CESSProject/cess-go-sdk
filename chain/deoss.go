@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/CESSProject/cess-go-sdk/config"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
@@ -523,8 +522,8 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 		peerid[i] = types.U8(peerId[i])
 	}
 
-	if len(domain) > config.MaxDomainNameLength {
-		return blockhash, fmt.Errorf("register deoss: Domain name length cannot exceed %v characters", config.MaxDomainNameLength)
+	if len(domain) > int(MaxDomainNameLength) {
+		return blockhash, fmt.Errorf("register deoss: Domain name length cannot exceed %v characters", MaxDomainNameLength)
 	}
 
 	err := utils.CheckDomain(domain)
@@ -658,8 +657,8 @@ func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
 		peerid[i] = types.U8(peerId[i])
 	}
 
-	if len(domain) > config.MaxDomainNameLength {
-		return blockhash, fmt.Errorf("update oss: domain name length cannot exceed %v", config.MaxDomainNameLength)
+	if len(domain) > int(MaxDomainNameLength) {
+		return blockhash, fmt.Errorf("update oss: domain name length cannot exceed %v", MaxDomainNameLength)
 	}
 
 	err := utils.CheckDomain(domain)
