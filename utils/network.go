@@ -66,7 +66,7 @@ func IsPortInUse(port int) bool {
 
 // CheckDomain returns an error if the domain name is not valid.
 // See https://tools.ietf.org/html/rfc1034#section-3.5 and
-// https://tools.ietf.org/html/rfc1123#section-2.
+// https://tools.ietf.org/html/rfc1123#section-2
 func CheckDomain(name string) error {
 	name = strings.TrimPrefix(name, "http://")
 	name = strings.TrimPrefix(name, "https://")

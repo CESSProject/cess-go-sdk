@@ -10,6 +10,7 @@ package process
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -62,6 +63,7 @@ func StoreFileToMiners(file string, mnemonic string, territory string, bucket st
 	if err != nil {
 		return "", err
 	}
+
 	defer func() {
 		os.RemoveAll(cacheDir)
 	}()
@@ -81,29 +83,84 @@ func StoreFileToMiners(file string, mnemonic string, territory string, bucket st
 	}
 	defer cli.Close()
 
+	err = cli.InitExtrinsicsName()
+	if err != nil {
+		return fid, err
+	}
+
 	err = CheckAccount(cli, territory, size)
 	if err != nil {
 		return fid, err
 	}
-
-	_, err = cli.PlaceStorageOrder(fid, filepath.Base(file), bucket, territory, segmentInfo, cli.GetSignatureAccPulickey(), uint64(size))
+	var fragmentGroup = make([][]string, 0)
+	var sucMiner = make([]string, 0)
+	fmeta, err := cli.QueryFile(fid, -1)
 	if err != nil {
-		return fid, err
-	}
-
-	segmentlength := len(segmentInfo)
-	var fragmentGroup = make([][]string, chain.DataShards+chain.ParShards)
-	for j := 0; j < chain.DataShards+chain.ParShards; j++ {
-		fragmentGroup[j] = make([]string, segmentlength)
-		for i := 0; i < segmentlength; i++ {
-			fragmentGroup[j][i] = segmentInfo[i].FragmentHash[j]
+		if !errors.Is(err, chain.ERR_RPC_EMPTY_VALUE) {
+			return fid, err
 		}
+		dealmap, err := cli.QueryDealMap(fid, -1)
+		if err != nil {
+			if !errors.Is(err, chain.ERR_RPC_EMPTY_VALUE) {
+				return fid, err
+			}
+			_, err = cli.PlaceStorageOrder(fid, filepath.Base(file), bucket, territory, segmentInfo, cli.GetSignatureAccPulickey(), uint64(size))
+			if err != nil {
+				return fid, err
+			}
+			segmentlength := len(segmentInfo)
+			fragmentGroup = make([][]string, chain.DataShards+chain.ParShards)
+			for j := 0; j < chain.DataShards+chain.ParShards; j++ {
+				fragmentGroup[j] = make([]string, segmentlength)
+				for i := 0; i < segmentlength; i++ {
+					fragmentGroup[j][i] = segmentInfo[i].FragmentHash[j]
+				}
+			}
+		} else {
+			for i := 0; i < len(dealmap.CompleteList); i++ {
+				acc, _ := utils.EncodePublicKeyAsCessAccount(dealmap.CompleteList[i].Miner[:])
+				sucMiner = append(sucMiner, acc)
+			}
+			flag := false
+			for j := 0; j < chain.DataShards+chain.ParShards; j++ {
+				flag = false
+				for i := 0; i < len(dealmap.CompleteList); i++ {
+					if j+1 == int(dealmap.CompleteList[i].Index) {
+						flag = true
+						break
+					}
+				}
+				if flag {
+					continue
+				}
+				data := make([]string, 0)
+				for i := 0; i < len(segmentInfo); i++ {
+					data = append(data, segmentInfo[i].FragmentHash[j])
+				}
+				fragmentGroup = append(fragmentGroup, data)
+			}
+		}
+	} else {
+		flag := false
+		for _, v := range fmeta.Owner {
+			if utils.CompareSlice(v.User[:], cli.GetSignatureAccPulickey()) {
+				flag = true
+				break
+			}
+		}
+		if !flag {
+			_, err = cli.PlaceStorageOrder(fid, filepath.Base(file), bucket, territory, segmentInfo, cli.GetSignatureAccPulickey(), uint64(size))
+			if err != nil {
+				return fid, err
+			}
+		}
+		return fid, nil
 	}
 
 	if len(wantMiner) >= (chain.DataShards + chain.ParShards) {
-		return fid, StoreToAllDesignatedMiners(cli, fragmentGroup, fid, wantMiner)
+		return fid, StoreToAllDesignatedMiners(cli, fragmentGroup, fid, sucMiner, wantMiner)
 	}
-	err = StorageToMiners(cli, fragmentGroup, fid, wantMiner)
+	err = StorageToMiners(cli, fragmentGroup, fid, sucMiner, wantMiner)
 	return fid, err
 }
 
@@ -120,8 +177,8 @@ func StoreFileToMiners(file string, mnemonic string, territory string, bucket st
 //
 // Preconditions:
 //  1. the file to be downloaded needs to have been stored in the miner
-func RetrieveFileFromMiners(rpcs []string, fid string, cipher, savedir string) error {
-	cli, err := chain.NewChainClient(context.Background(), "", rpcs, "", 0)
+func RetrieveFileFromMiners(rpcs []string, mnemonic, fid, cipher, savedir string) error {
+	cli, err := chain.NewChainClient(context.Background(), "", rpcs, mnemonic, 0)
 	if err != nil {
 		return err
 	}
@@ -134,6 +191,7 @@ func RetrieveFileFromMiners(rpcs []string, fid string, cipher, savedir string) e
 		}
 		return err
 	}
+	fmt.Println("will retrieve file: ", fid)
 	_, err = Retrievefile(cli, metaInfo, fid, savedir, cipher)
 	return err
 }
@@ -161,53 +219,12 @@ func Retrievefile(cli chain.Chainer, fmeta chain.FileMetadata, fid, savedir, cip
 	}(savedir)
 
 	var segmentspath = make([]string, 0)
-	fragmentpaths := make([]string, chain.DataShards+chain.ParShards)
-
 	for _, segment := range fmeta.SegmentList {
-		for k, fragment := range segment.FragmentList {
-			fragmentpath := filepath.Join(savedir, string(fragment.Hash[:]))
-			fragmentpaths[k] = fragmentpath
-			if string(fragment.Hash[:]) != chain.ZeroFileHash_8M {
-				account, err := utils.EncodePublicKeyAsCessAccount(fragment.Miner[:])
-				if err != nil {
-					return userfile, err
-				}
-				buf, err := DownloadFragmentFromMiner(cli, fragment.Miner[:], fid, string(fragment.Hash[:]))
-				if err != nil {
-					return userfile, fmt.Errorf("download from [%s] failed: %v", account, err)
-				}
-				err = utils.WriteBufToFile(buf, fragmentpath)
-				if err != nil {
-					return userfile, err
-				}
-			} else {
-				_, err = os.Stat(fragmentpath)
-				if err != nil {
-					ff, err := os.Create(fragmentpath)
-					if err != nil {
-						return userfile, err
-					}
-					_, err = ff.Write(make([]byte, chain.FragmentSize))
-					if err != nil {
-						return userfile, err
-					}
-					err = ff.Sync()
-					if err != nil {
-						return userfile, err
-					}
-					err = ff.Close()
-					if err != nil {
-						return userfile, err
-					}
-				}
-			}
-		}
-		segmentpath := filepath.Join(savedir, string(segment.Hash[:]))
-		err = erasure.RSRestore(segmentpath, fragmentpaths)
+		spath, err := DownloadSegment(cli, savedir, fid, string(segment.Hash[:]), segment.FragmentList, fmeta.FileSize.Uint64())
 		if err != nil {
-			return "", err
+			return "", errors.New("download failed")
 		}
-		segmentspath = append(segmentspath, segmentpath)
+		segmentspath = append(segmentspath, spath)
 	}
 
 	if len(segmentspath) != len(fmeta.SegmentList) {
@@ -252,18 +269,118 @@ func Retrievefile(cli chain.Chainer, fmeta chain.FileMetadata, fid, savedir, cip
 	return userfile, err
 }
 
-func DownloadFragmentFromMiner(cli chain.Chainer, minerpuk []byte, fid, fragment string) ([]byte, error) {
+func DownloadSegment(cli chain.Chainer, savedir string, fid, segmentHash string, fragments []chain.FragmentInfo, size uint64) (string, error) {
+	var err error
+	var fragmenthash string
+	var zeroFragmentPath = filepath.Join(savedir, chain.ZeroFileHash_8M)
+	var segmentpath = filepath.Join(savedir, segmentHash)
+	var fragmentspath = make([]string, 0)
+
+	for _, fragment := range fragments {
+		if string(fragment.Hash[:]) == chain.ZeroFileHash_8M {
+			fstat, err := os.Stat(zeroFragmentPath)
+			if err != nil {
+				err = utils.WriteBufToFile(make([]byte, chain.FragmentSize), zeroFragmentPath)
+				if err != nil {
+					return segmentpath, err
+				}
+			} else {
+				if fstat.Size() != chain.FragmentSize {
+					err = utils.WriteBufToFile(make([]byte, chain.FragmentSize), zeroFragmentPath)
+					if err != nil {
+						return segmentpath, err
+					}
+				}
+			}
+			break
+		}
+	}
+
+	var end uint64
+	for k, fragment := range fragments {
+		if len(fragmentspath) >= chain.DataShards {
+			break
+		}
+		end = 0
+		fragmenthash = string(fragment.Hash[:])
+		fragmentpath := filepath.Join(savedir, fragmenthash)
+		fmt.Println("fragment path: ", fragmentpath)
+		if fragmenthash != chain.ZeroFileHash_8M {
+			fstat, err := os.Stat(fragmentpath)
+			if err == nil {
+				if fstat.Size() == chain.FragmentSize {
+					fragmentspath = append(fragmentspath, fragmentpath)
+					continue
+				}
+			}
+
+			account, err := utils.EncodePublicKeyAsCessAccount(fragment.Miner[:])
+			if err != nil {
+				return segmentpath, err
+			}
+			fmt.Println("will download from miner: ", account)
+			if k < chain.DataShards {
+				switch k {
+				case 0:
+					if size < chain.FragmentSize {
+						end = size
+					}
+				case 1:
+					if size < chain.FragmentSize*2 {
+						end = size - chain.FragmentSize
+					}
+				case 2:
+					if size < chain.FragmentSize*3 {
+						end = size - chain.FragmentSize*2
+					}
+				case 3:
+					if size < chain.SegmentSize {
+						end = size - chain.FragmentSize*3
+					}
+				}
+			}
+
+			buf, err := DownloadFragmentFromMiner(cli, fragment.Miner[:], fid, string(fragment.Hash[:]), 0, end)
+			if err != nil {
+				return segmentpath, fmt.Errorf("download from [%s] failed: %v", account, err)
+			}
+
+			if end > 0 {
+				buf = append(buf, make([]byte, chain.FragmentSize-end)...)
+			}
+			err = utils.WriteBufToFile(buf[:chain.FragmentSize], fragmentpath)
+			if err != nil {
+				return segmentpath, err
+			}
+			fragmentspath = append(fragmentspath, fragmentpath)
+		} else {
+			fragmentspath = append(fragmentspath, zeroFragmentPath)
+		}
+	}
+
+	err = erasure.RSRestore(segmentpath, fragmentspath)
+	return segmentpath, err
+}
+
+func DownloadFragmentFromMiner(cli chain.Chainer, minerpuk []byte, fid, fragment string, start, end uint64) ([]byte, error) {
 	minerInfo, err := cli.QueryMinerItems(minerpuk, -1)
 	if err != nil {
 		return nil, err
 	}
 
-	url := string(minerInfo.PeerId[:])
+	tmp := strings.Split(string(minerInfo.PeerId[:]), "\x00")
+	if len(tmp) < 1 {
+		return nil, errors.New("invalid addr")
+	}
 
+	url := tmp[0]
 	if strings.HasSuffix(url, "/") {
 		url = url + "fragment"
 	} else {
 		url = url + "/fragment"
+	}
+	if !strings.HasPrefix(url, "http://") {
+		url = "http://" + url
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -276,11 +393,16 @@ func DownloadFragmentFromMiner(cli chain.Chainer, minerpuk []byte, fid, fragment
 	if err != nil {
 		return nil, fmt.Errorf("[SignedSR25519WithMnemonic] %v", err)
 	}
+
+	if start < end && end < chain.FragmentSize && end > 0 {
+		req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d/%d", start, end, chain.FragmentSize))
+	}
+
 	req.Header.Set("Fid", fid)
 	req.Header.Set("Fragment", fragment)
 	req.Header.Set("Account", cli.GetSignatureAcc())
 	req.Header.Set("Message", message)
-	req.Header.Set("Signature", string(sig))
+	req.Header.Set("Signature", hex.EncodeToString(sig))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -291,21 +413,25 @@ func DownloadFragmentFromMiner(cli chain.Chainer, minerpuk []byte, fid, fragment
 	}
 	defer resp.Body.Close()
 
-	respbody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusPartialContent {
 		return nil, fmt.Errorf("failed code: %d", resp.StatusCode)
+	}
+	respbody, err := io.ReadAll(resp.Body)
+	if err != nil && err != io.EOF {
+		fmt.Println(err)
+		return nil, err
 	}
 	return respbody, nil
 }
 
-func StorageToMiners(cli chain.Chainer, fragmentGroup [][]string, fid string, wantMiner []string) error {
+func StorageToMiners(cli chain.Chainer, fragmentGroup [][]string, fid string, completedMiner, wantMiner []string) error {
 	var ok bool
 	var err error
-	var sucMiner = make(map[string]struct{}, 0)
+	var sucMiner = make(map[string]struct{}, 12)
+	for i := 0; i < len(completedMiner); i++ {
+		sucMiner[completedMiner[i]] = struct{}{}
+	}
+
 	for i := 0; i < len(wantMiner); i++ {
 		_, ok = sucMiner[wantMiner[i]]
 		if ok {
@@ -316,11 +442,11 @@ func StorageToMiners(cli chain.Chainer, fragmentGroup [][]string, fid string, wa
 			return fmt.Errorf("[%s] failed: %v\n", wantMiner[i], err)
 		}
 		sucMiner[wantMiner[i]] = struct{}{}
-		if (i + 1) >= (chain.DataShards + chain.ParShards) {
+		fragmentGroup = fragmentGroup[1:]
+		if len(fragmentGroup) == 0 {
 			return nil
 		}
 	}
-	fragmentGroup = fragmentGroup[len(wantMiner):]
 
 	allminers, err := cli.QueryAllMiner(-1)
 	if err != nil {
@@ -349,13 +475,17 @@ func StorageToMiners(cli chain.Chainer, fragmentGroup [][]string, fid string, wa
 	return errors.New("storage failed")
 }
 
-func StoreToAllDesignatedMiners(cli chain.Chainer, fragmentGroup [][]string, fid string, wantMiner []string) error {
+func StoreToAllDesignatedMiners(cli chain.Chainer, fragmentGroup [][]string, fid string, completedMiner, wantMiner []string) error {
 	var ok bool
 	var err error
 	var rntMsg string
-	var sucMiner = make(map[string]struct{}, 0)
+	var sucMiner = make(map[string]struct{}, 12)
+	for i := 0; i < len(completedMiner); i++ {
+		sucMiner[completedMiner[i]] = struct{}{}
+	}
+
 	minerlength := len(wantMiner)
-	for i := 0; i < chain.DataShards+chain.ParShards; i++ {
+	for i := 0; i < len(fragmentGroup); i++ {
 		for j := 0; j < minerlength; j++ {
 			_, ok = sucMiner[wantMiner[j]]
 			if ok {
@@ -364,10 +494,11 @@ func StoreToAllDesignatedMiners(cli chain.Chainer, fragmentGroup [][]string, fid
 			err = StoreBatchFragmentsToMiner(cli, fragmentGroup[i], fid, wantMiner[j])
 			if err != nil {
 				rntMsg += fmt.Sprintf("[%s] failed: %v\n", wantMiner[j], err)
-			} else {
-				sucMiner[wantMiner[j]] = struct{}{}
-				rntMsg += fmt.Sprintf("[%s] suc\n", wantMiner[j])
+				continue
 			}
+			sucMiner[wantMiner[j]] = struct{}{}
+			rntMsg += fmt.Sprintf("[%s] suc\n", wantMiner[j])
+			break
 		}
 	}
 	if len(sucMiner) == chain.DataShards+chain.ParShards {
@@ -377,20 +508,25 @@ func StoreToAllDesignatedMiners(cli chain.Chainer, fragmentGroup [][]string, fid
 }
 
 func StoreBatchFragmentsToMiner(cli chain.Chainer, fragments []string, fid, account string) error {
+	fmt.Println("will upload to miner: ", account)
 	puk, err := utils.ParsingPublickey(account)
 	if err != nil {
+		fmt.Println("ParsingPublickey: ", err)
 		return err
 	}
 	minerInfo, err := cli.QueryMinerItems(puk, -1)
 	if err != nil {
+		fmt.Println("QueryMinerItems: ", err)
 		return err
 	}
 
 	if string(minerInfo.State) != chain.MINER_STATE_POSITIVE {
+		fmt.Println("not positive state")
 		return errors.New("not positive state")
 	}
 
 	if minerInfo.IdleSpace.Uint64() < uint64(len(fragments)*chain.FragmentSize) {
+		fmt.Println("insufficient space")
 		return errors.New("insufficient space")
 	}
 
@@ -398,13 +534,14 @@ func StoreBatchFragmentsToMiner(cli chain.Chainer, fragments []string, fid, acco
 	for i := 0; i < length; i++ {
 		err = UploadFragmentToMiner(cli, string(minerInfo.PeerId[:]), fid, fragments[i])
 		if err != nil {
+			fmt.Println("UploadFragmentToMiner: ", err)
 			return err
 		}
 	}
 	return nil
 }
 
-func UploadFragmentToMiner(cli chain.Chainer, ip string, fid string, file string) error {
+func UploadFragmentToMiner(cli chain.Chainer, addr string, fid string, file string) error {
 	message := utils.GetRandomcode(16)
 	sig, err := utils.SignedSR25519WithMnemonic(cli.GetURI(), message)
 	if err != nil {
@@ -417,7 +554,6 @@ func UploadFragmentToMiner(cli chain.Chainer, ip string, fid string, file string
 	if err != nil {
 		return err
 	}
-
 	fd, err := os.Open(file)
 	if err != nil {
 		return err
@@ -432,22 +568,29 @@ func UploadFragmentToMiner(cli chain.Chainer, ip string, fid string, file string
 	if err != nil {
 		return err
 	}
-	url := ip
+	tmp := strings.Split(addr, "\x00")
+	if len(tmp) < 1 {
+		return errors.New("invalid addr")
+	}
+	url := tmp[0]
 	if strings.HasSuffix(url, "/") {
 		url = url + "fragment"
 	} else {
 		url = url + "/fragment"
 	}
-
+	if !strings.HasPrefix(url, "http://") {
+		url = "http://" + url
+	}
 	req, err := http.NewRequest(http.MethodPut, url, body)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Fid", fid)
+	req.Header.Set("Fragment", filepath.Base(file))
 	req.Header.Set("Account", cli.GetSignatureAcc())
 	req.Header.Set("Message", message)
-	req.Header.Set("Signature", string(sig))
+	req.Header.Set("Signature", hex.EncodeToString(sig))
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	client := &http.Client{}

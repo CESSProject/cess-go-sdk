@@ -46,6 +46,7 @@ const (
 	FragmentSize = 8 * SIZE_1MiB
 	DataShards   = 4
 	ParShards    = 8
+	TotalShards  = DataShards + ParShards
 )
 
 const (

@@ -526,11 +526,6 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 		return blockhash, fmt.Errorf("register deoss: Domain name length cannot exceed %v characters", MaxDomainNameLength)
 	}
 
-	err := utils.CheckDomain(domain)
-	if err != nil {
-		return blockhash, errors.New("register oss: invalid domain")
-	}
-
 	call, err := types.NewCall(c.metadata, ExtName_Oss_register, peerid, types.NewBytes([]byte(domain)))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
@@ -659,11 +654,6 @@ func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
 
 	if len(domain) > int(MaxDomainNameLength) {
 		return blockhash, fmt.Errorf("update oss: domain name length cannot exceed %v", MaxDomainNameLength)
-	}
-
-	err := utils.CheckDomain(domain)
-	if err != nil {
-		return blockhash, errors.New("update oss: invalid domain name")
 	}
 
 	call, err := types.NewCall(c.metadata, ExtName_Oss_update, peerid, types.NewBytes([]byte(domain)))

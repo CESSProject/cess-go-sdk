@@ -15,8 +15,9 @@ import (
 
 // Substrate well-known mnemonic:
 //
-//	https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
-var MY_MNEMONIC = "head achieve piano online exhaust bulk trust vote inflict room keen maximum"
+//   - cXgaee2N8E77JJv9gdsGAckv1Qsf3hqWYf7NL4q6ZuQzuAUtB
+//   - https://github.com/substrate-developer-hub/substrate-developer-hub.github.io/issues/613
+var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
 
 var RPC_ADDRS = []string{
 	//testnet
@@ -24,7 +25,6 @@ var RPC_ADDRS = []string{
 }
 
 func main() {
-	// 1. new sdk
 	sdk, err := NewSDK()
 	if err != nil {
 		panic(err)
