@@ -237,9 +237,9 @@ var (
 )
 
 const (
-	FileHashLen            = 64
-	RandomLen              = 20
-	PeerIdPublicKeyLen     = 38
+	FileHashLen = 64
+	RandomLen   = 20
+	// PeerIdPublicKeyLen     = 38
 	PoISKeyLen             = 256
 	TeeSignatureLen        = 256
 	AccumulatorLen         = 256
@@ -256,7 +256,9 @@ const (
 
 type FileHash [FileHashLen]types.U8
 type Random [RandomLen]types.U8
-type PeerId [PeerIdPublicKeyLen]types.U8
+
+// type PeerId [PeerIdPublicKeyLen]types.U8
+
 type PoISKey_G [PoISKeyLen]types.U8
 type PoISKey_N [PoISKeyLen]types.U8
 type TeeSignature [TeeSignatureLen]types.U8
@@ -348,7 +350,7 @@ type BucketInfo struct {
 }
 
 type OssInfo struct {
-	Peerid PeerId
+	// Peerid PeerId
 	Domain types.Bytes
 }
 
@@ -430,7 +432,7 @@ type KeyOwnerParam struct {
 type MinerInfo struct {
 	BeneficiaryAccount types.AccountID
 	StakingAccount     types.AccountID
-	PeerId             PeerId
+	Endpoint           types.Bytes
 	Collaterals        types.U128
 	Debt               types.U128
 	State              types.Bytes // positive, exit, frozen, lock
@@ -458,17 +460,6 @@ type RewardOrder struct {
 	LastReceiveBlock types.U32
 }
 
-// StorageHandler
-// type UserSpaceInfo struct {
-// 	TotalSpace     types.U128
-// 	UsedSpace      types.U128
-// 	LockedSpace    types.U128
-// 	RemainingSpace types.U128
-// 	Start          types.U32
-// 	Deadline       types.U32
-// 	State          types.Bytes
-// }
-
 type TerritoryInfo struct {
 	Token          types.H256
 	TotalSpace     types.U128
@@ -479,16 +470,6 @@ type TerritoryInfo struct {
 	Deadline       types.U32
 	State          types.U8 //0: Active 1: Frozen 2: Expired 3: OnConsignment
 }
-
-// type OrderInfo struct {
-// 	TerritoryName [TerritoryKeyLen]types.U8
-// 	Pay           types.U128
-// 	GibCount      types.U32
-// 	Days          types.U32
-// 	Expired       types.U32
-// 	TargetAcc     types.AccountID
-// 	OrderType     types.U8
-// }
 
 type ConsignmentInfo struct {
 	User   types.AccountID

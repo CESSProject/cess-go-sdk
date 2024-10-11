@@ -34,12 +34,12 @@ type Chainer interface {
 	// Oss
 	QueryOss(accountID []byte, block int32) (OssInfo, error)
 	QueryAllOss(block int32) ([]OssInfo, error)
-	QueryAllOssPeerId(block int32) ([]string, error)
+	QueryAllOssDomain(block int32) ([]string, error)
 	QueryAuthorityList(accountID []byte, block int32) ([]types.AccountID, error)
 	Authorize(accountID []byte) (string, error)
 	CancelAuthorize(accountID []byte) (string, error)
-	RegisterOss(peerId []byte, domain string) (string, error)
-	UpdateOss(peerId string, domain string) (string, error)
+	RegisterOss(domain string) (string, error)
+	UpdateOss(domain string) (string, error)
 	DestroyOss() (string, error)
 
 	// EVM
@@ -94,10 +94,10 @@ type Chainer interface {
 	MinerWithdraw() (string, error)
 	ReceiveReward() (string, string, error)
 	RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
-	RegnstkSminer(earnings string, addr []byte, staking uint64, tibCount uint32) (string, error)
-	RegnstkAssignStaking(earnings string, peerId []byte, stakingAcc string, tibCount uint32) (string, error)
+	RegnstkSminer(earnings string, endpoint []byte, staking uint64, tibCount uint32) (string, error)
+	RegnstkAssignStaking(earnings string, endpoint []byte, stakingAcc string, tibCount uint32) (string, error)
 	UpdateBeneficiary(earnings string) (string, error)
-	UpdateSminerAddr(addr []byte) (string, error)
+	UpdateSminerEndpoint(endpoint []byte) (string, error)
 
 	// Staking
 	QueryCounterForValidators(block int32) (uint32, error)

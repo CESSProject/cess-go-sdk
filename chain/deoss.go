@@ -16,7 +16,6 @@ import (
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
-	"github.com/mr-tron/base58"
 	"github.com/pkg/errors"
 )
 
@@ -141,13 +140,13 @@ func (c *ChainClient) QueryAllOss(block int32) ([]OssInfo, error) {
 	return result, nil
 }
 
-// QueryAllOssPeerId query all oss's peer id
+// QueryAllOssDomain query all oss's domain name
 //   - block: block number, less than 0 indicates the latest block
 //
 // Return:
-//   - []string: all oss's peer id
+//   - []string: all oss's domain name
 //   - error: error message
-func (c *ChainClient) QueryAllOssPeerId(block int32) ([]string, error) {
+func (c *ChainClient) QueryAllOssDomain(block int32) ([]string, error) {
 	if !c.GetRpcState() {
 		err := c.ReconnectRpc()
 		if err != nil {
@@ -199,7 +198,7 @@ func (c *ChainClient) QueryAllOssPeerId(block int32) ([]string, error) {
 			if err := codec.Decode(change.StorageData, &data); err != nil {
 				continue
 			}
-			result = append(result, base58.Encode([]byte(string(data.Peerid[:]))))
+			result = append(result, string(data.Domain[:]))
 		}
 	}
 	return result, nil
@@ -500,7 +499,7 @@ func (c *ChainClient) CancelAuthorize(accountID []byte) (string, error) {
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) {
+func (c *ChainClient) RegisterOss(domain string) (string, error) {
 	<-c.tradeCh
 	defer func() {
 		c.tradeCh <- true
@@ -511,22 +510,14 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 
 	var (
 		blockhash   string
-		peerid      PeerId
 		accountInfo types.AccountInfo
 	)
-
-	if len(peerId) != PeerIdPublicKeyLen {
-		return blockhash, errors.New("register oss: invalid peerid")
-	}
-	for i := 0; i < len(peerid); i++ {
-		peerid[i] = types.U8(peerId[i])
-	}
 
 	if len(domain) > int(MaxDomainNameLength) {
 		return blockhash, fmt.Errorf("register deoss: Domain name length cannot exceed %v characters", MaxDomainNameLength)
 	}
 
-	call, err := types.NewCall(c.metadata, ExtName_Oss_register, peerid, types.NewBytes([]byte(domain)))
+	call, err := types.NewCall(c.metadata, ExtName_Oss_register, types.NewBytes([]byte(domain)))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
 		return blockhash, err
@@ -630,7 +621,7 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
+func (c *ChainClient) UpdateOss(domain string) (string, error) {
 	<-c.tradeCh
 	defer func() {
 		c.tradeCh <- true
@@ -641,22 +632,14 @@ func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
 
 	var (
 		blockhash   string
-		peerid      PeerId
 		accountInfo types.AccountInfo
 	)
-
-	if len(peerid) != len(peerId) {
-		return blockhash, errors.New("update oss: invalid peerid")
-	}
-	for i := 0; i < len(peerid); i++ {
-		peerid[i] = types.U8(peerId[i])
-	}
 
 	if len(domain) > int(MaxDomainNameLength) {
 		return blockhash, fmt.Errorf("update oss: domain name length cannot exceed %v", MaxDomainNameLength)
 	}
 
-	call, err := types.NewCall(c.metadata, ExtName_Oss_update, peerid, types.NewBytes([]byte(domain)))
+	call, err := types.NewCall(c.metadata, ExtName_Oss_update, types.NewBytes([]byte(domain)))
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
 		return blockhash, err

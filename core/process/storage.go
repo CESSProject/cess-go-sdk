@@ -368,18 +368,13 @@ func DownloadFragmentFromMiner(cli chain.Chainer, minerpuk []byte, fid, fragment
 		return nil, err
 	}
 
-	tmp := strings.Split(string(minerInfo.PeerId[:]), "\x00")
-	if len(tmp) < 1 {
-		return nil, errors.New("invalid addr")
-	}
-
-	url := tmp[0]
+	url := string(minerInfo.Endpoint[:])
 	if strings.HasSuffix(url, "/") {
 		url = url + "fragment"
 	} else {
 		url = url + "/fragment"
 	}
-	if !strings.HasPrefix(url, "http://") {
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = "http://" + url
 	}
 
@@ -532,7 +527,7 @@ func StoreBatchFragmentsToMiner(cli chain.Chainer, fragments []string, fid, acco
 
 	length := len(fragments)
 	for i := 0; i < length; i++ {
-		err = UploadFragmentToMiner(cli, string(minerInfo.PeerId[:]), fid, fragments[i])
+		err = UploadFragmentToMiner(cli, string(minerInfo.Endpoint[:]), fid, fragments[i])
 		if err != nil {
 			fmt.Println("UploadFragmentToMiner: ", err)
 			return err

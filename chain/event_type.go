@@ -130,14 +130,6 @@ type Event_UpdateBeneficiary struct {
 	Topics []types.Hash
 }
 
-type Event_UpdatePeerId struct {
-	Phase  types.Phase
-	Acc    types.AccountID
-	Old    PeerId
-	New    PeerId
-	Topics []types.Hash
-}
-
 type Event_Receive struct {
 	Phase  types.Phase
 	Acc    string
@@ -385,14 +377,14 @@ type Event_MinimumCesealVersionChangedTo struct {
 type Event_OssRegister struct {
 	Phase    types.Phase
 	Acc      types.AccountID
-	Endpoint PeerId
+	Endpoint types.Bytes
 	Topics   []types.Hash
 }
 
 type Event_OssUpdate struct {
 	Phase       types.Phase
 	Acc         types.AccountID
-	NewEndpoint PeerId
+	NewEndpoint types.Bytes
 	Topics      []types.Hash
 }
 
@@ -545,94 +537,3 @@ type AllDeleteFileEvent struct {
 	Owner    string
 	Filehash string
 }
-
-// // Events
-// type EventRecords struct {
-// 	// AUDIT
-// 	Audit_VerifyProof               []Event_VerifyProof
-// 	Audit_SubmitProof               []Event_SubmitProof
-// 	Audit_GenerateChallenge         []Event_GenerateChallenge
-// 	Audit_SubmitIdleProof           []Event_SubmitIdleProof
-// 	Audit_SubmitServiceProof        []Event_SubmitServiceProof
-// 	Audit_SubmitIdleVerifyResult    []Event_SubmitIdleVerifyResult
-// 	Audit_SubmitServiceVerifyResult []Event_SubmitServiceVerifyResult
-
-// 	// Cacher
-
-// 	// FILEBANK
-// 	FileBank_DeleteFile            []Event_DeleteFile
-// 	FileBank_FillerDelete          []Event_FillerDelete
-// 	FileBank_FillerUpload          []Event_FillerUpload
-// 	FileBank_UploadDeclaration     []Event_UploadDeclaration
-// 	FileBank_CreateBucket          []Event_CreateBucket
-// 	FileBank_DeleteBucket          []Event_DeleteBucket
-// 	FileBank_TransferReport        []Event_TransferReport
-// 	FileBank_ReplaceFiller         []Event_ReplaceFiller
-// 	FileBank_CalculateEnd          []Event_CalculateEnd
-// 	FileBank_GenerateRestoralOrder []Event_GenerateRestoralOrder
-// 	FileBank_ClaimRestoralOrder    []Event_ClaimRestoralOrder
-// 	FileBank_RecoveryCompleted     []Event_RecoveryCompleted
-// 	FileBank_StorageCompleted      []Event_StorageCompleted
-// 	FileBank_IdleSpaceCert         []Event_IdleSpaceCert
-// 	FileBank_ReplaceIdleSpace      []Event_ReplaceIdleSpace
-// 	FileBank_CalculateReport       []Event_CalculateReport
-
-// 	// OSS
-// 	Oss_Authorize       []Event_Authorize
-// 	Oss_CancelAuthorize []Event_CancelAuthorize
-// 	Oss_OssRegister     []Event_OssRegister
-// 	Oss_OssUpdate       []Event_OssUpdate
-// 	Oss_OssDestroy      []Event_OssDestroy
-
-// 	// SMINER
-// 	Sminer_Registered               []Event_Registered
-// 	Sminer_RegisterPoisKey          []Event_RegisterPoisKey
-// 	Sminer_DrawFaucetMoney          []Event_DrawFaucetMoney
-// 	Sminer_FaucetTopUpMoney         []Event_FaucetTopUpMoney
-// 	Sminer_LessThan24Hours          []Event_LessThan24Hours
-// 	Sminer_AlreadyFrozen            []Event_AlreadyFrozen
-// 	Sminer_IncreaseCollateral       []Event_IncreaseCollateral
-// 	Sminer_Deposit                  []Event_Deposit
-// 	Sminer_UpdateBeneficiary        []Event_UpdateBeneficiary
-// 	Sminer_UpdatePeerId             []Event_UpdatePeerId
-// 	Sminer_Receive                  []Event_Receive
-// 	Sminer_MinerExitPrep            []Event_MinerExitPrep
-// 	Sminer_Withdraw                 []Event_Withdraw
-// 	Sminer_IncreaseDeclarationSpace []Event_IncreaseDeclarationSpace
-
-// 	// StorageHandler
-// 	StorageHandler_BuySpace             []Event_BuySpace
-// 	StorageHandler_ExpansionSpace       []Event_ExpansionSpace
-// 	StorageHandler_RenewalSpace         []Event_RenewalSpace
-// 	StorageHandler_LeaseExpired         []Event_LeaseExpired
-// 	StorageHandler_LeaseExpireIn24Hours []Event_LeaseExpireIn24Hours
-
-// 	// TeeWorker
-// 	TeeWorker_Exit                          []Event_Exit
-// 	TeeWorker_MasterKeyLaunched             []Event_MasterKeyLaunched
-// 	TeeWorker_WorkerAdded                   []Event_WorkerAdded
-// 	TeeWorker_KeyfairyAdded                 []Event_KeyfairyAdded
-// 	TeeWorker_WorkerUpdated                 []Event_WorkerUpdated
-// 	TeeWorker_MasterKeyRotated              []Event_MasterKeyRotated
-// 	TeeWorker_MasterKeyRotationFailed       []Event_MasterKeyRotationFailed
-// 	TeeWorker_MinimumCesealVersionChangedTo []Event_MinimumCesealVersionChangedTo
-
-// 	// system - Staking
-// 	Balances_Locked []Event_Locked
-
-// 	// system - EvmAccountMapping
-// 	EvmAccountMapping_ServiceFeePaid     []Event_ServiceFeePaid
-// 	EvmAccountMapping_CallDone           []Event_CallDone
-// 	EvmAccountMapping_TransactionFeePaid []Event_TransactionFeePaid
-
-// 	// system - Staking
-// 	Staking_ValidatorPrefsSet []Event_ValidatorPrefsSet
-
-// 	// system - ElectionProviderMultiPhase
-// 	ElectionProviderMultiPhase_ElectionFinalized []Event_ElectionFinalized
-// 	ElectionProviderMultiPhase_PhaseTransitioned []Event_PhaseTransitioned
-// 	ElectionProviderMultiPhase_SolutionStored    []Event_SolutionStored
-
-// 	// system-gsrpc
-// 	types.EventRecords
-// }
