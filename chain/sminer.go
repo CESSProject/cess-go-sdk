@@ -1582,7 +1582,7 @@ func (c *ChainClient) RegnstkSminer(earnings string, addr []byte, staking uint64
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, stakingAcc string, tibCount uint32) (string, error) {
+func (c *ChainClient) RegnstkAssignStaking(earnings string, addr []byte, stakingAcc string, tibCount uint32) (string, error) {
 	<-c.tradeCh
 	defer func() {
 		c.tradeCh <- true
@@ -1597,12 +1597,12 @@ func (c *ChainClient) RegnstkAssignStaking(earnings string, peerId []byte, staki
 	)
 
 	var peerid PeerId
-	if len(peerId) != PeerIdPublicKeyLen {
-		return blockhash, fmt.Errorf("invalid peerid: %v", peerId)
+	if len(addr) > PeerIdPublicKeyLen {
+		return blockhash, fmt.Errorf("invalid addr: %v", addr)
 	}
 
 	for i := 0; i < len(peerid); i++ {
-		peerid[i] = types.U8(peerId[i])
+		peerid[i] = types.U8(addr[i])
 	}
 
 	pubkey, err := utils.ParsingPublickey(earnings)
