@@ -642,19 +642,19 @@ func (c *ChainClient) QueryCompleteSnapShot(era uint32, block int32) (uint32, ui
 	return uint32(data.MinerCount), data.TotalPower.Uint64(), nil
 }
 
-// QueryCompleteMinerSnapShot query CompleteMinerSnapShot
+// QueryCompleteMinerSnapShot query the completed challenge snapshots of miners
 //   - puk: account id
 //   - block: block number, less than 0 indicates the latest block
 //
 // Return:
-//   - MinerCompleteInfo: CompleteMinerSnapShot
+//   - []MinerCompleteInfo: list of completed challenge snapshots
 //   - error: error message
-func (c *ChainClient) QueryCompleteMinerSnapShot(puk []byte, block int32) (MinerCompleteInfo, error) {
+func (c *ChainClient) QueryCompleteMinerSnapShot(puk []byte, block int32) ([]MinerCompleteInfo, error) {
 	if !c.GetRpcState() {
 		err := c.ReconnectRpc()
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, CompleteMinerSnapShot, ERR_RPC_CONNECTION.Error())
-			return MinerCompleteInfo{}, err
+			return nil, err
 		}
 	}
 
@@ -664,14 +664,9 @@ func (c *ChainClient) QueryCompleteMinerSnapShot(puk []byte, block int32) (Miner
 		}
 	}()
 
-	var data MinerCompleteInfo
+	var data []MinerCompleteInfo
 
-	param, err := codec.Encode(puk)
-	if err != nil {
-		return data, err
-	}
-
-	key, err := types.CreateStorageKey(c.metadata, Sminer, CompleteMinerSnapShot, param)
+	key, err := types.CreateStorageKey(c.metadata, Sminer, CompleteMinerSnapShot, puk)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), Sminer, CompleteMinerSnapShot, err)
 		return data, err
