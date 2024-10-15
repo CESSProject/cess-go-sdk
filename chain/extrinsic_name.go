@@ -159,10 +159,10 @@ const (
 	ExtName_FileBank_cert_idle_space              = "FileBank.cert_idle_space"
 	ExtName_FileBank_claim_restoral_noexist_order = "FileBank.claim_restoral_noexist_order"
 	ExtName_FileBank_claim_restoral_order         = "FileBank.claim_restoral_order"
-	ExtName_FileBank_create_bucket                = "FileBank.create_bucket"
-	ExtName_FileBank_delete_bucket                = "FileBank.delete_bucket"
-	ExtName_FileBank_delete_file                  = "FileBank.delete_file"
-	ExtName_FileBank_generate_restoral_order      = "FileBank.generate_restoral_order"
+	//ExtName_FileBank_create_bucket                = "FileBank.create_bucket"
+	//ExtName_FileBank_delete_bucket                = "FileBank.delete_bucket"
+	ExtName_FileBank_delete_file             = "FileBank.delete_file"
+	ExtName_FileBank_generate_restoral_order = "FileBank.generate_restoral_order"
 	//ExtName_FileBank_ownership_transfer           = "FileBank.ownership_transfer"
 	ExtName_FileBank_replace_idle_space      = "FileBank.replace_idle_space"
 	ExtName_FileBank_restoral_order_complete = "FileBank.restoral_order_complete"
@@ -303,7 +303,7 @@ const (
 	ExtName_Sminer_set_facuet_whitelist       = "Sminer.set_facuet_whitelist"
 	ExtName_Sminer_update_beneficiary         = "Sminer.update_beneficiary"
 	ExtName_Sminer_update_expender            = "Sminer.update_expender"
-	ExtName_Sminer_update_peer_id             = "Sminer.update_peer_id"
+	ExtName_Sminer_update_endpoint            = "Sminer.update_endpoint"
 
 	// Staking
 	ExtName_Staking_bond                       = "Staking.bond"
@@ -1047,16 +1047,16 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_create_bucket); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_FileBank_create_bucket
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_delete_bucket); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_FileBank_delete_bucket
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_create_bucket); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_FileBank_create_bucket
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_delete_bucket); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_FileBank_delete_bucket
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_delete_file); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_FileBank_delete_file
 	} else {
@@ -1655,8 +1655,8 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_peer_id); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Sminer_update_peer_id
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_endpoint); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Sminer_update_endpoint
 	} else {
 		return err
 	}
@@ -2413,8 +2413,8 @@ func (c *ChainClient) InitExtrinsicsNameForMiner() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_peer_id); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Sminer_update_peer_id
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_endpoint); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Sminer_update_endpoint
 	} else {
 		return err
 	}
@@ -2440,16 +2440,6 @@ func (c *ChainClient) InitExtrinsicsNameForOSS() error {
 	ExtrinsicsName = make(map[types.CallIndex]string, 0)
 
 	// FileBank
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_create_bucket); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_FileBank_create_bucket
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_delete_bucket); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_FileBank_delete_bucket
-	} else {
-		return err
-	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_FileBank_delete_file); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_FileBank_delete_file
 	} else {

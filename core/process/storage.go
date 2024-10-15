@@ -35,7 +35,6 @@ import (
 //   - file: stored file
 //   - mnemonic: account mnemonic
 //   - territory: territory name
-//   - bucket: bucket name
 //   - timeout: timeout for waiting for block transaction to complete
 //   - rpcs: rpc address list
 //   - wantMiner: the wallet account of the miner you want to store. if it is empty, will be randomly selected.
@@ -48,14 +47,10 @@ import (
 //  1. your account needs to have money, and will be automatically created if the territory you specify does not exist.
 //  2. if the number of miners you specify is less than 12, file storage will be exited if even one fails.
 //  3. if the number of miners you specify is greater than 11, no other miners will be found for storage.
-func StoreFileToMiners(file string, mnemonic string, territory string, bucket string, timeout time.Duration, rpcs []string, wantMiner []string) (string, error) {
+func StoreFileToMiners(file string, mnemonic string, territory string, timeout time.Duration, rpcs []string, wantMiner []string) (string, error) {
 	size, err := CheckFile(file)
 	if err != nil {
 		return "", err
-	}
-
-	if !chain.CheckBucketName(bucket) {
-		return "", errors.New("invalid bucket name")
 	}
 
 	cacheDir := filepath.Join(filepath.Dir(file), fmt.Sprintf("%v", time.Now().UnixMilli()))
@@ -104,7 +99,7 @@ func StoreFileToMiners(file string, mnemonic string, territory string, bucket st
 			if !errors.Is(err, chain.ERR_RPC_EMPTY_VALUE) {
 				return fid, err
 			}
-			_, err = cli.PlaceStorageOrder(fid, filepath.Base(file), bucket, territory, segmentInfo, cli.GetSignatureAccPulickey(), uint64(size))
+			_, err = cli.PlaceStorageOrder(fid, filepath.Base(file), territory, segmentInfo, cli.GetSignatureAccPulickey(), uint64(size))
 			if err != nil {
 				return fid, err
 			}
@@ -149,7 +144,7 @@ func StoreFileToMiners(file string, mnemonic string, territory string, bucket st
 			}
 		}
 		if !flag {
-			_, err = cli.PlaceStorageOrder(fid, filepath.Base(file), bucket, territory, segmentInfo, cli.GetSignatureAccPulickey(), uint64(size))
+			_, err = cli.PlaceStorageOrder(fid, filepath.Base(file), territory, segmentInfo, cli.GetSignatureAccPulickey(), uint64(size))
 			if err != nil {
 				return fid, err
 			}

@@ -237,9 +237,9 @@ var (
 )
 
 const (
-	FileHashLen = 64
-	RandomLen   = 20
-	// PeerIdPublicKeyLen     = 38
+	FileHashLen            = 64
+	RandomLen              = 20
+	PeerIdPublicKeyLen     = 38
 	PoISKeyLen             = 256
 	TeeSignatureLen        = 256
 	AccumulatorLen         = 256
@@ -257,7 +257,7 @@ const (
 type FileHash [FileHashLen]types.U8
 type Random [RandomLen]types.U8
 
-// type PeerId [PeerIdPublicKeyLen]types.U8
+type PeerId [PeerIdPublicKeyLen]types.U8
 
 type PoISKey_G [PoISKeyLen]types.U8
 type PoISKey_N [PoISKeyLen]types.U8
@@ -350,7 +350,7 @@ type BucketInfo struct {
 }
 
 type OssInfo struct {
-	// Peerid PeerId
+	Peerid PeerId
 	Domain types.Bytes
 }
 
@@ -395,7 +395,6 @@ type FragmentInfo struct {
 type UserBrief struct {
 	User          types.AccountID
 	FileName      types.Bytes
-	BucketName    types.Bytes
 	TerriortyName types.Bytes
 }
 
@@ -698,8 +697,6 @@ type BlockData struct {
 	TransferInfo        []TransferInfo
 	UploadDecInfo       []UploadDecInfo
 	DeleteFileInfo      []DeleteFileInfo
-	CreateBucketInfo    []CreateBucketInfo
-	DeleteBucketInfo    []DeleteBucketInfo
 	SubmitIdleProve     []SubmitIdleProve
 	SubmitServiceProve  []SubmitServiceProve
 	SubmitIdleResult    []SubmitIdleResult
@@ -745,18 +742,6 @@ type DeleteFileInfo struct {
 type MinerRegInfo struct {
 	ExtrinsicHash string
 	Account       string
-}
-
-type CreateBucketInfo struct {
-	ExtrinsicHash string
-	Owner         string
-	BucketName    string
-}
-
-type DeleteBucketInfo struct {
-	ExtrinsicHash string
-	Owner         string
-	BucketName    string
 }
 
 type SubmitIdleProve struct {

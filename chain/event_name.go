@@ -55,7 +55,7 @@ const (
 	SminerIncreaseCollateral       = "Sminer.IncreaseCollateral"
 	SminerDeposit                  = "Sminer.Deposit"
 	SminerUpdateBeneficiary        = "Sminer.UpdateBeneficiary"
-	SminerUpdatePeerId             = "Sminer.UpdatePeerId"
+	SminerUpdateEndpoint           = "Sminer.UpdateEndPoint"
 	SminerReceive                  = "Sminer.Receive"
 	SminerMinerExitPrep            = "Sminer.MinerExitPrep"
 	SminerWithdraw                 = "Sminer.Withdraw"

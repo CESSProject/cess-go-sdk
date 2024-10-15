@@ -51,16 +51,6 @@ func main() {
 		fmt.Println("    Owner: ", v.Owner)
 		fmt.Println("    Fid: ", v.Fid)
 	}
-	fmt.Println("createBucketInfo:")
-	for _, v := range blockData.CreateBucketInfo {
-		fmt.Println("    Owner: ", v.Owner)
-		fmt.Println("    BucketName: ", v.BucketName)
-	}
-	fmt.Println("DeleteBucketInfo:")
-	for _, v := range blockData.DeleteBucketInfo {
-		fmt.Println("    Owner: ", v.Owner)
-		fmt.Println("    BucketName: ", v.BucketName)
-	}
 	fmt.Println("GenChallenge:")
 	for _, v := range blockData.GenChallenge {
 		fmt.Println("    GenChallenge miner: ", v)

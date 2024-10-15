@@ -13,7 +13,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/klauspost/reedsolomon v1.12.0
-	github.com/mr-tron/base58 v1.2.0
 	github.com/pixelbender/go-traceroute v0.0.0-20190414152342-e631ab553a80
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.39.0

@@ -25,7 +25,6 @@ var RPC_ADDRS = []string{
 }
 
 const UploadFile = "file_name"
-const BucketName = "bucket_name"
 const TerritoryName = "territory_name"
 
 var WantMiner = []string{}
@@ -35,7 +34,6 @@ func main() {
 		UploadFile,
 		MY_MNEMONIC,
 		TerritoryName,
-		BucketName,
 		time.Second*15,
 		RPC_ADDRS,
 		WantMiner,
