@@ -8,8 +8,6 @@
 package chain
 
 import (
-	"fmt"
-
 	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
 )
@@ -63,7 +61,6 @@ func (c *ChainClient) RetrieveEvent(blockhash types.Hash, extrinsic_name, event_
 			if !ok {
 				continue
 			}
-			fmt.Println("name: ", name)
 		}
 		if name != extrinsic_name {
 			if e.Name == SystemExtrinsicSuccess || e.Name == SystemExtrinsicFailed {
