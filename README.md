@@ -21,10 +21,6 @@ If you find any system errors or you have better suggestions, please submit an i
 ```
 wss://testnet-rpc.cess.network/ws/
 ```
-**CESS test network bootstrap node**
-```
-_dnsaddr.boot-miner-testnet.cess.network
-```
 
 ## 🚰 CESS test network faucet
 ```
