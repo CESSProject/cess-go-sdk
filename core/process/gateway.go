@@ -9,23 +9,19 @@ package process
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/pkg/errors"
 )
-
-var globalTransport = &http.Transport{
-	DisableKeepAlives: true,
-}
 
 // StoreFile stores files to the gateway
 //
@@ -40,12 +36,9 @@ var globalTransport = &http.Transport{
 //   - error: error message.
 //
 // Preconditions:
-//  1. Account requires purchasing space, refer to [BuySpace] interface.
+//  1. Account requires purchasing territory, refer to [MintTerritory] interface.
 //  2. Authorize the space usage rights of the account to the gateway account,
 //     refer to the [AuthorizeSpace] interface.
-//
-// Explanation:
-//   - Account refers to the account where you configured mnemonic when creating an SDK.
 func StoreFile(url, file, territory, mnemonic string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
@@ -132,7 +125,163 @@ func StoreFile(url, file, territory, mnemonic string) (string, error) {
 		return "", errors.New(fmt.Sprintf("upload failed, code: %d", resp.StatusCode))
 	}
 
-	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
+	var respValue RespType
+	err = json.Unmarshal(respbody, &respValue)
+	if err != nil {
+		return "", nil
+	}
+	reapdata, ok := respValue.Data.(map[string]string)
+	if !ok {
+		return "", nil
+	}
+	return reapdata["fid"], nil
+}
+
+// RangeUploadFast quickly upload a file using range request
+//
+// Receive parameter:
+//   - url: gateway url
+//   - file: upload file
+//   - territory: territory name
+//   - mnemonic: polkadot account mnemonic
+//   - start: starting position of file
+//   - rangeSize: range size
+//
+// Return parameter:
+//   - string: [fid] unique identifier for the file.
+//   - error: error message.
+//
+// Preconditions:
+//  1. Account requires purchasing territory, refer to [MintTerritory] interface.
+//  2. Authorize the space usage rights of the account to the gateway account,
+//     refer to the [AuthorizeSpace] interface.
+func RangeUploadFast(url, file, territory, mnemonic string, start int64, rangeSize int64) (string, error) {
+	fstat, err := os.Stat(file)
+	if err != nil {
+		return "", err
+	}
+	if fstat.IsDir() {
+		return "", errors.New("not a file")
+	}
+	if rangeSize <= 0 {
+		return "", errors.New("invalid range size")
+	}
+	totalSize := fstat.Size()
+	if totalSize <= 0 {
+		return "", errors.New("empty file")
+	}
+	var fid string
+
+	// sign message
+	keyringPair, err := signature.KeyringPairFromSecret(mnemonic, 0)
+	if err != nil {
+		return "", fmt.Errorf("[KeyringPairFromSecret] %v", err)
+	}
+	message := utils.GetRandomcode(16)
+	sig, err := utils.SignedSR25519WithMnemonic(keyringPair.URI, message)
+	if err != nil {
+		return "", fmt.Errorf("[SignedSR25519WithMnemonic] %v", err)
+	}
+	account, err := utils.EncodePublicKeyAsCessAccount(keyringPair.PublicKey)
+	if err != nil {
+		return "", err
+	}
+	for start := int64(0); start < totalSize; start += rangeSize {
+		fid, err = RangeUpload(url, file, territory, account, message, base58.Encode(sig[:]), start, rangeSize)
+		if err != nil {
+			return fid, err
+		}
+	}
+	return fid, nil
+}
+
+// RangeUpload upload a file using range request
+//
+// Receive parameter:
+//   - url: gateway url
+//   - file: upload file
+//   - territory: territory name
+//   - account: user account
+//   - msg: signed message
+//   - sign: signature
+//   - start: starting position of file
+//   - rangeSize: range size
+//
+// Return parameter:
+//   - string: [fid] unique identifier for the file.
+//   - error: error message.
+//
+// Preconditions:
+//  1. Account requires purchasing territory, refer to [MintTerritory] interface.
+//  2. Authorize the space usage rights of the account to the gateway account,
+//     refer to the [AuthorizeSpace] interface.
+func RangeUpload(url, file, territory, account, msg, sign string, start int64, rangeSize int64) (string, error) {
+	fd, err := os.Open(file)
+	if err != nil {
+		return "", fmt.Errorf("failed to open file: %v", err)
+	}
+	defer fd.Close()
+
+	fdStat, err := fd.Stat()
+	if err != nil {
+		return "", fmt.Errorf("failed to get stat: %v", err)
+	}
+
+	totalSize := fdStat.Size()
+	_, err = fd.Seek(start, 0)
+	if err != nil {
+		return "", fmt.Errorf("failed to seek file: %w", err)
+	}
+
+	end := start + rangeSize - 1
+	if end >= totalSize {
+		end = totalSize - 1
+	}
+	bytesToUpload := end - start + 1
+
+	req, err := http.NewRequest("PUT", url, io.LimitReader(fd, bytesToUpload))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", start, end, totalSize))
+	req.Header.Set("Content-Length", fmt.Sprintf("%d", bytesToUpload))
+	req.Header.Set("Territory", territory)
+	req.Header.Set("Account", account)
+	req.Header.Set("Message", msg)
+	req.Header.Set("Signature", sign)
+
+	client := &http.Client{}
+	client.Transport = globalTransport
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to upload chunk: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusPermanentRedirect {
+		fmt.Printf("Uploaded bytes %d-%d\n", start, end)
+		return "", nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("upload failed: %s", resp.Status)
+	}
+	buf, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", nil
+	}
+
+	var respValue RespType
+	err = json.Unmarshal(buf, &respValue)
+	if err != nil {
+		return "", nil
+	}
+	reapdata, ok := respValue.Data.(map[string]string)
+	if !ok {
+		return "", nil
+	}
+	return reapdata["fid"], nil
 }
 
 // StoreObject stores object to the gateway
@@ -151,9 +300,6 @@ func StoreFile(url, file, territory, mnemonic string) (string, error) {
 //  1. Account requires purchasing space, refer to [BuySpace] interface.
 //  2. Authorize the space usage rights of the account to the gateway account,
 //     refer to the [AuthorizeSpace] interface.
-//
-// Explanation:
-//   - Account refers to the account where you configured mnemonic when creating an SDK.
 func StoreObject(url string, territory, mnemonic string, reader io.Reader) (string, error) {
 	keyringPair, err := signature.KeyringPairFromSecret(mnemonic, 0)
 	if err != nil {
@@ -203,35 +349,47 @@ func StoreObject(url string, territory, mnemonic string, reader io.Reader) (stri
 		return "", errors.New(fmt.Sprintf("upload failed, code: %d", resp.StatusCode))
 	}
 
-	return strings.TrimPrefix(strings.TrimSuffix(string(respbody), "\""), "\""), nil
+	var respValue RespType
+	err = json.Unmarshal(respbody, &respValue)
+	if err != nil {
+		return "", nil
+	}
+	reapdata, ok := respValue.Data.(map[string]string)
+	if !ok {
+		return "", nil
+	}
+	return reapdata["fid"], nil
 }
 
 // RetrieveFile downloads files from the gateway
 //   - url: gateway url
-//   - fid: fid
 //   - mnemonic: polkadot account mnemonic
 //   - savepath: file save path
 //
 // Return:
-//   - string: fid
 //   - error: error message
-func RetrieveFile(url, fid, mnemonic, savepath string) error {
+func RetrieveFile(url, mnemonic, savepath string) error {
+	fid := filepath.Base(url)
 	fstat, err := os.Stat(savepath)
-	if err == nil {
+	if err != nil {
+		err = os.MkdirAll(savepath, 0755)
+		if err != nil {
+			return err
+		}
+	} else {
 		if fstat.IsDir() {
 			savepath = filepath.Join(savepath, fid)
+			fstat, err = os.Stat(savepath)
+			if err == nil {
+				if fstat.Size() > 0 {
+					return nil
+				}
+			}
+		} else {
+			if fstat.Size() > 0 {
+				return nil
+			}
 		}
-		if fstat.Size() > 0 {
-			return nil
-		}
-	}
-
-	if url == "" {
-		return errors.New("empty url")
-	}
-
-	if url[len(url)-1] != byte(47) {
-		url += "/"
 	}
 
 	f, err := os.Create(savepath)
@@ -240,7 +398,7 @@ func RetrieveFile(url, fid, mnemonic, savepath string) error {
 	}
 	defer f.Close()
 
-	req, err := http.NewRequest(http.MethodGet, url+fid, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err
 	}
@@ -265,7 +423,6 @@ func RetrieveFile(url, fid, mnemonic, savepath string) error {
 	req.Header.Set("Message", message)
 	req.Header.Set("Signature", base58.Encode(sig[:]))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Operation", "download")
 	req.Header.Set("Account", acc)
 
 	client := &http.Client{}
@@ -291,22 +448,17 @@ func RetrieveFile(url, fid, mnemonic, savepath string) error {
 
 // RetrieveObject gets the object from the gateway
 //   - url: gateway url
-//   - fid: fid
 //   - mnemonic: polkadot account mnemonic
 //
 // Return:
 //   - io.ReadCloser: object
 //   - error: error message
-func RetrieveObject(url, fid, mnemonic string) (io.ReadCloser, error) {
+func RetrieveObject(url, mnemonic string) (io.ReadCloser, error) {
 	if url == "" {
 		return nil, errors.New("empty url")
 	}
 
-	if url[len(url)-1] != byte(47) {
-		url += "/"
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url+fid, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -332,7 +484,6 @@ func RetrieveObject(url, fid, mnemonic string) (io.ReadCloser, error) {
 	req.Header.Set("Signature", base58.Encode(sig[:]))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Account", acc)
-	req.Header.Set("Operation", "download")
 
 	client := &http.Client{}
 	client.Transport = globalTransport

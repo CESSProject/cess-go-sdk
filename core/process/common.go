@@ -7,8 +7,14 @@
 
 package process
 
+import "net/http"
+
 type RespType struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 	Data any    `json:"data"`
+}
+
+var globalTransport = &http.Transport{
+	DisableKeepAlives: true,
 }
