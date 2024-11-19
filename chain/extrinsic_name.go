@@ -424,15 +424,15 @@ const (
 	ExtName_TransactionStorage_store       = "TransactionStorage.store"
 
 	// Treasury
-	ExtName_Treasury_approve_proposal = "Treasury.approve_proposal"
-	ExtName_Treasury_check_status     = "Treasury.check_status"
-	ExtName_Treasury_payout           = "Treasury.payout"
-	ExtName_Treasury_propose_spend    = "Treasury.propose_spend"
-	ExtName_Treasury_reject_proposal  = "Treasury.reject_proposal"
-	ExtName_Treasury_remove_approval  = "Treasury.remove_approval"
-	ExtName_Treasury_spend            = "Treasury.spend"
-	ExtName_Treasury_spend_local      = "Treasury.spend_local"
-	ExtName_Treasury_void_spend       = "Treasury.void_spend"
+	//ExtName_Treasury_approve_proposal = "Treasury.approve_proposal"
+	ExtName_Treasury_check_status = "Treasury.check_status"
+	ExtName_Treasury_payout       = "Treasury.payout"
+	//ExtName_Treasury_propose_spend   = "Treasury.propose_spend"
+	//ExtName_Treasury_reject_proposal = "Treasury.reject_proposal"
+	ExtName_Treasury_remove_approval = "Treasury.remove_approval"
+	ExtName_Treasury_spend           = "Treasury.spend"
+	ExtName_Treasury_spend_local     = "Treasury.spend_local"
+	ExtName_Treasury_void_spend      = "Treasury.void_spend"
 
 	// Utility
 	ExtName_Utility_as_derivative = "Utility.as_derivative"
@@ -2185,11 +2185,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// Treasury
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_approve_proposal); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Treasury_approve_proposal
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_approve_proposal); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Treasury_approve_proposal
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_check_status); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Treasury_check_status
 	} else {
@@ -2200,16 +2200,16 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_propose_spend); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Treasury_propose_spend
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_reject_proposal); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Treasury_reject_proposal
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_propose_spend); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Treasury_propose_spend
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_reject_proposal); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Treasury_reject_proposal
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_remove_approval); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Treasury_remove_approval
 	} else {

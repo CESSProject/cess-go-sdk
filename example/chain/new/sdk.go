@@ -23,14 +23,14 @@ var MY_MNEMONIC = "bottom drive obey lake curtain smoke basket hold race lonely 
 
 var RPC_ADDRS = []string{
 	//testnet
-	"wss://testnet-rpc.cess.network/ws/",
+	"wss://devnet-rpc.cess.network/ws/",
 }
 
 func main() {
 	sdk, err := cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
+		//cess.Mnemonic(MY_MNEMONIC),
 		cess.TransactionTimeout(time.Second*10),
 	)
 	if err != nil {
@@ -38,7 +38,7 @@ func main() {
 	}
 	defer sdk.Close()
 
-	err = sdk.InitExtrinsicsNameForMiner()
+	err = sdk.InitExtrinsicsName()
 	if err != nil {
 		panic(err)
 	}
