@@ -20,6 +20,7 @@ const (
 	ExtName_AssetConversion_remove_liquidity             = "AssetConversion.remove_liquidity"
 	ExtName_AssetConversion_swap_exact_tokens_for_tokens = "AssetConversion.swap_exact_tokens_for_tokens"
 	ExtName_AssetConversion_swap_tokens_for_exact_tokens = "AssetConversion.swap_tokens_for_exact_tokens"
+	ExtName_AssetConversion_touch                        = "AssetConversion.touch"
 
 	// AssetRate
 	ExtName_AssetRate_create = "AssetRate.create"
@@ -76,16 +77,15 @@ const (
 	ExtName_Babe_report_equivocation_unsigned = "Babe.report_equivocation_unsigned"
 
 	// Balances
+	ExtName_Balances_burn                        = "Balances.burn"
 	ExtName_Balances_force_adjust_total_issuance = "Balances.force_adjust_total_issuance"
 	ExtName_Balances_force_set_balance           = "Balances.force_set_balance"
 	ExtName_Balances_force_transfer              = "Balances.force_transfer"
 	ExtName_Balances_force_unreserve             = "Balances.force_unreserve"
-	// ExtName_Balances_set_balance_deprecated      = "Balances.set_balance_deprecated"
-	// ExtName_Balances_transfer                    = "Balances.transfer"
-	ExtName_Balances_transfer_all         = "Balances.transfer_all"
-	ExtName_Balances_transfer_allow_death = "Balances.transfer_allow_death"
-	ExtName_Balances_transferKeepAlive    = "Balances.transfer_keep_alive"
-	ExtName_Balances_upgrade_accounts     = "Balances.upgrade_accounts"
+	ExtName_Balances_transfer_all                = "Balances.transfer_all"
+	ExtName_Balances_transfer_allow_death        = "Balances.transfer_allow_death"
+	ExtName_Balances_transferKeepAlive           = "Balances.transfer_keep_alive"
+	ExtName_Balances_upgrade_accounts            = "Balances.upgrade_accounts"
 
 	// BaseFee
 	ExtName_BaseFee_set_base_fee_per_gas = "BaseFee.set_base_fee_per_gas"
@@ -303,7 +303,7 @@ const (
 	ExtName_Sminer_set_facuet_whitelist       = "Sminer.set_facuet_whitelist"
 	ExtName_Sminer_update_beneficiary         = "Sminer.update_beneficiary"
 	ExtName_Sminer_update_expender            = "Sminer.update_expender"
-	ExtName_Sminer_update_endpoint            = "Sminer.update_endpoint"
+	//ExtName_Sminer_update_endpoint            = "Sminer.update_endpoint"
 
 	// Staking
 	ExtName_Staking_bond                       = "Staking.bond"
@@ -424,15 +424,15 @@ const (
 	ExtName_TransactionStorage_store       = "TransactionStorage.store"
 
 	// Treasury
-	ExtName_Treasury_approve_proposal = "Treasury.approve_proposal"
-	ExtName_Treasury_check_status     = "Treasury.check_status"
-	ExtName_Treasury_payout           = "Treasury.payout"
-	ExtName_Treasury_propose_spend    = "Treasury.propose_spend"
-	ExtName_Treasury_reject_proposal  = "Treasury.reject_proposal"
-	ExtName_Treasury_remove_approval  = "Treasury.remove_approval"
-	ExtName_Treasury_spend            = "Treasury.spend"
-	ExtName_Treasury_spend_local      = "Treasury.spend_local"
-	ExtName_Treasury_void_spend       = "Treasury.void_spend"
+	//ExtName_Treasury_approve_proposal = "Treasury.approve_proposal"
+	ExtName_Treasury_check_status = "Treasury.check_status"
+	ExtName_Treasury_payout       = "Treasury.payout"
+	//ExtName_Treasury_propose_spend    = "Treasury.propose_spend"
+	//ExtName_Treasury_reject_proposal  = "Treasury.reject_proposal"
+	ExtName_Treasury_remove_approval = "Treasury.remove_approval"
+	ExtName_Treasury_spend           = "Treasury.spend"
+	ExtName_Treasury_spend_local     = "Treasury.spend_local"
+	ExtName_Treasury_void_spend      = "Treasury.void_spend"
 
 	// Utility
 	ExtName_Utility_as_derivative = "Utility.as_derivative"
@@ -480,6 +480,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetConversion_swap_tokens_for_exact_tokens); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_AssetConversion_swap_tokens_for_exact_tokens
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_AssetConversion_touch); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_AssetConversion_touch
 	} else {
 		return err
 	}
@@ -723,6 +728,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// Balances
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_burn); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Balances_burn
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Balances_force_adjust_total_issuance); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Balances_force_adjust_total_issuance
 	} else {
@@ -1655,11 +1665,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_endpoint); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Sminer_update_endpoint
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_endpoint); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Sminer_update_endpoint
+	// } else {
+	// 	return err
+	// }
 
 	// Staking
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Staking_bond); err == nil {
@@ -2185,11 +2195,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// Treasury
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_approve_proposal); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Treasury_approve_proposal
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_approve_proposal); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Treasury_approve_proposal
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_check_status); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Treasury_check_status
 	} else {
@@ -2200,16 +2210,16 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_propose_spend); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Treasury_propose_spend
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_reject_proposal); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Treasury_reject_proposal
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_propose_spend); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Treasury_propose_spend
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_reject_proposal); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Treasury_reject_proposal
+	// } else {
+	// 	return err
+	// }
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_remove_approval); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Treasury_remove_approval
 	} else {
@@ -2413,11 +2423,11 @@ func (c *ChainClient) InitExtrinsicsNameForMiner() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_endpoint); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_Sminer_update_endpoint
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Sminer_update_endpoint); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_Sminer_update_endpoint
+	// } else {
+	// 	return err
+	// }
 
 	// Timestamp
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Timestamp_set); err == nil {

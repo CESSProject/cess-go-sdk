@@ -1847,100 +1847,101 @@ func (c *ChainClient) UpdateSminerEndpoint(endpoint []byte) (string, error) {
 		}
 	}()
 
-	var (
-		blockhash   string
-		accountInfo types.AccountInfo
-	)
+	// var (
+	// 	blockhash   string
+	// 	accountInfo types.AccountInfo
+	// )
 
-	if len(endpoint) <= 0 {
-		return blockhash, errors.New("empty endpoint")
-	}
+	// if len(endpoint) <= 0 {
+	// 	return blockhash, errors.New("empty endpoint")
+	// }
 
-	call, err := types.NewCall(c.metadata, ExtName_Sminer_update_endpoint, types.NewBytes(endpoint))
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
-		return blockhash, err
-	}
+	// call, err := types.NewCall(c.metadata, ExtName_Sminer_update_endpoint, types.NewBytes(endpoint))
+	// if err != nil {
+	// 	err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
+	// 	return blockhash, err
+	// }
 
-	ext := types.NewExtrinsic(call)
+	// ext := types.NewExtrinsic(call)
 
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
-		return blockhash, err
-	}
+	// key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	// if err != nil {
+	// 	err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
+	// 	return blockhash, err
+	// }
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
+	// if !c.GetRpcState() {
+	// 	err = c.ReconnectRpc()
+	// 	if err != nil {
+	// 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, ERR_RPC_CONNECTION.Error())
+	// 		return blockhash, err
+	// 	}
+	// }
 
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
+	// ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	// if err != nil {
+	// 	err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
+	// 	c.SetRpcState(false)
+	// 	return blockhash, err
+	// }
+	// if !ok {
+	// 	return blockhash, ERR_RPC_EMPTY_VALUE
+	// }
 
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
+	// o := types.SignatureOptions{
+	// 	BlockHash:          c.genesisHash,
+	// 	Era:                types.ExtrinsicEra{IsMortalEra: false},
+	// 	GenesisHash:        c.genesisHash,
+	// 	Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+	// 	SpecVersion:        c.runtimeVersion.SpecVersion,
+	// 	Tip:                types.NewUCompactFromUInt(0),
+	// 	TransactionVersion: c.runtimeVersion.TransactionVersion,
+	// }
 
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
-		return blockhash, err
-	}
+	// // Sign the transaction
+	// err = ext.Sign(c.keyring, o)
+	// if err != nil {
+	// 	err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
+	// 	return blockhash, err
+	// }
 
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_update_endpoint, SminerUpdateEndpoint, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	// // Do the transfer and track the actual status
+	// sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	// if err != nil {
+	// 	if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
+	// 		o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
+	// 		err = ext.Sign(c.keyring, o)
+	// 		if err != nil {
+	// 			return blockhash, errors.Wrap(err, "[Sign]")
+	// 		}
+	// 		sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	// 		if err != nil {
+	// 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
+	// 			c.SetRpcState(false)
+	// 			return blockhash, err
+	// 		}
+	// 	} else {
+	// 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_update_endpoint, err)
+	// 		c.SetRpcState(false)
+	// 		return blockhash, err
+	// 	}
+	// }
+	// defer sub.Unsubscribe()
+	// timeout := time.NewTimer(c.packingTime)
+	// defer timeout.Stop()
+	// for {
+	// 	select {
+	// 	case status := <-sub.Chan():
+	// 		if status.IsInBlock {
+	// 			blockhash = status.AsInBlock.Hex()
+	// 			err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_update_endpoint, SminerUpdateEndpoint, c.signatureAcc)
+	// 			return blockhash, err
+	// 		}
+	// 	case err = <-sub.Err():
+	// 		return blockhash, errors.Wrap(err, "[sub]")
+	// 	case <-timeout.C:
+	// 		return blockhash, ERR_RPC_TIMEOUT
+	// 	}
+	// }
+	return "", nil
 }
