@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
 	"github.com/CESSProject/cess-go-sdk/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 // QueryAuthorities query consensus rrsc public

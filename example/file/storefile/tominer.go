@@ -35,7 +35,6 @@ func main() {
 		UploadFile,
 		MY_MNEMONIC,
 		TerritoryName,
-		BucketName,
 		time.Second*15,
 		RPC_ADDRS,
 		WantMiner,

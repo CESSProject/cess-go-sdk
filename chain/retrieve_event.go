@@ -8,7 +8,9 @@
 package chain
 
 import (
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"fmt"
+
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
 )
 
@@ -24,12 +26,12 @@ func (c *ChainClient) RetrieveAllEventName(blockhash types.Hash) ([]string, erro
 	return result, nil
 }
 
-func (c *ChainClient) RetrieveEvent(blockhash types.Hash, extrinsic_name, event_name, signer string) error {
+func (c *ChainClient) RetrieveEvent(blockhash types.Hash, extrinsic_name, signer string) error {
 	if len(ExtrinsicsName) <= 0 {
 		return errors.New("please call InitExtrinsicsName method first")
 	}
 
-	if len(extrinsic_name) <= 0 || len(event_name) <= 0 {
+	if len(extrinsic_name) <= 0 {
 		return errors.New("extrinsic_name or event_name is empty")
 	}
 
@@ -53,10 +55,10 @@ func (c *ChainClient) RetrieveEvent(blockhash types.Hash, extrinsic_name, event_
 		extrinsic_signer string
 	)
 	for _, e := range events {
+		if !e.Phase.IsApplyExtrinsic {
+			continue
+		}
 		if name == "" {
-			if !e.Phase.IsApplyExtrinsic {
-				continue
-			}
 			name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]
 			if !ok {
 				continue
@@ -81,32 +83,32 @@ func (c *ChainClient) RetrieveEvent(blockhash types.Hash, extrinsic_name, event_
 		case SystemExtrinsicFailed:
 			name = ""
 			if extrinsic_signer == signer {
-				return errors.New(ERR_Failed)
+				return errors.New(SystemExtrinsicFailed)
 			}
 		}
 	}
-	return errors.Errorf("transaction failed: no %s event found", event_name)
+	return fmt.Errorf("not found extrinsic: %s", extrinsic_name)
 }
 
 func (c *ChainClient) RetrieveExtrinsicsAndEvents(blockhash types.Hash) ([]string, map[string][]string, error) {
 	var systemEvents = make([]string, 0)
 	var extrinsicsEvents = make(map[string][]string, 0)
-	block, err := c.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
-	if err != nil {
-		return systemEvents, extrinsicsEvents, err
-	}
+	// block, err := c.GetSubstrateAPI().RPC.Chain.GetBlock(blockhash)
+	// if err != nil {
+	// 	return systemEvents, extrinsicsEvents, err
+	// }
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return systemEvents, extrinsicsEvents, err
 	}
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
-			if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
-				if extrinsicsEvents[name] == nil {
-					extrinsicsEvents[name] = make([]string, 0)
-				}
-				extrinsicsEvents[name] = append(extrinsicsEvents[name], e.Name)
-			}
+			// if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+			// 	if extrinsicsEvents[name] == nil {
+			// 		extrinsicsEvents[name] = make([]string, 0)
+			// 	}
+			// 	extrinsicsEvents[name] = append(extrinsicsEvents[name], e.Name)
+			// }
 		} else {
 			systemEvents = append(systemEvents, e.Name)
 		}
@@ -117,41 +119,41 @@ func (c *ChainClient) RetrieveExtrinsicsAndEvents(blockhash types.Hash) ([]strin
 func (c *ChainClient) RetrieveEvent_Sminer_Receive(blockhash types.Hash) (Event_Receive, error) {
 	var result Event_Receive
 
-	block, err := c.api.RPC.Chain.GetBlock(blockhash)
-	if err != nil {
-		return result, err
-	}
+	// block, err := c.api.RPC.Chain.GetBlock(blockhash)
+	// if err != nil {
+	// 	return result, err
+	// }
 
 	events, err := c.eventRetriever.GetEvents(blockhash)
 	if err != nil {
 		return result, err
 	}
 
-	var signer string
-	var earningsAcc string
+	// var signer string
+	// var earningsAcc string
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
-			if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
-				if name == ExtName_Sminer_receive_reward {
-					switch e.Name {
-					case SminerReceive:
-						earningsAcc, _ = ParseAccountFromEvent(e)
-						result.Acc = earningsAcc
-					case TransactionPaymentTransactionFeePaid:
-						signer, _, _ = parseSignerAndFeePaidFromEvent(e)
-					case EvmAccountMappingTransactionFeePaid:
-						signer, _, _ = parseSignerAndFeePaidFromEvent(e)
-					case SystemExtrinsicSuccess:
-						if signer == c.GetSignatureAcc() {
-							return result, nil
-						}
-					case SystemExtrinsicFailed:
-						if signer == c.GetSignatureAcc() {
-							return result, errors.New(ERR_Failed)
-						}
-					}
-				}
-			}
+			// if name, ok := ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+			// 	if name == ExtName_Sminer_receive_reward {
+			// 		switch e.Name {
+			// 		case SminerReceive:
+			// 			earningsAcc, _ = ParseAccountFromEvent(e)
+			// 			result.Acc = earningsAcc
+			// 		case TransactionPaymentTransactionFeePaid:
+			// 			signer, _, _ = parseSignerAndFeePaidFromEvent(e)
+			// 		case EvmAccountMappingTransactionFeePaid:
+			// 			signer, _, _ = parseSignerAndFeePaidFromEvent(e)
+			// 		case SystemExtrinsicSuccess:
+			// 			if signer == c.GetSignatureAcc() {
+			// 				return result, nil
+			// 			}
+			// 		case SystemExtrinsicFailed:
+			// 			if signer == c.GetSignatureAcc() {
+			// 				return result, errors.New(ERR_Failed)
+			// 			}
+			// 		}
+			// 	}
+			// }
 		}
 	}
 	return result, errors.Errorf("failed: no %s event found", SminerReceive)

@@ -12,8 +12,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
 	"github.com/CESSProject/cess-go-sdk/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/pkg/errors"
 	"github.com/vedhavyas/go-subkey/v2"

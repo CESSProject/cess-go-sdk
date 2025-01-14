@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types/codec"
 	"github.com/CESSProject/cess-go-sdk/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 )
 
 // QueryCurrencyReward query the currency rewards

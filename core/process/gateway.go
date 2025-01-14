@@ -17,10 +17,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/CESSProject/cess-go-sdk/chain"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/signature"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/pkg/errors"
 )
 
@@ -33,7 +32,6 @@ var globalTransport = &http.Transport{
 // Receive parameter:
 //   - url: gateway url
 //   - file: stored file
-//   - bucket: bucket for storing file, it will be created automatically
 //   - territory: territory name
 //   - mnemonic: polkadot account mnemonic
 //
@@ -45,11 +43,10 @@ var globalTransport = &http.Transport{
 //  1. Account requires purchasing space, refer to [BuySpace] interface.
 //  2. Authorize the space usage rights of the account to the gateway account,
 //     refer to the [AuthorizeSpace] interface.
-//  3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
 //
 // Explanation:
 //   - Account refers to the account where you configured mnemonic when creating an SDK.
-func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
+func StoreFile(url, file, territory, mnemonic string) (string, error) {
 	fstat, err := os.Stat(file)
 	if err != nil {
 
@@ -62,10 +59,6 @@ func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 
 	if fstat.Size() == 0 {
 		return "", errors.New("empty file")
-	}
-
-	if !chain.CheckBucketName(bucket) {
-		return "", errors.New("invalid bucket name")
 	}
 
 	keyringPair, err := signature.KeyringPairFromSecret(mnemonic, 0)
@@ -113,7 +106,6 @@ func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 		return "", err
 	}
 
-	req.Header.Set("Bucket", bucket)
 	req.Header.Set("Territory", territory)
 	req.Header.Set("Account", acc)
 	req.Header.Set("Message", message)
@@ -147,7 +139,6 @@ func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 //
 // Receive parameter:
 //   - url: gateway url
-//   - bucket: the bucket for storing object, it will be created automatically
 //   - territory: territory name
 //   - mnemonic: polkadot account mnemonic
 //   - reader: strings, byte data, file streams, network streams, etc
@@ -160,15 +151,10 @@ func StoreFile(url, file, bucket, territory, mnemonic string) (string, error) {
 //  1. Account requires purchasing space, refer to [BuySpace] interface.
 //  2. Authorize the space usage rights of the account to the gateway account,
 //     refer to the [AuthorizeSpace] interface.
-//  3. Make sure the name of the bucket is legal, use the [CheckBucketName] method to check.
 //
 // Explanation:
 //   - Account refers to the account where you configured mnemonic when creating an SDK.
-func StoreObject(url string, bucket, territory, mnemonic string, reader io.Reader) (string, error) {
-	if !chain.CheckBucketName(bucket) {
-		return "", errors.New("invalid bucket name")
-	}
-
+func StoreObject(url string, territory, mnemonic string, reader io.Reader) (string, error) {
 	keyringPair, err := signature.KeyringPairFromSecret(mnemonic, 0)
 	if err != nil {
 		return "", fmt.Errorf("[KeyringPairFromSecret] %v", err)
@@ -191,7 +177,6 @@ func StoreObject(url string, bucket, territory, mnemonic string, reader io.Reade
 		return "", err
 	}
 
-	req.Header.Set("Bucket", bucket)
 	req.Header.Set("Territory", territory)
 	req.Header.Set("Account", acc)
 	req.Header.Set("Message", message)

@@ -10,12 +10,9 @@ package chain
 import (
 	"fmt"
 	"log"
-	"strings"
-	"time"
 
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
 	"github.com/CESSProject/cess-go-sdk/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/pkg/errors"
 )
 
 // QueryChallengeSnapShot query challenge snapshot data
@@ -202,104 +199,21 @@ func (c *ChainClient) SubmitIdleProof(idleProof []types.U8) (string, error) {
 		}
 	}()
 
-	var (
-		blockhash   string
-		accountInfo types.AccountInfo
-	)
-
 	if len(idleProof) == 0 {
-		return blockhash, ERR_IdleProofIsEmpty
+		return "", ERR_IdleProofIsEmpty
 	}
 
-	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_idle_proof, idleProof)
+	newcall, err := types.NewCall(c.metadata, ExtName_Audit_submit_idle_proof, idleProof)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Audit_submit_idle_proof)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_idle_proof, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_idle_proof, AuditSubmitIdleProof, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }
 
 // SubmitServiceProof submit service data proof to the chain
@@ -317,100 +231,17 @@ func (c *ChainClient) SubmitServiceProof(serviceProof []types.U8) (string, error
 		}
 	}()
 
-	var (
-		blockhash   string
-		accountInfo types.AccountInfo
-	)
-
-	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_service_proof, serviceProof)
+	newcall, err := types.NewCall(c.metadata, ExtName_Audit_submit_service_proof, serviceProof)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Audit_submit_service_proof)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_service_proof, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_service_proof, AuditSubmitServiceProof, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }
 
 // SubmitVerifyIdleResult submit validation result of idle data proof to the chain
@@ -434,100 +265,17 @@ func (c *ChainClient) SubmitVerifyIdleResult(totalProofHash []types.U8, front, r
 		}
 	}()
 
-	var (
-		blockhash   string
-		accountInfo types.AccountInfo
-	)
-
-	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_verify_idle_result, totalProofHash, front, rear, accumulator, result, sig, teePuk)
+	newcall, err := types.NewCall(c.metadata, ExtName_Audit_submit_verify_idle_result, totalProofHash, front, rear, accumulator, result, sig, teePuk)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Audit_submit_verify_idle_result)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_idle_result, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_verify_idle_result, AuditSubmitIdleVerifyResult, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }
 
 // SubmitVerifyServiceResult submit validation result of service data proof to the chain
@@ -548,98 +296,15 @@ func (c *ChainClient) SubmitVerifyServiceResult(result types.Bool, sign types.By
 		}
 	}()
 
-	var (
-		blockhash   string
-		accountInfo types.AccountInfo
-	)
-
-	call, err := types.NewCall(c.metadata, ExtName_Audit_submit_verify_service_result, result, sign, bloomFilter, teePuk)
+	newcall, err := types.NewCall(c.metadata, ExtName_Audit_submit_verify_service_result, result, sign, bloomFilter, teePuk)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Audit_submit_verify_service_result)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Audit_submit_verify_service_result, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Audit_submit_verify_service_result, AuditSubmitServiceVerifyResult, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }

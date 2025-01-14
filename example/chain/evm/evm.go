@@ -8,9 +8,9 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
 	cess "github.com/CESSProject/cess-go-sdk"
 	"github.com/CESSProject/cess-go-sdk/chain"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
 )
 
 // Substrate well-known mnemonic:
