@@ -78,6 +78,9 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
+			if strings.Contains(e.Name, "MultiBlockMigrations.") {
+				continue
+			}
 			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
 				if extrinsicIndex >= len(blockdata.Extrinsics) {
 					return blockdata, errors.New("The number of extrinsics hashes does not equal the number of extrinsics")

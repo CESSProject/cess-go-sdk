@@ -13,6 +13,7 @@ import (
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
+	"github.com/CESSProject/cess-go-sdk/utils"
 )
 
 // Substrate well-known mnemonic:
@@ -30,7 +31,7 @@ func main() {
 	sdk, err := cess.New(
 		context.Background(),
 		cess.ConnectRpcAddrs(RPC_ADDRS),
-		cess.Mnemonic(MY_MNEMONIC),
+		//cess.Mnemonic(MY_MNEMONIC),
 		cess.TransactionTimeout(time.Second*10),
 	)
 	if err != nil {
@@ -47,5 +48,12 @@ func main() {
 	fmt.Println(sdk.GetCurrentRpcAddr())
 	fmt.Println(sdk.SystemProperties())
 
+	puk, err := utils.ParsingPublickey("cXjqBVG3JZhNBAbwpaRDt9ct2TtZcq4R8Zp4DwhCMvhPjskrn")
+	if err != nil {
+		panic("cXjqBVG3JZhNBAbwpaRDt9ct2TtZcq4R8Zp4DwhCMvhPjskrn")
+	}
+	fmt.Println(sdk.QueryChallengeSnapShot(puk, 42436))
+
+	return
 	fmt.Println(sdk.TransferToken("cXkdXokcMa32BAYkmsGjhRGA2CYmLUN2pq69U8k9taXsQPHGp", "100000000000000000000"))
 }

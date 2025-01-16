@@ -28,7 +28,7 @@ func main() {
 		panic(err)
 	}
 
-	blockData, err := sdk.ParseBlockData(54915)
+	blockData, err := sdk.ParseBlockData(43182)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
