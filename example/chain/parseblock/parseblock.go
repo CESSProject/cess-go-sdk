@@ -10,7 +10,7 @@ import (
 
 var RPC_ADDRS = []string{
 	//testnet
-	"wss://devnet-rpc.cess.network/ws/",
+	"wss://testnet-rpc.cess.network/ws/",
 }
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 		panic(err)
 	}
 
-	blockData, err := sdk.ParseBlockData(43182)
+	blockData, err := sdk.ParseBlockData(2270026)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
