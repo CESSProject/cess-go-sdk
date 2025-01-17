@@ -8,8 +8,8 @@
 package chain
 
 import (
-	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	gsrpc "github.com/AstaFrode/go-substrate-rpc-client/v4"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
 )
 
 // chain client interface
@@ -38,27 +38,23 @@ type Chainer interface {
 	QueryAuthorityList(accountID []byte, block int32) ([]types.AccountID, error)
 	Authorize(accountID []byte) (string, error)
 	CancelAuthorize(accountID []byte) (string, error)
-	RegisterOss(peerId []byte, domain string) (string, error)
-	UpdateOss(peerId string, domain string) (string, error)
+	RegisterOss(domain string) (string, error)
+	UpdateOss(domain string) (string, error)
 	DestroyOss() (string, error)
 
 	// EVM
 	SendEvmCall(source types.H160, target types.H160, input types.Bytes, value types.U256, gasLimit types.U64, maxFeePerGas types.U256, accessList []AccessInfo) (string, error)
 
 	// FileBank
-	QueryBucket(accountID []byte, bucketName string, block int32) (BucketInfo, error)
 	QueryDealMap(fid string, block int32) (StorageOrder, error)
 	QueryDealMapList(block int32) ([]StorageOrder, error)
 	QueryFile(fid string, block int32) (FileMetadata, error)
 	QueryRestoralOrder(fragmentHash string, block int32) (RestoralOrderInfo, error)
 	QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, error)
-	QueryAllBucketName(accountID []byte, block int32) ([]string, error)
 	QueryUserHoldFileList(accountID []byte, block int32) ([]UserFileSliceInfo, error)
 	QueryUserFidList(accountID []byte, block int32) ([]string, error)
-	PlaceStorageOrder(fid, file_name, bucket_name, territory_name string, segment []SegmentDataInfo, owner []byte, file_size uint64) (string, error)
+	PlaceStorageOrder(fid, file_name, territory_name string, segment []SegmentDataInfo, owner []byte, file_size uint64) (string, error)
 	UploadDeclaration(fid string, segment []SegmentList, user UserBrief, filesize uint64) (string, error)
-	CreateBucket(owner []byte, bucketName string) (string, error)
-	DeleteBucket(owner []byte, bucketName string) (string, error)
 	DeleteFile(owner []byte, fid string) (string, error)
 	TransferReport(index uint8, fid string) (string, error)
 	GenerateRestoralOrder(fid, fragmentHash string) (string, error)
@@ -87,17 +83,17 @@ type Chainer interface {
 	QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo, error)
 	QueryPendingReplacements(accountID []byte, block int32) (types.U128, error)
 	QueryCompleteSnapShot(era uint32, block int32) (uint32, uint64, error)
-	QueryCompleteMinerSnapShot(puk []byte, block int32) (MinerCompleteInfo, error)
+	QueryCompleteMinerSnapShot(puk []byte, block int32) ([]MinerCompleteInfo, error)
 	IncreaseCollateral(accountID []byte, token string) (string, error)
 	IncreaseDeclarationSpace(tibCount uint32) (string, error)
 	MinerExitPrep() (string, error)
 	MinerWithdraw() (string, error)
 	ReceiveReward() (string, string, error)
 	RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
-	RegnstkSminer(earnings string, addr []byte, staking uint64, tibCount uint32) (string, error)
-	RegnstkAssignStaking(earnings string, peerId []byte, stakingAcc string, tibCount uint32) (string, error)
+	RegnstkSminer(earnings string, endpoint []byte, staking uint64, tibCount uint32) (string, error)
+	RegnstkAssignStaking(earnings string, endpoint []byte, stakingAcc string, tibCount uint32) (string, error)
 	UpdateBeneficiary(earnings string) (string, error)
-	UpdateSminerAddr(addr []byte) (string, error)
+	UpdateSminerEndpoint(endpoint []byte) (string, error)
 
 	// Staking
 	QueryCounterForValidators(block int32) (uint32, error)
@@ -188,6 +184,6 @@ type Chainer interface {
 
 	// event
 	RetrieveAllEventName(blockhash types.Hash) ([]string, error)
-	RetrieveEvent(blockhash types.Hash, extrinsic_name, event_name, signer string) error
+	RetrieveEvent(blockhash types.Hash, extrinsic_name, signer string) error
 	RetrieveExtrinsicsAndEvents(blockhash types.Hash) ([]string, map[string][]string, error)
 }

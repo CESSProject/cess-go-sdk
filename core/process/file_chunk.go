@@ -20,10 +20,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/signature"
 	"github.com/CESSProject/cess-go-sdk/chain"
 	"github.com/CESSProject/cess-go-sdk/utils"
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
 	"github.com/pkg/errors"
 )
 

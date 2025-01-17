@@ -10,7 +10,7 @@ package chain
 import (
 	"time"
 
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
 	"github.com/pkg/errors"
 )
 
@@ -393,7 +393,6 @@ type FragmentInfo struct {
 type UserBrief struct {
 	User          types.AccountID
 	FileName      types.Bytes
-	BucketName    types.Bytes
 	TerriortyName types.Bytes
 }
 
@@ -430,7 +429,7 @@ type KeyOwnerParam struct {
 type MinerInfo struct {
 	BeneficiaryAccount types.AccountID
 	StakingAccount     types.AccountID
-	PeerId             PeerId
+	Endpoint           types.Bytes
 	Collaterals        types.U128
 	Debt               types.U128
 	State              types.Bytes // positive, exit, frozen, lock
@@ -458,17 +457,6 @@ type RewardOrder struct {
 	LastReceiveBlock types.U32
 }
 
-// StorageHandler
-// type UserSpaceInfo struct {
-// 	TotalSpace     types.U128
-// 	UsedSpace      types.U128
-// 	LockedSpace    types.U128
-// 	RemainingSpace types.U128
-// 	Start          types.U32
-// 	Deadline       types.U32
-// 	State          types.Bytes
-// }
-
 type TerritoryInfo struct {
 	Token          types.H256
 	TotalSpace     types.U128
@@ -479,16 +467,6 @@ type TerritoryInfo struct {
 	Deadline       types.U32
 	State          types.U8 //0: Active 1: Frozen 2: Expired 3: OnConsignment
 }
-
-// type OrderInfo struct {
-// 	TerritoryName [TerritoryKeyLen]types.U8
-// 	Pay           types.U128
-// 	GibCount      types.U32
-// 	Days          types.U32
-// 	Expired       types.U32
-// 	TargetAcc     types.AccountID
-// 	OrderType     types.U8
-// }
 
 type ConsignmentInfo struct {
 	User   types.AccountID
@@ -717,8 +695,6 @@ type BlockData struct {
 	TransferInfo        []TransferInfo
 	UploadDecInfo       []UploadDecInfo
 	DeleteFileInfo      []DeleteFileInfo
-	CreateBucketInfo    []CreateBucketInfo
-	DeleteBucketInfo    []DeleteBucketInfo
 	SubmitIdleProve     []SubmitIdleProve
 	SubmitServiceProve  []SubmitServiceProve
 	SubmitIdleResult    []SubmitIdleResult
@@ -764,18 +740,6 @@ type DeleteFileInfo struct {
 type MinerRegInfo struct {
 	ExtrinsicHash string
 	Account       string
-}
-
-type CreateBucketInfo struct {
-	ExtrinsicHash string
-	Owner         string
-	BucketName    string
-}
-
-type DeleteBucketInfo struct {
-	ExtrinsicHash string
-	Owner         string
-	BucketName    string
 }
 
 type SubmitIdleProve struct {

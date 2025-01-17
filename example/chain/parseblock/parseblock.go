@@ -28,7 +28,7 @@ func main() {
 		panic(err)
 	}
 
-	blockData, err := sdk.ParseBlockData(123524)
+	blockData, err := sdk.ParseBlockData(2270026)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return
@@ -50,16 +50,6 @@ func main() {
 	for _, v := range blockData.DeleteFileInfo {
 		fmt.Println("    Owner: ", v.Owner)
 		fmt.Println("    Fid: ", v.Fid)
-	}
-	fmt.Println("createBucketInfo:")
-	for _, v := range blockData.CreateBucketInfo {
-		fmt.Println("    Owner: ", v.Owner)
-		fmt.Println("    BucketName: ", v.BucketName)
-	}
-	fmt.Println("DeleteBucketInfo:")
-	for _, v := range blockData.DeleteBucketInfo {
-		fmt.Println("    Owner: ", v.Owner)
-		fmt.Println("    BucketName: ", v.BucketName)
 	}
 	fmt.Println("GenChallenge:")
 	for _, v := range blockData.GenChallenge {

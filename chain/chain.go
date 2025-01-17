@@ -10,6 +10,7 @@ package chain
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"math"
@@ -18,13 +19,13 @@ import (
 	"sync"
 	"time"
 
+	gsrpc "github.com/AstaFrode/go-substrate-rpc-client/v4"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/registry/retriever"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/registry/state"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/signature"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/xxhash"
 	"github.com/CESSProject/cess-go-sdk/utils"
-	gsrpc "github.com/centrifuge/go-substrate-rpc-client/v4"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/retriever"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/state"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/signature"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/xxhash"
 )
 
 type ChainClient struct {
@@ -396,5 +397,78 @@ func (c *ChainClient) Close() {
 			c.api.Client.Close()
 		}
 		c.api = nil
+	}
+}
+
+func (c *ChainClient) SubmitExtrinsic(call types.Call, extrinsicName string) (string, error) {
+	ext := types.NewExtrinsic(call)
+
+	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	if err != nil {
+		return "", fmt.Errorf(" CreateStorageKey err: %v", err)
+	}
+
+	if !c.GetRpcState() {
+		err = c.ReconnectRpc()
+		if err != nil {
+			return "", ERR_RPC_CONNECTION
+		}
+	}
+
+	var accountInfo types.AccountInfo
+	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
+	if err != nil {
+		c.SetRpcState(false)
+		return "", fmt.Errorf(" GetStorageLatest err: %v", err)
+	}
+
+	if !ok {
+		return "", fmt.Errorf(" GetStorageLatest: %v", ERR_RPC_EMPTY_VALUE)
+	}
+
+	o := types.SignatureOptions{
+		BlockHash:          c.genesisHash,
+		Era:                types.ExtrinsicEra{IsMortalEra: false},
+		GenesisHash:        c.genesisHash,
+		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
+		SpecVersion:        c.runtimeVersion.SpecVersion,
+		Tip:                types.NewUCompactFromUInt(0),
+		TransactionVersion: c.runtimeVersion.TransactionVersion,
+	}
+
+	err = ext.Sign(c.keyring, o)
+	if err != nil {
+		return "", fmt.Errorf(" extrinsic sign err: %v", err)
+	}
+
+	subscription, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
+	if err != nil {
+		c.SetRpcState(false)
+		return "", fmt.Errorf(" SubmitAndWatchExtrinsic err: %v", err)
+	}
+	defer subscription.Unsubscribe()
+
+	timeout := time.NewTimer(c.packingTime)
+	defer timeout.Stop()
+
+	blockhash := ""
+	for {
+		select {
+		case status := <-subscription.Chan():
+			if status.IsInBlock {
+				blockhash = status.AsInBlock.Hex()
+				if extrinsicName != "" {
+					err = c.RetrieveEvent(status.AsInBlock, extrinsicName, c.signatureAcc)
+					if err != nil {
+						return blockhash, fmt.Errorf(" RetrieveEvent err: %v", err)
+					}
+				}
+				return blockhash, nil
+			}
+		case err = <-subscription.Err():
+			return blockhash, fmt.Errorf(" subscription err: %v", err)
+		case <-timeout.C:
+			return blockhash, errors.New(" subscription timeout")
+		}
 	}
 }

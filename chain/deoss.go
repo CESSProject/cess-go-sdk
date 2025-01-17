@@ -10,12 +10,10 @@ package chain
 import (
 	"fmt"
 	"log"
-	"strings"
-	"time"
 
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types/codec"
 	"github.com/CESSProject/cess-go-sdk/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/mr-tron/base58"
 	"github.com/pkg/errors"
 )
@@ -281,105 +279,22 @@ func (c *ChainClient) Authorize(accountID []byte) (string, error) {
 		}
 	}()
 
-	var (
-		blockhash   string
-		accountInfo types.AccountInfo
-	)
-
 	acc, err := types.NewAccountID(accountID)
 	if err != nil {
-		return blockhash, errors.Wrap(err, "[NewAccountID]")
+		return "", errors.Wrap(err, "[NewAccountID]")
 	}
 
-	call, err := types.NewCall(c.metadata, ExtName_Oss_authorize, *acc)
+	newcall, err := types.NewCall(c.metadata, ExtName_Oss_authorize, *acc)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Oss_authorize)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_authorize, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_authorize, OssAuthorize, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }
 
 // CancelAuthorize cancels authorisation for an account
@@ -397,100 +312,17 @@ func (c *ChainClient) CancelAuthorize(accountID []byte) (string, error) {
 		}
 	}()
 
-	var (
-		blockhash   string
-		accountInfo types.AccountInfo
-	)
-
-	call, err := types.NewCall(c.metadata, ExtName_Oss_cancel_authorize, accountID)
+	newcall, err := types.NewCall(c.metadata, ExtName_Oss_cancel_authorize, accountID)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Oss_cancel_authorize)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_cancel_authorize, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_cancel_authorize, OssCancelAuthorize, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }
 
 // RegisterOss registered as oss role
@@ -500,7 +332,7 @@ func (c *ChainClient) CancelAuthorize(accountID []byte) (string, error) {
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) {
+func (c *ChainClient) RegisterOss(domain string) (string, error) {
 	<-c.tradeCh
 	defer func() {
 		c.tradeCh <- true
@@ -509,118 +341,21 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 		}
 	}()
 
-	var (
-		blockhash   string
-		peerid      PeerId
-		accountInfo types.AccountInfo
-	)
-
-	if len(peerId) != PeerIdPublicKeyLen {
-		return blockhash, errors.New("register oss: invalid peerid")
-	}
-	for i := 0; i < len(peerid); i++ {
-		peerid[i] = types.U8(peerId[i])
-	}
-
 	if len(domain) > int(MaxDomainNameLength) {
-		return blockhash, fmt.Errorf("register deoss: Domain name length cannot exceed %v characters", MaxDomainNameLength)
+		return "", fmt.Errorf("register deoss: Domain name length cannot exceed %v characters", MaxDomainNameLength)
 	}
 
-	call, err := types.NewCall(c.metadata, ExtName_Oss_register, peerid, types.NewBytes([]byte(domain)))
+	newcall, err := types.NewCall(c.metadata, ExtName_Oss_register, PeerId{}, types.NewBytes([]byte(domain)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Oss_register)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_register, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-
-	if !ok {
-		keyStr, _ := utils.NumsToByteStr(key, map[string]bool{})
-		return blockhash, fmt.Errorf(
-			"chain rpc.state.GetStorageLatest[%v]: %v",
-			keyStr,
-			ERR_RPC_EMPTY_VALUE,
-		)
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_register, err)
-			c.SetRpcState(false)
-			return blockhash, errors.Wrap(err, "[SubmitAndWatchExtrinsic]")
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_register, OssOssRegister, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }
 
 // UpdateOss update oss's peerId or domain
@@ -630,7 +365,7 @@ func (c *ChainClient) RegisterOss(peerId []byte, domain string) (string, error) 
 // Return:
 //   - string: block hash
 //   - error: error message
-func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
+func (c *ChainClient) UpdateOss(domain string) (string, error) {
 	<-c.tradeCh
 	defer func() {
 		c.tradeCh <- true
@@ -639,110 +374,21 @@ func (c *ChainClient) UpdateOss(peerId string, domain string) (string, error) {
 		}
 	}()
 
-	var (
-		blockhash   string
-		peerid      PeerId
-		accountInfo types.AccountInfo
-	)
-
-	if len(peerid) != len(peerId) {
-		return blockhash, errors.New("update oss: invalid peerid")
-	}
-	for i := 0; i < len(peerid); i++ {
-		peerid[i] = types.U8(peerId[i])
-	}
-
 	if len(domain) > int(MaxDomainNameLength) {
-		return blockhash, fmt.Errorf("update oss: domain name length cannot exceed %v", MaxDomainNameLength)
+		return "", fmt.Errorf("update oss: domain name length cannot exceed %v", MaxDomainNameLength)
 	}
 
-	call, err := types.NewCall(c.metadata, ExtName_Oss_update, peerid, types.NewBytes([]byte(domain)))
+	newcall, err := types.NewCall(c.metadata, ExtName_Oss_update, PeerId{}, types.NewBytes([]byte(domain)))
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Oss_update)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_update, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_update, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_update, OssOssUpdate, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }
 
 // DestroyOss destroys the oss role of the current account
@@ -759,99 +405,15 @@ func (c *ChainClient) DestroyOss() (string, error) {
 		}
 	}()
 
-	var (
-		blockhash   string
-		accountInfo types.AccountInfo
-	)
-
-	call, err := types.NewCall(c.metadata, ExtName_Oss_destroy)
+	newcall, err := types.NewCall(c.metadata, ExtName_Oss_destroy)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, err)
-		return blockhash, err
+		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, err)
 	}
 
-	ext := types.NewExtrinsic(call)
-
-	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
+	blockhash, err := c.SubmitExtrinsic(newcall, ExtName_Oss_destroy)
 	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, err)
-		return blockhash, err
+		return blockhash, fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, err)
 	}
 
-	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, ERR_RPC_CONNECTION.Error())
-			return blockhash, err
-		}
-	}
-
-	ok, err := c.api.RPC.State.GetStorageLatest(key, &accountInfo)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, err)
-		c.SetRpcState(false)
-		return blockhash, err
-	}
-
-	if !ok {
-		return blockhash, ERR_RPC_EMPTY_VALUE
-	}
-
-	o := types.SignatureOptions{
-		BlockHash:          c.genesisHash,
-		Era:                types.ExtrinsicEra{IsMortalEra: false},
-		GenesisHash:        c.genesisHash,
-		Nonce:              types.NewUCompactFromUInt(uint64(accountInfo.Nonce)),
-		SpecVersion:        c.runtimeVersion.SpecVersion,
-		Tip:                types.NewUCompactFromUInt(0),
-		TransactionVersion: c.runtimeVersion.TransactionVersion,
-	}
-
-	// Sign the transaction
-	err = ext.Sign(c.keyring, o)
-	if err != nil {
-		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, err)
-		return blockhash, err
-	}
-
-	// Do the transfer and track the actual status
-	sub, err := c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-	if err != nil {
-		if strings.Contains(err.Error(), ERR_PriorityIsTooLow) {
-			o.Nonce = types.NewUCompactFromUInt(uint64(accountInfo.Nonce + 1))
-			err = ext.Sign(c.keyring, o)
-			if err != nil {
-				return blockhash, errors.Wrap(err, "[Sign]")
-			}
-			sub, err = c.api.RPC.Author.SubmitAndWatchExtrinsic(ext)
-			if err != nil {
-				err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, err)
-				c.SetRpcState(false)
-				return blockhash, err
-			}
-		} else {
-			err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Oss_destroy, err)
-			c.SetRpcState(false)
-			return blockhash, err
-		}
-	}
-	defer sub.Unsubscribe()
-
-	timeout := time.NewTimer(c.packingTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case status := <-sub.Chan():
-			if status.IsInBlock {
-				blockhash = status.AsInBlock.Hex()
-				err = c.RetrieveEvent(status.AsInBlock, ExtName_Oss_destroy, OssOssDestroy, c.signatureAcc)
-				return blockhash, err
-			}
-		case err = <-sub.Err():
-			return blockhash, errors.Wrap(err, "[sub]")
-		case <-timeout.C:
-			return blockhash, ERR_RPC_TIMEOUT
-		}
-	}
+	return blockhash, nil
 }

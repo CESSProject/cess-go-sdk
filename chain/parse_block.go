@@ -15,10 +15,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/registry/parser"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types"
+	"github.com/AstaFrode/go-substrate-rpc-client/v4/types/codec"
 	"github.com/CESSProject/cess-go-sdk/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/registry/parser"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types"
-	"github.com/centrifuge/go-substrate-rpc-client/v4/types/codec"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	"github.com/vedhavyas/go-subkey/v2/scale"
@@ -78,6 +78,9 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 
 	for _, e := range events {
 		if e.Phase.IsApplyExtrinsic {
+			if strings.Contains(e.Name, "MultiBlockMigrations.") {
+				continue
+			}
 			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
 				if extrinsicIndex >= len(blockdata.Extrinsics) {
 					return blockdata, errors.New("The number of extrinsics hashes does not equal the number of extrinsics")
@@ -171,34 +174,6 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
 						Owner:         acc,
 						Fid:           fid,
-					})
-				case FileBankCreateBucket:
-					acc, err := ParseAccountFromEvent(e)
-					if err != nil {
-						return blockdata, err
-					}
-					bucketname, err := ParseStringFromEvent(e)
-					if err != nil {
-						return blockdata, err
-					}
-					blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo, CreateBucketInfo{
-						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
-						Owner:         acc,
-						BucketName:    bucketname,
-					})
-				case FileBankDeleteBucket:
-					acc, err := ParseAccountFromEvent(e)
-					if err != nil {
-						return blockdata, err
-					}
-					bucketname, err := ParseStringFromEvent(e)
-					if err != nil {
-						return blockdata, err
-					}
-					blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo, DeleteBucketInfo{
-						ExtrinsicHash: blockdata.Extrinsics[extrinsicIndex].Hash,
-						Owner:         acc,
-						BucketName:    bucketname,
 					})
 				case StorageHandlerMintTerritory:
 					token, name, size, err := parseTerritoryInfoFromEvent(e)
@@ -342,28 +317,6 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 									blockdata.DeleteFileInfo = nil
 								} else {
 									blockdata.DeleteFileInfo = append(blockdata.DeleteFileInfo[:m], blockdata.DeleteFileInfo[m+1:]...)
-								}
-								break
-							}
-						}
-					case ExtName_FileBank_delete_bucket:
-						for m := 0; m < len(blockdata.DeleteBucketInfo); m++ {
-							if blockdata.DeleteBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-								if len(blockdata.DeleteBucketInfo) == 1 {
-									blockdata.DeleteBucketInfo = nil
-								} else {
-									blockdata.DeleteBucketInfo = append(blockdata.DeleteBucketInfo[:m], blockdata.DeleteBucketInfo[m+1:]...)
-								}
-								break
-							}
-						}
-					case ExtName_FileBank_create_bucket:
-						for m := 0; m < len(blockdata.CreateBucketInfo); m++ {
-							if blockdata.CreateBucketInfo[m].ExtrinsicHash == blockdata.Extrinsics[extrinsicIndex].Hash {
-								if len(blockdata.CreateBucketInfo) == 1 {
-									blockdata.CreateBucketInfo = nil
-								} else {
-									blockdata.CreateBucketInfo = append(blockdata.CreateBucketInfo[:m], blockdata.CreateBucketInfo[m+1:]...)
 								}
 								break
 							}
