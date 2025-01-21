@@ -360,6 +360,13 @@ type StorageOrder struct {
 	CompleteList []CompleteInfo
 }
 
+type StorageOrderV1 struct {
+	FileSize     types.U128
+	SegmentList  []SegmentList
+	User         UserBriefV1
+	CompleteList []CompleteInfo
+}
+
 type SegmentList struct {
 	SegmentHash  FileHash
 	FragmentHash []FileHash
@@ -373,6 +380,14 @@ type CompleteInfo struct {
 type FileMetadata struct {
 	SegmentList []SegmentInfo
 	Owner       []UserBrief
+	FileSize    types.U128
+	Completion  types.U32
+	State       types.U8
+}
+
+type FileMetadataV1 struct {
+	SegmentList []SegmentInfo
+	Owner       []UserBriefV1
 	FileSize    types.U128
 	Completion  types.U32
 	State       types.U8
@@ -393,6 +408,13 @@ type FragmentInfo struct {
 type UserBrief struct {
 	User          types.AccountID
 	FileName      types.Bytes
+	TerriortyName types.Bytes
+}
+
+type UserBriefV1 struct {
+	User          types.AccountID
+	FileName      types.Bytes
+	BucketName    types.Bytes
 	TerriortyName types.Bytes
 }
 
@@ -430,6 +452,22 @@ type MinerInfo struct {
 	BeneficiaryAccount types.AccountID
 	StakingAccount     types.AccountID
 	Endpoint           types.Bytes
+	Collaterals        types.U128
+	Debt               types.U128
+	State              types.Bytes // positive, exit, frozen, lock
+	DeclarationSpace   types.U128
+	IdleSpace          types.U128
+	ServiceSpace       types.U128
+	LockSpace          types.U128
+	SpaceProofInfo     types.Option[SpaceProofInfo]
+	ServiceBloomFilter BloomFilter
+	TeeSig             TeeSig
+}
+
+type MinerInfoV1 struct {
+	BeneficiaryAccount types.AccountID
+	StakingAccount     types.AccountID
+	PeerId             PeerId
 	Collaterals        types.U128
 	Debt               types.U128
 	State              types.Bytes // positive, exit, frozen, lock

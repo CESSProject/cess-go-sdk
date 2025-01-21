@@ -136,6 +136,65 @@ func (c *ChainClient) QueryMinerItems(accountID []byte, block int32) (MinerInfo,
 	return data, nil
 }
 
+// QueryMinerItems query storage miner info
+//   - accountID: storage miner account
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - MinerInfo: storage miner info
+//   - error: error message
+func (c *ChainClient) QueryMinerItemsV1(accountID []byte, block int32) (MinerInfoV1, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, MinerItems, ERR_RPC_CONNECTION.Error())
+			return MinerInfoV1{}, err
+		}
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var data MinerInfoV1
+
+	key, err := types.CreateStorageKey(c.metadata, Sminer, MinerItems, accountID)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
+		return data, err
+	}
+
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
+			c.SetRpcState(false)
+			return data, err
+		}
+		if !ok {
+			return data, ERR_RPC_EMPTY_VALUE
+		}
+		return data, nil
+	}
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		return data, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
+		c.SetRpcState(false)
+		return data, err
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 // QueryStakingStartBlock query storage miner's starting staking block
 //   - accountID: storage miner account
 //   - block: block number, less than 0 indicates the latest block

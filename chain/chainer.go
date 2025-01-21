@@ -47,8 +47,10 @@ type Chainer interface {
 
 	// FileBank
 	QueryDealMap(fid string, block int32) (StorageOrder, error)
+	QueryDealMapV1(fid string, block int32) (StorageOrderV1, error)
 	QueryDealMapList(block int32) ([]StorageOrder, error)
 	QueryFile(fid string, block int32) (FileMetadata, error)
+	QueryFileV1(fid string, block int32) (FileMetadataV1, error)
 	QueryRestoralOrder(fragmentHash string, block int32) (RestoralOrderInfo, error)
 	QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, error)
 	QueryUserHoldFileList(accountID []byte, block int32) ([]UserFileSliceInfo, error)
@@ -75,6 +77,7 @@ type Chainer interface {
 	// Sminer
 	QueryExpenders(block int32) (ExpendersInfo, error)
 	QueryMinerItems(accountID []byte, block int32) (MinerInfo, error)
+	QueryMinerItemsV1(accountID []byte, block int32) (MinerInfoV1, error)
 	QueryStakingStartBlock(accountID []byte, block int32) (uint32, error)
 	QueryAllMiner(block int32) ([]types.AccountID, error)
 	QueryCounterForMinerItems(block int32) (uint32, error)

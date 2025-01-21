@@ -93,6 +93,80 @@ func (c *ChainClient) QueryDealMap(fid string, block int32) (StorageOrder, error
 	return data, nil
 }
 
+// QueryDealMap query file storage order
+//   - fid: file identification
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - StorageOrderV1: file storage order
+//   - error: error message
+func (c *ChainClient) QueryDealMapV1(fid string, block int32) (StorageOrderV1, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, DealMap, ERR_RPC_CONNECTION.Error())
+			return StorageOrderV1{}, err
+		}
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		data StorageOrderV1
+		hash FileHash
+	)
+
+	if len(fid) != FileHashLen {
+		return data, errors.New("invalid filehash")
+	}
+
+	for i := 0; i < len(hash); i++ {
+		hash[i] = types.U8(fid[i])
+	}
+
+	param_hash, err := codec.Encode(hash)
+	if err != nil {
+		return data, errors.Wrap(err, "[Encode]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, FileBank, DealMap, param_hash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+		return data, err
+	}
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+			c.SetRpcState(false)
+			return data, err
+		}
+		if !ok {
+			return data, ERR_RPC_EMPTY_VALUE
+		}
+		return data, nil
+	}
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+		return data, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), FileBank, DealMap, err)
+		c.SetRpcState(false)
+		return data, err
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
 // QueryDealMapList query file storage order list
 //   - block: block number, less than 0 indicates the latest block
 //
@@ -180,6 +254,82 @@ func (c *ChainClient) QueryFile(fid string, block int32) (FileMetadata, error) {
 
 	var (
 		data FileMetadata
+		hash FileHash
+	)
+
+	if len(fid) != FileHashLen {
+		return data, errors.New("invalid filehash")
+	}
+
+	for i := 0; i < len(hash); i++ {
+		hash[i] = types.U8(fid[i])
+	}
+
+	param_hash, err := codec.Encode(hash)
+	if err != nil {
+		return data, errors.Wrap(err, "[Encode]")
+	}
+
+	key, err := types.CreateStorageKey(c.metadata, FileBank, File, param_hash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), FileBank, File, err)
+		return data, err
+	}
+
+	if block < 0 {
+		ok, err := c.api.RPC.State.GetStorageLatest(key, &data)
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), FileBank, File, err)
+			c.SetRpcState(false)
+			return data, err
+		}
+		if !ok {
+			return data, ERR_RPC_EMPTY_VALUE
+		}
+		return data, nil
+	}
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(uint64(block))
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetBlockHash: %v", c.GetCurrentRpcAddr(), FileBank, File, err)
+		return data, err
+	}
+	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), FileBank, File, err)
+		c.SetRpcState(false)
+		return data, err
+	}
+	if !ok {
+		return data, ERR_RPC_EMPTY_VALUE
+	}
+	return data, nil
+}
+
+// QueryFile query file metadata
+//   - fid: file identification
+//   - block: block number, less than 0 indicates the latest block
+//
+// Return:
+//   - FileMetadataV1: file metadata
+//   - error: error message
+func (c *ChainClient) QueryFileV1(fid string, block int32) (FileMetadataV1, error) {
+	if !c.GetRpcState() {
+		err := c.ReconnectRpc()
+		if err != nil {
+			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, File, ERR_RPC_CONNECTION.Error())
+			return FileMetadataV1{}, err
+		}
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(utils.RecoverError(err))
+		}
+	}()
+
+	var (
+		data FileMetadataV1
 		hash FileHash
 	)
 
