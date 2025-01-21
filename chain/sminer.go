@@ -124,6 +124,20 @@ func (c *ChainClient) QueryMinerItems(accountID []byte, block int32) (MinerInfo,
 	if err != nil {
 		return data, err
 	}
+	fmt.Println("block:", 2241971)
+	fmt.Println("blockhash:", blockhash)
+	fmt.Println("blockhashex:", blockhash.Hex())
+	meta, err := c.api.RPC.State.GetMetadata(blockhash)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetMetadata: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
+		return data, err
+	}
+	key, err = types.CreateStorageKey(meta, Sminer, MinerItems, accountID)
+	if err != nil {
+		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
+		return data, err
+	}
+	time.Sleep(time.Second)
 	ok, err := c.api.RPC.State.GetStorage(key, &data, blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetStorage: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
