@@ -91,7 +91,7 @@ type Chainer interface {
 	IncreaseDeclarationSpace(tibCount uint32) (string, error)
 	MinerExitPrep() (string, error)
 	MinerWithdraw() (string, error)
-	ReceiveReward() (string, string, error)
+	ReceiveReward() (string, error)
 	RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSign types.Bytes, teePuk WorkerPublicKey) (string, error)
 	RegnstkSminer(earnings string, endpoint []byte, staking uint64, tibCount uint32) (string, error)
 	RegnstkAssignStaking(earnings string, endpoint []byte, stakingAcc string, tibCount uint32) (string, error)
@@ -188,5 +188,4 @@ type Chainer interface {
 	// event
 	RetrieveAllEventName(blockhash types.Hash) ([]string, error)
 	RetrieveEvent(blockhash types.Hash, extrinsic_name, signer string) error
-	RetrieveExtrinsicsAndEvents(blockhash types.Hash) ([]string, map[string][]string, error)
 }

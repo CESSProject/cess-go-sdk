@@ -908,13 +908,12 @@ func (c *ChainClient) MinerWithdraw() (string, error) {
 //
 // Return:
 //   - string: block hash
-//   - string: earnings account for receiving payments
 //   - error: error message
 //
 // Note:
 //   - for storage miner only
 //   - pass at least one idle and service challenge at the same time to get the reward
-func (c *ChainClient) ReceiveReward() (string, string, error) {
+func (c *ChainClient) ReceiveReward() (string, error) {
 	<-c.tradeCh
 	defer func() {
 		c.tradeCh <- true
@@ -925,14 +924,13 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 
 	var (
 		blockhash   string
-		earningsAcc string
 		accountInfo types.AccountInfo
 	)
 
 	call, err := types.NewCall(c.metadata, ExtName_Sminer_receive_reward)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, err)
-		return blockhash, earningsAcc, err
+		return blockhash, err
 	}
 
 	ext := types.NewExtrinsic(call)
@@ -940,14 +938,14 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 	key, err := types.CreateStorageKey(c.metadata, System, Account, c.keyring.PublicKey)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] CreateStorageKey: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, err)
-		return blockhash, earningsAcc, err
+		return blockhash, err
 	}
 
 	if !c.GetRpcState() {
 		err = c.ReconnectRpc()
 		if err != nil {
 			err = fmt.Errorf("rpc err: [%s] [tx] [%s] %s", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, ERR_RPC_CONNECTION.Error())
-			return blockhash, earningsAcc, err
+			return blockhash, err
 		}
 	}
 
@@ -955,10 +953,10 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] GetStorageLatest: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, err)
 		c.SetRpcState(false)
-		return blockhash, earningsAcc, err
+		return blockhash, err
 	}
 	if !ok {
-		return blockhash, earningsAcc, ERR_RPC_EMPTY_VALUE
+		return blockhash, ERR_RPC_EMPTY_VALUE
 	}
 
 	o := types.SignatureOptions{
@@ -974,7 +972,7 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 	err = ext.Sign(c.keyring, o)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] Sign: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, err)
-		return blockhash, earningsAcc, err
+		return blockhash, err
 	}
 
 	// Do the transfer and track the actual status
@@ -982,7 +980,7 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [tx] [%s] SubmitAndWatchExtrinsic: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_receive_reward, err)
 		c.SetRpcState(false)
-		return blockhash, earningsAcc, err
+		return blockhash, err
 	}
 	defer sub.Unsubscribe()
 
@@ -994,13 +992,13 @@ func (c *ChainClient) ReceiveReward() (string, string, error) {
 		case status := <-sub.Chan():
 			if status.IsInBlock {
 				blockhash = status.AsInBlock.Hex()
-				receive_event, err := c.RetrieveEvent_Sminer_Receive(status.AsInBlock)
-				return blockhash, receive_event.Acc, err
+				err = c.RetrieveEvent(status.AsInBlock, ExtName_Sminer_receive_reward, c.signatureAcc)
+				return blockhash, err
 			}
 		case err = <-sub.Err():
-			return blockhash, earningsAcc, errors.Wrap(err, "[sub]")
+			return blockhash, errors.Wrap(err, "[sub]")
 		case <-timeout.C:
-			return blockhash, earningsAcc, ERR_RPC_TIMEOUT
+			return blockhash, ERR_RPC_TIMEOUT
 		}
 	}
 }
