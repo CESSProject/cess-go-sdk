@@ -24,19 +24,17 @@ import (
 //   - []byte: master public key
 //   - error: error message
 func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
-	if !c.GetRpcState() {
-		err := c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, ERR_RPC_CONNECTION.Error())
-			return []byte{}, err
-		}
-	}
-
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
+
+	if !c.GetRpcState() {
+		return []byte{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, ERR_RPC_CONNECTION.Error())
+	}
 
 	var data MasterPublicKey
 
@@ -82,19 +80,17 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 //   - WorkerInfo: tee worker info
 //   - error: error message
 func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo, error) {
-	if !c.GetRpcState() {
-		err := c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
-			return WorkerInfo{}, err
-		}
-	}
-
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
+
+	if !c.GetRpcState() {
+		return WorkerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
+	}
 
 	var data WorkerInfo
 
@@ -144,19 +140,17 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 //   - []WorkerInfo: all tee worker info
 //   - error: error message
 func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
-	if !c.GetRpcState() {
-		err := c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
-			return []WorkerInfo{}, err
-		}
-	}
-
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
+
+	if !c.GetRpcState() {
+		return []WorkerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
+	}
 
 	var list []WorkerInfo
 
@@ -206,19 +200,17 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 //   - string: tee's endpoint
 //   - error: error message
 func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, error) {
-	if !c.GetRpcState() {
-		err := c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, ERR_RPC_CONNECTION.Error())
-			return "", err
-		}
-	}
-
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
+
+	if !c.GetRpcState() {
+		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, ERR_RPC_CONNECTION.Error())
+	}
 
 	var data types.Text
 
@@ -267,19 +259,17 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 //   - uint32: tee work registered block
 //   - error: error message
 func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint32, error) {
-	if !c.GetRpcState() {
-		err := c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, ERR_RPC_CONNECTION.Error())
-			return 0, err
-		}
-	}
-
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
+
+	if !c.GetRpcState() {
+		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, ERR_RPC_CONNECTION.Error())
+	}
 
 	var data types.U32
 

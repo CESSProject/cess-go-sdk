@@ -39,6 +39,14 @@ func main() {
 	}
 	defer sdk.Close()
 
+	allminer, err := sdk.QueryAllMiner(2241971)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("len: ", len(allminer))
+	//fmt.Println(sdk.GetCurrentRpcAddr())
+	return
+
 	err = sdk.InitExtrinsicsName()
 	if err != nil {
 		panic(err)

@@ -39,6 +39,13 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 
 	blockdata.BlockId = uint32(blocknumber)
 
+	c.rwlock.RLock()
+	defer c.rwlock.RUnlock()
+
+	if !c.GetRpcState() {
+		return BlockData{}, ERR_RPC_CONNECTION
+	}
+
 	blockhash, err := c.api.RPC.Chain.GetBlockHash(blocknumber)
 	if err != nil {
 		return blockdata, err

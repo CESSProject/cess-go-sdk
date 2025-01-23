@@ -23,19 +23,17 @@ import (
 //   - SchedulerCounterEntry: validator's credit score
 //   - error: error message
 func (c *ChainClient) QueryCurrentCounters(accountId []byte, block int32) (SchedulerCounterEntry, error) {
-	if !c.GetRpcState() {
-		err := c.ReconnectRpc()
-		if err != nil {
-			err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), SchedulerCredit, CurrentCounters, ERR_RPC_CONNECTION.Error())
-			return SchedulerCounterEntry{}, err
-		}
-	}
-
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
+
+	if !c.GetRpcState() {
+		return SchedulerCounterEntry{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), SchedulerCredit, CurrentCounters, ERR_RPC_CONNECTION.Error())
+	}
 
 	var data SchedulerCounterEntry
 

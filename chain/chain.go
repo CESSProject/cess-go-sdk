@@ -29,7 +29,7 @@ import (
 )
 
 type ChainClient struct {
-	lock           *sync.Mutex
+	rwlock         *sync.RWMutex
 	chainStLock    *sync.Mutex
 	api            *gsrpc.SubstrateAPI
 	metadata       *types.Metadata
@@ -64,7 +64,7 @@ var _ Chainer = (*ChainClient)(nil)
 func NewChainClientUnconnectedRpc(ctx context.Context, name string, rpcs []string, mnemonic string, t time.Duration) (Chainer, error) {
 	var err error
 	var chainClient = &ChainClient{
-		lock:        new(sync.Mutex),
+		rwlock:      new(sync.RWMutex),
 		chainStLock: new(sync.Mutex),
 		tradeCh:     make(chan bool, 1),
 		rpcAddr:     rpcs,
@@ -100,7 +100,7 @@ func NewChainClient(ctx context.Context, name string, rpcs []string, mnemonic st
 	var (
 		err         error
 		chainClient = &ChainClient{
-			lock:        new(sync.Mutex),
+			rwlock:      new(sync.RWMutex),
 			chainStLock: new(sync.Mutex),
 			tradeCh:     make(chan bool, 1),
 			rpcAddr:     rpcs,
@@ -282,8 +282,8 @@ func (c *ChainClient) Verify(msg []byte, sig []byte) (bool, error) {
 // ReconnectRpc reconnect rpc
 func (c *ChainClient) ReconnectRpc() error {
 	var err error
-	c.lock.Lock()
-	defer c.lock.Unlock()
+	c.rwlock.Lock()
+	defer c.rwlock.Unlock()
 	if c.GetRpcState() {
 		return nil
 	}
@@ -408,11 +408,11 @@ func (c *ChainClient) SubmitExtrinsic(call types.Call, extrinsicName string) (st
 		return "", fmt.Errorf(" CreateStorageKey err: %v", err)
 	}
 
+	c.rwlock.RLock()
+	defer c.rwlock.RUnlock()
+
 	if !c.GetRpcState() {
-		err = c.ReconnectRpc()
-		if err != nil {
-			return "", ERR_RPC_CONNECTION
-		}
+		return "", ERR_RPC_CONNECTION
 	}
 
 	var accountInfo types.AccountInfo
