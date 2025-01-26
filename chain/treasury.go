@@ -23,6 +23,11 @@ import (
 //   - string: currency rewards
 //   - error: error message
 func (c *ChainClient) QueryCurrencyReward(block int32) (string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), CessTreasury, CurrencyReward, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -30,10 +35,6 @@ func (c *ChainClient) QueryCurrencyReward(block int32) (string, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), CessTreasury, CurrencyReward, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -88,6 +89,11 @@ func (c *ChainClient) QueryCurrencyReward(block int32) (string, error) {
 //   - string: rewards in era
 //   - error: error message
 func (c *ChainClient) QueryEraReward(block int32) (string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), CessTreasury, EraReward, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -95,10 +101,6 @@ func (c *ChainClient) QueryEraReward(block int32) (string, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), CessTreasury, EraReward, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -153,6 +155,11 @@ func (c *ChainClient) QueryEraReward(block int32) (string, error) {
 //   - string: reserve rewards
 //   - error: error message
 func (c *ChainClient) QueryReserveReward(block int32) (string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), CessTreasury, ReserveReward, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -160,10 +167,6 @@ func (c *ChainClient) QueryReserveReward(block int32) (string, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), CessTreasury, ReserveReward, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -219,6 +222,11 @@ func (c *ChainClient) QueryReserveReward(block int32) (string, error) {
 //   - string: rewards in an era
 //   - error: error message
 func (c *ChainClient) QueryRoundReward(era uint32, block int32) (string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), CessTreasury, RoundReward, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -226,10 +234,6 @@ func (c *ChainClient) QueryRoundReward(era uint32, block int32) (string, error) 
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), CessTreasury, RoundReward, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data RoundRewardType
 

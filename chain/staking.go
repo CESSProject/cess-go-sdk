@@ -24,6 +24,11 @@ import (
 //   - uint32: validator number
 //   - error: error message
 func (c *ChainClient) QueryCounterForValidators(block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, CounterForValidators, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -31,10 +36,6 @@ func (c *ChainClient) QueryCounterForValidators(block int32) (uint32, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, CounterForValidators, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U32
 
@@ -79,6 +80,11 @@ func (c *ChainClient) QueryCounterForValidators(block int32) (uint32, error) {
 //   - uint32: validator number
 //   - error: error message
 func (c *ChainClient) QueryValidatorsCount(block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ValidatorCount, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -86,10 +92,6 @@ func (c *ChainClient) QueryValidatorsCount(block int32) (uint32, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ValidatorCount, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U32
 
@@ -134,6 +136,11 @@ func (c *ChainClient) QueryValidatorsCount(block int32) (uint32, error) {
 //   - uint32: nominator number
 //   - error: error message
 func (c *ChainClient) QueryNominatorCount(block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, CounterForNominators, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -141,10 +148,6 @@ func (c *ChainClient) QueryNominatorCount(block int32) (uint32, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, CounterForNominators, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U32
 
@@ -190,6 +193,11 @@ func (c *ChainClient) QueryNominatorCount(block int32) (uint32, error) {
 //   - string: the total number of staking
 //   - error: error message
 func (c *ChainClient) QueryErasTotalStake(era uint32, block int32) (string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasTotalStake, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -197,10 +205,6 @@ func (c *ChainClient) QueryErasTotalStake(era uint32, block int32) (string, erro
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasTotalStake, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -251,6 +255,11 @@ func (c *ChainClient) QueryErasTotalStake(era uint32, block int32) (string, erro
 //   - uint32: era id
 //   - error: error message
 func (c *ChainClient) QueryCurrentEra(block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, CurrentEra, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -258,10 +267,6 @@ func (c *ChainClient) QueryCurrentEra(block int32) (uint32, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, CurrentEra, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U32
 
@@ -308,6 +313,11 @@ func (c *ChainClient) QueryCurrentEra(block int32) (uint32, error) {
 //   - StakingEraRewardPoints: the rewards of consensus nodes
 //   - error: error message
 func (c *ChainClient) QueryErasRewardPoints(era uint32, block int32) (StakingEraRewardPoints, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return StakingEraRewardPoints{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasRewardPoints, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -315,10 +325,6 @@ func (c *ChainClient) QueryErasRewardPoints(era uint32, block int32) (StakingEra
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return StakingEraRewardPoints{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasRewardPoints, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result StakingEraRewardPoints
 
@@ -366,6 +372,11 @@ func (c *ChainClient) QueryErasRewardPoints(era uint32, block int32) (StakingEra
 //   - []StakingNominations: all nominators info
 //   - error: error message
 func (c *ChainClient) QueryAllNominators(block int32) ([]StakingNominations, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []StakingNominations{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Nominators, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -373,10 +384,6 @@ func (c *ChainClient) QueryAllNominators(block int32) ([]StakingNominations, err
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []StakingNominations{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Nominators, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result []StakingNominations
 
@@ -430,6 +437,11 @@ func (c *ChainClient) QueryAllNominators(block int32) ([]StakingNominations, err
 //   - []types.AccountID: all consensus and nominators accounts
 //   - error: error message
 func (c *ChainClient) QueryAllBonded(block int32) ([]types.AccountID, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []types.AccountID{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Bonded, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -437,10 +449,6 @@ func (c *ChainClient) QueryAllBonded(block int32) ([]types.AccountID, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []types.AccountID{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Bonded, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result []types.AccountID
 
@@ -498,6 +506,11 @@ func (c *ChainClient) QueryAllBonded(block int32) ([]types.AccountID, error) {
 //   - uint8: validator commission
 //   - error: error message
 func (c *ChainClient) QueryValidatorCommission(accountID []byte, block int32) (uint8, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Validators, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -505,10 +518,6 @@ func (c *ChainClient) QueryValidatorCommission(accountID []byte, block int32) (u
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Validators, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result StakingValidatorPrefs
 
@@ -550,6 +559,11 @@ func (c *ChainClient) QueryValidatorCommission(accountID []byte, block int32) (u
 //   - string: total rewards
 //   - error: error message
 func (c *ChainClient) QueryEraValidatorReward(era uint32, block int32) (string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasValidatorReward, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -557,10 +571,6 @@ func (c *ChainClient) QueryEraValidatorReward(era uint32, block int32) (string, 
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasValidatorReward, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result types.U128
 
@@ -606,6 +616,11 @@ func (c *ChainClient) QueryEraValidatorReward(era uint32, block int32) (string, 
 //   - StakingLedger: staking ledger
 //   - error: error message
 func (c *ChainClient) QueryLedger(accountID []byte, block int32) (StakingLedger, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return StakingLedger{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Ledger, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -613,10 +628,6 @@ func (c *ChainClient) QueryLedger(accountID []byte, block int32) (StakingLedger,
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return StakingLedger{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Ledger, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result StakingLedger
 
@@ -657,6 +668,11 @@ func (c *ChainClient) QueryLedger(accountID []byte, block int32) (StakingLedger,
 //   - StakingExposure: staking exposure
 //   - error: error message
 func (c *ChainClient) QueryeErasStakers(era uint32, accountId []byte) (StakingExposure, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return StakingExposure{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasStakers, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -664,10 +680,6 @@ func (c *ChainClient) QueryeErasStakers(era uint32, accountId []byte) (StakingEx
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return StakingExposure{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasStakers, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result StakingExposure
 
@@ -701,6 +713,11 @@ func (c *ChainClient) QueryeErasStakers(era uint32, accountId []byte) (StakingEx
 //   - StakingNominations: nominator info
 //   - error: error message
 func (c *ChainClient) QueryeNominators(accountId []byte, block int32) (StakingNominations, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return StakingNominations{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Nominators, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -708,10 +725,6 @@ func (c *ChainClient) QueryeNominators(accountId []byte, block int32) (StakingNo
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return StakingNominations{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, Nominators, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result StakingNominations
 
@@ -756,6 +769,11 @@ func (c *ChainClient) QueryeNominators(accountId []byte, block int32) (StakingNo
 //   - []QueryeErasStakersPaged: all staking exposure
 //   - error: error message
 func (c *ChainClient) QueryeAllErasStakersPaged(era uint32, accountId []byte) ([]StakingExposurePaged, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []StakingExposurePaged{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasStakersPaged, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -763,10 +781,6 @@ func (c *ChainClient) QueryeAllErasStakersPaged(era uint32, accountId []byte) ([
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []StakingExposurePaged{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasStakersPaged, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result []StakingExposurePaged
 
@@ -807,6 +821,11 @@ func (c *ChainClient) QueryeAllErasStakersPaged(era uint32, accountId []byte) ([
 //   - PagedExposureMetadata: PagedExposureMetadata
 //   - error: error message
 func (c *ChainClient) QueryeErasStakersOverview(era uint32, accountId []byte) (PagedExposureMetadata, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return PagedExposureMetadata{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasStakersOverview, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -814,10 +833,6 @@ func (c *ChainClient) QueryeErasStakersOverview(era uint32, accountId []byte) (P
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return PagedExposureMetadata{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Staking, ErasStakersOverview, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result PagedExposureMetadata
 

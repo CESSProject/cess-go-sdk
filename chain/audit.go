@@ -24,6 +24,11 @@ import (
 //   - ChallengeInfo: challenge snapshot data
 //   - error: error message
 func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (bool, ChallengeInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return false, ChallengeInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, ChallengeSnapShot, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -31,10 +36,6 @@ func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (boo
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return false, ChallengeInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, ChallengeSnapShot, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data ChallengeInfo
 
@@ -74,6 +75,11 @@ func (c *ChainClient) QueryChallengeSnapShot(accountID []byte, block int32) (boo
 //   - uint8: cleanup count
 //   - error: error message
 func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, CountedClear, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -81,10 +87,6 @@ func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, e
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, CountedClear, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U8
 
@@ -130,6 +132,11 @@ func (c *ChainClient) QueryCountedClear(accountID []byte, block int32) (uint8, e
 //   - uint32: Is there a value
 //   - error: error message
 func (c *ChainClient) QueryCountedServiceFailed(accountID []byte, block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, CountedServiceFailed, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -137,10 +144,6 @@ func (c *ChainClient) QueryCountedServiceFailed(accountID []byte, block int32) (
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Audit, CountedServiceFailed, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U32
 

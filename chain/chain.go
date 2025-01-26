@@ -287,6 +287,10 @@ func (c *ChainClient) ReconnectRpc() error {
 	if c.GetRpcState() {
 		return nil
 	}
+	if _, err := c.api.RPC.Chain.GetHeaderLatest(); err != nil {
+		c.SetRpcState(true)
+		return nil
+	}
 	if c.api != nil {
 		if c.api.Client != nil {
 			c.api.Client.Close()

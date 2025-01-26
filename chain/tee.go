@@ -24,6 +24,11 @@ import (
 //   - []byte: master public key
 //   - error: error message
 func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []byte{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -31,10 +36,6 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []byte{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data MasterPublicKey
 
@@ -80,6 +81,11 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 //   - WorkerInfo: tee worker info
 //   - error: error message
 func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return WorkerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -87,10 +93,6 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return WorkerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data WorkerInfo
 
@@ -140,6 +142,11 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 //   - []WorkerInfo: all tee worker info
 //   - error: error message
 func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []WorkerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -147,10 +154,6 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []WorkerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
-	}
 
 	var list []WorkerInfo
 
@@ -200,6 +203,11 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 //   - string: tee's endpoint
 //   - error: error message
 func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -207,10 +215,6 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.Text
 
@@ -259,6 +263,11 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 //   - uint32: tee work registered block
 //   - error: error message
 func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -266,10 +275,6 @@ func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U32
 

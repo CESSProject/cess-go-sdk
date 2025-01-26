@@ -27,6 +27,11 @@ import (
 //   - StorageOrder: file storage order
 //   - error: error message
 func (c *ChainClient) QueryDealMap(fid string, block int32) (StorageOrder, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return StorageOrder{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, DealMap, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -34,10 +39,6 @@ func (c *ChainClient) QueryDealMap(fid string, block int32) (StorageOrder, error
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return StorageOrder{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, DealMap, ERR_RPC_CONNECTION.Error())
-	}
 
 	var (
 		data StorageOrder
@@ -107,7 +108,9 @@ func (c *ChainClient) QueryDealMapV1(fid string, block int32) (StorageOrderV1, e
 		}
 	}
 
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -172,6 +175,11 @@ func (c *ChainClient) QueryDealMapV1(fid string, block int32) (StorageOrderV1, e
 //   - []StorageOrder: file storage order list
 //   - error: error message
 func (c *ChainClient) QueryDealMapList(block int32) ([]StorageOrder, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []StorageOrder{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, DealMap, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -179,10 +187,6 @@ func (c *ChainClient) QueryDealMapList(block int32) ([]StorageOrder, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []StorageOrder{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, DealMap, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result []StorageOrder
 
@@ -234,6 +238,11 @@ func (c *ChainClient) QueryDealMapList(block int32) ([]StorageOrder, error) {
 //   - FileMetadata: file metadata
 //   - error: error message
 func (c *ChainClient) QueryFile(fid string, block int32) (FileMetadata, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return FileMetadata{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, File, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -241,10 +250,6 @@ func (c *ChainClient) QueryFile(fid string, block int32) (FileMetadata, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return FileMetadata{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, File, ERR_RPC_CONNECTION.Error())
-	}
 
 	var (
 		data FileMetadata
@@ -316,7 +321,9 @@ func (c *ChainClient) QueryFileV1(fid string, block int32) (FileMetadataV1, erro
 		}
 	}
 
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -384,6 +391,11 @@ func (c *ChainClient) QueryFileV1(fid string, block int32) (FileMetadataV1, erro
 //   - RestoralOrderInfo: restoral order info
 //   - error: error message
 func (c *ChainClient) QueryRestoralOrder(fragmentHash string, block int32) (RestoralOrderInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return RestoralOrderInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -391,10 +403,6 @@ func (c *ChainClient) QueryRestoralOrder(fragmentHash string, block int32) (Rest
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return RestoralOrderInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, ERR_RPC_CONNECTION.Error())
-	}
 
 	var (
 		data RestoralOrderInfo
@@ -455,6 +463,11 @@ func (c *ChainClient) QueryRestoralOrder(fragmentHash string, block int32) (Rest
 //   - []RestoralOrderInfo: all restoral order info
 //   - error: error message
 func (c *ChainClient) QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []RestoralOrderInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -462,10 +475,6 @@ func (c *ChainClient) QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, e
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []RestoralOrderInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, RestoralOrder, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result []RestoralOrderInfo
 
@@ -517,6 +526,11 @@ func (c *ChainClient) QueryAllRestoralOrder(block int32) ([]RestoralOrderInfo, e
 //   - []UserFileSliceInfo: file list
 //   - error: error message
 func (c *ChainClient) QueryUserHoldFileList(accountID []byte, block int32) ([]UserFileSliceInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []UserFileSliceInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, UserHoldFileList, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -524,10 +538,6 @@ func (c *ChainClient) QueryUserHoldFileList(accountID []byte, block int32) ([]Us
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []UserFileSliceInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, UserHoldFileList, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data []UserFileSliceInfo
 
@@ -582,6 +592,11 @@ func (c *ChainClient) QueryUserHoldFileList(accountID []byte, block int32) ([]Us
 //   - []string: all fid
 //   - error: error message
 func (c *ChainClient) QueryUserFidList(accountID []byte, block int32) ([]string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []string{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, UserHoldFileList, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -589,10 +604,6 @@ func (c *ChainClient) QueryUserFidList(accountID []byte, block int32) ([]string,
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []string{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), FileBank, UserHoldFileList, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data []UserFileSliceInfo
 

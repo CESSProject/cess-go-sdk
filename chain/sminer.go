@@ -27,6 +27,11 @@ import (
 //   - ExpendersInfo: idle data specification
 //   - error: error message
 func (c *ChainClient) QueryExpenders(block int32) (ExpendersInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return ExpendersInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, Expenders, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -34,10 +39,6 @@ func (c *ChainClient) QueryExpenders(block int32) (ExpendersInfo, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return ExpendersInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, Expenders, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data ExpendersInfo
 
@@ -83,6 +84,11 @@ func (c *ChainClient) QueryExpenders(block int32) (ExpendersInfo, error) {
 //   - MinerInfo: storage miner info
 //   - error: error message
 func (c *ChainClient) QueryMinerItems(accountID []byte, block int32) (MinerInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return MinerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, MinerItems, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -90,10 +96,6 @@ func (c *ChainClient) QueryMinerItems(accountID []byte, block int32) (MinerInfo,
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return MinerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, MinerItems, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data MinerInfo
 
@@ -120,9 +122,7 @@ func (c *ChainClient) QueryMinerItems(accountID []byte, block int32) (MinerInfo,
 	if err != nil {
 		return data, err
 	}
-	fmt.Println("block:", 2241971)
-	fmt.Println("blockhash:", blockhash)
-	fmt.Println("blockhashex:", blockhash.Hex())
+
 	meta, err := c.api.RPC.State.GetMetadata(blockhash)
 	if err != nil {
 		err = fmt.Errorf("rpc err: [%s] [st] [%s.%s] GetMetadata: %v", c.GetCurrentRpcAddr(), Sminer, MinerItems, err)
@@ -162,7 +162,9 @@ func (c *ChainClient) QueryMinerItemsV1(accountID []byte, block int32) (MinerInf
 		}
 	}
 
+	c.rwlock.RLock()
 	defer func() {
+		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -213,6 +215,11 @@ func (c *ChainClient) QueryMinerItemsV1(accountID []byte, block int32) (MinerInf
 //   - uint32: starting staking block
 //   - error: error message
 func (c *ChainClient) QueryStakingStartBlock(accountID []byte, block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, StakingStartBlock, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -220,10 +227,6 @@ func (c *ChainClient) QueryStakingStartBlock(accountID []byte, block int32) (uin
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, StakingStartBlock, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U32
 
@@ -269,6 +272,11 @@ func (c *ChainClient) QueryStakingStartBlock(accountID []byte, block int32) (uin
 //   - []types.AccountID: all storage miner accounts
 //   - error: error message
 func (c *ChainClient) QueryAllMiner(block int32) ([]types.AccountID, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []types.AccountID{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, AllMiner, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -276,10 +284,6 @@ func (c *ChainClient) QueryAllMiner(block int32) ([]types.AccountID, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []types.AccountID{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, AllMiner, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data []types.AccountID
 
@@ -324,6 +328,11 @@ func (c *ChainClient) QueryAllMiner(block int32) ([]types.AccountID, error) {
 //   - uint32: all storage miner count
 //   - error: error message
 func (c *ChainClient) QueryCounterForMinerItems(block int32) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, CounterForMinerItems, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -331,10 +340,6 @@ func (c *ChainClient) QueryCounterForMinerItems(block int32) (uint32, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, CounterForMinerItems, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U32
 
@@ -379,6 +384,11 @@ func (c *ChainClient) QueryCounterForMinerItems(block int32) (uint32, error) {
 //   - MinerReward: all reward information
 //   - error: error message
 func (c *ChainClient) QueryRewardMap(accountID []byte, block int32) (MinerReward, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return MinerReward{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, RewardMap, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -386,10 +396,6 @@ func (c *ChainClient) QueryRewardMap(accountID []byte, block int32) (MinerReward
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return MinerReward{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, RewardMap, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data MinerReward
 
@@ -445,6 +451,11 @@ func (c *ChainClient) QueryRewardMap(accountID []byte, block int32) (MinerReward
 //   - RestoralTargetInfo: the data recovery information
 //   - error: error message
 func (c *ChainClient) QueryRestoralTarget(accountID []byte, block int32) (RestoralTargetInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return RestoralTargetInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -452,10 +463,6 @@ func (c *ChainClient) QueryRestoralTarget(accountID []byte, block int32) (Restor
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return RestoralTargetInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data RestoralTargetInfo
 
@@ -509,6 +516,11 @@ func (c *ChainClient) QueryRestoralTarget(accountID []byte, block int32) (Restor
 //   - []RestoralTargetInfo: all the data recovery information
 //   - error: error message
 func (c *ChainClient) QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []RestoralTargetInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -516,10 +528,6 @@ func (c *ChainClient) QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo,
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []RestoralTargetInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, RestoralTarget, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result []RestoralTargetInfo
 
@@ -570,6 +578,11 @@ func (c *ChainClient) QueryAllRestoralTarget(block int32) ([]RestoralTargetInfo,
 //   - types.U128: the size of replaceable idle data
 //   - error: error message
 func (c *ChainClient) QueryPendingReplacements(accountID []byte, block int32) (types.U128, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return types.U128{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, PendingReplacements, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -577,10 +590,6 @@ func (c *ChainClient) QueryPendingReplacements(accountID []byte, block int32) (t
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return types.U128{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, PendingReplacements, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -637,6 +646,11 @@ func (c *ChainClient) QueryPendingReplacements(accountID []byte, block int32) (t
 //   - uint64: all storage miners power in current era
 //   - error: error message
 func (c *ChainClient) QueryCompleteSnapShot(era uint32, block int32) (uint32, uint64, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, CompleteSnapShot, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -644,10 +658,6 @@ func (c *ChainClient) QueryCompleteSnapShot(era uint32, block int32) (uint32, ui
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, CompleteSnapShot, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data CompleteSnapShotType
 
@@ -702,6 +712,11 @@ func (c *ChainClient) QueryCompleteSnapShot(era uint32, block int32) (uint32, ui
 //   - []MinerCompleteInfo: list of completed challenge snapshots
 //   - error: error message
 func (c *ChainClient) QueryCompleteMinerSnapShot(puk []byte, block int32) ([]MinerCompleteInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return nil, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, CompleteMinerSnapShot, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -709,10 +724,6 @@ func (c *ChainClient) QueryCompleteMinerSnapShot(puk []byte, block int32) ([]Min
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return nil, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Sminer, CompleteMinerSnapShot, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data []MinerCompleteInfo
 

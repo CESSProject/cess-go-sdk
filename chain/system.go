@@ -24,6 +24,11 @@ import (
 //   - uint32: block number
 //   - error: error message
 func (c *ChainClient) QueryBlockNumber(blockhash string) (uint32, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [GetBlockLatest] %s", c.GetCurrentRpcAddr(), ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -31,10 +36,6 @@ func (c *ChainClient) QueryBlockNumber(blockhash string) (uint32, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [GetBlockLatest] %s", c.GetCurrentRpcAddr(), ERR_RPC_CONNECTION.Error())
-	}
 
 	if blockhash != "" {
 		var h types.Hash
@@ -79,6 +80,11 @@ func (c *ChainClient) QueryAccountInfo(account string, block int32) (types.Accou
 //   - types.AccountInfo: account info
 //   - error: error message
 func (c *ChainClient) QueryAccountInfoByAccountID(accountID []byte, block int32) (types.AccountInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return types.AccountInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), System, Account, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -86,10 +92,6 @@ func (c *ChainClient) QueryAccountInfoByAccountID(accountID []byte, block int32)
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return types.AccountInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), System, Account, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.AccountInfo
 	acc, err := types.NewAccountID(accountID)
@@ -138,6 +140,11 @@ func (c *ChainClient) QueryAccountInfoByAccountID(accountID []byte, block int32)
 //   - []types.AccountInfo: all account info
 //   - error: error message
 func (c *ChainClient) QueryAllAccountInfo(block int32) ([]types.AccountInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []types.AccountInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), System, Account, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -145,10 +152,6 @@ func (c *ChainClient) QueryAllAccountInfo(block int32) ([]types.AccountInfo, err
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []types.AccountInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), System, Account, ERR_RPC_CONNECTION.Error())
-	}
 
 	var result []types.AccountInfo
 	key := CreatePrefixedKey(System, Account)

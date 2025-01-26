@@ -22,6 +22,11 @@ import (
 //   - []types.AccountID: validators account
 //   - error: error message
 func (c *ChainClient) QueryValidators(block int32) ([]types.AccountID, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return []types.AccountID{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Session, Validators, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -29,10 +34,6 @@ func (c *ChainClient) QueryValidators(block int32) ([]types.AccountID, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return []types.AccountID{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Session, Validators, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data []types.AccountID
 

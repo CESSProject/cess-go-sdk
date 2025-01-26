@@ -24,6 +24,11 @@ import (
 //   - string: price per GiB space
 //   - error: error message
 func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, UnitPrice, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -31,10 +36,6 @@ func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, UnitPrice, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -82,6 +83,11 @@ func (c *ChainClient) QueryUnitPrice(block int32) (string, error) {
 //   - uint64: the size of all idle space
 //   - error: error message
 func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, TotalIdleSpace, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -89,10 +95,6 @@ func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, TotalIdleSpace, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -138,6 +140,11 @@ func (c *ChainClient) QueryTotalIdleSpace(block int32) (uint64, error) {
 //   - uint64: the size of all service space
 //   - error: error message
 func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, TotalServiceSpace, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -145,10 +152,6 @@ func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, TotalServiceSpace, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -193,6 +196,11 @@ func (c *ChainClient) QueryTotalServiceSpace(block int32) (uint64, error) {
 //   - uint64: all purchased space size
 //   - error: error message
 func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, PurchasedSpace, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -200,10 +208,6 @@ func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, PurchasedSpace, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data types.U128
 
@@ -250,6 +254,11 @@ func (c *ChainClient) QueryPurchasedSpace(block int32) (uint64, error) {
 //   - TerritoryInfo: territory info
 //   - error: error message
 func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32) (TerritoryInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return TerritoryInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, Territory, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -257,10 +266,6 @@ func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32)
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return TerritoryInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, Territory, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data TerritoryInfo
 
@@ -311,6 +316,11 @@ func (c *ChainClient) QueryTerritory(accountId []byte, name string, block int32)
 //   - ConsignmentInfo: consignment info
 //   - error: error message
 func (c *ChainClient) QueryConsignment(token types.H256, block int32) (ConsignmentInfo, error) {
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return ConsignmentInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, Consignment, ERR_RPC_CONNECTION.Error())
+		}
+	}
 	c.rwlock.RLock()
 	defer func() {
 		c.rwlock.RUnlock()
@@ -318,10 +328,6 @@ func (c *ChainClient) QueryConsignment(token types.H256, block int32) (Consignme
 			log.Println(utils.RecoverError(err))
 		}
 	}()
-
-	if !c.GetRpcState() {
-		return ConsignmentInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), StorageHandler, Consignment, ERR_RPC_CONNECTION.Error())
-	}
 
 	var data ConsignmentInfo
 
