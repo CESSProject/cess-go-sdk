@@ -1029,7 +1029,7 @@ func (c *ChainClient) RegisterPoisKey(poisKey PoISKeyInfo, teeSignWithAcc, teeSi
 		}
 	}()
 
-	newcall, err := types.NewCall(c.metadata, ExtName_Sminer_register_pois_key, teeSignWithAcc, teeSign, teePuk)
+	newcall, err := types.NewCall(c.metadata, ExtName_Sminer_register_pois_key, poisKey, teeSignWithAcc, teeSign, teePuk)
 	if err != nil {
 		return "", fmt.Errorf("rpc err: [%s] [tx] [%s] NewCall: %v", c.GetCurrentRpcAddr(), ExtName_Sminer_register_pois_key, err)
 	}
