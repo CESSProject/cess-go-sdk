@@ -55,17 +55,24 @@ func (c *ChainClient) RetrieveEvent(blockhash types.Hash, extrinsic_name, signer
 		extrinsic_signer string
 	)
 	for _, e := range events {
+		//fmt.Println("e.name: ", e.Name)
 		if !e.Phase.IsApplyExtrinsic {
+			//fmt.Println(" continue1")
 			continue
 		}
 		if name == "" {
+			//fmt.Println(" name==nil")
 			name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]
 			if !ok {
+				//fmt.Println(" continue2")
 				continue
 			}
+			//fmt.Println(" name: ", name)
 		}
 		if name != extrinsic_name {
+			//fmt.Println(" aa")
 			if e.Name == SystemExtrinsicSuccess || e.Name == SystemExtrinsicFailed {
+				//fmt.Println(" name=nil")
 				name = ""
 			}
 			continue
@@ -73,16 +80,20 @@ func (c *ChainClient) RetrieveEvent(blockhash types.Hash, extrinsic_name, signer
 		switch e.Name {
 		case TransactionPaymentTransactionFeePaid:
 			extrinsic_signer, _, _ = parseSignerAndFeePaidFromEvent(e)
+			//fmt.Println(" extrinsic_signer1: ", extrinsic_signer)
 		case EvmAccountMappingTransactionFeePaid:
 			extrinsic_signer, _, _ = parseSignerAndFeePaidFromEvent(e)
+			//fmt.Println(" extrinsic_signer2: ", extrinsic_signer)
 		case SystemExtrinsicSuccess:
 			name = ""
 			if extrinsic_signer == signer {
+				//fmt.Println(" suc")
 				return nil
 			}
 		case SystemExtrinsicFailed:
 			name = ""
 			if extrinsic_signer == signer {
+				//fmt.Println(" failed")
 				return errors.New(SystemExtrinsicFailed)
 			}
 		}

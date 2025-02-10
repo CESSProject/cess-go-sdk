@@ -28,9 +28,8 @@ func (c *ChainClient) QueryCurrentCounters(accountId []byte, block int32) (Sched
 			return SchedulerCounterEntry{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), SchedulerCredit, CurrentCounters, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}

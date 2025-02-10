@@ -27,9 +27,8 @@ func (c *ChainClient) QueryAuthorities(block int32) ([]ConsensusRrscAppPublic, e
 			return []ConsensusRrscAppPublic{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Babe, Authorities, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}

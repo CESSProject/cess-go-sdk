@@ -27,9 +27,8 @@ func (c *ChainClient) QueryValidators(block int32) ([]types.AccountID, error) {
 			return []types.AccountID{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Session, Validators, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}

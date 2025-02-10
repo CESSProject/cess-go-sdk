@@ -29,7 +29,7 @@ import (
 )
 
 type ChainClient struct {
-	rwlock         *sync.RWMutex
+	chainLock      *sync.Mutex
 	chainStLock    *sync.Mutex
 	api            *gsrpc.SubstrateAPI
 	metadata       *types.Metadata
@@ -64,7 +64,7 @@ var _ Chainer = (*ChainClient)(nil)
 func NewChainClientUnconnectedRpc(ctx context.Context, name string, rpcs []string, mnemonic string, t time.Duration) (Chainer, error) {
 	var err error
 	var chainClient = &ChainClient{
-		rwlock:      new(sync.RWMutex),
+		chainLock:   new(sync.Mutex),
 		chainStLock: new(sync.Mutex),
 		tradeCh:     make(chan bool, 1),
 		rpcAddr:     rpcs,
@@ -100,7 +100,7 @@ func NewChainClient(ctx context.Context, name string, rpcs []string, mnemonic st
 	var (
 		err         error
 		chainClient = &ChainClient{
-			rwlock:      new(sync.RWMutex),
+			chainLock:   new(sync.Mutex),
 			chainStLock: new(sync.Mutex),
 			tradeCh:     make(chan bool, 1),
 			rpcAddr:     rpcs,
@@ -282,8 +282,8 @@ func (c *ChainClient) Verify(msg []byte, sig []byte) (bool, error) {
 // ReconnectRpc reconnect rpc
 func (c *ChainClient) ReconnectRpc() error {
 	var err error
-	c.rwlock.Lock()
-	defer c.rwlock.Unlock()
+	c.chainLock.Lock()
+	defer c.chainLock.Unlock()
 	if c.GetRpcState() {
 		return nil
 	}
@@ -309,24 +309,24 @@ func (c *ChainClient) ReconnectRpc() error {
 	}
 	c.SetRpcState(true)
 
-	if c.keyring.URI != "" && len(c.keyring.PublicKey) > 0 {
-		accInfo, err := c.QueryAccountInfoByAccountID(c.keyring.PublicKey, -1)
-		if err != nil {
-			if !errors.Is(err, ERR_RPC_EMPTY_VALUE) {
-				return err
-			}
-			c.balance = 0
-		} else {
-			free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
-			minBanlance_bi, _ := new(big.Int).SetString(MinTransactionBalance, 10)
-			free_bi = free_bi.Div(free_bi, minBanlance_bi)
-			if free_bi.IsUint64() {
-				c.balance = free_bi.Uint64()
-			} else {
-				c.balance = math.MaxUint64
-			}
-		}
-	}
+	// if c.keyring.URI != "" && len(c.keyring.PublicKey) > 0 {
+	// 	accInfo, err := c.QueryAccountInfoByAccountID(c.keyring.PublicKey, -1)
+	// 	if err != nil {
+	// 		if !errors.Is(err, ERR_RPC_EMPTY_VALUE) {
+	// 			return err
+	// 		}
+	// 		c.balance = 0
+	// 	} else {
+	// 		free_bi, _ := new(big.Int).SetString(accInfo.Data.Free.String(), 10)
+	// 		minBanlance_bi, _ := new(big.Int).SetString(MinTransactionBalance, 10)
+	// 		free_bi = free_bi.Div(free_bi, minBanlance_bi)
+	// 		if free_bi.IsUint64() {
+	// 			c.balance = free_bi.Uint64()
+	// 		} else {
+	// 			c.balance = math.MaxUint64
+	// 		}
+	// 	}
+	// }
 
 	return nil
 }
@@ -412,11 +412,10 @@ func (c *ChainClient) SubmitExtrinsic(call types.Call, extrinsicName string) (st
 		return "", fmt.Errorf(" CreateStorageKey err: %v", err)
 	}
 
-	c.rwlock.RLock()
-	defer c.rwlock.RUnlock()
-
 	if !c.GetRpcState() {
-		return "", ERR_RPC_CONNECTION
+		if err = c.ReconnectRpc(); err != nil {
+			return "", ERR_RPC_CONNECTION
+		}
 	}
 
 	var accountInfo types.AccountInfo

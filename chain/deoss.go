@@ -31,9 +31,8 @@ func (c *ChainClient) QueryOss(accountID []byte, block int32) (OssInfo, error) {
 			return OssInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Oss, Oss, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -87,9 +86,8 @@ func (c *ChainClient) QueryAllOss(block int32) ([]OssInfo, error) {
 			return []OssInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Oss, Oss, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -149,9 +147,8 @@ func (c *ChainClient) QueryAllOssPeerId(block int32) ([]string, error) {
 			return []string{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Oss, Oss, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -213,9 +210,8 @@ func (c *ChainClient) QueryAuthorityList(accountID []byte, block int32) ([]types
 			return []types.AccountID{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), Oss, AuthorityList, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}

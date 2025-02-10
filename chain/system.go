@@ -29,9 +29,8 @@ func (c *ChainClient) QueryBlockNumber(blockhash string) (uint32, error) {
 			return 0, fmt.Errorf("rpc err: [%s] [st] [GetBlockLatest] %s", c.GetCurrentRpcAddr(), ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -85,9 +84,8 @@ func (c *ChainClient) QueryAccountInfoByAccountID(accountID []byte, block int32)
 			return types.AccountInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), System, Account, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -145,9 +143,8 @@ func (c *ChainClient) QueryAllAccountInfo(block int32) ([]types.AccountInfo, err
 			return []types.AccountInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), System, Account, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}

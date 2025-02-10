@@ -26,9 +26,8 @@ func (c *ChainClient) ChainGetBlock(hash types.Hash) (types.SignedBlock, error) 
 			return types.SignedBlock{}, fmt.Errorf("rpc err: [%s] [rpc_call] [%s] %s", c.GetCurrentRpcAddr(), RPC_Chain_getBlock, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -50,9 +49,8 @@ func (c *ChainClient) ChainGetBlockHash(block uint32) (types.Hash, error) {
 			return types.Hash{}, fmt.Errorf("rpc err: [%s] [rpc_call] [%s] %s", c.GetCurrentRpcAddr(), RPC_Chain_getBlockHash, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -74,9 +72,8 @@ func (c *ChainClient) ChainGetFinalizedHead() (types.Hash, error) {
 			return types.Hash{}, fmt.Errorf("rpc err: [%s] [rpc_call] [%s] %s", c.GetCurrentRpcAddr(), RPC_Chain_getFinalizedHead, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -98,9 +95,8 @@ func (c *ChainClient) SystemProperties() (SysProperties, error) {
 			return SysProperties{}, fmt.Errorf("rpc err: [%s] [rpc_call] [%s] %s", c.GetCurrentRpcAddr(), RPC_SYS_Properties, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -122,9 +118,8 @@ func (c *ChainClient) SystemChain() (string, error) {
 			return "", fmt.Errorf("rpc err: [%s] [rpc_call] [%s] %s", c.GetCurrentRpcAddr(), RPC_SYS_Chain, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -146,9 +141,8 @@ func (c *ChainClient) SystemSyncState() (SysSyncState, error) {
 			return SysSyncState{}, fmt.Errorf("rpc err: [%s] [rpc_call] [%s] %s", c.GetCurrentRpcAddr(), RPC_SYS_SyncState, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -170,9 +164,8 @@ func (c *ChainClient) SystemVersion() (string, error) {
 			return "", fmt.Errorf("rpc err: [%s] [rpc_call] [%s] %s", c.GetCurrentRpcAddr(), RPC_SYS_Version, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -194,9 +187,8 @@ func (c *ChainClient) NetListening() (bool, error) {
 			return false, fmt.Errorf("rpc err: [%s] [rpc_call] [%s] %s", c.GetCurrentRpcAddr(), RPC_NET_Listening, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}

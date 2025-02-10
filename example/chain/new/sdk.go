@@ -13,7 +13,6 @@ import (
 	"time"
 
 	cess "github.com/CESSProject/cess-go-sdk"
-	"github.com/CESSProject/cess-go-sdk/utils"
 )
 
 // Substrate well-known mnemonic:
@@ -39,26 +38,12 @@ func main() {
 	}
 	defer sdk.Close()
 
-	// allminer, err := sdk.QueryAllMiner(2241971)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println("len: ", len(allminer))
-	// //fmt.Println(sdk.GetCurrentRpcAddr())
-	// return
-
 	err = sdk.InitExtrinsicsName()
 	if err != nil {
 		panic(err)
 	}
-	err = sdk.InitExtrinsicsNameForMiner()
-	if err != nil {
-		panic(err)
-	}
+
 	fmt.Println(sdk.SystemVersion())
 	fmt.Println(sdk.GetCurrentRpcAddr())
 	fmt.Println(sdk.SystemProperties())
-	puk, _ := utils.ParsingPublickey("cXhxz56uXtyaj5u8pSCBJF6BwU4tmjPsiebCProo2ZER13LFu")
-	fmt.Println(sdk.QueryMinerItems(puk, -1))
-	//fmt.Println(sdk.TransferToken("cXkdXokcMa32BAYkmsGjhRGA2CYmLUN2pq69U8k9taXsQPHGp", "100000000000000000000"))
 }

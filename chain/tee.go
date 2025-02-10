@@ -29,9 +29,8 @@ func (c *ChainClient) QueryMasterPubKey(block int32) ([]byte, error) {
 			return []byte{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, MasterPubkey, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -86,9 +85,8 @@ func (c *ChainClient) QueryWorkers(puk WorkerPublicKey, block int32) (WorkerInfo
 			return WorkerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -147,9 +145,8 @@ func (c *ChainClient) QueryAllWorkers(block int32) ([]WorkerInfo, error) {
 			return []WorkerInfo{}, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Workers, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -208,9 +205,8 @@ func (c *ChainClient) QueryEndpoints(puk WorkerPublicKey, block int32) (string, 
 			return "", fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, Endpoints, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
@@ -268,9 +264,8 @@ func (c *ChainClient) QueryWorkerAddedAt(puk WorkerPublicKey, block int32) (uint
 			return 0, fmt.Errorf("rpc err: [%s] [st] [%s.%s] %s", c.GetCurrentRpcAddr(), TeeWorker, WorkerAddedAt, ERR_RPC_CONNECTION.Error())
 		}
 	}
-	c.rwlock.RLock()
+
 	defer func() {
-		c.rwlock.RUnlock()
 		if err := recover(); err != nil {
 			log.Println(utils.RecoverError(err))
 		}
