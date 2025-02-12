@@ -745,6 +745,14 @@ type BlockData struct {
 	MintTerritory       []MintTerritory
 }
 
+type FileDataInBlock struct {
+	StorageCompleted []string
+	UploadDecInfo    []UploadDecInfo
+	DeleteFileInfo   []DeleteFileInfo
+	Timestamp        int64
+	BlockId          uint32
+}
+
 type ExtrinsicsInfo struct {
 	Name    string
 	Signer  string

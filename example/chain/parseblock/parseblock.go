@@ -28,7 +28,37 @@ func main() {
 		panic(err)
 	}
 
-	blockData, err := sdk.ParseBlockData(2340332)
+	for i := 0; i < 2500000; i++ {
+		filedata, err := sdk.ParseFileInBlock(uint64(i))
+		if err != nil {
+			fmt.Println(i, " ERR: ", err)
+			continue
+		}
+		fmt.Println(i, " time: ", filedata.Timestamp)
+		if len(filedata.UploadDecInfo) > 0 {
+			fmt.Println(i, " uploadDecInfo:")
+			for _, v := range filedata.UploadDecInfo {
+				fmt.Println("    Owner: ", v.Owner)
+				fmt.Println("    Fid: ", v.Fid)
+			}
+		}
+		if len(filedata.DeleteFileInfo) > 0 {
+			fmt.Println(i, " deleteFileInfo:")
+			for _, v := range filedata.DeleteFileInfo {
+				fmt.Println("    Owner: ", v.Owner)
+				fmt.Println("    Fid: ", v.Fid)
+			}
+		}
+		if len(filedata.StorageCompleted) > 0 {
+			fmt.Println(i, " StorageCompleted:")
+			for _, v := range filedata.StorageCompleted {
+				fmt.Println("    StorageCompleted fid: ", v)
+			}
+		}
+	}
+	return
+
+	blockData, err := sdk.ParseBlockData(2616537)
 	if err != nil {
 		fmt.Println("ERR: ", err)
 		return

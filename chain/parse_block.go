@@ -521,6 +521,124 @@ func (c *ChainClient) ParseBlockData(blocknumber uint64) (BlockData, error) {
 	return blockdata, nil
 }
 
+func (c *ChainClient) ParseFileInBlock(blocknumber uint64) (FileDataInBlock, error) {
+	var (
+		ok       bool
+		name     string
+		err      error
+		filedata FileDataInBlock
+	)
+
+	filedata.BlockId = uint32(blocknumber)
+
+	if !c.GetRpcState() {
+		if err := c.ReconnectRpc(); err != nil {
+			return FileDataInBlock{}, ERR_RPC_CONNECTION
+		}
+	}
+
+	c.chainLock.Lock()
+	defer c.chainLock.Unlock()
+
+	blockhash, err := c.api.RPC.Chain.GetBlockHash(blocknumber)
+	if err != nil {
+		return filedata, err
+	}
+
+	block, err := c.api.RPC.Chain.GetBlock(blockhash)
+	if err != nil {
+		return filedata, err
+	}
+
+	if blocknumber == 0 {
+		return filedata, nil
+	}
+
+	events, err := c.eventRetriever.GetEvents(blockhash)
+	if err != nil {
+		return filedata, err
+	}
+
+	uploadDeclarationFlag := false
+	deleteFileFlag := false
+	for _, e := range events {
+		if e.Phase.IsApplyExtrinsic {
+			if strings.Contains(e.Name, "MultiBlockMigrations.") {
+				continue
+			}
+			if name, ok = ExtrinsicsName[block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.CallIndex]; ok {
+				if name == ExtName_Timestamp_set {
+					timestamp, err := scale.NewDecoder(bytes.NewReader(block.Block.Extrinsics[e.Phase.AsApplyExtrinsic].Method.Args)).DecodeUintCompact()
+					if err != nil {
+						return filedata, err
+					}
+					filedata.Timestamp = timestamp.Int64()
+					continue
+				}
+
+				switch e.Name {
+				case FileBankUploadDeclaration:
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return filedata, err
+					}
+					fid, err := ParseStringFromEvent(e)
+					if err != nil {
+						return filedata, err
+					}
+					filedata.UploadDecInfo = append(filedata.UploadDecInfo, UploadDecInfo{
+						Owner: acc,
+						Fid:   fid,
+					})
+					uploadDeclarationFlag = true
+				case FileBankDeleteFile:
+					acc, err := ParseAccountFromEvent(e)
+					if err != nil {
+						return filedata, err
+					}
+					fid, err := ParseStringFromEvent(e)
+					if err != nil {
+						return filedata, err
+					}
+					filedata.DeleteFileInfo = append(filedata.DeleteFileInfo, DeleteFileInfo{
+						Owner: acc,
+						Fid:   fid,
+					})
+					deleteFileFlag = true
+				case FileBankStorageCompleted:
+					fid, err := ParseStringFromEvent(e)
+					if err != nil {
+						return filedata, err
+					}
+					filedata.StorageCompleted = append(filedata.StorageCompleted, fid)
+				case SystemExtrinsicSuccess:
+					uploadDeclarationFlag = false
+					deleteFileFlag = false
+				case SystemExtrinsicFailed:
+					if uploadDeclarationFlag {
+						length := len(filedata.UploadDecInfo)
+						if length == 1 {
+							filedata.UploadDecInfo = nil
+						} else {
+							filedata.UploadDecInfo = filedata.UploadDecInfo[:length-1]
+						}
+					}
+					if deleteFileFlag {
+						length := len(filedata.DeleteFileInfo)
+						if length == 1 {
+							filedata.DeleteFileInfo = nil
+						} else {
+							filedata.DeleteFileInfo = filedata.DeleteFileInfo[:length-1]
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return filedata, nil
+}
+
 func parseSignerAndFeePaidFromEvent(e *parser.Event) (string, string, error) {
 	if e == nil {
 		return "", "", errors.New("event is nil")

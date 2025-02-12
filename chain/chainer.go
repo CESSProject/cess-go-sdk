@@ -184,6 +184,7 @@ type Chainer interface {
 	InitExtrinsicsNameForMiner() error
 	InitExtrinsicsNameForOSS() error
 	ParseBlockData(blocknumber uint64) (BlockData, error)
+	ParseFileInBlock(blocknumber uint64) (FileDataInBlock, error)
 
 	// event
 	RetrieveAllEventName(blockhash types.Hash) ([]string, error)
