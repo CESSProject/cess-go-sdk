@@ -1,5 +1,3 @@
-English | [简体中文](README_CN.md)
-
 <p align="center">
 <a href="https://cess.network/"><img src="https://github.com/CESSProject/doc-v2/blob/main/assets/introduction/banner.jpg"></a>
 </p>
@@ -16,33 +14,34 @@ English | [简体中文](README_CN.md)
 
 </div>
 
-CESS Network SDK for Go allows you to access the CESS blockchain network, such as querying block data, transactions, and calling RPC methods. You don't need to deal with API related tasks such as signing and building requests to access the CESS blockchain network. It also allows you to access the storage network, such as uploading or downloading data directly from storage nodes, as well as implementations of file chunking, encryption, and redundancy.
+CESS Network SDK for Go 允许您访问CESS区块链网络，如查询区块数据、交易、调用RPC方法。您无需处理 API 相关任务（如签名和构建请求）即可访问CESS区块链网络。还允许您访问存储网络，如直接从存储节点上传或下载数据，以及文件分块，加密，冗余的实现。
 
-
-## Bulletin
-- Test Network RPC Endpoint
+## 公告
+- 测试网RPC端点
 ```
 wss://testnet-rpc.cess.network/ws/
 ```
 
-- Test Network Faucet
+- 测试网水龙头地址
 ```
 https://www.cess.network/faucet.html
 ```
 
-## Requirements
-Install a Go environment newer than 1.22.x.
+## 环境要求
 
-## Installation
+安装比 1.22.x 更新的Go环境。
 
-Use `go get` to install SDK：
+## 安装
+
+使用 `go get` 安装SDK：
 
 ```sh
 go get -u "github.com/CESSProject/cess-go-sdk"
 ```
 
-## Quick Use
-Quickly create your SDK client:
+## 快速使用
+
+快速创建您的 SDK 客户端：
 ```golang
 cli, err := sdkgo.New(
     context.Background(),
@@ -50,23 +49,31 @@ cli, err := sdkgo.New(
 )
 ```
 
+## 测试
 
-## Testing
-
-To run test:
+运行测试：
 
 ```sh
 make check
 ```
 
-## Documentation
+## 文档
+
 - [Guidebook](https://doc.cess.network/developer/cess-sdk/sdk-golang)
 - [Reference](https://pkg.go.dev/github.com/CESSProject/cess-go-sdk)
 
-## Issues
+## 问题
 
-If you find any system errors or you have better suggestions, please submit an [issue](https://github.com/CESSProject/cess-go-sdk/issues/new) or PR, or join the [CESS discord](https://discord.gg/mYHTMfBwNS) to communicate with us.
+如果你发现任何系统错误或者有更好的建议，请提交[issue](https://github.com/CESSProject/cess-go-sdk/issues/new)或者PR，或者加入[CESS discord](https://discord.gg/mYHTMfBwNS)与我们交流。
 
 ## License
 
-Licensed under [Apache 2.0](https://github.com/CESSProject/cess-go-sdk/blob/main/LICENSE)
+许可依据 [Apache 2.0](https://github.com/CESSProject/cess-go-sdk/blob/main/LICENSE)
+
+
+
+
+
+
+
+

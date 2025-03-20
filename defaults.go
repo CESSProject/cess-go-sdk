@@ -21,7 +21,12 @@ var DefaultRpcAddrs = func(cfg *Config) error {
 
 // DefaultTimeout configures the default transaction waiting timeout
 var DefaultTimeout = func(cfg *Config) error {
-	return cfg.Apply(TransactionTimeout(time.Second * 30))
+	return cfg.Apply(TransactionTimeout(time.Second * 18))
+}
+
+// DefaultTimeout configures the default transaction waiting timeout
+var DefaultSDKName = func(cfg *Config) error {
+	return cfg.Apply(Name(DefaultName))
 }
 
 // Complete list of default options and when to fallback on them.
@@ -37,11 +42,14 @@ var defaults = []struct {
 		fallback: func(cfg *Config) bool { return cfg.Timeout == 0 },
 		opt:      DefaultTimeout,
 	},
+	{
+		fallback: func(cfg *Config) bool { return cfg.Name == "" },
+		opt:      DefaultSDKName,
+	},
 }
 
-// FallbackDefaults applies default options to the libp2p node if and only if no
-// other relevant options have been applied. will be appended to the options
-// passed into New.
+// FallbackDefaults Default options are used if and only
+// if no other relevant options apply.
 var FallbackDefaults Option = func(cfg *Config) error {
 	for _, def := range defaults {
 		if !def.fallback(cfg) {
