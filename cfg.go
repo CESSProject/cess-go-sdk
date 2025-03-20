@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/CESSProject/cess-go-sdk/chain"
-	"github.com/CESSProject/cess-go-sdk/config"
 )
 
 // Config describes a set of settings for a client
@@ -26,16 +25,12 @@ type Config struct {
 // Option is a client config option that can be given to the client constructor
 type Option func(cfg *Config) error
 
-// // Option is a client config option that can be given to the client constructor
-// type Option func(cfg *Config) error
+const DefaultName = "cess-sdk-go"
 
 // NewSDK constructs a new client from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
 func (cfg *Config) NewSDK(ctx context.Context) (chain.Chainer, error) {
-	if cfg.Name == "" {
-		cfg.Name = config.CharacterName_Default
-	}
 	return chain.NewChainClient(ctx, cfg.Name, cfg.Rpc, cfg.Mnemonic, cfg.Timeout)
 }
 

@@ -13,26 +13,22 @@ import (
 	"github.com/CESSProject/cess-go-sdk/chain"
 )
 
-// New constructs a new sdk client with the given options, falling back on
-// reasonable defaults. The defaults are:
+// NewDefault constructs a new SDK client using the given options and default options.
 //
-// - If no rpc address is provided, the sdk client uses the default address
-// "wss://testnet-rpc.cess.network/ws/"
+// If no rpc endpoint are provided, use the default: “wss://testnet-rpc.cess.network/ws/”
 //
-// - If no transaction timeout is provided, the sdk client uses the default
-// timeout: time.Duration(time.Second * 6)
+// If no transaction timeout are provided, use the default timeout: 18s
 //
-// - The serviceName is used to specify the name of your service
+// If no name are provided, use the default name: cess-sdk-go
 func New(ctx context.Context, opts ...Option) (chain.Chainer, error) {
 	return NewWithoutDefaults(ctx, append(opts, FallbackDefaults)...)
 }
 
-// NewWithoutDefaults constructs a new client with the given options but
-// *without* falling back on reasonable defaults.
+// New constructs a new sdk client with the given options.
 //
-// Warning: This function should not be considered a stable interface. We may
-// choose to add required services at any time and, by using this function, you
-// opt-out of any defaults we may provide.
+// If no rpc endpoint are provided, the CESS blockchain network cannot be accessed.
+//
+// If no account mnemonic are provided, block transactions cannot be conducted.
 func NewWithoutDefaults(ctx context.Context, opts ...Option) (chain.Chainer, error) {
 	var cfg Config
 	if err := cfg.Apply(opts...); err != nil {
