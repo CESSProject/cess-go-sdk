@@ -92,6 +92,15 @@ const (
 	ExtName_BaseFee_set_base_fee_per_gas = "BaseFee.set_base_fee_per_gas"
 	ExtName_BaseFee_set_elasticity       = "BaseFee.set_elasticity"
 
+	// Beefy
+	ExtName_Beefy_report_double_voting                = "Beefy.report_double_voting"
+	ExtName_Beefy_report_double_voting_unsigned       = "Beefy.report_double_voting_unsigned"
+	ExtName_Beefy_report_fork_voting                  = "Beefy.report_fork_voting"
+	ExtName_Beefy_report_fork_voting_unsigned         = "Beefy.report_fork_voting_unsigned"
+	ExtName_Beefy_report_future_block_voting          = "Beefy.report_future_block_voting"
+	ExtName_Beefy_report_future_block_voting_unsigned = "Beefy.report_future_block_voting_unsigned"
+	ExtName_Beefy_set_new_genesis                     = "Beefy.set_new_genesis"
+
 	// Cacher
 	ExtName_Cacher_logout   = "Cacher.logout"
 	ExtName_Cacher_pay      = "Cacher.pay"
@@ -99,9 +108,9 @@ const (
 	ExtName_Cacher_update   = "Cacher.update"
 
 	// CesMq
-	ExtName_CesMq_force_push_pallet_message = "CesMq.force_push_pallet_message"
-	ExtName_CesMq_push_message              = "CesMq.push_message"
-	ExtName_CesMq_sync_offchain_message     = "CesMq.sync_offchain_message"
+	// ExtName_CesMq_force_push_pallet_message = "CesMq.force_push_pallet_message"
+	// ExtName_CesMq_push_message              = "CesMq.push_message"
+	// ExtName_CesMq_sync_offchain_message     = "CesMq.sync_offchain_message"
 
 	// CessTreasury
 	ExtName_CessTreasury_pid_burn_funds    = "CessTreasury.pid_burn_funds"
@@ -124,12 +133,14 @@ const (
 	ExtName_Contracts_upload_code                      = "Contracts.upload_code"
 
 	// Council
-	ExtName_Council_close               = "Council.close"
-	ExtName_Council_disapprove_proposal = "Council.disapprove_proposal"
-	ExtName_Council_execute             = "Council.execute"
-	ExtName_Council_propose             = "Council.propose"
-	ExtName_Council_set_members         = "Council.set_members"
-	ExtName_Council_vote                = "Council.vote"
+	ExtName_Council_close                 = "Council.close"
+	ExtName_Council_disapprove_proposal   = "Council.disapprove_proposal"
+	ExtName_Council_execute               = "Council.execute"
+	ExtName_Council_kill                  = "Council.kill"
+	ExtName_Council_propose               = "Council.propose"
+	ExtName_Council_release_proposal_cost = "Council.release_proposal_cost"
+	ExtName_Council_set_members           = "Council.set_members"
+	ExtName_Council_vote                  = "Council.vote"
 
 	// ElectionProviderMultiPhase
 	ExtName_ElectionProviderMultiPhase_governance_fallback           = "ElectionProviderMultiPhase.governance_fallback"
@@ -346,24 +357,25 @@ const (
 	ExtName_StateTrieMigration_set_signed_max_limits  = "StateTrieMigration.set_signed_max_limits"
 
 	// StorageHandler
-	ExtName_StorageHandler_buy_consignment            = "StorageHandler.buy_consignment"
-	ExtName_StorageHandler_cancel_consignment         = "StorageHandler.cancel_consignment"
-	ExtName_StorageHandler_cancel_purchase_action     = "StorageHandler.cancel_purchase_action"
-	ExtName_StorageHandler_clear_service_space        = "StorageHandler.clear_service_space"
-	ExtName_StorageHandler_create_order               = "StorageHandler.create_order"
-	ExtName_StorageHandler_define_update_price        = "StorageHandler.define_update_price"
-	ExtName_StorageHandler_exec_consignment           = "StorageHandler.exec_consignment"
-	ExtName_StorageHandler_exec_order                 = "StorageHandler.exec_order"
-	ExtName_StorageHandler_expanding_territory        = "StorageHandler.expanding_territory"
-	ExtName_StorageHandler_mint_territory             = "StorageHandler.mint_territory"
-	ExtName_StorageHandler_reactivate_territory       = "StorageHandler.reactivate_territory"
-	ExtName_StorageHandler_renewal_territory          = "StorageHandler.renewal_territory"
-	ExtName_StorageHandler_territory_consignment      = "StorageHandler.territory_consignment"
-	ExtName_StorageHandler_territory_grants           = "StorageHandler.territory_grants"
-	ExtName_StorageHandler_territory_rename           = "StorageHandler.territory_rename"
-	ExtName_StorageHandler_update_expired_exec        = "StorageHandler.update_expired_exec"
-	ExtName_StorageHandler_update_price               = "StorageHandler.update_price"
-	ExtName_StorageHandler_update_user_territory_life = "StorageHandler.update_user_territory_life"
+	ExtName_StorageHandler_buy_consignment                    = "StorageHandler.buy_consignment"
+	ExtName_StorageHandler_cancel_consignment                 = "StorageHandler.cancel_consignment"
+	ExtName_StorageHandler_cancel_purchase_action             = "StorageHandler.cancel_purchase_action"
+	ExtName_StorageHandler_clear_service_space                = "StorageHandler.clear_service_space"
+	ExtName_StorageHandler_create_order                       = "StorageHandler.create_order"
+	ExtName_StorageHandler_define_update_price                = "StorageHandler.define_update_price"
+	ExtName_StorageHandler_exec_consignment                   = "StorageHandler.exec_consignment"
+	ExtName_StorageHandler_exec_order                         = "StorageHandler.exec_order"
+	ExtName_StorageHandler_expanding_territory                = "StorageHandler.expanding_territory"
+	ExtName_StorageHandler_fix_territory_space_for_reactivate = "StorageHandler.fix_territory_space_for_reactivate"
+	ExtName_StorageHandler_mint_territory                     = "StorageHandler.mint_territory"
+	ExtName_StorageHandler_reactivate_territory               = "StorageHandler.reactivate_territory"
+	ExtName_StorageHandler_renewal_territory                  = "StorageHandler.renewal_territory"
+	ExtName_StorageHandler_territory_consignment              = "StorageHandler.territory_consignment"
+	ExtName_StorageHandler_territory_grants                   = "StorageHandler.territory_grants"
+	ExtName_StorageHandler_territory_rename                   = "StorageHandler.territory_rename"
+	ExtName_StorageHandler_update_expired_exec                = "StorageHandler.update_expired_exec"
+	ExtName_StorageHandler_update_price                       = "StorageHandler.update_price"
+	ExtName_StorageHandler_update_user_territory_life         = "StorageHandler.update_user_territory_life"
 
 	// Sudo
 	ExtName_Sudo_remove_key            = "Sudo.remove_key"
@@ -386,31 +398,37 @@ const (
 	ExtName_System_set_storage                      = "System.set_storage"
 
 	// TechnicalCommittee
-	ExtName_TechnicalCommittee_close               = "TechnicalCommittee.close"
-	ExtName_TechnicalCommittee_disapprove_proposal = "TechnicalCommittee.disapprove_proposal"
-	ExtName_TechnicalCommittee_execute             = "TechnicalCommittee.execute"
-	ExtName_TechnicalCommittee_propose             = "TechnicalCommittee.propose"
-	ExtName_TechnicalCommittee_set_members         = "TechnicalCommittee.set_members"
-	ExtName_TechnicalCommittee_vote                = "TechnicalCommittee.vote"
+	ExtName_TechnicalCommittee_close                 = "TechnicalCommittee.close"
+	ExtName_TechnicalCommittee_disapprove_proposal   = "TechnicalCommittee.disapprove_proposal"
+	ExtName_TechnicalCommittee_execute               = "TechnicalCommittee.execute"
+	ExtName_TechnicalCommittee_kill                  = "TechnicalCommittee.kill"
+	ExtName_TechnicalCommittee_propose               = "TechnicalCommittee.propose"
+	ExtName_TechnicalCommittee_release_proposal_code = "TechnicalCommittee.release_proposal_cost"
+	ExtName_TechnicalCommittee_set_members           = "TechnicalCommittee.set_members"
+	ExtName_TechnicalCommittee_vote                  = "TechnicalCommittee.vote"
 
 	// TeeWorker
-	ExtName_TeeWorker_add_ceseal                 = "TeeWorker.add_ceseal"
-	ExtName_TeeWorker_apply_master_key           = "TeeWorker.apply_master_key"
-	ExtName_TeeWorker_change_first_holder        = "TeeWorker.change_first_holder"
-	ExtName_TeeWorker_clear_master_key           = "TeeWorker.clear_master_key"
-	ExtName_TeeWorker_force_clear_tee            = "TeeWorker.force_clear_tee"
-	ExtName_TeeWorker_force_register_worker      = "TeeWorker.force_register_worker"
-	ExtName_TeeWorker_launch_master_key          = "TeeWorker.launch_master_key"
-	ExtName_TeeWorker_migration_last_work        = "TeeWorker.migration_last_work"
-	ExtName_TeeWorker_patch_clear_invalid_tee    = "TeeWorker.patch_clear_invalid_tee"
-	ExtName_TeeWorker_patch_clear_not_work_tee   = "TeeWorker.patch_clear_not_work_tee"
-	ExtName_TeeWorker_refresh_tee_status         = "TeeWorker.refresh_tee_status"
-	ExtName_TeeWorker_register_worker            = "TeeWorker.register_worker"
-	ExtName_TeeWorker_register_worker_v2         = "TeeWorker.register_worker_v2"
+	ExtName_TeeWorker_add_ceseal               = "TeeWorker.add_ceseal"
+	ExtName_TeeWorker_apply_master_key         = "TeeWorker.apply_master_key"
+	ExtName_TeeWorker_change_first_holder      = "TeeWorker.change_first_holder"
+	ExtName_TeeWorker_clear_master_key         = "TeeWorker.clear_master_key"
+	ExtName_TeeWorker_distribute_master_key    = "TeeWorker.distribute_master_key"
+	ExtName_TeeWorker_force_clear_tee          = "TeeWorker.force_clear_tee"
+	ExtName_TeeWorker_force_register_worker    = "TeeWorker.force_register_worker"
+	ExtName_TeeWorker_launch_master_key        = "TeeWorker.launch_master_key"
+	ExtName_TeeWorker_migration_last_work      = "TeeWorker.migration_last_work"
+	ExtName_TeeWorker_patch_clear_invalid_tee  = "TeeWorker.patch_clear_invalid_tee"
+	ExtName_TeeWorker_patch_clear_not_work_tee = "TeeWorker.patch_clear_not_work_tee"
+	//ExtName_TeeWorker_refresh_tee_status         = "TeeWorker.refresh_tee_status"
+	ExtName_TeeWorker_register_worker = "TeeWorker.register_worker"
+	//ExtName_TeeWorker_register_worker_v2         = "TeeWorker.register_worker_v2"
 	ExtName_TeeWorker_remove_ceseal              = "TeeWorker.remove_ceseal"
+	ExtName_TeeWorker_set_ceseal_verify_required = "TeeWorker.set_ceseal_verify_required"
 	ExtName_TeeWorker_set_minimum_ceseal_version = "TeeWorker.set_minimum_ceseal_version"
-	ExtName_TeeWorker_set_note_stalled           = "TeeWorker.set_note_stalled"
-	ExtName_TeeWorker_update_worker_endpoint     = "TeeWorker.update_worker_endpoint"
+	//ExtName_TeeWorker_set_note_stalled           = "TeeWorker.set_note_stalled"
+	ExtName_TeeWorker_set_none_attestation_enabled = "TeeWorker.set_none_attestation_enabled"
+	//ExtName_TeeWorker_update_worker_endpoint = "TeeWorker.update_worker_endpoint"
+	ExtName_TeeWorker_settle_master_key_launch = "TeeWorker.settle_master_key_launch"
 
 	// Timestamp
 	ExtName_Timestamp_set = "Timestamp.set"
@@ -427,6 +445,10 @@ const (
 	ExtName_Treasury_spend           = "Treasury.spend"
 	ExtName_Treasury_spend_local     = "Treasury.spend_local"
 	ExtName_Treasury_void_spend      = "Treasury.void_spend"
+
+	// TxPause
+	ExtName_TxPause_pause   = "TxPause.pause"
+	ExtName_TxPause_unpause = "TxPause.unpause"
 
 	// Utility
 	ExtName_Utility_as_derivative = "Utility.as_derivative"
@@ -786,6 +808,43 @@ func (c *ChainClient) InitExtrinsicsName() error {
 		return err
 	}
 
+	// Beefy
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Beefy_report_double_voting); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Beefy_report_double_voting
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Beefy_report_double_voting_unsigned); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Beefy_report_double_voting_unsigned
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Beefy_report_fork_voting); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Beefy_report_fork_voting
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Beefy_report_fork_voting_unsigned); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Beefy_report_fork_voting_unsigned
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Beefy_report_future_block_voting); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Beefy_report_future_block_voting
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Beefy_report_future_block_voting_unsigned); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Beefy_report_future_block_voting_unsigned
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Beefy_set_new_genesis); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Beefy_set_new_genesis
+	} else {
+		return err
+	}
+
 	// Cacher
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Cacher_logout); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Cacher_logout
@@ -809,21 +868,21 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 
 	// CesMq
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_CesMq_force_push_pallet_message); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_CesMq_force_push_pallet_message
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_CesMq_push_message); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_CesMq_push_message
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_CesMq_sync_offchain_message); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_CesMq_sync_offchain_message
-	} else {
-		return err
-	}
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_CesMq_force_push_pallet_message); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_CesMq_force_push_pallet_message
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_CesMq_push_message); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_CesMq_push_message
+	// } else {
+	// 	return err
+	// }
+	// if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_CesMq_sync_offchain_message); err == nil {
+	// 	ExtrinsicsName[callIndex] = ExtName_CesMq_sync_offchain_message
+	// } else {
+	// 	return err
+	// }
 
 	// CessTreasury
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_CessTreasury_pid_burn_funds); err == nil {
@@ -930,8 +989,18 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Council_kill); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Council_kill
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Council_propose); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Council_propose
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Council_release_proposal_cost); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_Council_release_proposal_cost
 	} else {
 		return err
 	}
@@ -1887,6 +1956,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_fix_territory_space_for_reactivate); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_StorageHandler_fix_territory_space_for_reactivate
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_StorageHandler_mint_territory); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_StorageHandler_mint_territory
 	} else {
@@ -2033,8 +2107,18 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalCommittee_kill); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TechnicalCommittee_kill
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalCommittee_propose); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_TechnicalCommittee_propose
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TechnicalCommittee_release_proposal_code); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TechnicalCommittee_release_proposal_code
 	} else {
 		return err
 	}
@@ -2070,6 +2154,11 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_distribute_master_key); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_distribute_master_key
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_force_clear_tee); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_TeeWorker_force_clear_tee
 	} else {
@@ -2100,18 +2189,8 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_refresh_tee_status); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_refresh_tee_status
-	} else {
-		return err
-	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_register_worker); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_TeeWorker_register_worker
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_register_worker_v2); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_register_worker_v2
 	} else {
 		return err
 	}
@@ -2120,18 +2199,23 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_set_ceseal_verify_required); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_set_ceseal_verify_required
+	} else {
+		return err
+	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_set_minimum_ceseal_version); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_TeeWorker_set_minimum_ceseal_version
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_set_note_stalled); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_set_note_stalled
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_set_none_attestation_enabled); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_set_none_attestation_enabled
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_update_worker_endpoint); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_update_worker_endpoint
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_settle_master_key_launch); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_settle_master_key_launch
 	} else {
 		return err
 	}
@@ -2188,6 +2272,18 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	}
 	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_Treasury_void_spend); err == nil {
 		ExtrinsicsName[callIndex] = ExtName_Treasury_void_spend
+	} else {
+		return err
+	}
+
+	// TxPause
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TxPause_pause); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TxPause_pause
+	} else {
+		return err
+	}
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TxPause_unpause); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TxPause_unpause
 	} else {
 		return err
 	}
