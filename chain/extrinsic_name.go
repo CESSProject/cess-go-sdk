@@ -408,27 +408,22 @@ const (
 	ExtName_TechnicalCommittee_vote                  = "TechnicalCommittee.vote"
 
 	// TeeWorker
-	ExtName_TeeWorker_add_ceseal               = "TeeWorker.add_ceseal"
-	ExtName_TeeWorker_apply_master_key         = "TeeWorker.apply_master_key"
-	ExtName_TeeWorker_change_first_holder      = "TeeWorker.change_first_holder"
-	ExtName_TeeWorker_clear_master_key         = "TeeWorker.clear_master_key"
-	ExtName_TeeWorker_distribute_master_key    = "TeeWorker.distribute_master_key"
-	ExtName_TeeWorker_force_clear_tee          = "TeeWorker.force_clear_tee"
-	ExtName_TeeWorker_force_register_worker    = "TeeWorker.force_register_worker"
-	ExtName_TeeWorker_launch_master_key        = "TeeWorker.launch_master_key"
-	ExtName_TeeWorker_migration_last_work      = "TeeWorker.migration_last_work"
-	ExtName_TeeWorker_patch_clear_invalid_tee  = "TeeWorker.patch_clear_invalid_tee"
-	ExtName_TeeWorker_patch_clear_not_work_tee = "TeeWorker.patch_clear_not_work_tee"
-	//ExtName_TeeWorker_refresh_tee_status         = "TeeWorker.refresh_tee_status"
-	ExtName_TeeWorker_register_worker = "TeeWorker.register_worker"
-	//ExtName_TeeWorker_register_worker_v2         = "TeeWorker.register_worker_v2"
-	ExtName_TeeWorker_remove_ceseal              = "TeeWorker.remove_ceseal"
-	ExtName_TeeWorker_set_ceseal_verify_required = "TeeWorker.set_ceseal_verify_required"
-	ExtName_TeeWorker_set_minimum_ceseal_version = "TeeWorker.set_minimum_ceseal_version"
-	//ExtName_TeeWorker_set_note_stalled           = "TeeWorker.set_note_stalled"
+	ExtName_TeeWorker_add_ceseal                   = "TeeWorker.add_ceseal"
+	ExtName_TeeWorker_apply_master_key             = "TeeWorker.apply_master_key"
+	ExtName_TeeWorker_change_master_key_holder     = "TeeWorker.change_master_key_holder"
+	ExtName_TeeWorker_distribute_master_key        = "TeeWorker.distribute_master_key"
+	ExtName_TeeWorker_force_clear_tee              = "TeeWorker.force_clear_tee"
+	ExtName_TeeWorker_force_register_worker        = "TeeWorker.force_register_worker"
+	ExtName_TeeWorker_launch_master_key            = "TeeWorker.launch_master_key"
+	ExtName_TeeWorker_migration_last_work          = "TeeWorker.migration_last_work"
+	ExtName_TeeWorker_patch_clear_invalid_tee      = "TeeWorker.patch_clear_invalid_tee"
+	ExtName_TeeWorker_patch_clear_not_work_tee     = "TeeWorker.patch_clear_not_work_tee"
+	ExtName_TeeWorker_register_worker              = "TeeWorker.register_worker"
+	ExtName_TeeWorker_remove_ceseal                = "TeeWorker.remove_ceseal"
+	ExtName_TeeWorker_set_ceseal_verify_required   = "TeeWorker.set_ceseal_verify_required"
+	ExtName_TeeWorker_set_minimum_ceseal_version   = "TeeWorker.set_minimum_ceseal_version"
 	ExtName_TeeWorker_set_none_attestation_enabled = "TeeWorker.set_none_attestation_enabled"
-	//ExtName_TeeWorker_update_worker_endpoint = "TeeWorker.update_worker_endpoint"
-	ExtName_TeeWorker_settle_master_key_launch = "TeeWorker.settle_master_key_launch"
+	ExtName_TeeWorker_settle_master_key_launch     = "TeeWorker.settle_master_key_launch"
 
 	// Timestamp
 	ExtName_Timestamp_set = "Timestamp.set"
@@ -2144,13 +2139,8 @@ func (c *ChainClient) InitExtrinsicsName() error {
 	} else {
 		return err
 	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_change_first_holder); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_change_first_holder
-	} else {
-		return err
-	}
-	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_clear_master_key); err == nil {
-		ExtrinsicsName[callIndex] = ExtName_TeeWorker_clear_master_key
+	if callIndex, err := c.GetMetadata().FindCallIndex(ExtName_TeeWorker_change_master_key_holder); err == nil {
+		ExtrinsicsName[callIndex] = ExtName_TeeWorker_change_master_key_holder
 	} else {
 		return err
 	}
